@@ -30,6 +30,28 @@ export async function GET(request: NextRequest) {
 
   await saveTokens(user.id, tokens, googleUser.email ?? undefined);
 
+  // Start Gmail Pub/Sub watch if project ID is configured
+  if (process.env.GOOGLE_CLOUD_PROJECT_ID) {
+    try {
+      const { watchGmailInbox } = await import("@/lib/integrations/gmail");
+      const { historyId, expiration } = await watchGmailInbox(user.id);
+      const { createServiceClient } = await import("@/lib/supabase/server");
+      const serviceSupabase = await createServiceClient();
+      await serviceSupabase
+        .from("integrations")
+        .update({
+          metadata: {
+            last_history_id: historyId,
+            watch_expires_at: new Date(Number(expiration)).toISOString(),
+          },
+        })
+        .eq("user_id", user.id)
+        .eq("provider", "google");
+    } catch (e) {
+      console.error("Gmail watch setup failed:", e);
+    }
+  }
+
   // Check if onboarding is complete to redirect appropriately
   const { data: profile } = await supabase
     .from("users")
