@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import GenerateDraftButton from "./generate-draft-button";
+import EmailActions from "./email-actions";
 
 function formatEmailBody(body: string): string {
   // Strip trailing quoted reply lines (lines starting with ">")
@@ -46,9 +47,12 @@ export default async function EmailDetailPage({
 
   return (
     <div className="p-6 max-w-3xl space-y-4">
-      <Link href="/inbox">
-        <Button variant="ghost" size="sm">← Back</Button>
-      </Link>
+      <div className="flex items-center justify-between">
+        <Link href="/inbox">
+          <Button variant="ghost" size="sm">← Back</Button>
+        </Link>
+        <EmailActions communicationId={id} />
+      </div>
 
       {/* Email card */}
       <div className="rounded-lg border bg-card overflow-hidden">
