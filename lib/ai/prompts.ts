@@ -11,6 +11,23 @@ export const emailTriageSchema = z.object({
   action_description: z.string().nullable(),
   entities_mentioned: z.array(z.string()).describe("Company names, deal names, project names"),
   follow_up_deadline: z.string().nullable().describe("ISO date if a deadline is mentioned"),
+  email_category: z.enum([
+    "important",
+    "pending_reply",
+    "finance_bills",
+    "transactions",
+    "meetings_calendar",
+    "promotions",
+    "travel",
+    "other",
+  ]),
+  fin_amount: z.number().nullable(),
+  fin_currency: z.string().nullable(),
+  fin_merchant: z.string().nullable(),
+  fin_sub_category: z.enum([
+    "groceries", "subscriptions", "transport", "dining",
+    "flight", "hotel", "shopping", "utilities", "banking", "other",
+  ]).nullable(),
 });
 
 export type EmailTriage = z.infer<typeof emailTriageSchema>;
@@ -24,7 +41,19 @@ Sender: ${senderInfo}
 Email body:
 ${body.substring(0, 3000)}
 
-Return ONLY valid JSON matching this schema:
+Classify email_category using exactly one rule:
+- "important": personal human email, direct question, requires relationship attention, from a known person
+- "pending_reply": sender expects a reply, thread stale, user hasn't responded
+- "finance_bills": invoice, payment reminder, utility bill, bank alert, credit card statement, rent, subscription charge notification
+- "transactions": purchase confirmation (Amazon, Flipkart, Swiggy, Zomato, Uber, Ola, flight, hotel, e-commerce order shipped/delivered)
+- "meetings_calendar": calendar invite, reschedule, meeting reminder, conference link, video call
+- "promotions": marketing email, newsletter, promotional offer, discount, sale
+- "travel": flight/hotel/train booking confirmation, itinerary, PNR, reservation details
+- "other": everything else
+
+For "finance_bills" or "transactions" only: extract fin_amount (number), fin_currency ("INR"/"USD" etc), fin_merchant (company name), fin_sub_category (groceries/subscriptions/transport/dining/flight/hotel/shopping/utilities/banking/other). Set all fin_* to null for all other categories.
+
+Return ONLY valid JSON:
 {
   "summary": "string (2 sentences)",
   "sentiment": "positive|neutral|negative|urgent",
@@ -32,7 +61,12 @@ Return ONLY valid JSON matching this schema:
   "requires_action": true|false,
   "action_description": "string or null",
   "entities_mentioned": ["string"],
-  "follow_up_deadline": "ISO date or null"
+  "follow_up_deadline": "ISO date or null",
+  "email_category": "important|pending_reply|finance_bills|transactions|meetings_calendar|promotions|travel|other",
+  "fin_amount": number or null,
+  "fin_currency": "string or null",
+  "fin_merchant": "string or null",
+  "fin_sub_category": "string or null"
 }`;
 }
 

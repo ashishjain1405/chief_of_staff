@@ -30,6 +30,17 @@ export async function summarizeCommunication(job: Job) {
   // Claude Haiku triage
   const triage = await triageEmail(businessContext, senderInfo, comm.body ?? "");
 
+  const isFinancial = triage.email_category === "finance_bills" || triage.email_category === "transactions";
+  const existingMeta = (comm.channel_metadata as any) ?? {};
+  const financialMeta = isFinancial
+    ? {
+        fin_amount: triage.fin_amount,
+        fin_currency: triage.fin_currency,
+        fin_merchant: triage.fin_merchant,
+        fin_sub_category: triage.fin_sub_category,
+      }
+    : {};
+
   await supabase
     .from("communications")
     .update({
@@ -37,6 +48,9 @@ export async function summarizeCommunication(job: Job) {
       sentiment: triage.sentiment,
       importance_score: triage.importance_score,
       requires_action: triage.requires_action,
+      email_category: triage.email_category,
+      category_processed: true,
+      channel_metadata: { ...existingMeta, ...financialMeta },
     })
     .eq("id", communicationId);
 

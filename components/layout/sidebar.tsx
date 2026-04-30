@@ -14,6 +14,7 @@ const navItems = [
   { href: "/commitments", label: "Commitments", icon: "📋" },
   { href: "/tasks", label: "Tasks", icon: "✅" },
   { href: "/ask", label: "Ask AI", icon: "✨" },
+  { href: "/finance", label: "Finance", icon: "📊" },
 ];
 
 export default function Sidebar() {

@@ -45,10 +45,24 @@ export default async function EmailDetailPage({
   const toRaw = metadata?.to ?? "";
   const body = email.body ? formatEmailBody(email.body) : "";
 
+  const isFinancial =
+    email.email_category === "finance_bills" || email.email_category === "transactions";
+
+  const CATEGORY_LABELS: Record<string, string> = {
+    important: "Important",
+    pending_reply: "Pending Reply",
+    finance_bills: "Finance & Bills",
+    transactions: "Transaction",
+    meetings_calendar: "Meeting",
+    promotions: "Promotion",
+    travel: "Travel",
+    other: "Other",
+  };
+
   return (
     <div className="p-6 max-w-3xl space-y-4">
       <div className="flex items-center justify-between">
-        <Link href="/inbox">
+        <Link href={`/inbox?cat=${email.email_category ?? "important"}`}>
           <Button variant="ghost" size="sm">← Back</Button>
         </Link>
         <EmailActions
@@ -63,7 +77,12 @@ export default async function EmailDetailPage({
         <div className="p-5 border-b space-y-3">
           <div className="flex items-start justify-between gap-3">
             <h1 className="text-xl font-semibold leading-snug">{email.subject ?? "(no subject)"}</h1>
-            <div className="flex items-center gap-1.5 shrink-0">
+            <div className="flex items-center gap-1.5 shrink-0 flex-wrap justify-end">
+              {email.email_category && email.email_category !== "other" && (
+                <Badge variant="outline" className="text-xs capitalize">
+                  {CATEGORY_LABELS[email.email_category] ?? email.email_category}
+                </Badge>
+              )}
               {email.sentiment && (
                 <Badge variant="outline" className="text-xs">{email.sentiment}</Badge>
               )}
@@ -92,6 +111,30 @@ export default async function EmailDetailPage({
               })}</span>
             </div>
           </div>
+
+          {isFinancial && metadata.fin_amount != null && (
+            <div className="flex items-center gap-4 pt-1 p-3 bg-muted/40 rounded-lg">
+              <div>
+                <p className="text-xs text-muted-foreground">Amount</p>
+                <p className="text-sm font-semibold tabular-nums">
+                  {metadata.fin_currency ?? "INR"}{" "}
+                  {Number(metadata.fin_amount).toLocaleString("en-IN")}
+                </p>
+              </div>
+              {metadata.fin_merchant && (
+                <div>
+                  <p className="text-xs text-muted-foreground">Merchant</p>
+                  <p className="text-sm font-medium">{metadata.fin_merchant}</p>
+                </div>
+              )}
+              {metadata.fin_sub_category && (
+                <div>
+                  <p className="text-xs text-muted-foreground">Category</p>
+                  <p className="text-sm font-medium capitalize">{metadata.fin_sub_category}</p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* AI Summary */}

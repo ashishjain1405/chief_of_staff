@@ -15,7 +15,7 @@ export async function triageEmail(
   const client = getClient();
   const response = await client.chat.completions.create({
     model: "gpt-4o-mini",
-    max_tokens: 512,
+    max_tokens: 700,
     messages: [
       { role: "user", content: emailTriagePrompt(businessContext, senderInfo, body) },
     ],

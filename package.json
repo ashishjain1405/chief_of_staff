@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "worker": "npx tsx --env-file=.env.local --tsconfig tsconfig.json worker/index.ts",
-    "worker:dev": "npx tsx watch --env-file=.env.local --tsconfig tsconfig.json worker/index.ts"
+    "worker:dev": "npx tsx watch --env-file=.env.local --tsconfig tsconfig.json worker/index.ts",
+    "backfill:categories": "npx tsx --env-file=.env.local --tsconfig tsconfig.json worker/jobs/backfill-categories.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.72",

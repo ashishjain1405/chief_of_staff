@@ -1,131 +1,148 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Suspense } from "react";
+import CategorySidebar, { CATEGORIES } from "@/components/inbox/category-sidebar";
 
 function ImportanceDot({ score }: { score: number }) {
   const color =
-    score >= 0.8 ? "bg-red-500" : score >= 0.6 ? "bg-amber-500" : "bg-muted-foreground/40";
-  return <span className={`w-2 h-2 rounded-full shrink-0 mt-1.5 ${color}`} />;
+    score >= 0.8 ? "bg-red-500" : score >= 0.6 ? "bg-amber-500" : "bg-muted-foreground/30";
+  return <span className={`w-1.5 h-1.5 rounded-full shrink-0 mt-2 ${color}`} />;
 }
 
-function SentimentBadge({ sentiment }: { sentiment: string | null }) {
-  if (!sentiment) return null;
-  const map: Record<string, string> = {
-    urgent: "destructive",
-    negative: "secondary",
-    positive: "outline",
-    neutral: "outline",
-  };
-  return <Badge variant={(map[sentiment] ?? "outline") as any} className="text-xs">{sentiment}</Badge>;
-}
+const CATEGORY_LABELS: Record<string, string> = Object.fromEntries(
+  CATEGORIES.map((c) => [c.key, c.label])
+);
+
+const SUB_CAT_COLORS: Record<string, string> = {
+  groceries: "bg-green-100 text-green-700",
+  subscriptions: "bg-purple-100 text-purple-700",
+  transport: "bg-blue-100 text-blue-700",
+  dining: "bg-orange-100 text-orange-700",
+  flight: "bg-sky-100 text-sky-700",
+  hotel: "bg-teal-100 text-teal-700",
+  shopping: "bg-pink-100 text-pink-700",
+  utilities: "bg-yellow-100 text-yellow-700",
+  banking: "bg-indigo-100 text-indigo-700",
+  other: "bg-muted text-muted-foreground",
+};
 
 export default async function InboxPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string }>;
+  searchParams: Promise<{ cat?: string }>;
 }) {
-  const { tab = "action" } = await searchParams;
+  const { cat = "important" } = await searchParams;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/auth/login");
 
-  const [actionRes, allRes, doneRes] = await Promise.all([
+  const [countsRes, emailsRes] = await Promise.all([
+    supabase.rpc("get_category_counts", { p_user_id: user.id }),
     supabase
       .from("communications")
-      .select("id, subject, body_summary, importance_score, sentiment, occurred_at, requires_action, action_taken, contact_id, contacts(name, email)")
+      .select("id, subject, body_summary, importance_score, sentiment, occurred_at, requires_action, action_taken, email_category, channel_metadata, contacts(name, email)")
       .eq("user_id", user.id)
-      .eq("requires_action", true)
-      .eq("action_taken", false)
-      .order("importance_score", { ascending: false })
-      .order("occurred_at", { ascending: false })
-      .limit(50),
-    supabase
-      .from("communications")
-      .select("id, subject, body_summary, importance_score, sentiment, occurred_at, requires_action, action_taken, contacts(name, email)")
-      .eq("user_id", user.id)
-      .order("occurred_at", { ascending: false })
-      .limit(50),
-    supabase
-      .from("communications")
-      .select("id, subject, body_summary, importance_score, sentiment, occurred_at, requires_action, action_taken, contact_id, contacts(name, email)")
-      .eq("user_id", user.id)
-      .eq("action_taken", true)
-      .order("importance_score", { ascending: false })
+      .eq("email_category", cat)
       .order("occurred_at", { ascending: false })
       .limit(50),
   ]);
 
-  const lists: Record<string, any[]> = {
-    action: actionRes.data ?? [],
-    all: allRes.data ?? [],
-    done: doneRes.data ?? [],
-  };
+  const counts: Record<string, number> = {};
+  for (const row of countsRes.data ?? []) {
+    counts[row.email_category] = Number(row.cnt);
+  }
 
-  const current = lists[tab] ?? lists.action;
+  const emails = emailsRes.data ?? [];
 
   return (
-    <div className="p-6 max-w-4xl space-y-4">
-      <h1 className="text-2xl font-bold">Inbox</h1>
+    <div className="flex h-[calc(100vh-3.5rem)] overflow-hidden">
+      <Suspense>
+        <CategorySidebar counts={counts} />
+      </Suspense>
 
-      <Tabs defaultValue={tab}>
-        <TabsList>
-          <TabsTrigger value="action">
-            <Link href="/inbox?tab=action">Needs Action ({lists.action.length})</Link>
-          </TabsTrigger>
-          <TabsTrigger value="all">
-            <Link href="/inbox?tab=all">All</Link>
-          </TabsTrigger>
-          <TabsTrigger value="done">
-            <Link href="/inbox?tab=done">Done</Link>
-          </TabsTrigger>
-        </TabsList>
+      <div className="flex-1 overflow-y-auto">
+        <div className="px-6 py-5 border-b">
+          <h1 className="text-base font-semibold">
+            {CATEGORY_LABELS[cat] ?? cat}
+          </h1>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {counts[cat] ?? 0} emails
+          </p>
+        </div>
 
-        <TabsContent value={tab} className="mt-4">
-          {current.length === 0 ? (
-            <div className="text-center py-16 text-muted-foreground">
-              {tab === "action" ? "All clear! No emails need action." : "No emails yet."}
-            </div>
-          ) : (
-            <div className="divide-y rounded-lg border overflow-hidden">
-              {current.map((email) => (
+        {emails.length === 0 ? (
+          <div className="flex items-center justify-center h-48 text-sm text-muted-foreground">
+            No emails in this category
+          </div>
+        ) : (
+          <div className="divide-y">
+            {emails.map((email) => {
+              const meta = (email.channel_metadata as any) ?? {};
+              const isFinancial =
+                email.email_category === "finance_bills" ||
+                email.email_category === "transactions";
+              return (
                 <Link
                   key={email.id}
                   href={`/inbox/${email.id}`}
-                  className="flex items-start gap-3 p-4 hover:bg-muted/50 transition-colors"
+                  className="flex items-start gap-3 px-6 py-4 hover:bg-muted/40 transition-colors"
                 >
                   <ImportanceDot score={email.importance_score ?? 0.5} />
                   <div className="flex-1 min-w-0 space-y-1">
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <span className="font-medium text-sm truncate">{email.subject ?? "(no subject)"}</span>
-                        {email.requires_action && !email.action_taken && (
-                          <Badge variant="secondary" className="text-xs shrink-0">Action</Badge>
-                        )}
-                      </div>
+                    <div className="flex items-start justify-between gap-3">
+                      <span className="font-medium text-sm leading-snug truncate">
+                        {email.subject ?? "(no subject)"}
+                      </span>
                       <div className="flex items-center gap-2 shrink-0">
-                        <SentimentBadge sentiment={email.sentiment} />
-                        <span className="text-xs text-muted-foreground">
-                          {new Date(email.occurred_at).toLocaleDateString()}
+                        {isFinancial && meta.fin_amount != null && (
+                          <span className="text-sm font-medium tabular-nums">
+                            {meta.fin_currency ?? "INR"} {Number(meta.fin_amount).toLocaleString()}
+                          </span>
+                        )}
+                        <span className="text-xs text-muted-foreground whitespace-nowrap">
+                          {new Date(email.occurred_at).toLocaleDateString("en-IN", {
+                            day: "numeric",
+                            month: "short",
+                          })}
                         </span>
                       </div>
                     </div>
+
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {(email.contacts as any)?.name && (
+                        <span className="text-xs text-muted-foreground">
+                          {(email.contacts as any).name}
+                        </span>
+                      )}
+                      {isFinancial && meta.fin_sub_category && (
+                        <span
+                          className={`text-xs px-2 py-0.5 rounded-full ${
+                            SUB_CAT_COLORS[meta.fin_sub_category] ?? SUB_CAT_COLORS.other
+                          }`}
+                        >
+                          {meta.fin_sub_category}
+                        </span>
+                      )}
+                      {isFinancial && meta.fin_merchant && (
+                        <span className="text-xs text-muted-foreground">
+                          {meta.fin_merchant}
+                        </span>
+                      )}
+                    </div>
+
                     {email.body_summary && (
-                      <p className="text-sm text-muted-foreground line-clamp-2">{email.body_summary}</p>
-                    )}
-                    {(email.contacts as any)?.name && (
-                      <p className="text-xs text-muted-foreground">
-                        From: {(email.contacts as any).name}
+                      <p className="text-xs text-muted-foreground line-clamp-1">
+                        {email.body_summary}
                       </p>
                     )}
                   </div>
                 </Link>
-              ))}
-            </div>
-          )}
-        </TabsContent>
-      </Tabs>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
