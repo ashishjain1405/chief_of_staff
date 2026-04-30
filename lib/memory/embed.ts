@@ -49,7 +49,7 @@ export async function embedAndStoreChunks(params: {
   const chunks = chunkText(text);
 
   // Delete old chunks for this source (re-embedding on update)
-  await supabase
+  await getSupabase()
     .from("memory_chunks")
     .delete()
     .eq("user_id", userId)
@@ -72,7 +72,7 @@ export async function embedAndStoreChunks(params: {
 
 export async function updateCommunicationEmbedding(commId: string, text: string) {
   const embedding = await embedText(text);
-  await supabase
+  await getSupabase()
     .from("communications")
     .update({ embedding })
     .eq("id", commId);
@@ -80,7 +80,7 @@ export async function updateCommunicationEmbedding(commId: string, text: string)
 
 export async function updateMeetingEmbedding(meetingId: string, text: string) {
   const embedding = await embedText(text);
-  await supabase
+  await getSupabase()
     .from("meetings")
     .update({ embedding })
     .eq("id", meetingId);
