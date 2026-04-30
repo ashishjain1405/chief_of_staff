@@ -32,12 +32,19 @@ export function getQueue(name: string): Queue {
   return queues[name];
 }
 
-export const emailRawQueue = { add: (...a: any[]) => getQueue("email-raw").add(...a) };
-export const calendarRawQueue = { add: (...a: any[]) => getQueue("calendar-raw").add(...a) };
-export const slackRawQueue = { add: (...a: any[]) => getQueue("slack-raw").add(...a) };
-export const zoomRawQueue = { add: (...a: any[]) => getQueue("zoom-raw").add(...a) };
-export const summarizeQueue = { add: (...a: any[]) => getQueue("summarize").add(...a) };
-export const embedQueue = { add: (...a: any[]) => getQueue("embed").add(...a) };
-export const reasonQueue = { add: (...a: any[]) => getQueue("reason").add(...a) };
-export const actQueue = { add: (...a: any[]) => getQueue("act").add(...a) };
-export const scheduledQueue = { add: (...a: any[]) => getQueue("scheduled").add(...a) };
+function makeQueue(name: string) {
+  return {
+    add: (jobName: string, data: any, opts?: any) =>
+      getQueue(name).add(jobName, data, opts),
+  };
+}
+
+export const emailRawQueue = makeQueue("email-raw");
+export const calendarRawQueue = makeQueue("calendar-raw");
+export const slackRawQueue = makeQueue("slack-raw");
+export const zoomRawQueue = makeQueue("zoom-raw");
+export const summarizeQueue = makeQueue("summarize");
+export const embedQueue = makeQueue("embed");
+export const reasonQueue = makeQueue("reason");
+export const actQueue = makeQueue("act");
+export const scheduledQueue = makeQueue("scheduled");
