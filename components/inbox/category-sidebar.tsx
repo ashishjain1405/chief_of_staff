@@ -2,17 +2,9 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { CATEGORIES } from "./categories";
 
-export const CATEGORIES = [
-  { key: "important",          label: "Important",          icon: "★" },
-  { key: "pending_reply",      label: "Pending Reply",      icon: "↩" },
-  { key: "finance_bills",      label: "Finance & Bills",    icon: "₹" },
-  { key: "transactions",       label: "Transactions",       icon: "🧾" },
-  { key: "meetings_calendar",  label: "Meetings",           icon: "📅" },
-  { key: "promotions",         label: "Promotions",         icon: "%" },
-  { key: "travel",             label: "Travel",             icon: "✈" },
-  { key: "other",              label: "Other",              icon: "•" },
-];
+export { CATEGORIES };
 
 export default function CategorySidebar({
   counts,

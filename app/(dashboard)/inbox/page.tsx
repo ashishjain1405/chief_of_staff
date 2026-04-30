@@ -2,7 +2,8 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Suspense } from "react";
-import CategorySidebar, { CATEGORIES } from "@/components/inbox/category-sidebar";
+import CategorySidebar from "@/components/inbox/category-sidebar";
+import { CATEGORIES } from "@/components/inbox/categories";
 
 function ImportanceDot({ score }: { score: number }) {
   const color =
