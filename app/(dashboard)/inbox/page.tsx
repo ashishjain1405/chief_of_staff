@@ -31,23 +31,30 @@ export default async function InboxPage({
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/auth/login");
 
-  const base = supabase
-    .from("communications")
-    .select("id, subject, body_summary, importance_score, sentiment, occurred_at, requires_action, action_taken, contact_id, contacts(name, email)")
-    .eq("user_id", user.id)
-    .order("importance_score", { ascending: false })
-    .order("occurred_at", { ascending: false })
-    .limit(50);
-
   const [actionRes, allRes, doneRes] = await Promise.all([
-    base.eq("requires_action", true).eq("action_taken", false),
+    supabase
+      .from("communications")
+      .select("id, subject, body_summary, importance_score, sentiment, occurred_at, requires_action, action_taken, contact_id, contacts(name, email)")
+      .eq("user_id", user.id)
+      .eq("requires_action", true)
+      .eq("action_taken", false)
+      .order("importance_score", { ascending: false })
+      .order("occurred_at", { ascending: false })
+      .limit(50),
     supabase
       .from("communications")
       .select("id, subject, body_summary, importance_score, sentiment, occurred_at, requires_action, action_taken, contacts(name, email)")
       .eq("user_id", user.id)
       .order("occurred_at", { ascending: false })
       .limit(50),
-    base.eq("action_taken", true),
+    supabase
+      .from("communications")
+      .select("id, subject, body_summary, importance_score, sentiment, occurred_at, requires_action, action_taken, contact_id, contacts(name, email)")
+      .eq("user_id", user.id)
+      .eq("action_taken", true)
+      .order("importance_score", { ascending: false })
+      .order("occurred_at", { ascending: false })
+      .limit(50),
   ]);
 
   const lists: Record<string, any[]> = {
