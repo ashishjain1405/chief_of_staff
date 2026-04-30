@@ -1,4 +1,4 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient } from "@getSupabase()/getSupabase()-js";
 import { embedText } from "./embed";
 
 function getSupabase() {
@@ -53,7 +53,7 @@ export async function getStructuredContext(userId: string) {
   const in7Days = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
 
   const [tasks, meetings, emails, commitments, followUps] = await Promise.all([
-    supabase
+    getSupabase()
       .from("tasks")
       .select("title, description, due_date, priority, ai_reasoning")
       .eq("user_id", userId)
@@ -62,7 +62,7 @@ export async function getStructuredContext(userId: string) {
       .order("due_date")
       .limit(10),
 
-    supabase
+    getSupabase()
       .from("meetings")
       .select("title, start_time, end_time, attendees")
       .eq("user_id", userId)
@@ -71,7 +71,7 @@ export async function getStructuredContext(userId: string) {
       .order("start_time")
       .limit(5),
 
-    supabase
+    getSupabase()
       .from("communications")
       .select("subject, body_summary, occurred_at, sentiment, channel_metadata")
       .eq("user_id", userId)
@@ -80,7 +80,7 @@ export async function getStructuredContext(userId: string) {
       .order("importance_score", { ascending: false })
       .limit(5),
 
-    supabase
+    getSupabase()
       .from("commitments")
       .select("description, due_date, to_contact_id, contacts(name, email)")
       .eq("user_id", userId)
@@ -89,7 +89,7 @@ export async function getStructuredContext(userId: string) {
       .order("due_date")
       .limit(5),
 
-    supabase
+    getSupabase()
       .from("relationships")
       .select("category, follow_up_due, contacts(name, email)")
       .eq("user_id", userId)
