@@ -51,7 +51,10 @@ export default async function EmailDetailPage({
         <Link href="/inbox">
           <Button variant="ghost" size="sm">← Back</Button>
         </Link>
-        <EmailActions communicationId={id} />
+        <EmailActions
+          communicationId={id}
+          hasUnsubscribe={!!metadata?.list_unsubscribe}
+        />
       </div>
 
       {/* Email card */}

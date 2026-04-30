@@ -31,6 +31,7 @@ export async function processEmail(job: Job) {
   const date = extractHeader(headers, "date");
   const threadId = message.threadId ?? undefined;
   const body = parseEmailBody(message.payload);
+  const listUnsubscribe = extractHeader(headers, "list-unsubscribe");
 
   // Extract sender email
   const emailMatch = from.match(/<(.+)>/) ?? from.match(/(\S+@\S+)/);
@@ -73,7 +74,7 @@ export async function processEmail(job: Job) {
         subject,
         body: body.substring(0, 10000), // cap raw body
         direction: "inbound",
-        channel_metadata: { from, to, labels },
+        channel_metadata: { from, to, labels, list_unsubscribe: listUnsubscribe || null },
         occurred_at: date ? new Date(date).toISOString() : new Date().toISOString(),
         importance_score: importanceScore,
       },
