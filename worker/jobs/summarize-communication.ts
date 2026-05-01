@@ -151,10 +151,22 @@ async function runFinancialExtraction(
   if (!extraction.is_financial_email && !needsReview) return;
 
   const merchantRaw = raw?.merchant_name ?? null;
-  const merchantNormalized = merchantRaw ? normalizeMerchant(merchantRaw) : null;
+  const deterministicNormalized = merchantRaw ? normalizeMerchant(merchantRaw) : null;
+  // Prefer deterministic normalization; fall back to LLM's suggestion for unknown merchants
+  const isKnownMerchant = deterministicNormalized !== null &&
+    deterministicNormalized !== merchantRaw?.trim().replace(/\w\S*/g, (w) => w[0].toUpperCase() + w.slice(1).toLowerCase());
+  const merchantNormalized = isKnownMerchant
+    ? deterministicNormalized
+    : (raw?.merchant_normalized ?? deterministicNormalized);
   const category = merchantNormalized
     ? (getCategoryForMerchant(merchantNormalized) ?? raw?.category ?? null)
     : (raw?.category ?? null);
+
+  // Accept LLM sender_type only for types the deterministic engine doesn't classify
+  const LLM_ONLY_SENDER_TYPES = new Set(["INSURANCE_PROVIDER", "TRAVEL_PROVIDER", "SUBSCRIPTION_PROVIDER"]);
+  const resolvedSenderType = LLM_ONLY_SENDER_TYPES.has(raw?.sender_type ?? "")
+    ? raw!.sender_type!
+    : senderType;
 
   await (supabase.from as any)("transactions_raw").upsert(
     {
@@ -179,7 +191,7 @@ async function runFinancialExtraction(
       is_recurring: raw?.is_recurring ?? false,
       recurring_frequency: raw?.recurring_frequency ?? null,
       status: raw?.status ?? null,
-      sender_type: senderType,
+      sender_type: resolvedSenderType,
       raw_sender: senderEmail,
       needs_review: needsReview,
       extracted_at: new Date().toISOString(),
