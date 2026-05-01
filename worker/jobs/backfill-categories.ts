@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { triageEmail } from "@/lib/ai/claude";
+import { getSenderHint } from "@/lib/finance/senders";
 
 async function main() {
   const supabase = createClient(
@@ -24,7 +25,8 @@ async function main() {
 
     for (const comm of rows) {
       try {
-        const senderInfo = `${(comm.contacts as any)?.name ?? ""} <${(comm.contacts as any)?.email ?? ""}>`;
+        const senderEmail = (comm.contacts as any)?.email ?? "";
+        const senderInfo = `${(comm.contacts as any)?.name ?? ""} <${senderEmail}>${getSenderHint(senderEmail)}`;
         const triage = await triageEmail({}, senderInfo, comm.body_summary ?? comm.body ?? "");
 
         await supabase

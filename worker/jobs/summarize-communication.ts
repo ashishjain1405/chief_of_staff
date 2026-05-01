@@ -2,7 +2,7 @@ import { Job } from "bullmq";
 import { createClient } from "@supabase/supabase-js";
 import { triageEmail, extractCommitments } from "@/lib/ai/claude";
 import { embedAndStoreChunks, updateCommunicationEmbedding } from "@/lib/memory/embed";
-import { classifySender, shouldRunStage1 } from "@/lib/finance/senders";
+import { classifySender, getSenderHint, shouldRunStage1 } from "@/lib/finance/senders";
 import { extractFinancialTransaction } from "@/lib/ai/extractors/financial";
 import { normalizeMerchant, getCategoryForMerchant } from "@/lib/finance/normalize";
 import { deduplicateRawTransactions, type TransactionRaw } from "@/lib/finance/dedup";
@@ -29,10 +29,10 @@ export async function summarizeCommunication(job: Job) {
     .single();
 
   const businessContext = user?.business_context ?? {};
-  const senderInfo = `${(comm.contacts as any)?.name ?? ""} <${(comm.contacts as any)?.email ?? ""}>`;
   const senderEmail = (comm.contacts as any)?.email ?? "";
+  const senderInfo = `${(comm.contacts as any)?.name ?? ""} <${senderEmail}>${getSenderHint(senderEmail)}`;
 
-  // Stage 0: General email triage (unchanged)
+  // Stage 0: General email triage
   const triage = await triageEmail(businessContext, senderInfo, comm.body ?? "");
 
   const existingMeta = (comm.channel_metadata as any) ?? {};

@@ -91,12 +91,59 @@ export function hasFinancialKeywords(text: string): boolean {
   return FINANCIAL_KEYWORDS.some((kw) => lower.includes(kw));
 }
 
+const NEWSLETTER_DOMAINS = new Set([
+  "substack.com", "beehiiv.com", "ghost.io", "convertkit.com", "mailerlite.com", "mailchimp.com",
+]);
+
+const SOCIAL_DOMAINS = new Set([
+  "linkedin.com", "instagram.com", "twitter.com", "x.com", "facebook.com", "reddit.com", "discord.com",
+]);
+
+const PRODUCTIVITY_DOMAINS = new Set([
+  "github.com", "gitlab.com", "vercel.com", "linear.app", "atlassian.net", "slack.com",
+  "zoom.us", "asana.com", "trello.com", "jira.com",
+]);
+
+const CAREER_DOMAINS = new Set([
+  "naukri.com", "instahyre.com", "greenhouse.io", "lever.co", "workday.com", "wellfound.com", "iimjobs.com",
+]);
+
+const LEARNING_DOMAINS = new Set([
+  "coursera.org", "udemy.com", "upgrad.com", "scaler.com", "skillshare.com", "edx.org",
+]);
+
+const ENTERTAINMENT_DOMAINS = new Set([
+  "primevideo.com", "hotstar.com", "steampowered.com", "epicgames.com", "playstation.com",
+]);
+
+const SUBSCRIPTION_DOMAINS = new Set([
+  "netflix.com", "spotify.com", "notion.so", "grammarly.com", "openai.com", "canva.com",
+  "adobe.com", "primevideo.com", "hotstar.com", "steampowered.com", "epicgames.com",
+]);
+
+const LEGAL_GOV_DOMAINS = new Set([
+  "incometax.gov.in", "gst.gov.in", "uidai.gov.in", "digilocker.gov.in", "epfindia.gov.in", "mca.gov.in",
+]);
+
+export function getSenderHint(email: string): string {
+  const domain = extractDomain(email);
+  if (NEWSLETTER_DOMAINS.has(domain)) return " [newsletter sender]";
+  if (CAREER_DOMAINS.has(domain)) return " [career/jobs platform]";
+  if (LEARNING_DOMAINS.has(domain)) return " [learning platform]";
+  if (LEGAL_GOV_DOMAINS.has(domain)) return " [government/legal sender]";
+  if (ENTERTAINMENT_DOMAINS.has(domain)) return " [entertainment platform]";
+  if (SUBSCRIPTION_DOMAINS.has(domain)) return " [subscription service]";
+  if (PRODUCTIVITY_DOMAINS.has(domain)) return " [productivity tool]";
+  if (SOCIAL_DOMAINS.has(domain)) return " [social network]";
+  return "";
+}
+
 export function shouldRunStage1(
   emailCategory: string | null,
   subject: string,
   bodySnippet: string
 ): boolean {
-  if (emailCategory === "finance_bills" || emailCategory === "transactions") return true;
+  if (emailCategory === "finance_bills" || emailCategory === "transactions" || emailCategory === "subscriptions_memberships") return true;
   if (hasFinancialKeywords(subject + " " + bodySnippet)) return true;
   return false;
 }
