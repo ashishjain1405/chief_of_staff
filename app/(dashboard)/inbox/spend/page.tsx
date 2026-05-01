@@ -2,16 +2,20 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 
-const SUB_CAT_COLORS: Record<string, string> = {
+const CAT_COLORS: Record<string, string> = {
   groceries: "bg-green-500",
   subscriptions: "bg-purple-500",
   transport: "bg-blue-500",
-  dining: "bg-orange-500",
-  flight: "bg-sky-500",
-  hotel: "bg-teal-500",
+  food_delivery: "bg-orange-500",
+  travel: "bg-sky-500",
   shopping: "bg-pink-500",
   utilities: "bg-yellow-500",
   banking: "bg-indigo-500",
+  telecom: "bg-cyan-500",
+  investments: "bg-emerald-500",
+  healthcare: "bg-red-500",
+  ecommerce: "bg-violet-500",
+  restaurants: "bg-amber-500",
   other: "bg-muted-foreground",
 };
 
@@ -34,26 +38,25 @@ export default async function InboxSpendPage({
   const since = period === "week" ? weekAgo : monthAgo;
 
   const { data: rows } = await supabase
-    .from("communications")
-    .select("id, subject, occurred_at, channel_metadata, email_category")
+    .from("transactions_normalized")
+    .select("*")
     .eq("user_id", user.id)
-    .in("email_category", ["finance_bills", "transactions"])
-    .gte("occurred_at", since)
-    .order("occurred_at", { ascending: false })
+    .neq("status", "failed")
+    .gte("transaction_datetime", since)
+    .order("transaction_datetime", { ascending: false })
     .limit(200);
 
-  const all = (rows ?? []).filter((r) => (r.channel_metadata as any)?.fin_amount != null);
-  const total = all.reduce((s, r) => s + ((r.channel_metadata as any).fin_amount ?? 0), 0);
+  const all = rows ?? [];
+  const total = all.reduce((s, r) => s + (r.amount ?? 0), 0);
 
-  const bySubCat: Record<string, number> = {};
+  const byCat: Record<string, number> = {};
   for (const r of all) {
-    const meta = r.channel_metadata as any;
-    const s = meta.fin_sub_category ?? "other";
-    bySubCat[s] = (bySubCat[s] ?? 0) + (meta.fin_amount ?? 0);
+    const cat = r.category ?? "other";
+    byCat[cat] = (byCat[cat] ?? 0) + (r.amount ?? 0);
   }
 
-  const maxSubCat = Math.max(...Object.values(bySubCat), 1);
-  const sortedSubCats = Object.entries(bySubCat).sort((a, b) => b[1] - a[1]);
+  const maxCat = Math.max(...Object.values(byCat), 1);
+  const sortedCats = Object.entries(byCat).sort((a, b) => b[1] - a[1]);
 
   return (
     <div className="flex-1 overflow-y-auto p-6 max-w-3xl space-y-8">
@@ -92,23 +95,23 @@ export default async function InboxSpendPage({
         </div>
         <div className="border rounded-lg p-4 space-y-1">
           <p className="text-xs text-muted-foreground">Categories</p>
-          <p className="text-xl font-semibold">{sortedSubCats.length}</p>
+          <p className="text-xl font-semibold">{sortedCats.length}</p>
         </div>
       </div>
 
-      {sortedSubCats.length > 0 && (
+      {sortedCats.length > 0 && (
         <div className="space-y-3">
           <h2 className="text-sm font-medium">By Category</h2>
           <div className="space-y-2.5">
-            {sortedSubCats.map(([subCat, amount]) => (
-              <div key={subCat} className="flex items-center gap-3">
-                <span className="text-xs text-muted-foreground w-24 shrink-0 capitalize">
-                  {subCat}
+            {sortedCats.map(([cat, amount]) => (
+              <div key={cat} className="flex items-center gap-3">
+                <span className="text-xs text-muted-foreground w-28 shrink-0 capitalize">
+                  {cat.replace(/_/g, " ")}
                 </span>
                 <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
                   <div
-                    className={`h-full rounded-full ${SUB_CAT_COLORS[subCat] ?? "bg-muted-foreground"}`}
-                    style={{ width: `${(amount / maxSubCat) * 100}%` }}
+                    className={`h-full rounded-full ${CAT_COLORS[cat] ?? "bg-muted-foreground"}`}
+                    style={{ width: `${(amount / maxCat) * 100}%` }}
                   />
                 </div>
                 <span className="text-xs tabular-nums text-muted-foreground w-20 text-right shrink-0">
@@ -125,27 +128,34 @@ export default async function InboxSpendPage({
         <div className="border rounded-lg overflow-hidden">
           <div className="divide-y">
             {all.map((r) => {
-              const meta = r.channel_metadata as any;
-              return (
-                <Link
-                  key={r.id}
-                  href={`/inbox/${r.id}`}
-                  className="flex items-center justify-between px-4 py-3 hover:bg-muted/40 transition-colors"
-                >
+              const primaryCommId = r.communication_ids?.[0] ?? null;
+              const inner = (
+                <div className="flex items-center justify-between px-4 py-3">
                   <div className="min-w-0 space-y-0.5">
-                    <p className="text-sm truncate">{meta.fin_merchant ?? r.subject ?? "—"}</p>
+                    <p className="text-sm truncate">{r.merchant_normalized ?? "—"}</p>
                     <p className="text-xs text-muted-foreground capitalize">
-                      {meta.fin_sub_category ?? "—"} ·{" "}
-                      {new Date(r.occurred_at).toLocaleDateString("en-IN", {
+                      {(r.category ?? "—").replace(/_/g, " ")} ·{" "}
+                      {new Date(r.transaction_datetime).toLocaleDateString("en-IN", {
                         day: "numeric",
                         month: "short",
                       })}
                     </p>
                   </div>
                   <span className="text-sm font-medium tabular-nums shrink-0 ml-4">
-                    {meta.fin_currency ?? "INR"} {fmt(meta.fin_amount ?? 0)}
+                    {r.currency ?? "INR"} {fmt(r.amount ?? 0)}
                   </span>
+                </div>
+              );
+              return primaryCommId ? (
+                <Link
+                  key={r.id}
+                  href={`/inbox/${primaryCommId}`}
+                  className="block hover:bg-muted/40 transition-colors"
+                >
+                  {inner}
                 </Link>
+              ) : (
+                <div key={r.id}>{inner}</div>
               );
             })}
           </div>

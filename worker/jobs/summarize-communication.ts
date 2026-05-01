@@ -2,6 +2,10 @@ import { Job } from "bullmq";
 import { createClient } from "@supabase/supabase-js";
 import { triageEmail, extractCommitments } from "@/lib/ai/claude";
 import { embedAndStoreChunks, updateCommunicationEmbedding } from "@/lib/memory/embed";
+import { classifySender, shouldRunStage1 } from "@/lib/finance/senders";
+import { extractFinancialTransaction } from "@/lib/ai/extractors/financial";
+import { normalizeMerchant, getCategoryForMerchant } from "@/lib/finance/normalize";
+import { deduplicateRawTransactions, type TransactionRaw } from "@/lib/finance/dedup";
 
 export async function summarizeCommunication(job: Job) {
   const supabase = createClient(
@@ -16,7 +20,7 @@ export async function summarizeCommunication(job: Job) {
     .eq("id", communicationId)
     .single();
 
-  if (!comm || comm.body_summary) return; // already processed
+  if (!comm || comm.body_summary) return;
 
   const { data: user } = await supabase
     .from("users")
@@ -26,8 +30,9 @@ export async function summarizeCommunication(job: Job) {
 
   const businessContext = user?.business_context ?? {};
   const senderInfo = `${(comm.contacts as any)?.name ?? ""} <${(comm.contacts as any)?.email ?? ""}>`;
+  const senderEmail = (comm.contacts as any)?.email ?? "";
 
-  // Claude Haiku triage
+  // Stage 0: General email triage (unchanged)
   const triage = await triageEmail(businessContext, senderInfo, comm.body ?? "");
 
   const isFinancial = triage.email_category === "finance_bills" || triage.email_category === "transactions";
@@ -54,6 +59,11 @@ export async function summarizeCommunication(job: Job) {
     })
     .eq("id", communicationId);
 
+  // Stage 1: Financial extraction (runs in parallel with other processing)
+  if (shouldRunStage1(triage.email_category, senderEmail, comm.subject ?? "", comm.body?.substring(0, 500) ?? "")) {
+    await runFinancialExtraction(supabase, userId, communicationId, senderEmail, comm.subject ?? "", comm.body ?? "");
+  }
+
   // Embed summary into memory
   await embedAndStoreChunks({
     userId,
@@ -63,18 +73,16 @@ export async function summarizeCommunication(job: Job) {
     metadata: {
       occurred_at: comm.occurred_at,
       entities: triage.entities_mentioned,
-      contact_email: (comm.contacts as any)?.email,
+      contact_email: senderEmail,
     },
   });
 
-  // Update inline embedding on communications table
   await updateCommunicationEmbedding(communicationId, triage.summary);
 
-  // Extract commitments if action required
   if (triage.requires_action && comm.body) {
     const commitments = await extractCommitments(
       comm.body,
-      (comm.contacts as any)?.email ?? ""
+      senderEmail
     );
 
     for (const c of commitments) {
@@ -104,7 +112,6 @@ export async function summarizeCommunication(job: Job) {
     }
   }
 
-  // Create task if high importance with required action
   if (triage.requires_action && triage.importance_score >= 0.7) {
     await supabase.from("tasks").insert({
       user_id: userId,
@@ -116,5 +123,111 @@ export async function summarizeCommunication(job: Job) {
       priority: triage.importance_score >= 0.85 ? "high" : "medium",
       ai_reasoning: `Importance: ${triage.importance_score.toFixed(2)}. ${triage.summary}`,
     });
+  }
+}
+
+async function runFinancialExtraction(
+  supabase: any,
+  userId: string,
+  communicationId: string,
+  senderEmail: string,
+  subject: string,
+  body: string
+) {
+  const senderType = classifySender(senderEmail);
+  const extraction = await extractFinancialTransaction(senderEmail, senderType, subject, body);
+
+  // LLM says not financial and no amount — skip entirely
+  if (!extraction.is_financial_email && extraction.transaction?.amount == null) return;
+
+  const raw = extraction.transaction;
+
+  // Determine needs_review flag
+  const needsReview =
+    (!extraction.is_financial_email && raw?.amount != null) ||
+    (extraction.is_financial_email && extraction.confidence < 0.5) ||
+    (extraction.is_financial_email && extraction.confidence >= 0.5 && raw?.amount == null);
+
+  if (!extraction.is_financial_email && !needsReview) return;
+
+  const merchantRaw = raw?.merchant_name ?? null;
+  const merchantNormalized = merchantRaw ? normalizeMerchant(merchantRaw) : null;
+  const category = merchantNormalized
+    ? (getCategoryForMerchant(merchantNormalized) ?? raw?.category ?? null)
+    : (raw?.category ?? null);
+
+  await (supabase.from as any)("transactions_raw").upsert(
+    {
+      user_id: userId,
+      communication_id: communicationId,
+      is_financial_email: extraction.is_financial_email,
+      confidence: extraction.confidence,
+      transaction_type: raw?.transaction_type ?? null,
+      category,
+      amount: raw?.amount ?? null,
+      currency: raw?.currency ?? "INR",
+      merchant_name: merchantRaw,
+      merchant_normalized: merchantNormalized,
+      bank_name: raw?.bank_name ?? null,
+      payment_method: raw?.payment_method ?? null,
+      transaction_datetime: raw?.transaction_datetime ?? null,
+      due_date: raw?.due_date ?? null,
+      transaction_id: raw?.transaction_id ?? null,
+      reference_id: raw?.reference_id ?? null,
+      upi_id: raw?.upi_id ?? null,
+      masked_account: raw?.masked_account ?? null,
+      is_recurring: raw?.is_recurring ?? false,
+      recurring_frequency: raw?.recurring_frequency ?? null,
+      status: raw?.status ?? null,
+      sender_type: senderType,
+      raw_sender: senderEmail,
+      needs_review: needsReview,
+      extracted_at: new Date().toISOString(),
+    },
+    { onConflict: "communication_id" }
+  );
+
+  if (!needsReview) {
+    await runDedup(supabase, userId);
+  }
+}
+
+async function runDedup(supabase: any, userId: string) {
+  const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+
+  const db = supabase as any;
+
+  const { data: rawRows } = await db
+    .from("transactions_raw")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("is_financial_email", true)
+    .eq("needs_review", false)
+    .gte("transaction_datetime", since);
+
+  if (!rawRows?.length) return;
+
+  const normalized = deduplicateRawTransactions(rawRows as TransactionRaw[]);
+
+  for (const norm of normalized) {
+    const { data: existing } = await db
+      .from("transactions_normalized")
+      .select("id")
+      .eq("user_id", userId)
+      .contains("communication_ids", norm.communication_ids)
+      .maybeSingle();
+
+    if (existing) {
+      await db
+        .from("transactions_normalized")
+        .update({ ...norm, updated_at: new Date().toISOString() })
+        .eq("id", existing.id);
+    } else {
+      await db.from("transactions_normalized").insert({
+        ...norm,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      });
+    }
   }
 }
