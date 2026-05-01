@@ -1,3 +1,4 @@
+import OpenAI from "openai";
 import { createClient } from "@supabase/supabase-js";
 
 function getSupabase() {
@@ -7,23 +8,19 @@ function getSupabase() {
   );
 }
 
-// Voyage AI embedding via REST API (voyageai npm package)
-export async function embedText(text: string): Promise<number[]> {
-  const res = await fetch("https://api.voyageai.com/v1/embeddings", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${process.env.VOYAGE_API_KEY}`,
-    },
-    body: JSON.stringify({
-      input: [text],
-      model: "voyage-3-lite",
-    }),
-  });
+let _openai: OpenAI | null = null;
+function getOpenAI() {
+  if (!_openai) _openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  return _openai;
+}
 
-  if (!res.ok) throw new Error(`Voyage AI error: ${res.status}`);
-  const data = await res.json();
-  return data.data[0].embedding;
+export async function embedText(text: string): Promise<number[]> {
+  const res = await getOpenAI().embeddings.create({
+    model: "text-embedding-3-small",
+    input: text,
+    dimensions: 1024,
+  });
+  return res.data[0].embedding;
 }
 
 // Chunk text into ~512 token windows (approx 4 chars/token)

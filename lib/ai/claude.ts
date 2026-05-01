@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { z } from "zod";
 import { emailTriagePrompt, emailTriageSchema, type EmailTriage } from "./prompts";
 import { meetingSummaryPrompt, meetingSummarySchema, type MeetingSummary } from "./prompts";
 import { commitmentExtractionPrompt, commitmentExtractionSchema } from "./prompts";
@@ -6,6 +7,8 @@ import { commitmentExtractionPrompt, commitmentExtractionSchema } from "./prompt
 function getClient() {
   return new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 }
+
+const triageJsonSchema = z.toJSONSchema(emailTriageSchema);
 
 export async function triageEmail(
   businessContext: any,
@@ -19,11 +22,18 @@ export async function triageEmail(
     messages: [
       { role: "user", content: emailTriagePrompt(businessContext, senderInfo, body) },
     ],
-    response_format: { type: "json_object" },
+    response_format: {
+      type: "json_schema",
+      json_schema: {
+        name: "email_triage",
+        strict: true,
+        schema: triageJsonSchema as Record<string, unknown>,
+      },
+    },
   });
 
   const text = response.choices[0].message.content ?? "{}";
-  return emailTriageSchema.parse(JSON.parse(text));
+  return JSON.parse(text) as EmailTriage;
 }
 
 export async function summarizeMeeting(

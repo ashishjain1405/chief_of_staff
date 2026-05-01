@@ -27,9 +27,9 @@ export async function searchMemory(params: {
   const {
     userId,
     query,
-    matchThreshold = 0.75,
+    matchThreshold = 0.5,
     matchCount = 15,
-    daysBack = 30,
+    daysBack = 90,
   } = params;
 
   const embedding = await embedText(query);

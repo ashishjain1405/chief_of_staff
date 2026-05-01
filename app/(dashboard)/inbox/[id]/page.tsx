@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import GenerateDraftButton from "./generate-draft-button";
 import EmailActions from "./email-actions";
+import EmailBody from "@/components/inbox/email-body";
 
 function formatEmailBody(body: string): string {
   // Strip trailing quoted reply lines (lines starting with ">")
@@ -26,7 +27,7 @@ export default async function EmailDetailPage({
 
   const { data: email } = await supabase
     .from("communications")
-    .select("*, contacts(name, email, organization)")
+    .select("*, body_html, contacts(name, email, organization)")
     .eq("id", id)
     .eq("user_id", user.id)
     .single();
@@ -44,6 +45,7 @@ export default async function EmailDetailPage({
   const fromRaw = metadata?.from ?? contact?.name ?? "Unknown";
   const toRaw = metadata?.to ?? "";
   const body = email.body ? formatEmailBody(email.body) : "";
+  const bodyHtml = (email as any).body_html as string | null ?? null;
 
   const isFinancial =
     email.email_category === "finance_bills" || email.email_category === "transactions";
@@ -147,9 +149,7 @@ export default async function EmailDetailPage({
 
         {/* Body */}
         <div className="p-5">
-          <div className="text-sm leading-relaxed whitespace-pre-wrap text-foreground font-sans">
-            {body || "No body content"}
-          </div>
+          <EmailBody html={bodyHtml} plainText={body} />
         </div>
       </div>
 

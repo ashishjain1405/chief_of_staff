@@ -29,7 +29,7 @@ export async function POST(request: Request) {
     .single();
 
   const [memoryChunks, structured] = await Promise.all([
-    searchMemory({ userId: user.id, query: lastMessageText, matchCount: 15 }),
+    searchMemory({ userId: user.id, query: lastMessageText, matchCount: 15, daysBack: 90 }),
     getStructuredContext(user.id),
   ]);
 
@@ -57,5 +57,5 @@ export async function POST(request: Request) {
     maxOutputTokens: 1024,
   });
 
-  return result.toTextStreamResponse();
+  return result.toUIMessageStreamResponse();
 }

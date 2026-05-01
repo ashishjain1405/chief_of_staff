@@ -4,13 +4,13 @@ import { z } from "zod";
 // Email Triage (Claude Haiku)
 // ─────────────────────────────────────────
 export const emailTriageSchema = z.object({
-  summary: z.string().describe("2-sentence summary of the email"),
+  summary: z.string(),
   sentiment: z.enum(["positive", "neutral", "negative", "urgent"]),
   importance_score: z.number().min(0).max(1),
   requires_action: z.boolean(),
   action_description: z.string().nullable(),
-  entities_mentioned: z.array(z.string()).describe("Company names, deal names, project names"),
-  follow_up_deadline: z.string().nullable().describe("ISO date if a deadline is mentioned"),
+  entities_mentioned: z.array(z.string()),
+  follow_up_deadline: z.string().nullable(),
   email_category: z.enum([
     "important",
     "pending_reply",
@@ -31,16 +31,7 @@ export const emailTriageSchema = z.object({
     "shipping",
     "other",
   ]).nullable(),
-  fin_amount: z.number().nullable(),
-  fin_currency: z.string().nullable(),
-  fin_merchant: z.string().nullable(),
   confidence: z.number().min(0).max(1),
-  fin_sub_category: z.enum([
-    "food_delivery", "groceries", "shopping", "travel", "transport", "fuel",
-    "utilities", "rent", "subscriptions", "insurance", "healthcare", "education",
-    "entertainment", "investments", "banking", "salary", "tax", "emi",
-    "telecom", "ecommerce", "restaurants", "other",
-  ]).nullable(),
 });
 
 export type EmailTriage = z.infer<typeof emailTriageSchema>;
@@ -100,25 +91,9 @@ PRIORITY ORDER (when in doubt):
 4. Marketing/promotional → always "promotions"
 5. Order/shipping/delivery status → always "shipping"
 
-For "finance_bills" or "transactions" only: extract fin_amount (number), fin_currency (ISO code), fin_merchant (company name), fin_sub_category. Set all fin_* to null for all other categories.
-
-Return ONLY valid JSON:
-{
-  "summary": "string (2 sentences)",
-  "sentiment": "positive|neutral|negative|urgent",
-  "importance_score": 0.0-1.0,
-  "confidence": 0.0-1.0,
-  "requires_action": true|false,
-  "action_description": "string or null",
-  "entities_mentioned": ["string"],
-  "follow_up_deadline": "ISO date or null",
-  "email_category": "important|pending_reply|finance_bills|transactions|meetings_calendar|promotions|travel|shipping|other",
-  "fallback_category": "important|pending_reply|meetings_calendar|promotions|travel|shipping|other|null (only set when email_category is transactions or finance_bills, null otherwise)",
-  "fin_amount": number or null,
-  "fin_currency": "string or null",
-  "fin_merchant": "string or null",
-  "fin_sub_category": "food_delivery|groceries|shopping|travel|transport|fuel|utilities|rent|subscriptions|insurance|healthcare|education|entertainment|investments|banking|salary|tax|emi|telecom|ecommerce|restaurants|other|null"
-}`;
+If email_category is "transactions" or "finance_bills", set fallback_category to what you would classify this email as if it were NOT a financial email.
+Valid values: "important", "pending_reply", "meetings_calendar", "promotions", "travel", "shipping", "other".
+For all other categories, set fallback_category to null.`;
 }
 
 // ─────────────────────────────────────────

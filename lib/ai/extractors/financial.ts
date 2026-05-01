@@ -84,35 +84,10 @@ EXTRACTION RULES:
 - Refund amounts are positive numbers; transaction_type handles directionality.
 - If multiple transactions exist, extract only the primary one.
 
-Return ONLY valid JSON:
-{
-  "is_financial_email": true/false,
-  "confidence": 0.0-1.0,
-  "transaction": {
-    "transaction_type": "purchase|bill_payment|subscription|subscription_renewal|refund|salary_credit|bank_transfer|upi_payment|wallet_payment|wallet_topup|p2p_transfer|investment|atm_withdrawal|cashback|failed_transaction|emi|credit_card_payment|loan_payment|insurance_payment|rent_payment|recharge|utility_payment|travel_booking|food_order|autopay_debit|mandate_setup|mandate_debit|tax_payment|unknown",
-    "category": "ecommerce|groceries|food_delivery|restaurants|transport|travel|subscriptions|payments|investments|insurance|healthcare|education|productivity|electronics|telecom|fitness|gaming|home_services|furniture|shopping|fuel|utilities|rent|salary|banking|tax|entertainment|software|ai_tools|beauty|eyewear|jewelry|internet|pharmacy|unknown",
-    "amount": number or null,
-    "currency": "INR" or ISO currency code or null,
-    "merchant_name": "raw name exactly as seen in email or null",
-    "merchant_normalized": "canonical merchant name if confident, else same as merchant_name or null",
-    "bank_name": "string or null",
-    "payment_method": "string or null",
-    "transaction_datetime": "ISO datetime or null",
-    "due_date": "ISO date or null",
-    "transaction_id": "string or null",
-    "reference_id": "string or null",
-    "upi_id": "string or null",
-    "masked_account": "last 4 digits or masked number or null",
-    "is_recurring": true/false,
-    "recurring_frequency": "monthly|weekly|annual|null",
-    "status": "success|failed|pending|null",
-    "sender_type": "BANK|MERCHANT|WALLET|UPI|PAYMENT_GATEWAY|BILLER|INVESTMENT_PLATFORM|INSURANCE_PROVIDER|TRAVEL_PROVIDER|SUBSCRIPTION_PROVIDER|UNKNOWN",
-    "raw_sender": "${senderEmail}"
-  }
-}
-
 Set transaction to null if is_financial_email is false.`;
 }
+
+const financialJsonSchema = z.toJSONSchema(financialExtractionSchema);
 
 let _client: OpenAI | null = null;
 function getClient(): OpenAI {
@@ -131,9 +106,16 @@ export async function extractFinancialTransaction(
     model: "gpt-4o-mini",
     max_tokens: 800,
     messages: [{ role: "user", content: buildPrompt(senderEmail, senderType, subject, body) }],
-    response_format: { type: "json_object" },
+    response_format: {
+      type: "json_schema",
+      json_schema: {
+        name: "financial_extraction",
+        strict: true,
+        schema: financialJsonSchema as Record<string, unknown>,
+      },
+    },
   });
 
   const text = response.choices[0].message.content ?? "{}";
-  return financialExtractionSchema.parse(JSON.parse(text));
+  return JSON.parse(text) as FinancialExtraction;
 }

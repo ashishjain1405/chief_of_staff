@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import { getGmailClient, fetchEmailById, parseEmailBody, extractHeader } from "@/lib/integrations/gmail";
+import { getGmailClient, fetchEmailById, parseEmailBody, parseEmailHtml, extractHeader } from "@/lib/integrations/gmail";
 import { summarizeQueue } from "@/lib/queues";
 
 const DAYS = parseInt(process.argv.find((a) => a.startsWith("--days="))?.split("=")[1] ?? "90");
@@ -100,6 +100,7 @@ async function importMessage(supabase: any, userId: string, messageId: string) {
   const date = extractHeader(headers, "date");
   const threadId = message.threadId ?? undefined;
   const body = parseEmailBody(message.payload);
+  const bodyHtml = parseEmailHtml(message.payload);
   const listUnsubscribe = extractHeader(headers, "list-unsubscribe");
 
   const emailMatch = from.match(/<(.+)>/) ?? from.match(/(\S+@\S+)/);
@@ -135,6 +136,7 @@ async function importMessage(supabase: any, userId: string, messageId: string) {
         contact_id: contact?.id,
         subject,
         body: body.substring(0, 10000),
+        body_html: bodyHtml.substring(0, 500000) || null,
         direction: "inbound",
         channel_metadata: { from, to, labels, list_unsubscribe: listUnsubscribe || null },
         occurred_at: date ? new Date(date).toISOString() : new Date().toISOString(),
