@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { triageEmail, extractCommitments } from "@/lib/ai/claude";
 import { embedAndStoreChunks, updateCommunicationEmbedding } from "@/lib/memory/embed";
 import { classifySender, getSenderHint, shouldRunStage1 } from "@/lib/finance/senders";
+import { operationalQueue } from "@/lib/queues";
 import { extractFinancialTransaction } from "@/lib/ai/extractors/financial";
 import { normalizeMerchant, getCategoryForMerchant } from "@/lib/finance/normalize";
 import { deduplicateRawTransactions, type TransactionRaw } from "@/lib/finance/dedup";
@@ -119,6 +120,8 @@ export async function summarizeCommunication(job: Job) {
       ai_reasoning: `Importance: ${triage.importance_score.toFixed(2)}. ${triage.summary}`,
     });
   }
+
+  await operationalQueue.add("compute-operational-state", { userId }, { delay: 2000 });
 }
 
 async function runFinancialExtraction(

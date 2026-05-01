@@ -387,30 +387,48 @@ Business context: ${JSON.stringify(businessContext)}`;
 }
 
 export function askContextPrompt(
-  vectorResults: string[],
-  structuredContext: {
-    pendingTasks: any[];
-    upcomingMeetings: any[];
-    actionableEmails: any[];
-    overdueCommitments: any[];
-    overdueFollowUps: any[];
-    recentTransactions: any[];
-    activeSubscriptions: any[];
-    travelBookings: any[];
-  }
+  insights: Array<{
+    category: string;
+    insight_type: string;
+    urgency: string;
+    priority_score: number;
+    title: string;
+    summary: string;
+    recommended_action?: string | null;
+    explanation?: string;
+    entities?: string[];
+    generated_by?: string;
+  }>,
+  vectorChunks: string[],
+  intent: { primary: string; secondary: string[] }
 ): string {
-  return `Relevant context from memory:
-${vectorResults.length > 0 ? vectorResults.join("\n---\n") : "(none)"}
+  const sections: string[] = [];
 
-Structured data:
-Pending tasks: ${JSON.stringify(structuredContext.pendingTasks.slice(0, 5))}
-Upcoming meetings: ${JSON.stringify(structuredContext.upcomingMeetings.slice(0, 3))}
-Actionable emails: ${JSON.stringify(structuredContext.actionableEmails.slice(0, 5))}
-Overdue commitments: ${JSON.stringify(structuredContext.overdueCommitments.slice(0, 5))}
-Overdue follow-ups: ${JSON.stringify(structuredContext.overdueFollowUps.slice(0, 5))}
-Recent transactions (last 7 days): ${JSON.stringify(structuredContext.recentTransactions.slice(0, 20))}
-Active subscriptions: ${JSON.stringify(structuredContext.activeSubscriptions.slice(0, 15))}
-Travel bookings: ${JSON.stringify(structuredContext.travelBookings.slice(0, 10))}`;
+  sections.push(`Query intent: ${intent.primary}${intent.secondary.length > 0 ? ` (also: ${intent.secondary.join(", ")})` : ""}`);
+
+  if (insights.length > 0) {
+    sections.push("## Priority Insights (sorted by urgency and importance)");
+    for (const insight of insights.slice(0, 15)) {
+      const urgencyTag = insight.urgency.toUpperCase();
+      let entry = `[${urgencyTag}] ${insight.title}\n  ${insight.summary}`;
+      if (insight.recommended_action) {
+        entry += `\n  → ${insight.recommended_action}`;
+      }
+      if (insight.explanation) {
+        entry += `\n  (${insight.explanation})`;
+      }
+      sections.push(entry);
+    }
+  } else {
+    sections.push("## Priority Insights\n(No active insights found)");
+  }
+
+  if (vectorChunks.length > 0) {
+    sections.push("## Relevant Memory");
+    sections.push(vectorChunks.join("\n---\n"));
+  }
+
+  return sections.join("\n\n");
 }
 
 // ─────────────────────────────────────────

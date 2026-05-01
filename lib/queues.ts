@@ -48,3 +48,4 @@ export const embedQueue = makeQueue("embed");
 export const reasonQueue = makeQueue("reason");
 export const actQueue = makeQueue("act");
 export const scheduledQueue = makeQueue("scheduled");
+export const operationalQueue = makeQueue("compute-operational-state");

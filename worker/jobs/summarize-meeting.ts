@@ -2,6 +2,7 @@ import { Job } from "bullmq";
 import { createClient } from "@supabase/supabase-js";
 import { summarizeMeeting } from "@/lib/ai/claude";
 import { embedAndStoreChunks, updateMeetingEmbedding } from "@/lib/memory/embed";
+import { operationalQueue } from "@/lib/queues";
 
 export async function processMeetingSummary(job: Job) {
   const supabase = createClient(
@@ -99,4 +100,6 @@ export async function processMeetingSummary(job: Job) {
   });
 
   await updateMeetingEmbedding(meetingId, textToEmbed);
+
+  await operationalQueue.add("compute-operational-state", { userId }, { delay: 2000 });
 }

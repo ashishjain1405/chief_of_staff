@@ -4,6 +4,7 @@ import { processEmail } from "./jobs/process-email";
 import { summarizeCommunication } from "./jobs/summarize-communication";
 import { processMeetingSummary } from "./jobs/summarize-meeting";
 import { generateAndDeliverDailyBrief } from "./jobs/generate-daily-brief";
+import { computeOperationalState } from "./jobs/compute-operational-state";
 
 function makeWorker(queueName: string, handler: (job: any) => Promise<void>) {
   const worker = new Worker(queueName, handler, {
@@ -25,6 +26,7 @@ function makeWorker(queueName: string, handler: (job: any) => Promise<void>) {
 makeWorker("email-raw", processEmail);
 makeWorker("summarize", summarizeCommunication);
 makeWorker("meetings-summarize", processMeetingSummary);
+makeWorker("compute-operational-state", computeOperationalState);
 makeWorker("scheduled", async (job) => {
   if (job.name === "generate-daily-brief") {
     await generateAndDeliverDailyBrief(job);
