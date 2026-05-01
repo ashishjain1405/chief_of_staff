@@ -16,15 +16,27 @@ const CATEGORY_LABELS: Record<string, string> = Object.fromEntries(
 );
 
 const SUB_CAT_COLORS: Record<string, string> = {
+  food_delivery: "bg-orange-100 text-orange-700",
   groceries: "bg-green-100 text-green-700",
-  subscriptions: "bg-purple-100 text-purple-700",
-  transport: "bg-blue-100 text-blue-700",
-  dining: "bg-orange-100 text-orange-700",
-  flight: "bg-sky-100 text-sky-700",
-  hotel: "bg-teal-100 text-teal-700",
   shopping: "bg-pink-100 text-pink-700",
+  travel: "bg-sky-100 text-sky-700",
+  transport: "bg-blue-100 text-blue-700",
+  fuel: "bg-yellow-100 text-yellow-700",
   utilities: "bg-yellow-100 text-yellow-700",
+  rent: "bg-stone-100 text-stone-700",
+  subscriptions: "bg-purple-100 text-purple-700",
+  insurance: "bg-teal-100 text-teal-700",
+  healthcare: "bg-red-100 text-red-700",
+  education: "bg-cyan-100 text-cyan-700",
+  entertainment: "bg-violet-100 text-violet-700",
+  investments: "bg-emerald-100 text-emerald-700",
   banking: "bg-indigo-100 text-indigo-700",
+  salary: "bg-green-100 text-green-700",
+  tax: "bg-rose-100 text-rose-700",
+  emi: "bg-amber-100 text-amber-700",
+  telecom: "bg-cyan-100 text-cyan-700",
+  ecommerce: "bg-pink-100 text-pink-700",
+  restaurants: "bg-orange-100 text-orange-700",
   other: "bg-muted text-muted-foreground",
 };
 

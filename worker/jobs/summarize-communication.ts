@@ -60,7 +60,7 @@ export async function summarizeCommunication(job: Job) {
     .eq("id", communicationId);
 
   // Stage 1: Financial extraction (runs in parallel with other processing)
-  if (shouldRunStage1(triage.email_category, senderEmail, comm.subject ?? "", comm.body?.substring(0, 500) ?? "")) {
+  if (shouldRunStage1(triage.email_category, comm.subject ?? "", comm.body?.substring(0, 500) ?? "")) {
     await runFinancialExtraction(supabase, userId, communicationId, senderEmail, comm.subject ?? "", comm.body ?? "");
   }
 

@@ -24,9 +24,12 @@ export const emailTriageSchema = z.object({
   fin_amount: z.number().nullable(),
   fin_currency: z.string().nullable(),
   fin_merchant: z.string().nullable(),
+  confidence: z.number().min(0).max(1),
   fin_sub_category: z.enum([
-    "groceries", "subscriptions", "transport", "dining",
-    "flight", "hotel", "shopping", "utilities", "banking", "other",
+    "food_delivery", "groceries", "shopping", "travel", "transport", "fuel",
+    "utilities", "rent", "subscriptions", "insurance", "healthcare", "education",
+    "entertainment", "investments", "banking", "salary", "tax", "emi",
+    "telecom", "ecommerce", "restaurants", "other",
   ]).nullable(),
 });
 
@@ -41,23 +44,53 @@ Sender: ${senderInfo}
 Email body:
 ${body.substring(0, 3000)}
 
-Classify email_category using exactly one rule:
-- "important": personal human email, direct question, requires relationship attention, from a known person
-- "pending_reply": sender expects a reply, thread stale, user hasn't responded
-- "finance_bills": invoice, payment reminder, utility bill, bank alert, credit card statement, rent, subscription charge notification
-- "transactions": purchase confirmation (Amazon, Flipkart, Swiggy, Zomato, Uber, Ola, flight, hotel, e-commerce order shipped/delivered)
-- "meetings_calendar": calendar invite, reschedule, meeting reminder, conference link, video call
-- "promotions": marketing email, newsletter, promotional offer, discount, sale
-- "travel": flight/hotel/train booking confirmation, itinerary, PNR, reservation details
-- "other": everything else
+Classify email_category using EXACTLY ONE of these categories:
 
-For "finance_bills" or "transactions" only: extract fin_amount (number), fin_currency ("INR"/"USD" etc), fin_merchant (company name), fin_sub_category (groceries/subscriptions/transport/dining/flight/hotel/shopping/utilities/banking/other). Set all fin_* to null for all other categories.
+"important"
+Use for: personal human email, founder/client/investor communication, direct relationship communication, urgent human conversation, emails requiring nuanced attention.
+Examples: investor asking for update, recruiter outreach, client escalation, founder discussion.
+
+"pending_reply"
+Use for: sender expects a response, unanswered question, thread awaiting reply, follow-up email, conversational email needing action.
+Examples: "Can you review this?", "Following up on below", "Let me know your thoughts".
+
+"finance_bills"
+Use for: invoices, bills, payment reminders, EMI reminders, utility bills, rent due, subscription renewal invoices, credit card statements, loan due reminders, insurance premium notices, tax notices, SaaS invoices.
+Examples: electricity bill, AWS invoice, insurance premium due, Netflix renewal invoice, HDFC credit card statement.
+
+"transactions"
+Use for: ANY confirmed money movement or completed financial activity. This INCLUDES bank debit/credit alerts, UPI transaction notifications, wallet payments, card swipe alerts, refunds, salary credits, cashback, ATM withdrawals, merchant purchase confirmations, investment purchases, successful transfers. Bank alerts MUST be "transactions".
+Examples: "Rs 500 debited from HDFC card", "UPI payment successful", "Swiggy order confirmed", "Salary credited", "Refund processed", "Amazon payment successful".
+
+"meetings_calendar"
+Use for: calendar invites, meeting reminders, reschedules, video call links, conference invites.
+Examples: Google Meet invite, Zoom reschedule, interview reminder.
+
+"promotions"
+Use for: marketing emails, newsletters, promotional offers, discounts, product campaigns. Pure promotional emails belong here even if they mention pricing.
+Examples: "50% off sale", "New arrivals this week", "Your weekly digest".
+
+"travel"
+Use for: flight/hotel/train booking confirmations, itinerary, PNR, boarding info, reservation details. Travel booking confirmations are ALWAYS "travel", not "transactions".
+Examples: IndiGo boarding pass, MakeMyTrip hotel confirmation, IRCTC PNR.
+
+"other"
+Use ONLY if none of the above apply.
+
+PRIORITY ORDER (when in doubt):
+1. Travel booking confirmations → always "travel"
+2. Bills/invoices/reminders → always "finance_bills"
+3. Confirmed money movement including bank alerts → always "transactions"
+4. Marketing/promotional → always "promotions"
+
+For "finance_bills" or "transactions" only: extract fin_amount (number), fin_currency (ISO code), fin_merchant (company name), fin_sub_category. Set all fin_* to null for all other categories.
 
 Return ONLY valid JSON:
 {
   "summary": "string (2 sentences)",
   "sentiment": "positive|neutral|negative|urgent",
   "importance_score": 0.0-1.0,
+  "confidence": 0.0-1.0,
   "requires_action": true|false,
   "action_description": "string or null",
   "entities_mentioned": ["string"],
@@ -66,7 +99,7 @@ Return ONLY valid JSON:
   "fin_amount": number or null,
   "fin_currency": "string or null",
   "fin_merchant": "string or null",
-  "fin_sub_category": "string or null"
+  "fin_sub_category": "food_delivery|groceries|shopping|travel|transport|fuel|utilities|rent|subscriptions|insurance|healthcare|education|entertainment|investments|banking|salary|tax|emi|telecom|ecommerce|restaurants|other|null"
 }`;
 }
 

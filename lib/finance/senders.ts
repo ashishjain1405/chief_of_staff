@@ -93,12 +93,10 @@ export function hasFinancialKeywords(text: string): boolean {
 
 export function shouldRunStage1(
   emailCategory: string | null,
-  senderEmail: string,
   subject: string,
   bodySnippet: string
 ): boolean {
   if (emailCategory === "finance_bills" || emailCategory === "transactions") return true;
-  if (isKnownFinancialDomain(senderEmail)) return true;
   if (hasFinancialKeywords(subject + " " + bodySnippet)) return true;
   return false;
 }

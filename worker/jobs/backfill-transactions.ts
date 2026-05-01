@@ -27,7 +27,7 @@ async function main() {
       const senderEmail = (comm.contacts as any)?.email ?? "";
       const bodySnippet = (comm.body ?? "").substring(0, 500);
 
-      if (!shouldRunStage1(comm.email_category, senderEmail, comm.subject ?? "", bodySnippet)) {
+      if (!shouldRunStage1(comm.email_category, comm.subject ?? "", bodySnippet)) {
         continue;
       }
 
