@@ -1,36 +1,33 @@
 import { createClient } from "@/lib/supabase/server";
 import { searchMemory, getStructuredContext } from "@/lib/memory/search";
 import { askSystemPrompt, askContextPrompt } from "@/lib/ai/prompts";
-import { streamText } from "ai";
+import { streamText, convertToModelMessages, type UIMessage } from "ai";
 import { openai } from "@ai-sdk/openai";
 
 export async function POST(request: Request) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user) return new Response("Unauthorized", { status: 401 });
 
   const body = await request.json();
-  const messages: Array<{ role: string; parts?: Array<{ type: string; text?: string }> }> =
-    body.messages ?? [];
+  const messages: UIMessage[] = body.messages ?? [];
 
   const lastUserMsg = messages.filter((m) => m.role === "user").at(-1);
-  const lastMessageText =
-    lastUserMsg?.parts
-      ?.filter((p) => p.type === "text")
-      .map((p) => p.text ?? "")
-      .join("") ?? "";
+  const lastMessageText = lastUserMsg?.parts
+    ?.filter((p) => p.type === "text")
+    .map((p) => (p as any).text ?? "")
+    .join("") ?? "";
 
-  const { data: userData } = await supabase
-    .from("users")
-    .select("business_context")
-    .eq("id", user.id)
-    .single();
-
-  const [memoryChunks, structured] = await Promise.all([
-    searchMemory({ userId: user.id, query: lastMessageText, matchCount: 15, daysBack: 90 }),
-    getStructuredContext(user.id),
+  const [{ data: userData }, memoryChunks, structured] = await Promise.all([
+    supabase.from("users").select("business_context").eq("id", user.id).single(),
+    searchMemory({ userId: user.id, query: lastMessageText, matchCount: 15, daysBack: 90 }).catch(() => []),
+    getStructuredContext(user.id).catch(() => ({
+      pendingTasks: [],
+      upcomingMeetings: [],
+      actionableEmails: [],
+      overdueCommitments: [],
+      overdueFollowUps: [],
+    })),
   ]);
 
   const systemPrompt = askSystemPrompt(userData?.business_context ?? {});
@@ -39,21 +36,12 @@ export async function POST(request: Request) {
     structured
   );
 
-  const coreMessages = messages
-    .filter((m) => m.role === "user" || m.role === "assistant")
-    .map((m) => ({
-      role: m.role as "user" | "assistant",
-      content:
-        m.parts
-          ?.filter((p) => p.type === "text")
-          .map((p) => p.text ?? "")
-          .join("") ?? "",
-    }));
+  const modelMessages = await convertToModelMessages(messages);
 
   const result = streamText({
     model: openai("gpt-4o"),
     system: `${systemPrompt}\n\n${contextBlock}`,
-    messages: coreMessages,
+    messages: modelMessages,
     maxOutputTokens: 1024,
   });
 
