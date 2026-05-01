@@ -101,6 +101,15 @@ async function main() {
           { onConflict: "communication_id" }
         );
 
+        // Correct category if triage said financial but Stage 1 disagrees
+        const triageWasFinancial = comm.email_category === "finance_bills" || comm.email_category === "transactions";
+        if (triageWasFinancial && !extraction.is_financial_email) {
+          await supabase
+            .from("communications")
+            .update({ email_category: "other" })
+            .eq("id", comm.id);
+        }
+
         processed++;
         console.log(`[${processed}] extracted (${senderType}): ${comm.subject} → ${merchantNormalized ?? "unknown"} ${raw?.amount ?? ""}`);
       } catch (err: any) {

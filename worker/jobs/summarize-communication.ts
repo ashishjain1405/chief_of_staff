@@ -59,9 +59,13 @@ export async function summarizeCommunication(job: Job) {
     })
     .eq("id", communicationId);
 
-  // Stage 1: Financial extraction (runs in parallel with other processing)
+  // Stage 1: Financial extraction
   if (shouldRunStage1(triage.email_category, comm.subject ?? "", comm.body?.substring(0, 500) ?? "")) {
-    await runFinancialExtraction(supabase, userId, communicationId, senderEmail, comm.subject ?? "", comm.body ?? "");
+    await runFinancialExtraction(
+      supabase, userId, communicationId, senderEmail,
+      comm.subject ?? "", comm.body ?? "",
+      triage.email_category, (triage as any).fallback_category ?? null
+    );
   }
 
   // Embed summary into memory
@@ -132,7 +136,9 @@ async function runFinancialExtraction(
   communicationId: string,
   senderEmail: string,
   subject: string,
-  body: string
+  body: string,
+  emailCategory: string | null,
+  fallbackCategory: string | null
 ) {
   const senderType = classifySender(senderEmail);
   const extraction = await extractFinancialTransaction(senderEmail, senderType, subject, body);
@@ -198,6 +204,15 @@ async function runFinancialExtraction(
     },
     { onConflict: "communication_id" }
   );
+
+  // If triage said financial but Stage 1 disagrees, correct the category
+  const triageWasFinancial = emailCategory === "finance_bills" || emailCategory === "transactions";
+  if (triageWasFinancial && !extraction.is_financial_email) {
+    await supabase
+      .from("communications")
+      .update({ email_category: fallbackCategory ?? "other" })
+      .eq("id", communicationId);
+  }
 
   if (!needsReview) {
     await runDedup(supabase, userId);

@@ -19,8 +19,18 @@ export const emailTriageSchema = z.object({
     "meetings_calendar",
     "promotions",
     "travel",
+    "shipping",
     "other",
   ]),
+  fallback_category: z.enum([
+    "important",
+    "pending_reply",
+    "meetings_calendar",
+    "promotions",
+    "travel",
+    "shipping",
+    "other",
+  ]).nullable(),
   fin_amount: z.number().nullable(),
   fin_currency: z.string().nullable(),
   fin_merchant: z.string().nullable(),
@@ -61,6 +71,7 @@ Examples: electricity bill, AWS invoice, insurance premium due, Netflix renewal 
 "transactions"
 Use for: ANY confirmed money movement or completed financial activity. This INCLUDES bank debit/credit alerts, UPI transaction notifications, wallet payments, card swipe alerts, refunds, salary credits, cashback, ATM withdrawals, merchant purchase confirmations, investment purchases, successful transfers. Bank alerts MUST be "transactions".
 Examples: "Rs 500 debited from HDFC card", "UPI payment successful", "Swiggy order confirmed", "Salary credited", "Refund processed", "Amazon payment successful".
+NOT for: shipping notifications, delivery status, order tracking updates — use "shipping" for those.
 
 "meetings_calendar"
 Use for: calendar invites, meeting reminders, reschedules, video call links, conference invites.
@@ -74,6 +85,11 @@ Examples: "50% off sale", "New arrivals this week", "Your weekly digest".
 Use for: flight/hotel/train booking confirmations, itinerary, PNR, boarding info, reservation details. Travel booking confirmations are ALWAYS "travel", not "transactions".
 Examples: IndiGo boarding pass, MakeMyTrip hotel confirmation, IRCTC PNR.
 
+"shipping"
+Use for: order dispatched notifications, shipment tracking updates, out for delivery alerts, delivery confirmations, return and refund status updates, order confirmation emails.
+Examples: "Your order has been shipped", "Out for delivery", "Delivered", "Track your package", "Order #123 confirmed".
+NOT for: the payment confirmation of the order — that is "transactions".
+
 "other"
 Use ONLY if none of the above apply.
 
@@ -82,6 +98,7 @@ PRIORITY ORDER (when in doubt):
 2. Bills/invoices/reminders → always "finance_bills"
 3. Confirmed money movement including bank alerts → always "transactions"
 4. Marketing/promotional → always "promotions"
+5. Order/shipping/delivery status → always "shipping"
 
 For "finance_bills" or "transactions" only: extract fin_amount (number), fin_currency (ISO code), fin_merchant (company name), fin_sub_category. Set all fin_* to null for all other categories.
 
@@ -95,7 +112,8 @@ Return ONLY valid JSON:
   "action_description": "string or null",
   "entities_mentioned": ["string"],
   "follow_up_deadline": "ISO date or null",
-  "email_category": "important|pending_reply|finance_bills|transactions|meetings_calendar|promotions|travel|other",
+  "email_category": "important|pending_reply|finance_bills|transactions|meetings_calendar|promotions|travel|shipping|other",
+  "fallback_category": "important|pending_reply|meetings_calendar|promotions|travel|shipping|other|null (only set when email_category is transactions or finance_bills, null otherwise)",
   "fin_amount": number or null,
   "fin_currency": "string or null",
   "fin_merchant": "string or null",

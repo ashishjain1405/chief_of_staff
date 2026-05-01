@@ -5,6 +5,7 @@ export const CATEGORIES = [
   { key: "transactions",       label: "Transactions",    icon: "🧾" },
   { key: "meetings_calendar",  label: "Meetings",        icon: "📅" },
   { key: "promotions",         label: "Promotions",      icon: "%" },
-  { key: "travel",             label: "Travel",          icon: "✈" },
-  { key: "other",              label: "Other",           icon: "•" },
+  { key: "travel",             label: "Travel",           icon: "✈" },
+  { key: "shipping",           label: "Shipping & Orders", icon: "📦" },
+  { key: "other",              label: "Other",            icon: "•" },
 ];
