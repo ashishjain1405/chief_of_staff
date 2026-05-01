@@ -1,6 +1,7 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport } from "ai";
 import type { UIMessage } from "ai";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -23,8 +24,8 @@ function getTextFromMessage(m: UIMessage): string {
 
 export default function AskChat() {
   const { messages, sendMessage, status } = useChat({
-    api: "/api/ask",
-  } as Parameters<typeof useChat>[0]);
+    transport: new DefaultChatTransport({ api: "/api/ask" }),
+  });
   const [input, setInput] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
   const isLoading = status === "streaming" || status === "submitted";
