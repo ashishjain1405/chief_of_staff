@@ -51,8 +51,9 @@ export async function getStructuredContext(userId: string) {
   const in3Days = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString();
   const in24h = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
   const in7Days = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+  const past7Days = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
-  const [tasks, meetings, emails, commitments, followUps] = await Promise.all([
+  const [tasks, meetings, emails, commitments, followUps, transactions, subscriptions, travel] = await Promise.all([
     getSupabase()
       .from("tasks")
       .select("title, description, due_date, priority, ai_reasoning")
@@ -96,6 +97,30 @@ export async function getStructuredContext(userId: string) {
       .lte("follow_up_due", now.toISOString())
       .order("follow_up_due")
       .limit(5),
+
+    getSupabase()
+      .from("transactions_normalized")
+      .select("amount, currency, merchant_normalized, category, transaction_type, transaction_datetime")
+      .eq("user_id", userId)
+      .gte("transaction_datetime", past7Days)
+      .order("transaction_datetime", { ascending: false })
+      .limit(20),
+
+    getSupabase()
+      .from("transactions_normalized")
+      .select("merchant_normalized, amount, currency, recurring_frequency, transaction_datetime")
+      .eq("user_id", userId)
+      .eq("is_recurring", true)
+      .order("transaction_datetime", { ascending: false })
+      .limit(15),
+
+    getSupabase()
+      .from("communications")
+      .select("subject, body_summary, occurred_at")
+      .eq("user_id", userId)
+      .eq("email_category", "travel")
+      .order("occurred_at", { ascending: false })
+      .limit(10),
   ]);
 
   return {
@@ -104,5 +129,8 @@ export async function getStructuredContext(userId: string) {
     actionableEmails: emails.data ?? [],
     overdueCommitments: commitments.data ?? [],
     overdueFollowUps: followUps.data ?? [],
+    recentTransactions: transactions.data ?? [],
+    activeSubscriptions: subscriptions.data ?? [],
+    travelBookings: travel.data ?? [],
   };
 }

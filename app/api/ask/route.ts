@@ -27,7 +27,7 @@ export async function POST(request: Request) {
       }),
       getStructuredContext(user.id).catch((e) => {
         console.error("getStructuredContext failed:", e);
-        return { pendingTasks: [], upcomingMeetings: [], actionableEmails: [], overdueCommitments: [], overdueFollowUps: [] };
+        return { pendingTasks: [], upcomingMeetings: [], actionableEmails: [], overdueCommitments: [], overdueFollowUps: [], recentTransactions: [], activeSubscriptions: [], travelBookings: [] };
       }),
     ]);
 
