@@ -106,9 +106,12 @@ async function executeStep(
       if (f.dateRange) {
         q = q.gte("occurred_at", f.dateRange.from).lte("occurred_at", f.dateRange.to);
       }
-      // Topic/merchant filtering via body_summary ilike (best effort)
+      // Topic filtering across subject + body_summary (case-insensitive)
       if (f.topics?.length) {
-        const topicFilter = (f.topics as string[]).map((t: string) => `body_summary.ilike.%${t}%`).join(",");
+        const topicFilter = (f.topics as string[]).flatMap((t: string) => [
+          `subject.ilike.%${t}%`,
+          `body_summary.ilike.%${t}%`,
+        ]).join(",");
         q = q.or(topicFilter);
       }
 

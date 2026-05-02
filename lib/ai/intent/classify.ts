@@ -120,16 +120,26 @@ function inferTemporal(query: string): TemporalAnchor | null {
 // Looks for capitalized word sequences (1-3 words) near relational trigger words.
 function inferPeople(query: string): string[] {
   const matches: string[] = [];
-  // Pattern: trigger word followed by 1-3 capitalized words
-  const pattern = /\b(?:did|from|with|told|asked|about|regarding|to|by)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,2})\b/g;
+  // Trigger words before a name — case-insensitive, any casing
+  const triggerPattern = /\b(?:did|with|told|asked|about|regarding|to|by)\s+([A-Za-z][a-zA-Z\s]{1,40}?)(?=\s+(?:say|tell|send|write|about|on|regarding|in)|$)/gi;
   let m: RegExpExecArray | null;
-  while ((m = pattern.exec(query)) !== null) {
-    matches.push(m[1]);
+  while ((m = triggerPattern.exec(query)) !== null) {
+    const name = m[1].trim();
+    if (name.split(/\s+/).length <= 3) matches.push(name);
   }
-  // Also catch leading patterns: "What did Ashish Jain say" — name at start after "did"
-  const leading = /^(?:what|when|why|how|show|find|get)\s+did\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,2})\b/i.exec(query);
-  if (leading) matches.push(leading[1]);
-  return [...new Set(matches)];
+  // "from X" / "emails from X" — case-insensitive, captures until end or preposition
+  const fromPattern = /\b(?:emails?\s+from|messages?\s+from|from)\s+([A-Za-z][\w\s.-]{1,40}?)(?:\s*$|\s+(?:about|on|regarding|in|last|this|today|yesterday))/gi;
+  while ((m = fromPattern.exec(query)) !== null) {
+    const name = m[1].trim();
+    if (name.length > 1) matches.push(name);
+  }
+  // "from X" at end of query
+  const fromEnd = /\bfrom\s+([A-Za-z][\w\s.-]{1,40}?)$/i.exec(query);
+  if (fromEnd) matches.push(fromEnd[1].trim());
+  // Leading: "What did Ashish Jain say"
+  const leading = /^(?:what|when|why|how|show|find|get)\s+did\s+([A-Za-z][\w\s]{1,40}?)\s+(?:say|send|write|tell)/i.exec(query);
+  if (leading) matches.push(leading[1].trim());
+  return [...new Set(matches.filter(Boolean))];
 }
 
 function applyDeterministicOverrides(
@@ -176,7 +186,11 @@ function applyOverrides(query: string, result: IntentResult): IntentResult {
   const merchants = result.entities.merchants.length === 0
     ? inferMerchants(query)
     : result.entities.merchants;
-  const entities = { ...result.entities, categories, people, merchants };
+  // Inferred people also go into topics so subject/body search works if contact doesn't resolve
+  const topics = result.entities.topics.length === 0 && people.length > 0
+    ? people
+    : result.entities.topics;
+  const entities = { ...result.entities, categories, people, merchants, topics };
   const retrieval_weights = applyDeterministicOverrides(result.primary, query, result.retrieval_weights);
   const temporal = result.temporal ?? inferTemporal(query);
   return { ...result, entities, retrieval_weights, temporal };
