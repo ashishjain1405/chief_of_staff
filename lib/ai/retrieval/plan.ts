@@ -38,6 +38,7 @@ export function buildRetrievalPlan(
   const queryMentionsEmail = /\b(email|emails|message|messages|inbox|mail)\b/.test(queryLower);
   const queryMentionsMeeting = /\b(meeting|meetings|meet|met|discussed in|discussion in)\b/.test(queryLower);
   const queryMentionsTask = /\b(task|tasks|action items?|follow.?ups?|to.?do|overdue|commit(ted|ment)?|promise[ds]?|pending|ignored|unresolved|slipping)\b/.test(queryLower);
+  const queryIsTemporalLookup = /\bwhat (happened|changed)\s+(before|after|around|since|in|during)\b/.test(queryLower);
   const dateRange = resolved.resolvedDateRange;
 
   // Operational path — always include for finance intents to surface spending_summary insights
@@ -48,7 +49,7 @@ export function buildRetrievalPlan(
   }
 
   // Investigative path — only if weight above threshold (keyword overrides bypass this gate)
-  if (investigative_weight <= 0.3 && !queryMentionsEmail && !queryMentionsMeeting && !queryMentionsTask) return steps;
+  if (investigative_weight <= 0.3 && !queryMentionsEmail && !queryMentionsMeeting && !queryMentionsTask && !queryIsTemporalLookup) return steps;
 
   const primary = intent.primary;
 
@@ -116,8 +117,8 @@ export function buildRetrievalPlan(
   }
 
   // Search lookup — communications + topics
-  // Also fires when query explicitly mentions email/message keywords regardless of intent
-  if (primary === "search_lookup" || queryMentionsEmail) {
+  // Also fires for email keywords, or temporal-investigative queries ("what happened around/since X")
+  if (primary === "search_lookup" || queryMentionsEmail || queryIsTemporalLookup) {
     steps.push(step("sql_communications", "search email archive", {
       topics: intent.entities.topics,
       merchants: resolved.merchantNames,

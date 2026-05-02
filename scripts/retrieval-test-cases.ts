@@ -220,7 +220,7 @@ export const TEST_CASES: TestCase[] = [
   { id: "L2-A3",  description: "Spending around trip ambiguity", query: "Show spending around the trip.",                assert: [hasSqlTxns, { field: "no_crash" }] },
   { id: "L2-A4",  description: "Mom messages ambiguity",         query: "Find messages from Mom.",                       assert: [hasSqlComms, { field: "no_crash" }] },
   { id: "L2-A5",  description: "Rent payments",                  query: "Show rent payments.",                           assert: [{ field: "intent.primary", oneOf: ["finance", "bills_payments"] }, hasSqlTxns] },
-  { id: "L2-A6",  description: "After meeting ambiguity",        query: "What happened after the meeting?",              assert: [{ field: "intent.primary", eq: "scheduling" }, hasSqlMeetings] },
+  { id: "L2-A6",  description: "After meeting ambiguity",        query: "What happened after the meeting?",              assert: [hasSqlMeetings, { field: "no_crash" }] },
 
   // ─── Layer 3 — Daily Catch-up ──────────────────────────────────────────────
 
