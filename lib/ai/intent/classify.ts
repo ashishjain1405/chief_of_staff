@@ -107,17 +107,27 @@ temporal can be:
 - {"type":"absolute","dateRange":{"from":"2026-01-01","to":"2026-01-31"}}
 - {"type":"event_relative","anchor_event":"salary_credit|travel_booking|named_meeting|named_contact_interaction","anchor_ref":"...","relative_window":"+7d"}
 
+entities guidance:
+- categories: spending/domain categories mentioned — e.g. "food" → ["food_delivery","groceries"], "travel" → ["travel"], "subscriptions" → ["subscriptions"], "entertainment" → ["entertainment"]. Always populate for spending queries.
+- merchants: specific brand/service names — e.g. "Swiggy", "Netflix", "AWS"
+- people: person names mentioned — e.g. "John", "Rahul"
+- topics: subject matter — e.g. "insurance", "rent", "salary"
+- amount: specific rupee/dollar amount if mentioned, else null
+
 retrieval_weights guidance:
-- operational_weight=1.0 for catch-me-up, status, what's urgent, daily brief
-- investigative_weight=1.0 for specific factual lookups (did I pay X, find email about Y)
-- both high (0.6-0.8) for analytical questions (why am I overspending, what commitments are at risk)
-- operational_weight=0.0 for pure search (find email about insurance)`;
+- operational_weight=1.0, investigative_weight=0.0 → catch-me-up, what's urgent, daily brief, status
+- operational_weight=0.0, investigative_weight=1.0 → specific factual lookup: "did I pay X", "find email about Y", "show transactions for Z"
+- operational_weight=0.1, investigative_weight=1.0 → show/breakdown spending queries: "show food spending", "how much did I spend on X", "food expenses"
+- operational_weight=0.6, investigative_weight=0.8 → analytical: "why am I overspending", "what commitments are at risk", "am I spending too much"
+- operational_weight=0.0, investigative_weight=1.0 → pure search: "find email about insurance"
+
+IMPORTANT: "show X spending", "how much did I spend on X", "X expenses" → investigative_weight MUST be >= 0.8`;
 
   const response = await getOpenAI().chat.completions.create({
     model: "gpt-4o-mini",
     messages: [{ role: "user", content: prompt }],
     response_format: { type: "json_object" },
-    max_tokens: 300,
+    max_tokens: 400,
     temperature: 0,
   });
 
