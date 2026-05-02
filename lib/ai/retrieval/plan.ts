@@ -87,6 +87,14 @@ export function buildRetrievalPlan(
     }, 2));
   }
 
+  // Travel — also fetch booking confirmation emails
+  if (primary === "travel") {
+    steps.push(step("sql_communications", "find travel booking emails", {
+      emailCategory: ["travel"],
+      dateRange,
+    }, 2));
+  }
+
   // Relationship / communication lookups
   if (primary === "relationship" || resolved.contactIds.length > 0) {
     steps.push(step("sql_communications", "find communications with contacts", {
