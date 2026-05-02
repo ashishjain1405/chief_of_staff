@@ -32,7 +32,7 @@ async function runPipeline(query: string, userId: string): Promise<RetrievalTrac
   const startTime = Date.now();
   const intent = await classifyIntent(query, null);
   const resolved = await resolveEntities(intent.entities, intent.temporal, userId, supabase);
-  const plan = buildRetrievalPlan(intent, resolved);
+  const plan = buildRetrievalPlan(intent, resolved, query);
   const { rawResults, sourceStatuses, budgetExhausted } = await executeRetrievalPlan(
     plan, userId, query, supabase
   );

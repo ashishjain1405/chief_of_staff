@@ -30,9 +30,12 @@ const VECTOR_INTENTS = new Set(["operational_summary", "search_lookup", "relatio
 export function buildRetrievalPlan(
   intent: IntentResult,
   resolved: ResolvedEntities,
+  query: string = "",
 ): RetrievalStep[] {
   const steps: RetrievalStep[] = [];
   const { operational_weight, investigative_weight } = intent.retrieval_weights;
+  const queryLower = query.toLowerCase();
+  const queryMentionsEmail = /\b(email|emails|message|messages|inbox|mail)\b/.test(queryLower);
   const dateRange = resolved.resolvedDateRange;
 
   // Operational path — always include for finance intents to surface spending_summary insights
@@ -111,13 +114,14 @@ export function buildRetrievalPlan(
   }
 
   // Search lookup — communications + topics
-  if (primary === "search_lookup") {
+  // Also fires when query explicitly mentions email/message keywords regardless of intent
+  if (primary === "search_lookup" || queryMentionsEmail) {
     steps.push(step("sql_communications", "search email archive", {
       topics: intent.entities.topics,
       merchants: resolved.merchantNames,
       contactIds: resolved.contactIds,
       dateRange,
-    }, 1));
+    }, primary === "search_lookup" ? 1 : 2));
   }
 
   // Bills

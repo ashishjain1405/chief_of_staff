@@ -53,7 +53,7 @@ export async function POST(request: Request) {
     const needsClarification = resolved.temporalConfidence < 0.6;
 
     // Stage 4: Build plan + execute (budget-capped, allSettled)
-    const plan = buildRetrievalPlan(intent, resolved);
+    const plan = buildRetrievalPlan(intent, resolved, lastMessageText);
     const { rawResults, sourceStatuses, budgetExhausted } = await executeRetrievalPlan(
       plan, user.id, lastMessageText, supabase
     );
