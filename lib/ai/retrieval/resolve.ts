@@ -1,5 +1,5 @@
 import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth,
-  subWeeks, subMonths, subQuarters, startOfYear } from "date-fns";
+  subWeeks, subMonths, subQuarters, startOfYear, endOfYear, subYears } from "date-fns";
 import { normalizeMerchant } from "@/lib/finance/normalize";
 import type { EntityContext, TemporalAnchor } from "./types";
 
@@ -31,8 +31,16 @@ function relativeToDateRange(period: NonNullable<TemporalAnchor["relativePeriod"
       const lastQ = subQuarters(now, 1);
       return { from: startOfMonth(lastQ).toISOString(), to: endOfMonth(subMonths(lastQ, -2)).toISOString() };
     }
+    case "this_quarter": {
+      const quarterStart = startOfMonth(subMonths(now, (now.getMonth() % 3)));
+      return { from: quarterStart.toISOString(), to: endOfDay(now).toISOString() };
+    }
     case "this_year":
       return { from: startOfYear(now).toISOString(), to: endOfDay(now).toISOString() };
+    case "last_year": {
+      const lastYear = subYears(now, 1);
+      return { from: startOfYear(lastYear).toISOString(), to: endOfYear(lastYear).toISOString() };
+    }
   }
 }
 

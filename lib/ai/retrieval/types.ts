@@ -12,7 +12,7 @@ export interface TemporalAnchor {
   type: "absolute" | "relative" | "event_relative";
   dateRange?: { from: string; to: string };
   relativePeriod?: "today" | "this_week" | "last_week" | "this_month" |
-                   "last_month" | "last_quarter" | "this_year";
+                   "last_month" | "last_quarter" | "this_quarter" | "this_year" | "last_year";
   anchor_event?: "salary_credit" | "travel_booking" | "named_meeting" | "named_contact_interaction";
   anchor_ref?: string;
   relative_window?: string;

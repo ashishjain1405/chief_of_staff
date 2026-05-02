@@ -65,6 +65,39 @@ function inferCategories(query: string): string[] {
   return matched;
 }
 
+const TEMPORAL_PATTERNS: { pattern: RegExp; period: NonNullable<TemporalAnchor["relativePeriod"]> }[] = [
+  { pattern: /\btoday\b/i,          period: "today" },
+  { pattern: /\bthis week\b/i,      period: "this_week" },
+  { pattern: /\blast week\b/i,      period: "last_week" },
+  { pattern: /\bthis month\b/i,     period: "this_month" },
+  { pattern: /\blast month\b/i,     period: "last_month" },
+  { pattern: /\bthis quarter\b/i,   period: "this_quarter" },
+  { pattern: /\blast quarter\b/i,   period: "last_quarter" },
+  { pattern: /\bthis year\b/i,      period: "this_year" },
+  { pattern: /\blast year\b/i,      period: "last_year" },
+];
+
+// Rolling-day patterns: "last N days/weeks" → absolute dateRange computed immediately
+function inferRollingDays(query: string): TemporalAnchor | null {
+  const m = query.match(/\blast\s+(\d+)\s+(day|days|week|weeks)\b/i);
+  if (!m) return null;
+  const n = parseInt(m[1], 10);
+  const unit = m[2].toLowerCase();
+  const days = unit.startsWith("week") ? n * 7 : n;
+  const to = new Date();
+  const from = new Date(to.getTime() - days * 864e5);
+  return { type: "absolute", dateRange: { from: from.toISOString(), to: to.toISOString() } };
+}
+
+function inferTemporal(query: string): TemporalAnchor | null {
+  const rolling = inferRollingDays(query);
+  if (rolling) return rolling;
+  for (const { pattern, period } of TEMPORAL_PATTERNS) {
+    if (pattern.test(query)) return { type: "relative", relativePeriod: period };
+  }
+  return null;
+}
+
 // Extracts likely person names from query when LLM is unavailable.
 // Looks for capitalized word sequences (1-3 words) near relational trigger words.
 function inferPeople(query: string): string[] {
@@ -84,7 +117,6 @@ function inferPeople(query: string): string[] {
 function applyDeterministicOverrides(
   primary: IntentType,
   query: string,
-  entities: EntityContext,
   weights: RetrievalWeights
 ): RetrievalWeights {
   const lower = query.toLowerCase();
@@ -119,8 +151,9 @@ function applyOverrides(query: string, result: IntentResult): IntentResult {
     ? inferPeople(query)
     : result.entities.people;
   const entities = { ...result.entities, categories, people };
-  const retrieval_weights = applyDeterministicOverrides(result.primary, query, entities, result.retrieval_weights);
-  return { ...result, entities, retrieval_weights };
+  const retrieval_weights = applyDeterministicOverrides(result.primary, query, result.retrieval_weights);
+  const temporal = result.temporal ?? inferTemporal(query);
+  return { ...result, entities, retrieval_weights, temporal };
 }
 
 async function classifyWithLLM(
@@ -235,7 +268,7 @@ IMPORTANT: "show X spending", "how much did I spend on X", "X expenses" → inve
     amount: typeof parsed.entities?.amount === "number" ? parsed.entities.amount : null,
   };
 
-  const temporal: TemporalAnchor | null = parsed.temporal ?? null;
+  const temporal: TemporalAnchor | null = parsed.temporal ?? inferTemporal(query);
 
   const llmWeights: RetrievalWeights = {
     operational_weight: typeof parsed.retrieval_weights?.operational_weight === "number"
@@ -246,7 +279,7 @@ IMPORTANT: "show X spending", "how much did I spend on X", "X expenses" → inve
       : 0.3,
   };
 
-  const retrieval_weights = applyDeterministicOverrides(primary, query, entities, llmWeights);
+  const retrieval_weights = applyDeterministicOverrides(primary, query, llmWeights);
 
   return { primary, secondary, confidence, entities, temporal, retrieval_weights };
 }
