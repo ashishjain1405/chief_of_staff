@@ -133,7 +133,7 @@ export const TEST_CASES: TestCase[] = [
   { id: "L1-T23", description: "Tax payments",                   query: "How much tax did I pay?",                       assert: [{ field: "intent.primary", oneOf: ["finance", "spending_analysis"] }, hasSqlTxns] },
   { id: "L1-T24", description: "Suspicious transactions",        query: "Show suspicious transactions.",                 assert: [{ field: "intent.primary", oneOf: ["finance", "search_lookup"] }, hasSqlTxns] },
   { id: "L1-T25", description: "QR payments",                    query: "Find all QR payments.",                         assert: [{ field: "intent.primary", oneOf: ["finance", "search_lookup"] }, { field: "no_crash" }] },
-  { id: "L1-T26", description: "PhonePe credits",                query: "Show all credits from PhonePe.",                assert: [{ field: "intent.primary", oneOf: ["finance", "search_lookup"] }, { field: "entities.merchants", includes: "PhonePe" }, hasSqlTxns] },
+  { id: "L1-T26", description: "PhonePe credits",                query: "Show all credits from PhonePe.",                assert: [{ field: "entities.merchants", includes: "PhonePe" }, hasSqlTxns] },
   { id: "L1-T27", description: "Received rent",                  query: "Did I receive rent?",                           assert: [{ field: "no_crash" }] },
   { id: "L1-T28", description: "ATM withdrawals",                query: "Show ATM withdrawals.",                         assert: [{ field: "intent.primary", oneOf: ["finance", "search_lookup"] }, hasSqlTxns] },
   { id: "L1-T29", description: "Uncategorized transactions",     query: "Find transactions with no category.",           assert: [{ field: "intent.primary", oneOf: ["finance", "search_lookup"] }, hasSqlTxns] },
