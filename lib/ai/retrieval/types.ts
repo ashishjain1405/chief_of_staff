@@ -48,10 +48,11 @@ export interface AggregatedFinance {
   total: number;
   by_category: Record<string, number>;
   by_merchant: Record<string, number>;
+  by_currency: Record<string, { total: number; count: number }>;
   weekly_trend: { week: string; total: number }[];
   period: string;
   transaction_count: number;
-  category_fallback?: string[]; // set when requested categories had no matches; shows all categories instead
+  category_fallback?: string[];
 }
 
 // Discriminated union — typed payload per source, no data:any

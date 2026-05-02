@@ -374,6 +374,7 @@ Evidence grounding rules:
 * When citing evidence, naturally mention the source type: [TRANSACTION], [EMAIL], [MEETING], [COMMITMENT], [INSIGHT], or [ANALYTICS].
 
 Financial guidance:
+* Amounts are grouped by currency in the evidence. Show totals per currency (e.g. ₹45,000 and $120) — never combine different currencies into a single total.
 * Monitor recurring spending patterns.
 * Identify unusual transactions or spikes.
 * Surface upcoming bills or subscription renewals.
@@ -427,10 +428,14 @@ export function askContextPrompt(
           .map(([c, v]) => `${c}: ${v.toLocaleString()}`).join(", ");
         const topMerchants = Object.entries(d.by_merchant).sort((a, b) => b[1] - a[1]).slice(0, 5)
           .map(([m, v]) => `${m}: ${v.toLocaleString()}`).join(", ");
+        const currencyBreakdown = Object.entries(d.by_currency ?? {})
+          .sort((a, b) => b[1].total - a[1].total)
+          .map(([cur, v]) => `${cur} ${v.total.toLocaleString()} (${v.count} txns)`)
+          .join(" | ");
         const fallbackNote = d.category_fallback?.length
           ? `\n  Note: no transactions found for ${d.category_fallback.join(", ")}; showing all categories instead`
           : "";
-        sections.push(`[ANALYTICS] Spending for ${d.period}: Total ${d.total.toLocaleString()} (${d.transaction_count} transactions)\n  Categories: ${topCats}\n  Merchants: ${topMerchants}${fallbackNote}`);
+        sections.push(`[ANALYTICS] Spending for ${d.period}: Total ${d.transaction_count} transactions\n  By currency: ${currencyBreakdown || "INR " + d.total.toLocaleString()}\n  Categories: ${topCats}\n  Merchants: ${topMerchants}${fallbackNote}`);
         break;
       }
       case "communication": {

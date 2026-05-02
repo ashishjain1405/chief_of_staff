@@ -11,7 +11,7 @@ export async function aggregateTransactions(
 ): Promise<AggregatedFinance> {
   let query = (supabase as any)
     .from("transactions_normalized")
-    .select("amount, category, merchant_normalized, transaction_datetime")
+    .select("amount, currency, category, merchant_normalized, transaction_datetime")
     .eq("user_id", userId)
     .not("amount", "is", null);
 
@@ -40,7 +40,7 @@ export async function aggregateTransactions(
   if (!error && !data?.length && filters.categories?.length) {
     let retryQuery = supabase
       .from("transactions_normalized")
-      .select("amount, category, merchant_normalized, transaction_datetime")
+      .select("amount, currency, category, merchant_normalized, transaction_datetime")
       .eq("user_id", userId)
       .not("amount", "is", null);
     if (filters.dateRange) {
@@ -66,18 +66,24 @@ export async function aggregateTransactions(
     : "last 30 days";
 
   if (error || !data?.length) {
-    return { total: 0, by_category: {}, by_merchant: {}, weekly_trend: [], period: periodLabel, transaction_count: 0 };
+    return { total: 0, by_category: {}, by_merchant: {}, by_currency: {}, weekly_trend: [], period: periodLabel, transaction_count: 0 };
   }
 
-  const rows = data as { amount: number; category: string | null; merchant_normalized: string | null; transaction_datetime: string | null }[];
+  const rows = data as { amount: number; currency: string | null; category: string | null; merchant_normalized: string | null; transaction_datetime: string | null }[];
 
   const by_category: Record<string, number> = {};
   const by_merchant: Record<string, number> = {};
+  const by_currency: Record<string, { total: number; count: number }> = {};
   const by_week: Record<string, number> = {};
   let total = 0;
 
   for (const row of rows) {
     total += row.amount;
+
+    const currency = row.currency ?? "INR";
+    if (!by_currency[currency]) by_currency[currency] = { total: 0, count: 0 };
+    by_currency[currency].total += row.amount;
+    by_currency[currency].count += 1;
 
     const cat = row.category ?? "other";
     by_category[cat] = (by_category[cat] ?? 0) + row.amount;
@@ -103,6 +109,7 @@ export async function aggregateTransactions(
     total: Math.round(total),
     by_category: Object.fromEntries(Object.entries(by_category).map(([k, v]) => [k, Math.round(v)])),
     by_merchant: Object.fromEntries(Object.entries(by_merchant).map(([k, v]) => [k, Math.round(v)])),
+    by_currency: Object.fromEntries(Object.entries(by_currency).map(([k, v]) => [k, { total: Math.round(v.total), count: v.count }])),
     weekly_trend,
     period: periodLabel,
     transaction_count: rows.length,
