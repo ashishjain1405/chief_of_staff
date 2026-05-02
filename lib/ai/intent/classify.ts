@@ -80,9 +80,15 @@ const TEMPORAL_PATTERNS: { pattern: RegExp; period: NonNullable<TemporalAnchor["
 
 function inferMerchants(query: string): string[] {
   const lower = query.toLowerCase();
-  return Object.keys(MERCHANT_DATA).filter((canonical) =>
-    lower.includes(canonical.toLowerCase())
-  );
+  return Object.keys(MERCHANT_DATA).filter((canonical) => {
+    const name = canonical.toLowerCase();
+    const idx = lower.indexOf(name);
+    if (idx === -1) return false;
+    // Require word boundaries so "act" doesn't match inside "transactions"
+    const before = idx === 0 || /\W/.test(lower[idx - 1]);
+    const after = idx + name.length === lower.length || /\W/.test(lower[idx + name.length]);
+    return before && after;
+  });
 }
 
 // Rolling patterns: "last N days/weeks/months/years" → absolute dateRange
