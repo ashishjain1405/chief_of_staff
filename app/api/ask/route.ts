@@ -69,7 +69,10 @@ export async function POST(request: Request) {
       : null;
 
     // Record aggregated_finance in sourceStatuses so trace reflects real count
+    // Remove any placeholder entry from executeRetrievalPlan (it falls through to default: return [])
     if (needsAggregation) {
+      const idx = sourceStatuses.findIndex((s) => s.source === "aggregated_finance");
+      if (idx !== -1) sourceStatuses.splice(idx, 1);
       sourceStatuses.push({
         source: "aggregated_finance",
         count: aggregated?.transaction_count ?? 0,

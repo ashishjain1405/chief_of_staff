@@ -132,7 +132,8 @@ function inferPeople(query: string): string[] {
   let m: RegExpExecArray | null;
   while ((m = triggerPattern.exec(query)) !== null) {
     const name = m[1].trim();
-    if (name.split(/\s+/).length <= 3 && !FIRST_PERSON.has(name.toLowerCase())) matches.push(name);
+    const firstWord = name.split(/\s+/)[0].toLowerCase();
+    if (name.split(/\s+/).length <= 3 && !FIRST_PERSON.has(firstWord)) matches.push(name);
   }
   // "from X" / "emails from X" — case-insensitive, captures until end or preposition
   const fromPattern = /\b(?:emails?\s+from|messages?\s+from|from)\s+([A-Za-z][\w\s.-]{1,40}?)(?:\s*$|\s+(?:about|on|regarding|in|last|this|today|yesterday))/gi;
