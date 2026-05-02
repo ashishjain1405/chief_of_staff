@@ -85,11 +85,23 @@ function applyDeterministicOverrides(
     return { operational_weight: 0.0, investigative_weight: 1.0 };
   }
 
-  if (/\b(catch me up|what.s urgent|daily brief|status update|what.s important|whats new)\b/.test(lower)) {
+  if (
+    primary === "operational_summary" ||
+    /\b(catch me up|brief me|what.s urgent|daily brief|status update|what.s important|whats new|what happened|anything new|what do i need to know|what should i focus on)\b/.test(lower)
+  ) {
     return { operational_weight: 1.0, investigative_weight: 0.0 };
   }
 
   return weights;
+}
+
+function applyOverrides(query: string, result: IntentResult): IntentResult {
+  const categories = result.entities.categories.length === 0
+    ? inferCategories(query)
+    : result.entities.categories;
+  const entities = { ...result.entities, categories };
+  const retrieval_weights = applyDeterministicOverrides(result.primary, query, entities, result.retrieval_weights);
+  return { ...result, entities, retrieval_weights };
 }
 
 async function classifyWithLLM(
@@ -228,7 +240,7 @@ export async function classifyIntent(
       return await Promise.race([
         classifyWithLLM(query, [], context ?? null),
         new Promise<IntentResult>((resolve) =>
-          setTimeout(() => resolve(FALLBACK_INTENT), 1500)
+          setTimeout(() => resolve(applyOverrides(query, FALLBACK_INTENT)), 1500)
         ),
       ]);
     }
@@ -244,19 +256,19 @@ export async function classifyIntent(
           const secondary: IntentType[] = topCandidates.slice(1);
           const maxHits = sorted[0][1];
           const confidence = Math.min(0.95, 0.6 + maxHits * 0.1);
-          resolve({
+          resolve(applyOverrides(query, {
             primary, secondary, confidence,
             entities: EMPTY_ENTITIES,
             temporal: null,
             retrieval_weights: { operational_weight: 0.8, investigative_weight: 0.2 },
-          });
+          }));
         }, 1500)
       ),
     ]);
 
     return llmResult;
   } catch {
-    return FALLBACK_INTENT;
+    return applyOverrides(query, FALLBACK_INTENT);
   }
 }
 
