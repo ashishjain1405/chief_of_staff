@@ -1,5 +1,5 @@
 import type { IntentResult } from "../intent/classify";
-import type { RetrievalStep, RetrievalWeights } from "./types";
+import type { RetrievalStep } from "./types";
 import type { ResolvedEntities } from "./resolve";
 
 // Source confidence + cost reference table
@@ -72,7 +72,7 @@ export function buildRetrievalPlan(
   // Commitment / productivity lookups
   if (primary === "commitments" || primary === "productivity") {
     steps.push(step("sql_commitments", "find commitments", {
-      contactIds: resolved.contactIds,
+      ...(resolved.contactIds.length > 0 ? { contactIds: resolved.contactIds } : {}),
       dateRange,
     }, 2));
   }

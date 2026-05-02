@@ -242,6 +242,27 @@ export function unifiedRank(
   if (aggregated)
     all.push(normalizeAggregated(aggregated));
 
+  if (all.length === 0) {
+    return [{
+      item_type: "insight",
+      source: "operational_insights",
+      retrieval_score: 0,
+      source_confidence: 1.0,
+      data: {
+        id: "no-data",
+        state_key: "no_data",
+        category: "system",
+        insight_type: "no_data",
+        title: "No data found",
+        summary: "No relevant records were found for this query. If you expected data, try rephrasing or specifying a different time period.",
+        urgency: "low",
+        priority_score: 0,
+        recommended_action: null,
+        explanation: null,
+      },
+    } as InsightRetrievalItem];
+  }
+
   // Sort by score descending
   all.sort((a, b) => b.retrieval_score - a.retrieval_score);
 

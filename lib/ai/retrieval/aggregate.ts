@@ -33,9 +33,36 @@ export async function aggregateTransactions(
     query = query.in("merchant_normalized", filters.merchantNames);
   }
 
-  const { data, error } = await query.limit(500);
+  let { data, error } = await query.limit(500);
+
+  // Retry without category filter if over-specific filter returned nothing
+  if (!error && !data?.length && filters.categories?.length) {
+    let retryQuery = supabase
+      .from("transactions_normalized")
+      .select("amount, category, merchant_normalized, transaction_datetime")
+      .eq("user_id", userId)
+      .not("amount", "is", null);
+    if (filters.dateRange) {
+      retryQuery = retryQuery
+        .gte("transaction_datetime", filters.dateRange.from)
+        .lte("transaction_datetime", filters.dateRange.to);
+    } else {
+      const since = new Date(Date.now() - 30 * 864e5).toISOString();
+      retryQuery = retryQuery.gte("transaction_datetime", since);
+    }
+    if (filters.merchantNames?.length) {
+      retryQuery = retryQuery.in("merchant_normalized", filters.merchantNames);
+    }
+    const { data: retryData, error: retryError } = await retryQuery.limit(500);
+    if (!retryError) data = retryData;
+  }
+
+  const periodLabel = filters.dateRange
+    ? `${filters.dateRange.from.slice(0, 10)} to ${filters.dateRange.to.slice(0, 10)}`
+    : "last 30 days";
+
   if (error || !data?.length) {
-    return { total: 0, by_category: {}, by_merchant: {}, weekly_trend: [], period: "unknown", transaction_count: 0 };
+    return { total: 0, by_category: {}, by_merchant: {}, weekly_trend: [], period: periodLabel, transaction_count: 0 };
   }
 
   const rows = data as { amount: number; category: string | null; merchant_normalized: string | null; transaction_datetime: string | null }[];
@@ -68,17 +95,12 @@ export async function aggregateTransactions(
     .sort((a, b) => a[0].localeCompare(b[0]))
     .map(([week, wTotal]) => ({ week, total: Math.round(wTotal) }));
 
-  // Determine period label
-  const period = filters.dateRange
-    ? `${filters.dateRange.from.slice(0, 10)} to ${filters.dateRange.to.slice(0, 10)}`
-    : "last 30 days";
-
   return {
     total: Math.round(total),
     by_category: Object.fromEntries(Object.entries(by_category).map(([k, v]) => [k, Math.round(v)])),
     by_merchant: Object.fromEntries(Object.entries(by_merchant).map(([k, v]) => [k, Math.round(v)])),
     weekly_trend,
-    period,
+    period: periodLabel,
     transaction_count: rows.length,
   };
 }
