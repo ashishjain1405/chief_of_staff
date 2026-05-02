@@ -35,8 +35,8 @@ export function buildRetrievalPlan(
   const { operational_weight, investigative_weight } = intent.retrieval_weights;
   const dateRange = resolved.resolvedDateRange;
 
-  // Operational path
-  if (operational_weight > 0.3) {
+  // Operational path — always include for finance intents to surface spending_summary insights
+  if (operational_weight > 0.3 || FINANCE_INTENTS.has(intent.primary)) {
     steps.push(step("operational_insights", "fetch precomputed operational insights", {
       category: intentToCategories(intent),
     }, 1));
