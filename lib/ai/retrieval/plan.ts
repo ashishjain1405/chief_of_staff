@@ -60,13 +60,16 @@ export function buildRetrievalPlan(
       }, 2));
     }
 
-    // Raw transactions — always included for finance queries as fallback evidence
-    steps.push(step("sql_transactions", "find transactions", {
-      merchants: resolved.merchantNames,
-      categories: intent.entities.categories,
-      dateRange,
-      amount: intent.entities.amount,
-    }, hasSpecificLookup ? 2 : 3));
+    // Raw transactions — included for finance queries as fallback evidence
+    // Skip for bills_payments: that branch adds its own targeted step with transactionTypes filter
+    if (primary !== "bills_payments") {
+      steps.push(step("sql_transactions", "find transactions", {
+        merchants: resolved.merchantNames,
+        categories: intent.entities.categories,
+        dateRange,
+        amount: intent.entities.amount,
+      }, hasSpecificLookup ? 2 : 3));
+    }
   }
 
   // Commitment / productivity lookups
