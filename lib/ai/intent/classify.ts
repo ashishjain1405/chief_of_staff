@@ -128,7 +128,7 @@ function inferPeople(query: string): string[] {
   const matches: string[] = [];
   const FIRST_PERSON = new Set(["i", "me", "my", "we", "our", "us"]);
   // Trigger words before a name — case-insensitive, any casing
-  const triggerPattern = /\b(?:did|with|told|asked|about|regarding|to|by)\s+([A-Za-z][a-zA-Z\s]{1,40}?)(?=\s+(?:say|tell|send|write|about|on|regarding|in)|$)/gi;
+  const triggerPattern = /\b(?:did|with|told|asked|about|regarding|to|by|meet|met)\s+([A-Za-z][a-zA-Z\s]{1,40}?)(?=\s+(?:say|tell|send|write|about|on|regarding|in|after|before)|$)/gi;
   let m: RegExpExecArray | null;
   while ((m = triggerPattern.exec(query)) !== null) {
     const name = m[1].trim();
@@ -170,7 +170,7 @@ function applyDeterministicOverrides(
     return { operational_weight: 0.1, investigative_weight: 1.0 };
   }
 
-  if (primary === "search_lookup" || /\b(find|search|look up|show me|did i)\b/.test(lower)) {
+  if (primary === "search_lookup" || /\b(find|search|look up|show me)\b/.test(lower)) {
     return { operational_weight: 0.0, investigative_weight: 1.0 };
   }
 
@@ -182,9 +182,13 @@ function applyDeterministicOverrides(
     };
   }
 
+  // "what do I know about X" is a knowledge lookup, not a daily brief
+  const isKnowledgeLookup = /\bwhat do i know about\b/.test(lower);
   if (
-    primary === "operational_summary" ||
-    /\b(catch me up|brief me|what.s urgent|daily brief|status update|what.s important|whats new|what happened|anything new|what do i need to know|what should i focus on)\b/.test(lower)
+    !isKnowledgeLookup && (
+      primary === "operational_summary" ||
+      /\b(catch me up|brief me|what.s urgent|daily brief|status update|what.s important|whats new|what happened|anything new|what do i need to know|what should i focus on)\b/.test(lower)
+    )
   ) {
     return { operational_weight: 1.0, investigative_weight: 0.0 };
   }

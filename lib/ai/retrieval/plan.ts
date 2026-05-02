@@ -36,8 +36,8 @@ export function buildRetrievalPlan(
   const { operational_weight, investigative_weight } = intent.retrieval_weights;
   const queryLower = query.toLowerCase();
   const queryMentionsEmail = /\b(email|emails|message|messages|inbox|mail)\b/.test(queryLower);
-  const queryMentionsMeeting = /\b(meeting|meetings|met|discussed in|discussion in)\b/.test(queryLower);
-  const queryMentionsTask = /\b(task|tasks|action items?|follow.?up|to.?do|overdue)\b/.test(queryLower);
+  const queryMentionsMeeting = /\b(meeting|meetings|meet|met|discussed in|discussion in)\b/.test(queryLower);
+  const queryMentionsTask = /\b(task|tasks|action items?|follow.?ups?|to.?do|overdue)\b/.test(queryLower);
   const dateRange = resolved.resolvedDateRange;
 
   // Operational path — always include for finance intents to surface spending_summary insights
@@ -47,8 +47,8 @@ export function buildRetrievalPlan(
     }, 1));
   }
 
-  // Investigative path — only if weight above threshold
-  if (investigative_weight <= 0.3) return steps;
+  // Investigative path — only if weight above threshold (keyword overrides bypass this gate)
+  if (investigative_weight <= 0.3 && !queryMentionsEmail && !queryMentionsMeeting && !queryMentionsTask) return steps;
 
   const primary = intent.primary;
 

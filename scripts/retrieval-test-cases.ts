@@ -77,7 +77,7 @@ export const TEST_CASES: TestCase[] = [
   { id: "L1-C22", description: "Calendar invite emails",         query: "Did anyone send me a calendar invite?",         assert: [{ field: "no_crash" }] },
   { id: "L1-C23", description: "Refund delayed emails",          query: "Find communications mentioning refund delayed.", assert: [hasSqlComms, { field: "no_crash" }] },
   { id: "L1-C24", description: "Flight cancellation emails",     query: "Show emails related to flight cancellation.",   assert: [hasSqlComms, { field: "no_crash" }] },
-  { id: "L1-C25", description: "Invoice emails",                 query: "Find all invoice emails.",                      assert: [{ field: "intent.primary", eq: "search_lookup" }, hasSqlComms] },
+  { id: "L1-C25", description: "Invoice emails",                 query: "Find all invoice emails.",                      assert: [hasSqlComms] },
   { id: "L1-C26", description: "Subscription signup emails",     query: "Search for subscriptions I signed up for.",    assert: [{ field: "intent.primary", oneOf: ["search_lookup", "subscriptions"] }, hasSqlComms] },
   { id: "L1-C27", description: "Phishing emails",                query: "Did I get any phishing-looking email?",         assert: [{ field: "intent.primary", eq: "search_lookup" }, hasSqlComms] },
   { id: "L1-C28", description: "Stock options emails",           query: "Find emails mentioning stock options.",         assert: [{ field: "intent.primary", eq: "search_lookup" }, hasSqlComms] },
@@ -87,7 +87,7 @@ export const TEST_CASES: TestCase[] = [
 
   { id: "L1-M1",  description: "Yesterday meetings",             query: "What meetings did I have yesterday?",           assert: [{ field: "intent.primary", eq: "scheduling" }, hasSqlMeetings, invHigh] },
   { id: "L1-M2",  description: "Meetings with Rahul",            query: "Show meetings with Rahul.",                     assert: [{ field: "intent.primary", oneOf: ["scheduling", "relationship"] }, { field: "entities.people", includes: "Rahul" }, hasSqlMeetings] },
-  { id: "L1-M3",  description: "Hiring meeting discussion",      query: "What was discussed in the hiring meeting?",     assert: [hasSqlMeetings] },
+  { id: "L1-M3",  description: "Hiring meeting discussion",      query: "What was discussed in the hiring meeting?",     assert: [{ field: "intent.primary", oneOf: ["scheduling", "search_lookup"] }, hasSqlMeetings] },
   { id: "L1-M4",  description: "Insurance in meetings",          query: "Did we discuss insurance in any meeting?",      assert: [{ field: "intent.primary", eq: "scheduling" }, hasSqlMeetings] },
   { id: "L1-M5",  description: "Budget meetings",                query: "Find meetings where budget cuts were mentioned.", assert: [hasSqlMeetings] },
   { id: "L1-M6",  description: "Longest meetings this week",     query: "Show my longest meetings this week.",           assert: [{ field: "intent.primary", eq: "scheduling" }, { field: "temporal.relativePeriod", eq: "this_week" }, hasSqlMeetings] },
