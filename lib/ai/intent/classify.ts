@@ -2,6 +2,7 @@ import OpenAI from "openai";
 import type { IntentType } from "../processors/types";
 import type { EntityContext, TemporalAnchor, RetrievalWeights, ConversationContext } from "../retrieval/types";
 import { INTENT_RULES } from "./rules";
+import { MERCHANT_DATA } from "../../finance/normalize";
 
 export interface IntentResult {
   primary: IntentType;
@@ -77,15 +78,32 @@ const TEMPORAL_PATTERNS: { pattern: RegExp; period: NonNullable<TemporalAnchor["
   { pattern: /\blast year\b/i,      period: "last_year" },
 ];
 
-// Rolling-day patterns: "last N days/weeks" → absolute dateRange computed immediately
+function inferMerchants(query: string): string[] {
+  const lower = query.toLowerCase();
+  return Object.keys(MERCHANT_DATA).filter((canonical) =>
+    lower.includes(canonical.toLowerCase())
+  );
+}
+
+// Rolling patterns: "last N days/weeks/months/years" → absolute dateRange
 function inferRollingDays(query: string): TemporalAnchor | null {
-  const m = query.match(/\blast\s+(\d+)\s+(day|days|week|weeks)\b/i);
+  const m = query.match(/\blast\s+(\d+)\s+(day|days|week|weeks|month|months|year|years)\b/i);
   if (!m) return null;
   const n = parseInt(m[1], 10);
   const unit = m[2].toLowerCase();
-  const days = unit.startsWith("week") ? n * 7 : n;
   const to = new Date();
-  const from = new Date(to.getTime() - days * 864e5);
+  let from: Date;
+  if (unit.startsWith("year")) {
+    from = new Date(to);
+    from.setFullYear(from.getFullYear() - n);
+  } else if (unit.startsWith("month")) {
+    from = new Date(to);
+    from.setMonth(from.getMonth() - n);
+  } else if (unit.startsWith("week")) {
+    from = new Date(to.getTime() - n * 7 * 864e5);
+  } else {
+    from = new Date(to.getTime() - n * 864e5);
+  }
   return { type: "absolute", dateRange: { from: from.toISOString(), to: to.toISOString() } };
 }
 
@@ -150,7 +168,10 @@ function applyOverrides(query: string, result: IntentResult): IntentResult {
   const people = result.entities.people.length === 0
     ? inferPeople(query)
     : result.entities.people;
-  const entities = { ...result.entities, categories, people };
+  const merchants = result.entities.merchants.length === 0
+    ? inferMerchants(query)
+    : result.entities.merchants;
+  const entities = { ...result.entities, categories, people, merchants };
   const retrieval_weights = applyDeterministicOverrides(result.primary, query, result.retrieval_weights);
   const temporal = result.temporal ?? inferTemporal(query);
   return { ...result, entities, retrieval_weights, temporal };
