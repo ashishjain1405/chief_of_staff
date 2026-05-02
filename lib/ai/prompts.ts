@@ -427,7 +427,10 @@ export function askContextPrompt(
           .map(([c, v]) => `${c}: ${v.toLocaleString()}`).join(", ");
         const topMerchants = Object.entries(d.by_merchant).sort((a, b) => b[1] - a[1]).slice(0, 5)
           .map(([m, v]) => `${m}: ${v.toLocaleString()}`).join(", ");
-        sections.push(`[ANALYTICS] Spending for ${d.period}: Total ${d.total.toLocaleString()} (${d.transaction_count} transactions)\n  Categories: ${topCats}\n  Merchants: ${topMerchants}`);
+        const fallbackNote = d.category_fallback?.length
+          ? `\n  Note: no transactions found for ${d.category_fallback.join(", ")}; showing all categories instead`
+          : "";
+        sections.push(`[ANALYTICS] Spending for ${d.period}: Total ${d.total.toLocaleString()} (${d.transaction_count} transactions)\n  Categories: ${topCats}\n  Merchants: ${topMerchants}${fallbackNote}`);
         break;
       }
       case "communication": {

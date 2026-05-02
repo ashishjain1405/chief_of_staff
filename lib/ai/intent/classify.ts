@@ -139,9 +139,14 @@ function applyDeterministicOverrides(
 ): RetrievalWeights {
   const lower = query.toLowerCase();
 
+  // Analytical "why/am I/should I" queries benefit from operational insights too — let LLM weights stand
+  const isAnalyticalQuery = /\b(why|am i|should i|is it|are we)\b/.test(lower);
+
   const isSpendingQuery =
-    ["finance", "spending_analysis", "subscriptions", "bills_payments"].includes(primary) ||
-    /\b(show|how much|breakdown|spent|spending|expenses?|charges?|paid|transactions?)\b/.test(lower);
+    !isAnalyticalQuery && (
+      ["finance", "spending_analysis", "subscriptions", "bills_payments"].includes(primary) ||
+      /\b(show|how much|breakdown|spent|spending|expenses?|charges?|paid|transactions?)\b/.test(lower)
+    );
 
   if (isSpendingQuery) {
     return { operational_weight: 0.1, investigative_weight: 1.0 };

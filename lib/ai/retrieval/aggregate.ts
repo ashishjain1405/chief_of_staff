@@ -34,6 +34,7 @@ export async function aggregateTransactions(
   }
 
   let { data, error } = await query.limit(500);
+  let categoryFallback: string[] | undefined;
 
   // Retry without category filter if over-specific filter returned nothing
   if (!error && !data?.length && filters.categories?.length) {
@@ -54,7 +55,10 @@ export async function aggregateTransactions(
       retryQuery = retryQuery.in("merchant_normalized", filters.merchantNames);
     }
     const { data: retryData, error: retryError } = await retryQuery.limit(500);
-    if (!retryError) data = retryData;
+    if (!retryError && retryData?.length) {
+      data = retryData;
+      categoryFallback = filters.categories; // record which categories had no matches
+    }
   }
 
   const periodLabel = filters.dateRange
@@ -102,5 +106,6 @@ export async function aggregateTransactions(
     weekly_trend,
     period: periodLabel,
     transaction_count: rows.length,
+    ...(categoryFallback ? { category_fallback: categoryFallback } : {}),
   };
 }

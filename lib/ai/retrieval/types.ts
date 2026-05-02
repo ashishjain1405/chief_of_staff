@@ -51,6 +51,7 @@ export interface AggregatedFinance {
   weekly_trend: { week: string; total: number }[];
   period: string;
   transaction_count: number;
+  category_fallback?: string[]; // set when requested categories had no matches; shows all categories instead
 }
 
 // Discriminated union — typed payload per source, no data:any
