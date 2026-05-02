@@ -221,7 +221,10 @@ IMPORTANT: "show X spending", "how much did I spend on X", "X expenses" → inve
     ? Math.min(1, Math.max(0, parsed.confidence))
     : 0.7;
 
-  const llmCategories: string[] = Array.isArray(parsed.entities?.categories) ? parsed.entities.categories : [];
+  const VALID_CATEGORIES = new Set(Object.keys(CATEGORY_KEYWORDS));
+  const llmCategories: string[] = Array.isArray(parsed.entities?.categories)
+    ? parsed.entities.categories.filter((c: string) => VALID_CATEGORIES.has(c))
+    : [];
   const inferredCategories = llmCategories.length === 0 ? inferCategories(query) : llmCategories;
 
   const entities: EntityContext = {
