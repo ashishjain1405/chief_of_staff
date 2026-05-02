@@ -300,11 +300,23 @@ IMPORTANT: "show X spending", "how much did I spend on X", "X expenses" → inve
     : [];
   const inferredCategories = llmCategories.length === 0 ? inferCategories(query) : llmCategories;
 
+  const TOPIC_NOISE = new Set(["emails", "email", "messages", "message", "show", "find", "search", "notifications"]);
+
+  const llmPeople: string[] = Array.isArray(parsed.entities?.people) ? parsed.entities.people : [];
+  const llmMerchants: string[] = Array.isArray(parsed.entities?.merchants) ? parsed.entities.merchants : [];
+  const llmTopics: string[] = (Array.isArray(parsed.entities?.topics) ? parsed.entities.topics : [])
+    .filter((t: string) => !TOPIC_NOISE.has(t.toLowerCase()));
+
+  const people = llmPeople.length > 0 ? llmPeople : inferPeople(query);
+  const merchants = llmMerchants.length > 0 ? llmMerchants : inferMerchants(query);
+  // If topics empty after noise filter, use inferred senders for subject/body search
+  const topics = llmTopics.length > 0 ? llmTopics : people;
+
   const entities: EntityContext = {
-    people: Array.isArray(parsed.entities?.people) ? parsed.entities.people : [],
-    merchants: Array.isArray(parsed.entities?.merchants) ? parsed.entities.merchants : [],
+    people,
+    merchants,
     categories: inferredCategories,
-    topics: Array.isArray(parsed.entities?.topics) ? parsed.entities.topics : [],
+    topics,
     amount: typeof parsed.entities?.amount === "number" ? parsed.entities.amount : null,
   };
 
