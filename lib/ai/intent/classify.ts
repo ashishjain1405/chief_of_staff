@@ -65,6 +65,22 @@ function inferCategories(query: string): string[] {
   return matched;
 }
 
+// Extracts likely person names from query when LLM is unavailable.
+// Looks for capitalized word sequences (1-3 words) near relational trigger words.
+function inferPeople(query: string): string[] {
+  const matches: string[] = [];
+  // Pattern: trigger word followed by 1-3 capitalized words
+  const pattern = /\b(?:did|from|with|told|asked|about|regarding|to|by)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,2})\b/g;
+  let m: RegExpExecArray | null;
+  while ((m = pattern.exec(query)) !== null) {
+    matches.push(m[1]);
+  }
+  // Also catch leading patterns: "What did Ashish Jain say" — name at start after "did"
+  const leading = /^(?:what|when|why|how|show|find|get)\s+did\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+){0,2})\b/i.exec(query);
+  if (leading) matches.push(leading[1]);
+  return [...new Set(matches)];
+}
+
 function applyDeterministicOverrides(
   primary: IntentType,
   query: string,
@@ -99,7 +115,10 @@ function applyOverrides(query: string, result: IntentResult): IntentResult {
   const categories = result.entities.categories.length === 0
     ? inferCategories(query)
     : result.entities.categories;
-  const entities = { ...result.entities, categories };
+  const people = result.entities.people.length === 0
+    ? inferPeople(query)
+    : result.entities.people;
+  const entities = { ...result.entities, categories, people };
   const retrieval_weights = applyDeterministicOverrides(result.primary, query, entities, result.retrieval_weights);
   return { ...result, entities, retrieval_weights };
 }
@@ -240,7 +259,7 @@ export async function classifyIntent(
       return await Promise.race([
         classifyWithLLM(query, [], context ?? null),
         new Promise<IntentResult>((resolve) =>
-          setTimeout(() => resolve(applyOverrides(query, FALLBACK_INTENT)), 1500)
+          setTimeout(() => resolve(applyOverrides(query, FALLBACK_INTENT)), 3000)
         ),
       ]);
     }
@@ -262,7 +281,7 @@ export async function classifyIntent(
             temporal: null,
             retrieval_weights: { operational_weight: 0.8, investigative_weight: 0.2 },
           }));
-        }, 1500)
+        }, 3000)
       ),
     ]);
 
