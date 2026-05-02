@@ -1,80 +1,19 @@
 import { createClient } from "@/lib/supabase/server";
-import { searchMemory } from "@/lib/memory/search";
+import { classifyIntent, FALLBACK_INTENT } from "@/lib/ai/intent/classify";
+import { resolveEntities } from "@/lib/ai/retrieval/resolve";
+import { buildRetrievalPlan } from "@/lib/ai/retrieval/plan";
+import { executeRetrievalPlan } from "@/lib/ai/retrieval/execute";
+import { aggregateTransactions } from "@/lib/ai/retrieval/aggregate";
+import { unifiedRank, getRankingProfile, DEFAULT_DIVERSITY_CAPS } from "@/lib/ai/retrieval/rank";
+import { decodeConversationContext, updateConversationContext, mergeContextWithIntent } from "@/lib/ai/retrieval/context";
+import { buildTrace } from "@/lib/ai/retrieval/trace";
 import { askSystemPrompt, askContextPrompt } from "@/lib/ai/prompts";
-import { classifyIntent, FALLBACK_INTENT, type IntentResult } from "@/lib/ai/intent/classify";
-import { rankInsights } from "@/lib/ai/processors/rank";
-import type { IntentType } from "@/lib/ai/processors/types";
 import { streamText, convertToModelMessages, type UIMessage } from "ai";
 import { openai } from "@ai-sdk/openai";
 
-const FINANCE_INTENTS = new Set<IntentType>(["finance", "spending_analysis", "subscriptions", "bills_payments"]);
-const RELATIONSHIP_INTENTS = new Set<IntentType>(["relationship"]);
-const VECTOR_INTENTS = new Set<IntentType>(["operational_summary", "search_lookup", "relationship", "commitments", "travel"]);
-
-function activeIntentSet(intent: IntentResult): Set<IntentType> {
-  return new Set([intent.primary, ...intent.secondary] as IntentType[]);
-}
-
-function needsVectorSearch(intent: IntentResult): boolean {
-  const active = activeIntentSet(intent);
-  return [...active].some((i) => VECTOR_INTENTS.has(i));
-}
-
-function intentToCategories(intent: IntentResult): string[] {
-  const active = activeIntentSet(intent);
-  const categories: string[] = [];
-
-  const CATEGORY_MAP: Partial<Record<IntentType, string[]>> = {
-    finance: ["finance", "spending_analysis"],
-    spending_analysis: ["spending_analysis", "finance"],
-    commitments: ["commitments", "productivity"],
-    scheduling: ["scheduling"],
-    productivity: ["productivity", "commitments"],
-    relationship: ["relationship"],
-    travel: ["travel", "scheduling"],
-    subscriptions: ["subscriptions", "finance"],
-    bills_payments: ["bills_payments", "finance"],
-    reminders: ["reminders", "scheduling", "commitments"],
-    operational_summary: [],
-    search_lookup: [],
-  };
-
-  for (const intent of active) {
-    const mapped = CATEGORY_MAP[intent] ?? [];
-    categories.push(...mapped);
-  }
-
-  return [...new Set(categories)];
-}
-
-async function fetchOperationalInsights(intent: IntentResult, userId: string, supabase: any) {
-  const isOperationalSummary = intent.primary === "operational_summary";
-  const categories = intentToCategories(intent);
-
-  let query = supabase
-    .from("operational_insights")
-    .select("*")
-    .eq("user_id", userId)
-    .eq("status", "active")
-    .or(`snoozed_until.is.null,snoozed_until.lt.${new Date().toISOString()}`)
-    .order("priority_score", { ascending: false })
-    .limit(30);
-
-  // For specific intents, filter to relevant categories
-  // operational_summary and search_lookup get everything
-  if (!isOperationalSummary && categories.length > 0) {
-    query = query.in("category", categories);
-  }
-
-  const { data, error } = await query;
-  if (error) {
-    console.error("fetchOperationalInsights error:", error);
-    return [];
-  }
-  return data ?? [];
-}
-
 export async function POST(request: Request) {
+  const startTime = Date.now();
+
   try {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -89,36 +28,74 @@ export async function POST(request: Request) {
       .map((p) => (p as any).text ?? "")
       .join("") ?? "";
 
-    // Stage 1: Intent classification (with timeout fallback)
-    const intent = await classifyIntent(lastMessageText).catch(() => FALLBACK_INTENT);
+    // Stage 1: Decode conversational context from prior messages
+    const prevContext = decodeConversationContext(messages);
 
-    // Stage 2: Parallel fetch — precomputed insights + optional vector search
-    const [{ data: userData }, rawInsights, vectorChunks] = await Promise.all([
+    // Stage 2: Intent + entities + temporal + weights (single gpt-4o-mini call)
+    const rawIntent = await classifyIntent(lastMessageText, prevContext).catch(() => FALLBACK_INTENT);
+    const intent = mergeContextWithIntent(prevContext, rawIntent);
+    const newContext = updateConversationContext(prevContext, intent);
+
+    // Stage 3: Parallel — resolve entities + fetch user context
+    const [resolvedResult, userResult] = await Promise.allSettled([
+      resolveEntities(intent.entities, intent.temporal, user.id, supabase as any),
       supabase.from("users").select("business_context").eq("id", user.id).single(),
-
-      fetchOperationalInsights(intent, user.id, supabase).catch((e) => {
-        console.error("fetchOperationalInsights failed:", e);
-        return [];
-      }),
-
-      needsVectorSearch(intent)
-        ? searchMemory({ userId: user.id, query: lastMessageText, matchCount: 12, daysBack: 90 }).catch((e) => {
-            console.error("searchMemory failed:", e);
-            return [];
-          })
-        : Promise.resolve([]),
     ]);
 
-    // Stage 3: Rank insights (already scored — just sort and truncate)
-    const rankedInsights = rankInsights(rawInsights, 15);
+    const resolved = resolvedResult.status === "fulfilled"
+      ? resolvedResult.value
+      : { contactIds: [], merchantNames: [], resolvedDateRange: null, temporalConfidence: 1.0 };
 
-    // Stage 4: Build context prompt + stream
-    const systemPrompt = askSystemPrompt(userData?.business_context ?? {});
-    const contextBlock = askContextPrompt(
-      rankedInsights,
-      vectorChunks.map((c) => `[${c.source_type}] ${c.chunk_text}`),
-      intent
+    const userData = userResult.status === "fulfilled"
+      ? (userResult.value as any).data
+      : null;
+
+    const needsClarification = resolved.temporalConfidence < 0.6;
+
+    // Stage 4: Build plan + execute (budget-capped, allSettled)
+    const plan = buildRetrievalPlan(intent, resolved);
+    const { rawResults, sourceStatuses, budgetExhausted } = await executeRetrievalPlan(
+      plan, user.id, lastMessageText, supabase
     );
+
+    // Stage 5: Structured aggregation (if finance aggregation step is in plan)
+    const needsAggregation = plan.some((s) => s.source === "aggregated_finance");
+    const aggregated = needsAggregation
+      ? await aggregateTransactions(user.id, {
+          dateRange: resolved.resolvedDateRange,
+          categories: intent.entities.categories,
+          merchantNames: resolved.merchantNames,
+        }, supabase).catch(() => null)
+      : null;
+
+    // Stage 6: Unified ranking — single pass over all sources
+    const rankingProfile = getRankingProfile(intent.primary);
+    const rankedItems = unifiedRank(
+      rawResults,
+      aggregated,
+      lastMessageText,
+      intent.entities,
+      intent.temporal,
+      rankingProfile,
+      DEFAULT_DIVERSITY_CAPS,
+      20
+    );
+
+    // Stage 7: Trace (dev logging)
+    const trace = buildTrace(
+      lastMessageText, intent, plan, sourceStatuses, rankedItems, startTime, budgetExhausted
+    );
+    if (process.env.NODE_ENV === "development") {
+      console.log("[ask-trace]", JSON.stringify(trace));
+    }
+
+    // Stage 8: Build prompt + stream
+    const clarificationNote = needsClarification
+      ? "The time reference in the query is ambiguous. Ask the user to clarify the time period if needed."
+      : undefined;
+
+    const systemPrompt = askSystemPrompt(userData?.business_context ?? {}, clarificationNote);
+    const contextBlock = askContextPrompt(rankedItems, intent);
 
     const modelMessages = await convertToModelMessages(messages);
 
@@ -129,7 +106,14 @@ export async function POST(request: Request) {
       maxOutputTokens: 1024,
     });
 
-    return result.toUIMessageStreamResponse();
+    // Attach context metadata to response for next-turn retrieval
+    // Frontend should store this and send it back in subsequent messages
+    const response = result.toUIMessageStreamResponse();
+    response.headers.set(
+      "X-Assistant-Context",
+      JSON.stringify({ context: newContext, sources_used: sourceStatuses.filter(s => s.success).map(s => s.source) })
+    );
+    return response;
   } catch (e) {
     console.error("Ask AI route error:", e);
     return new Response(String(e), { status: 500 });

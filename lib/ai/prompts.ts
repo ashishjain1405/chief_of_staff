@@ -322,8 +322,8 @@ Format as markdown with these sections: ## Today's Top Priorities, ## Meetings, 
 // ─────────────────────────────────────────
 // Ask Anything / RAG system prompt
 // ─────────────────────────────────────────
-export function askSystemPrompt(businessContext: any): string {
-  return `You are a proactive AI Personal Chief of Staff.
+export function askSystemPrompt(businessContext: any, clarificationNote?: string): string {
+  const base = `You are a proactive AI Personal Chief of Staff.
 
 Your role is to help the user:
 
@@ -367,6 +367,12 @@ Core principles:
 9. Avoid overwhelming the user with low-priority information.
 10. Use recent information preferentially unless historical context is directly relevant.
 
+Evidence grounding rules:
+* Answer ONLY using the retrieved evidence provided in the context.
+* If evidence is insufficient to answer confidently, explicitly state what information is missing.
+* Do not infer connections, invent transactions, or fabricate details not present in the evidence.
+* When citing evidence, naturally mention the source type: [TRANSACTION], [EMAIL], [MEETING], [COMMITMENT], [INSIGHT], or [ANALYTICS].
+
 Financial guidance:
 * Monitor recurring spending patterns.
 * Identify unusual transactions or spikes.
@@ -379,53 +385,72 @@ Commitment guidance:
 * Detect unresolved action items across emails and meetings.
 * Prioritize based on urgency and personal importance.
 
-When referencing memory: naturally mention the source type (email, transaction, meeting, task), and include dates or people when useful.
-
-Do not fabricate information or recommendations unsupported by the provided context.
-
 Business context: ${JSON.stringify(businessContext)}`;
+
+  return clarificationNote ? `${base}\n\nNote: ${clarificationNote}` : base;
 }
 
 export function askContextPrompt(
-  insights: Array<{
-    category: string;
-    insight_type: string;
-    urgency: string;
-    priority_score: number;
-    title: string;
-    summary: string;
-    recommended_action?: string | null;
-    explanation?: string;
-    entities?: string[];
-    generated_by?: string;
-  }>,
-  vectorChunks: string[],
+  items: import("./retrieval/types").RetrievalItem[],
   intent: { primary: string; secondary: string[] }
 ): string {
   const sections: string[] = [];
 
   sections.push(`Query intent: ${intent.primary}${intent.secondary.length > 0 ? ` (also: ${intent.secondary.join(", ")})` : ""}`);
 
-  if (insights.length > 0) {
-    sections.push("## Priority Insights (sorted by urgency and importance)");
-    for (const insight of insights.slice(0, 15)) {
-      const urgencyTag = insight.urgency.toUpperCase();
-      let entry = `[${urgencyTag}] ${insight.title}\n  ${insight.summary}`;
-      if (insight.recommended_action) {
-        entry += `\n  → ${insight.recommended_action}`;
-      }
-      if (insight.explanation) {
-        entry += `\n  (${insight.explanation})`;
-      }
-      sections.push(entry);
-    }
-  } else {
-    sections.push("## Priority Insights\n(No active insights found)");
+  if (items.length === 0) {
+    sections.push("## Retrieved Evidence\n(No relevant evidence found)");
+    return sections.join("\n\n");
   }
 
-  if (vectorChunks.length > 0) {
-    sections.push("## Relevant Memory");
-    sections.push(vectorChunks.join("\n---\n"));
+  sections.push("## Retrieved Evidence");
+
+  for (const item of items) {
+    switch (item.item_type) {
+      case "insight": {
+        const d = item.data;
+        const urgencyTag = d.urgency.toUpperCase();
+        let entry = `[INSIGHT][${urgencyTag}] ${d.title}\n  ${d.summary}`;
+        if (d.recommended_action) entry += `\n  → ${d.recommended_action}`;
+        if (d.explanation) entry += `\n  (${d.explanation})`;
+        sections.push(entry);
+        break;
+      }
+      case "transaction": {
+        const d = item.data;
+        sections.push(`[TRANSACTION] ${d.merchant_normalized ?? "Unknown"} — ${d.currency ?? "INR"} ${d.amount?.toLocaleString() ?? "?"} on ${d.transaction_datetime?.slice(0, 10) ?? "?"} (${d.category ?? d.transaction_type ?? ""})`);
+        break;
+      }
+      case "aggregated_finance": {
+        const d = item.data;
+        const topCats = Object.entries(d.by_category).sort((a, b) => b[1] - a[1]).slice(0, 5)
+          .map(([c, v]) => `${c}: ${v.toLocaleString()}`).join(", ");
+        const topMerchants = Object.entries(d.by_merchant).sort((a, b) => b[1] - a[1]).slice(0, 5)
+          .map(([m, v]) => `${m}: ${v.toLocaleString()}`).join(", ");
+        sections.push(`[ANALYTICS] Spending for ${d.period}: Total ${d.total.toLocaleString()} (${d.transaction_count} transactions)\n  Categories: ${topCats}\n  Merchants: ${topMerchants}`);
+        break;
+      }
+      case "communication": {
+        const d = item.data;
+        sections.push(`[EMAIL] ${d.subject ?? "(no subject)"} — ${d.contact_name ?? "unknown sender"} on ${d.occurred_at?.slice(0, 10) ?? "?"}\n  ${d.body_summary ?? ""}`);
+        break;
+      }
+      case "meeting": {
+        const d = item.data;
+        sections.push(`[MEETING] ${d.title ?? "Untitled"} on ${d.start_time?.slice(0, 10) ?? "?"}\n  ${d.executive_summary ?? ""}`);
+        break;
+      }
+      case "commitment": {
+        const d = item.data;
+        sections.push(`[COMMITMENT] ${d.description}${d.to_contact_name ? ` (to ${d.to_contact_name})` : ""}${d.due_date ? ` — due ${d.due_date.slice(0, 10)}` : ""}`);
+        break;
+      }
+      case "vector": {
+        const d = item.data;
+        sections.push(`[${d.source_type?.toUpperCase() ?? "MEMORY"}] ${d.chunk_text}`);
+        break;
+      }
+    }
   }
 
   return sections.join("\n\n");
