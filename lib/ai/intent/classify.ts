@@ -44,6 +44,54 @@ function regexCandidates(query: string): Map<IntentType, number> {
   return hits;
 }
 
+const CATEGORY_KEYWORDS: Record<string, string[]> = {
+  food_delivery:   ["food", "swiggy", "zomato", "uber eats", "delivery", "meal", "restaurant", "dinner", "lunch"],
+  groceries:       ["grocery", "groceries", "bigbasket", "blinkit", "zepto", "supermarket", "vegetables", "fruits"],
+  travel:          ["travel", "flight", "hotel", "trip", "booking", "cab", "uber", "ola", "rapido", "train", "bus"],
+  entertainment:   ["entertainment", "netflix", "spotify", "prime", "hotstar", "youtube", "movie", "music"],
+  subscriptions:   ["subscription", "subscriptions", "membership", "renewal", "saas", "plan"],
+  utilities:       ["electricity", "water", "gas", "broadband", "internet", "recharge", "mobile"],
+  healthcare:      ["hospital", "doctor", "medicine", "pharmacy", "health", "clinic", "insurance"],
+  shopping:        ["amazon", "flipkart", "myntra", "shopping", "clothes", "fashion", "electronics"],
+  education:       ["course", "udemy", "coursera", "tuition", "school", "college", "education"],
+};
+
+function inferCategories(query: string): string[] {
+  const lower = query.toLowerCase();
+  const matched: string[] = [];
+  for (const [category, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
+    if (keywords.some((kw) => lower.includes(kw))) matched.push(category);
+  }
+  return matched;
+}
+
+function applyDeterministicOverrides(
+  primary: IntentType,
+  query: string,
+  entities: EntityContext,
+  weights: RetrievalWeights
+): RetrievalWeights {
+  const lower = query.toLowerCase();
+
+  const isSpendingQuery =
+    ["finance", "spending_analysis", "subscriptions", "bills_payments"].includes(primary) ||
+    /\b(show|how much|breakdown|spent|spending|expenses?|charges?|paid|transactions?)\b/.test(lower);
+
+  if (isSpendingQuery) {
+    return { operational_weight: 0.1, investigative_weight: 1.0 };
+  }
+
+  if (primary === "search_lookup" || /\b(find|search|look up|show me|did i)\b/.test(lower)) {
+    return { operational_weight: 0.0, investigative_weight: 1.0 };
+  }
+
+  if (/\b(catch me up|what.s urgent|daily brief|status update|what.s important|whats new)\b/.test(lower)) {
+    return { operational_weight: 1.0, investigative_weight: 0.0 };
+  }
+
+  return weights;
+}
+
 async function classifyWithLLM(
   query: string,
   candidates: IntentType[],
@@ -142,17 +190,20 @@ IMPORTANT: "show X spending", "how much did I spend on X", "X expenses" → inve
     ? Math.min(1, Math.max(0, parsed.confidence))
     : 0.7;
 
+  const llmCategories: string[] = Array.isArray(parsed.entities?.categories) ? parsed.entities.categories : [];
+  const inferredCategories = llmCategories.length === 0 ? inferCategories(query) : llmCategories;
+
   const entities: EntityContext = {
     people: Array.isArray(parsed.entities?.people) ? parsed.entities.people : [],
     merchants: Array.isArray(parsed.entities?.merchants) ? parsed.entities.merchants : [],
-    categories: Array.isArray(parsed.entities?.categories) ? parsed.entities.categories : [],
+    categories: inferredCategories,
     topics: Array.isArray(parsed.entities?.topics) ? parsed.entities.topics : [],
     amount: typeof parsed.entities?.amount === "number" ? parsed.entities.amount : null,
   };
 
   const temporal: TemporalAnchor | null = parsed.temporal ?? null;
 
-  const retrieval_weights: RetrievalWeights = {
+  const llmWeights: RetrievalWeights = {
     operational_weight: typeof parsed.retrieval_weights?.operational_weight === "number"
       ? Math.min(1, Math.max(0, parsed.retrieval_weights.operational_weight))
       : 0.7,
@@ -160,6 +211,8 @@ IMPORTANT: "show X spending", "how much did I spend on X", "X expenses" → inve
       ? Math.min(1, Math.max(0, parsed.retrieval_weights.investigative_weight))
       : 0.3,
   };
+
+  const retrieval_weights = applyDeterministicOverrides(primary, query, entities, llmWeights);
 
   return { primary, secondary, confidence, entities, temporal, retrieval_weights };
 }
