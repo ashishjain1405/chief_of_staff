@@ -128,7 +128,7 @@ function inferPeople(query: string): string[] {
   const matches: string[] = [];
   const FIRST_PERSON = new Set(["i", "me", "my", "we", "our", "us"]);
   // Trigger words before a name — case-insensitive, any casing
-  const triggerPattern = /\b(?:did|with|told|asked|about|regarding|to|by|meet|met)\s+([A-Za-z][a-zA-Z\s]{1,40}?)(?=\s+(?:say|tell|send|write|about|on|regarding|in|after|before)|$)/gi;
+  const triggerPattern = /\b(?:did|with|told|asked|about|regarding|to|by|meet|met)\s+([A-Za-z][a-zA-Z\s]{1,40}?)(?=\s+(?:say|tell|send|write|message|call|contact|email|about|on|regarding|in|after|before)|$)/gi;
   let m: RegExpExecArray | null;
   while ((m = triggerPattern.exec(query)) !== null) {
     const name = m[1].trim();
@@ -182,14 +182,14 @@ function applyDeterministicOverrides(
     };
   }
 
-  // "what do I know about X" is a knowledge/semantic lookup, not a daily brief
+  // "what do I know about X" is a knowledge lookup, not a daily brief
   if (/\bwhat do i know about\b/.test(lower)) {
     return { operational_weight: 0.0, investigative_weight: 1.0 };
   }
 
   if (
     primary === "operational_summary" ||
-    /\b(catch me up|brief me|what.s urgent|daily brief|status update|what.s important|whats new|what happened|anything new|what do i need to know|what should i focus on)\b/.test(lower)
+    /\b(catch me up|brief me|what.s urgent|daily brief|status update|what.s important|whats new|what happened(?!\s+(before|after|around|since|in|during))|anything new|what do i need to know|what should i focus on|what changed(?!\s+(before|after|around|since)))\b/.test(lower)
   ) {
     return { operational_weight: 1.0, investigative_weight: 0.0 };
   }
@@ -204,9 +204,20 @@ function applyOverrides(query: string, result: IntentResult): IntentResult {
   const people = result.entities.people.length === 0
     ? inferPeople(query)
     : result.entities.people;
-  const merchants = result.entities.merchants.length === 0
-    ? inferMerchants(query)
-    : result.entities.merchants;
+  // Always run inferMerchants to canonicalize LLM merchants (e.g. "Amazon Pay" → "Amazon", "Zomato Ltd" → "Zomato")
+  const inferred = inferMerchants(query);
+  // Start with inferred canonicals; for each LLM merchant not already covered, add it
+  const inferredLower = new Set(inferred.map((m) => m.toLowerCase()));
+  const merged = [...inferred];
+  for (const llmM of result.entities.merchants) {
+    const llmLower = llmM.toLowerCase();
+    // Skip if already covered by an inferred canonical (exact or the LLM is a longer variant of a canonical)
+    const coveredByInferred = inferred.some((c) => llmLower === c.toLowerCase() || llmLower.startsWith(c.toLowerCase() + " "));
+    if (!coveredByInferred && !inferredLower.has(llmLower)) {
+      merged.push(llmM);
+    }
+  }
+  const merchants = merged.length > 0 ? merged : result.entities.merchants;
   // For search_lookup only: inferred senders go into topics for subject/body ILIKE search
   const topics = result.entities.topics.length === 0 && result.primary === "search_lookup"
     ? people
@@ -329,7 +340,14 @@ IMPORTANT: "show X spending", "how much did I spend on X", "X expenses" → inve
     .filter((t: string) => !TOPIC_NOISE.has(t.toLowerCase()));
 
   const people = llmPeople.length > 0 ? llmPeople : inferPeople(query);
-  const merchants = llmMerchants.length > 0 ? llmMerchants : inferMerchants(query);
+  // inferMerchants returns canonical MERCHANT_DATA keys; always use as base, add LLM merchants only when unknown
+  const canonicalMerchants = inferMerchants(query);
+  const canonicalLower = new Set(canonicalMerchants.map((m) => m.toLowerCase()));
+  const extraLlmMerchants = llmMerchants.filter((m) =>
+    !canonicalLower.has(m.toLowerCase()) &&
+    !canonicalMerchants.some((c) => m.toLowerCase().startsWith(c.toLowerCase() + " "))
+  );
+  const merchants = canonicalMerchants.length > 0 ? [...canonicalMerchants, ...extraLlmMerchants] : llmMerchants;
   // For search_lookup only: if topics empty, use inferred senders for subject/body ILIKE search
   // Other intents (scheduling, relationship etc.) should not have people bleed into topics
   const topics = llmTopics.length > 0
