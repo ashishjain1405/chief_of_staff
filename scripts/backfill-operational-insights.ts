@@ -2,7 +2,7 @@
  * One-time backfill: runs compute-operational-state directly for all existing users.
  * Does NOT use Redis/BullMQ — calls the worker function inline to avoid Upstash limits.
  *
- * Run: npx tsx scripts/backfill-operational-insights.ts
+ * Run: npx tsx --env-file=.env.local scripts/backfill-operational-insights.ts
  */
 import { createClient } from "@supabase/supabase-js";
 import { computeOperationalState } from "../worker/jobs/compute-operational-state";
