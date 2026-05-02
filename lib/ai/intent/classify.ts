@@ -166,6 +166,14 @@ function applyDeterministicOverrides(
     return { operational_weight: 0.0, investigative_weight: 1.0 };
   }
 
+  // Scheduling and relationship queries always need SQL retrieval — ensure investigative path runs
+  if (primary === "scheduling" || primary === "relationship" || primary === "commitments" || primary === "productivity") {
+    return {
+      operational_weight: Math.max(weights.operational_weight, 0.3),
+      investigative_weight: Math.max(weights.investigative_weight, 0.5),
+    };
+  }
+
   if (
     primary === "operational_summary" ||
     /\b(catch me up|brief me|what.s urgent|daily brief|status update|what.s important|whats new|what happened|anything new|what do i need to know|what should i focus on)\b/.test(lower)
