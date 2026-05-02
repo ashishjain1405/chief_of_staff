@@ -37,7 +37,7 @@ export function buildRetrievalPlan(
   const queryLower = query.toLowerCase();
   const queryMentionsEmail = /\b(email|emails|message|messages|inbox|mail)\b/.test(queryLower);
   const queryMentionsMeeting = /\b(meeting|meetings|meet|met|discussed in|discussion in)\b/.test(queryLower);
-  const queryMentionsTask = /\b(task|tasks|action items?|follow.?ups?|to.?do|overdue|commit(ted|ment)?|promise[ds]?)\b/.test(queryLower);
+  const queryMentionsTask = /\b(task|tasks|action items?|follow.?ups?|to.?do|overdue|commit(ted|ment)?|promise[ds]?|pending|ignored|unresolved|slipping)\b/.test(queryLower);
   const dateRange = resolved.resolvedDateRange;
 
   // Operational path — always include for finance intents to surface spending_summary insights

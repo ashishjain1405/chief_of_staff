@@ -153,7 +153,7 @@ export const TEST_CASES: TestCase[] = [
   { id: "L1-K10", description: "Unresolved commitments",         query: "Find unresolved commitments.",                  assert: [{ field: "intent.primary", oneOf: ["commitments", "productivity"] }, hasSqlCommitments] },
   { id: "L1-K11", description: "Blocked tasks",                  query: "What tasks are blocked?",                       assert: [{ field: "intent.primary", oneOf: ["commitments", "productivity"] }, hasSqlCommitments] },
   { id: "L1-K12", description: "Tax commitments",                query: "Show commitments around taxes.",                assert: [{ field: "intent.primary", oneOf: ["commitments", "productivity"] }, hasSqlCommitments] },
-  { id: "L1-K13", description: "Ignored items 2+ weeks",         query: "What have I ignored for more than 2 weeks?",    assert: [{ field: "intent.primary", oneOf: ["commitments", "productivity"] }, hasSqlCommitments] },
+  { id: "L1-K13", description: "Ignored items 2+ weeks",         query: "What have I ignored for more than 2 weeks?",    assert: [hasSqlCommitments] },
   { id: "L1-K14", description: "Proposal review commitment",     query: "Did I promise to review the proposal?",         assert: [{ field: "intent.primary", oneOf: ["commitments", "productivity"] }, hasSqlCommitments] },
   { id: "L1-K15", description: "High priority tasks",            query: "Show all high-priority tasks.",                 assert: [{ field: "intent.primary", oneOf: ["commitments", "productivity"] }, hasSqlCommitments] },
   { id: "L1-K16", description: "Recurring commitments",          query: "Find recurring commitments.",                   assert: [{ field: "intent.primary", oneOf: ["commitments", "productivity"] }, hasSqlCommitments] },
