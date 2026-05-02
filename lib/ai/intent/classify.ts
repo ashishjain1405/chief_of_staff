@@ -194,8 +194,8 @@ function applyOverrides(query: string, result: IntentResult): IntentResult {
   const merchants = result.entities.merchants.length === 0
     ? inferMerchants(query)
     : result.entities.merchants;
-  // Inferred people also go into topics so subject/body search works if contact doesn't resolve
-  const topics = result.entities.topics.length === 0 && people.length > 0
+  // For search_lookup only: inferred senders go into topics for subject/body ILIKE search
+  const topics = result.entities.topics.length === 0 && result.primary === "search_lookup"
     ? people
     : result.entities.topics;
   const entities = { ...result.entities, categories, people, merchants, topics };
@@ -317,8 +317,11 @@ IMPORTANT: "show X spending", "how much did I spend on X", "X expenses" → inve
 
   const people = llmPeople.length > 0 ? llmPeople : inferPeople(query);
   const merchants = llmMerchants.length > 0 ? llmMerchants : inferMerchants(query);
-  // If topics empty after noise filter, use inferred senders for subject/body search
-  const topics = llmTopics.length > 0 ? llmTopics : people;
+  // For search_lookup only: if topics empty, use inferred senders for subject/body ILIKE search
+  // Other intents (scheduling, relationship etc.) should not have people bleed into topics
+  const topics = llmTopics.length > 0
+    ? llmTopics
+    : (primary === "search_lookup" ? people : []);
 
   const entities: EntityContext = {
     people,
