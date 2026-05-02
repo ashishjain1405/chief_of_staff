@@ -126,12 +126,13 @@ function inferTemporal(query: string): TemporalAnchor | null {
 // Looks for capitalized word sequences (1-3 words) near relational trigger words.
 function inferPeople(query: string): string[] {
   const matches: string[] = [];
+  const FIRST_PERSON = new Set(["i", "me", "my", "we", "our", "us"]);
   // Trigger words before a name — case-insensitive, any casing
   const triggerPattern = /\b(?:did|with|told|asked|about|regarding|to|by)\s+([A-Za-z][a-zA-Z\s]{1,40}?)(?=\s+(?:say|tell|send|write|about|on|regarding|in)|$)/gi;
   let m: RegExpExecArray | null;
   while ((m = triggerPattern.exec(query)) !== null) {
     const name = m[1].trim();
-    if (name.split(/\s+/).length <= 3) matches.push(name);
+    if (name.split(/\s+/).length <= 3 && !FIRST_PERSON.has(name.toLowerCase())) matches.push(name);
   }
   // "from X" / "emails from X" — case-insensitive, captures until end or preposition
   const fromPattern = /\b(?:emails?\s+from|messages?\s+from|from)\s+([A-Za-z][\w\s.-]{1,40}?)(?:\s*$|\s+(?:about|on|regarding|in|last|this|today|yesterday))/gi;
@@ -144,7 +145,7 @@ function inferPeople(query: string): string[] {
   if (fromEnd) matches.push(fromEnd[1].trim());
   // Leading: "What did Ashish Jain say"
   const leading = /^(?:what|when|why|how|show|find|get)\s+did\s+([A-Za-z][\w\s]{1,40}?)\s+(?:say|send|write|tell)/i.exec(query);
-  if (leading) matches.push(leading[1].trim());
+  if (leading && !FIRST_PERSON.has(leading[1].trim().toLowerCase())) matches.push(leading[1].trim());
   return [...new Set(matches.filter(Boolean))];
 }
 
