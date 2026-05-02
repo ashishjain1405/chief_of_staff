@@ -207,43 +207,46 @@ export function processFinance(
     }
   }
 
-  // Monthly spending summary — factual anchor for "how much did I spend" queries
-  if (transactions.length > 0) {
-    const total = transactions.reduce((sum, t) => sum + t.amount, 0);
-    const catSpend = currentCategorySpend;
+  // Monthly spending summaries — one per calendar month across current + prior windows
+  const allTxns = [...transactions, ...priorTransactions];
+  const byMonth = new Map<string, RawTransaction[]>();
+  for (const t of allTxns) {
+    if (!t.transaction_datetime) continue;
+    const ym = t.transaction_datetime.slice(0, 7); // "YYYY-MM"
+    const arr = byMonth.get(ym) ?? [];
+    arr.push(t);
+    byMonth.set(ym, arr);
+  }
+  for (const [ym, monthTxns] of byMonth) {
+    const total = monthTxns.reduce((sum, t) => sum + t.amount, 0);
+    const catSpend = spendByCategory(monthTxns);
+    const merchantMap = spendByMerchant(monthTxns);
     const merchantSpend: Record<string, number> = {};
-    for (const [merchant, amounts] of currentMerchantSpend) {
-      merchantSpend[merchant] = amounts.reduce((a, b) => a + b, 0);
-    }
-    const topCats = Object.entries(catSpend)
-      .sort((a, b) => b[1] - a[1]).slice(0, 3)
+    for (const [m, amounts] of merchantMap) merchantSpend[m] = amounts.reduce((a, b) => a + b, 0);
+    const topCats = Object.entries(catSpend).sort((a, b) => b[1] - a[1]).slice(0, 3)
       .map(([cat, amt]) => `${cat} ${amt.toLocaleString()}`).join(", ");
-    const topMerchants = Object.entries(merchantSpend)
-      .sort((a, b) => b[1] - a[1]).slice(0, 3)
+    const topMerchants = Object.entries(merchantSpend).sort((a, b) => b[1] - a[1]).slice(0, 3)
       .map(([m, amt]) => `${m} ${amt.toLocaleString()}`).join(", ");
-    const yearMonth = new Date().toISOString().slice(0, 7);
-    const endOfNextMonth = new Date(
-      new Date().getFullYear(),
-      new Date().getMonth() + 2,
-      0
-    ).toISOString();
+    const [year, month] = ym.split("-").map(Number);
+    const label = new Date(year, month - 1, 1).toLocaleString("en-US", { month: "long", year: "numeric" });
+    const endOfFollowingMonth = new Date(year, month + 1, 0).toISOString();
     insights.push({
-      state_key: `finance:spending_summary:${yearMonth}`,
+      state_key: `finance:spending_summary:${ym}`,
       category: "finance",
       insight_type: "spending_summary",
       priority_score: 0.3,
       urgency: "low",
-      title: `${new Date().toLocaleString("en-US", { month: "long", year: "numeric" })} Spending: ${total.toLocaleString()}`,
+      title: `${label} Spending: ${total.toLocaleString()}`,
       summary: `Total ${total.toLocaleString()}. Top categories: ${topCats}. Top merchants: ${topMerchants}.`,
       recommended_action: null,
       entities: [],
-      source_refs: transactions.map((t) => t.id ?? "").filter(Boolean),
+      source_refs: monthTxns.map((t) => t.id ?? "").filter(Boolean),
       confidence: 0.95,
-      source_count: transactions.length,
+      source_count: monthTxns.length,
       generated_by: "finance_processor",
       explanation: "Monthly spending aggregate from normalized transactions",
-      expires_at: endOfNextMonth,
-      metadata: { total, by_category: catSpend, by_merchant: merchantSpend, period: yearMonth },
+      expires_at: endOfFollowingMonth,
+      metadata: { total, by_category: catSpend, by_merchant: merchantSpend, period: ym },
     });
   }
 
