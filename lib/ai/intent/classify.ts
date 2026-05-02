@@ -182,10 +182,12 @@ function applyDeterministicOverrides(
     };
   }
 
-  // Temporal/knowledge lookups — not daily briefs even if LLM says operational_summary
-  const isTemporalLookup = /\bwhat do i know about\b/.test(lower) ||
-    /\bwhat (happened|changed)\s+(before|after|around|since|in|during)\b/.test(lower);
-  if (isTemporalLookup) {
+  // Specific lookup patterns — not daily briefs even if LLM says operational_summary
+  const isLookupQuery =
+    /\bwhat do i know about\b/.test(lower) ||
+    /\bwhat (happened|changed)\s+(before|after|around|since|in|during)\b/.test(lower) ||
+    /\bdid i (get|receive|have|see)\b/.test(lower);
+  if (isLookupQuery) {
     return { operational_weight: 0.0, investigative_weight: 1.0 };
   }
 
