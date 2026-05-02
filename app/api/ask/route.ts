@@ -85,9 +85,7 @@ export async function POST(request: Request) {
     const trace = buildTrace(
       lastMessageText, intent, plan, sourceStatuses, rankedItems, startTime, budgetExhausted
     );
-    if (process.env.NODE_ENV === "development") {
-      console.log("[ask-trace]", JSON.stringify(trace));
-    }
+    console.log("[ask-trace]", JSON.stringify(trace));
 
     // Stage 8: Build prompt + stream
     const clarificationNote = needsClarification
