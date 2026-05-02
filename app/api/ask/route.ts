@@ -68,6 +68,15 @@ export async function POST(request: Request) {
         }, supabase).catch(() => null)
       : null;
 
+    // Record aggregated_finance in sourceStatuses so trace reflects real count
+    if (needsAggregation) {
+      sourceStatuses.push({
+        source: "aggregated_finance",
+        count: aggregated?.transaction_count ?? 0,
+        success: aggregated !== null,
+      });
+    }
+
     // Stage 6: Unified ranking — single pass over all sources
     const rankingProfile = getRankingProfile(intent.primary);
     const rankedItems = unifiedRank(

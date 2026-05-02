@@ -51,15 +51,6 @@ export function buildRetrievalPlan(
   if (FINANCE_INTENTS.has(primary) || intent.entities.categories.length > 0 || intent.entities.merchants.length > 0) {
     const hasSpecificLookup = intent.entities.merchants.length > 0 || intent.entities.amount !== null;
 
-    if (hasSpecificLookup) {
-      // Factual lookup — raw rows
-      steps.push(step("sql_transactions", "find specific transactions", {
-        merchants: resolved.merchantNames,
-        dateRange,
-        amount: intent.entities.amount,
-      }, 2));
-    }
-
     // Always add aggregation for spending queries
     if (primary === "spending_analysis" || primary === "finance") {
       steps.push(step("aggregated_finance", "compute spending breakdown", {
@@ -68,6 +59,14 @@ export function buildRetrievalPlan(
         dateRange,
       }, 2));
     }
+
+    // Raw transactions — always included for finance queries as fallback evidence
+    steps.push(step("sql_transactions", "find transactions", {
+      merchants: resolved.merchantNames,
+      categories: intent.entities.categories,
+      dateRange,
+      amount: intent.entities.amount,
+    }, hasSpecificLookup ? 2 : 3));
   }
 
   // Commitment / productivity lookups
