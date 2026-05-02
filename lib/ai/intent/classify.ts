@@ -182,14 +182,16 @@ function applyDeterministicOverrides(
     };
   }
 
-  // "what do I know about X" is a knowledge lookup, not a daily brief
-  if (/\bwhat do i know about\b/.test(lower)) {
+  // Temporal/knowledge lookups — not daily briefs even if LLM says operational_summary
+  const isTemporalLookup = /\bwhat do i know about\b/.test(lower) ||
+    /\bwhat (happened|changed)\s+(before|after|around|since|in|during)\b/.test(lower);
+  if (isTemporalLookup) {
     return { operational_weight: 0.0, investigative_weight: 1.0 };
   }
 
   if (
     primary === "operational_summary" ||
-    /\b(catch me up|brief me|what.s urgent|daily brief|status update|what.s important|whats new|what happened(?!\s+(before|after|around|since|in|during))|anything new|what do i need to know|what should i focus on|what changed(?!\s+(before|after|around|since)))\b/.test(lower)
+    /\b(catch me up|brief me|what.s urgent|daily brief|status update|what.s important|whats new|what happened|anything new|what do i need to know|what should i focus on|what changed)\b/.test(lower)
   ) {
     return { operational_weight: 1.0, investigative_weight: 0.0 };
   }
