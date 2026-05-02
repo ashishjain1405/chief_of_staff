@@ -1,9 +1,16 @@
 /**
- * One-time backfill: enqueue compute-operational-state for all existing users.
- * Run once: npx tsx scripts/backfill-operational-insights.ts
+ * One-time backfill: runs compute-operational-state directly for all existing users.
+ * Does NOT use Redis/BullMQ — calls the worker function inline to avoid Upstash limits.
+ *
+ * Run: npx tsx scripts/backfill-operational-insights.ts
  */
 import { createClient } from "@supabase/supabase-js";
-import { operationalQueue } from "../lib/queues";
+import { computeOperationalState } from "../worker/jobs/compute-operational-state";
+import type { Job } from "bullmq";
+
+function makeJob(userId: string): Job {
+  return { data: { userId } } as unknown as Job;
+}
 
 async function main() {
   const supabase = createClient(
@@ -22,16 +29,20 @@ async function main() {
     process.exit(0);
   }
 
-  console.log(`Enqueueing compute-operational-state for ${users.length} users...`);
+  console.log(`Running backfill for ${users.length} user(s)...`);
 
   for (let i = 0; i < users.length; i++) {
-    const user = users[i];
-    // Stagger jobs by 2s each to avoid hammering the DB simultaneously
-    await operationalQueue.add("compute-operational-state", { userId: user.id }, { delay: i * 2000 });
-    console.log(`  [${i + 1}/${users.length}] Enqueued ${user.id}`);
+    const { id: userId } = users[i];
+    console.log(`\n[${i + 1}/${users.length}] Processing user ${userId}...`);
+    try {
+      await computeOperationalState(makeJob(userId));
+      console.log(`  ✓ Done`);
+    } catch (err) {
+      console.error(`  ✗ Failed:`, err);
+    }
   }
 
-  console.log("Done. Jobs enqueued — worker will process them shortly.");
+  console.log("\nBackfill complete.");
   process.exit(0);
 }
 
