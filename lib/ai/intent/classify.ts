@@ -182,13 +182,14 @@ function applyDeterministicOverrides(
     };
   }
 
-  // "what do I know about X" is a knowledge lookup, not a daily brief
-  const isKnowledgeLookup = /\bwhat do i know about\b/.test(lower);
+  // "what do I know about X" is a knowledge/semantic lookup, not a daily brief
+  if (/\bwhat do i know about\b/.test(lower)) {
+    return { operational_weight: 0.0, investigative_weight: 1.0 };
+  }
+
   if (
-    !isKnowledgeLookup && (
-      primary === "operational_summary" ||
-      /\b(catch me up|brief me|what.s urgent|daily brief|status update|what.s important|whats new|what happened|anything new|what do i need to know|what should i focus on)\b/.test(lower)
-    )
+    primary === "operational_summary" ||
+    /\b(catch me up|brief me|what.s urgent|daily brief|status update|what.s important|whats new|what happened|anything new|what do i need to know|what should i focus on)\b/.test(lower)
   ) {
     return { operational_weight: 1.0, investigative_weight: 0.0 };
   }

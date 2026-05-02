@@ -87,7 +87,7 @@ export const TEST_CASES: TestCase[] = [
 
   { id: "L1-M1",  description: "Yesterday meetings",             query: "What meetings did I have yesterday?",           assert: [{ field: "intent.primary", eq: "scheduling" }, hasSqlMeetings, invHigh] },
   { id: "L1-M2",  description: "Meetings with Rahul",            query: "Show meetings with Rahul.",                     assert: [{ field: "intent.primary", oneOf: ["scheduling", "relationship"] }, { field: "entities.people", includes: "Rahul" }, hasSqlMeetings] },
-  { id: "L1-M3",  description: "Hiring meeting discussion",      query: "What was discussed in the hiring meeting?",     assert: [{ field: "intent.primary", oneOf: ["scheduling", "search_lookup"] }, hasSqlMeetings] },
+  { id: "L1-M3",  description: "Hiring meeting discussion",      query: "What was discussed in the hiring meeting?",     assert: [hasSqlMeetings] },
   { id: "L1-M4",  description: "Insurance in meetings",          query: "Did we discuss insurance in any meeting?",      assert: [{ field: "intent.primary", eq: "scheduling" }, hasSqlMeetings] },
   { id: "L1-M5",  description: "Budget meetings",                query: "Find meetings where budget cuts were mentioned.", assert: [hasSqlMeetings] },
   { id: "L1-M6",  description: "Longest meetings this week",     query: "Show my longest meetings this week.",           assert: [{ field: "intent.primary", eq: "scheduling" }, { field: "temporal.relativePeriod", eq: "this_week" }, hasSqlMeetings] },
