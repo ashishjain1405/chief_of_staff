@@ -36,6 +36,8 @@ export function buildRetrievalPlan(
   const { operational_weight, investigative_weight } = intent.retrieval_weights;
   const queryLower = query.toLowerCase();
   const queryMentionsEmail = /\b(email|emails|message|messages|inbox|mail)\b/.test(queryLower);
+  const queryMentionsMeeting = /\b(meeting|meetings|met|discussed in|discussion in)\b/.test(queryLower);
+  const queryMentionsTask = /\b(task|tasks|action items?|follow.?up|to.?do|overdue)\b/.test(queryLower);
   const dateRange = resolved.resolvedDateRange;
 
   // Operational path — always include for finance intents to surface spending_summary insights
@@ -75,16 +77,16 @@ export function buildRetrievalPlan(
     }
   }
 
-  // Commitment / productivity lookups
-  if (primary === "commitments" || primary === "productivity") {
+  // Commitment / productivity lookups — also fires when query mentions task/follow-up keywords
+  if (primary === "commitments" || primary === "productivity" || queryMentionsTask) {
     steps.push(step("sql_commitments", "find commitments", {
       ...(resolved.contactIds.length > 0 ? { contactIds: resolved.contactIds } : {}),
       dateRange,
     }, 2));
   }
 
-  // Scheduling
-  if (primary === "scheduling" || primary === "travel") {
+  // Scheduling — also fires when query explicitly mentions meeting keywords
+  if (primary === "scheduling" || primary === "travel" || queryMentionsMeeting) {
     steps.push(step("sql_meetings", "find meetings", {
       dateRange,
     }, 2));
