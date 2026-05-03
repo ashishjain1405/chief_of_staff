@@ -24,8 +24,8 @@ export function getQueue(name: string): Queue {
       defaultJobOptions: {
         attempts: 3,
         backoff: { type: "exponential", delay: 2000 },
-        removeOnComplete: { count: 100 },
-        removeOnFail: { count: 50 },
+        removeOnComplete: { age: 3600 },
+        removeOnFail: { age: 86400 },
       },
     });
   }

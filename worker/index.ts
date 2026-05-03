@@ -10,6 +10,9 @@ function makeWorker(queueName: string, handler: (job: any) => Promise<void>) {
   const worker = new Worker(queueName, handler, {
     connection: getRedisConnection(),
     concurrency: 5,
+    stalledInterval: 60000,
+    lockDuration: 60000,
+    lockRenewTime: 30000,
   });
 
   worker.on("failed", (job, err) => {

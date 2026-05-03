@@ -121,7 +121,7 @@ export async function summarizeCommunication(job: Job) {
     });
   }
 
-  await operationalQueue.add("compute-operational-state", { userId }, { delay: 2000 });
+  await operationalQueue.add("compute-operational-state", { userId }, { delay: 30000, jobId: `ops-${userId}`, deduplication: { id: `ops-${userId}` } });
 }
 
 async function runFinancialExtraction(

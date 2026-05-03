@@ -1,6 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
 import { getGmailClient, fetchEmailById, parseEmailBody, parseEmailHtml, extractHeader } from "@/lib/integrations/gmail";
-import { summarizeQueue } from "@/lib/queues";
 
 const DAYS = parseInt(process.argv.find((a) => a.startsWith("--days="))?.split("=")[1] ?? "90");
 const DELAY_MS = 200; // ~5 req/s, well under Gmail quota
@@ -147,12 +146,7 @@ async function importMessage(supabase: any, userId: string, messageId: string) {
     .select("id")
     .single();
 
-  if (comm?.id) {
-    await summarizeQueue.add("summarize-communication", {
-      communicationId: comm.id,
-      userId,
-    });
-  }
+  // summarization skipped — enqueue manually once Redis quota resets
 }
 
 main();
