@@ -5,6 +5,7 @@ import { summarizeCommunication } from "./jobs/summarize-communication";
 import { processMeetingSummary } from "./jobs/summarize-meeting";
 import { generateAndDeliverDailyBrief } from "./jobs/generate-daily-brief";
 import { computeOperationalState } from "./jobs/compute-operational-state";
+import { renewGmailWatches } from "./jobs/renew-gmail-watches";
 
 function makeWorker(queueName: string, handler: (job: any) => Promise<void>) {
   const worker = new Worker(queueName, handler, {
@@ -34,7 +35,18 @@ makeWorker("scheduled", async (job) => {
   if (job.name === "generate-daily-brief") {
     await generateAndDeliverDailyBrief(job);
   }
+  if (job.name === "renew-gmail-watches") {
+    await renewGmailWatches(job);
+  }
 });
+
+// Register repeating jobs (idempotent — BullMQ deduplicates by repeat key)
+const scheduledQueue = getQueue("scheduled");
+scheduledQueue.add(
+  "renew-gmail-watches",
+  {},
+  { repeat: { pattern: "0 0 */6 * *" }, jobId: "renew-gmail-watches" }
+);
 
 console.log("Worker process started. Listening for jobs...");
 
