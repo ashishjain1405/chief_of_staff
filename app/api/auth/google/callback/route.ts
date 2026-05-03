@@ -30,25 +30,36 @@ export async function GET(request: NextRequest) {
 
   await saveTokens(user.id, tokens, googleUser.email ?? undefined);
 
-  // Start Gmail Pub/Sub watch if project ID is configured
+  // Start Gmail + Calendar watches if project ID is configured
   if (process.env.GOOGLE_CLOUD_PROJECT_ID) {
     try {
       const { watchGmailInbox } = await import("@/lib/integrations/gmail");
-      const { historyId, expiration } = await watchGmailInbox(user.id);
+      const { watchCalendar } = await import("@/lib/integrations/calendar");
       const { createServiceClient } = await import("@/lib/supabase/server");
       const serviceSupabase = await createServiceClient();
+
+      const [gmailResult, calendarResult] = await Promise.allSettled([
+        watchGmailInbox(user.id),
+        watchCalendar(user.id),
+      ]);
+
+      const gmailMeta = gmailResult.status === "fulfilled"
+        ? { last_history_id: gmailResult.value.historyId, watch_expires_at: new Date(Number(gmailResult.value.expiration)).toISOString() }
+        : {};
+      const calendarMeta = calendarResult.status === "fulfilled"
+        ? { calendar_resource_id: calendarResult.value.resourceId, calendar_watch_expires_at: new Date(Number(calendarResult.value.expiration)).toISOString() }
+        : {};
+
+      if (gmailResult.status === "rejected") console.error("Gmail watch setup failed:", gmailResult.reason);
+      if (calendarResult.status === "rejected") console.error("Calendar watch setup failed:", calendarResult.reason);
+
       await serviceSupabase
         .from("integrations")
-        .update({
-          metadata: {
-            last_history_id: historyId,
-            watch_expires_at: new Date(Number(expiration)).toISOString(),
-          },
-        })
+        .update({ metadata: { ...gmailMeta, ...calendarMeta } })
         .eq("user_id", user.id)
         .eq("provider", "google");
     } catch (e) {
-      console.error("Gmail watch setup failed:", e);
+      console.error("Watch setup failed:", e);
     }
   }
 
