@@ -35,11 +35,15 @@ export function buildRetrievalPlan(
   const steps: RetrievalStep[] = [];
   const { operational_weight, investigative_weight } = intent.retrieval_weights;
   const queryLower = query.toLowerCase();
-  const queryMentionsEmail = /\b(email|emails|message|messages|inbox|mail|discussed|discussion|conversation|conversations)\b/.test(queryLower);
   const queryMentionsMeeting = /\b(meeting|meetings|meet|met|discussed in|discussion in)\b/.test(queryLower);
   const queryMentionsTask = /\b(task|tasks|action items?|follow.?ups?|to.?do|overdue|commit(ted|ments?)?|promises?|pending|ignored|unresolved|slipping|deadline|deadlines|blocked|blocker|escalate)\b/.test(queryLower);
   const queryIsTemporalLookup = /\bwhat (happened|changed)\s+(before|after|around|since|in|during)\b/.test(queryLower);
-  const queryMentionsFinance = /\b(refund|refunds|transaction|transactions|debit|credit|payment|payments|charge|charges|spend|spent|spending|expense|expenses|atm|withdrawal|cashback|transfer|money|paid|salary)\b/.test(queryLower);
+  const queryMentionsFinance = /\b(refund|refunds|transaction|transactions|debit|credit|payment|payments|charge|charges|spend|spent|spending|expense|expenses|atm|withdrawal|cashback|transfer|money|paid|salary|merchant|merchants|savings?)\b/.test(queryLower);
+  const queryIsAggregation = /\b(top\s+merchants?|compare|month.{0,5}vs|spending\s+trend|category\s+breakdown|average\s+daily|monthly\s+trend|weekly\s+trend)\b/.test(queryLower);
+  // Intent-signal: inv=1.0 + non-finance primary + no finance domain → comms are the natural source
+  const isNonFinanceLookup = investigative_weight >= 1.0 && !FINANCE_INTENTS.has(intent.primary) && !queryMentionsFinance && !queryIsAggregation;
+  // Explicit comms noun in query — stable narrow set that names the data source, not topic words
+  const queryCommunicationExplicit = /\b(communication|communications|conversation|conversations|discussion|discussions|thread|threads|chat|correspondence)\b/.test(queryLower);
   const dateRange = resolved.resolvedDateRange;
 
   // Operational path — always include for finance intents to surface spending_summary insights
@@ -50,16 +54,16 @@ export function buildRetrievalPlan(
   }
 
   // Investigative path — only if weight above threshold (keyword overrides bypass this gate)
-  if (investigative_weight <= 0.3 && !queryMentionsEmail && !queryMentionsMeeting && !queryMentionsTask && !queryIsTemporalLookup && !queryMentionsFinance) return steps;
+  if (investigative_weight <= 0.3 && !isNonFinanceLookup && !queryMentionsMeeting && !queryMentionsTask && !queryIsTemporalLookup && !queryMentionsFinance) return steps;
 
   const primary = intent.primary;
 
   // Finance / spending
-  if (FINANCE_INTENTS.has(primary) || intent.entities.categories.length > 0 || intent.entities.merchants.length > 0 || queryMentionsFinance) {
+  if (FINANCE_INTENTS.has(primary) || intent.entities.categories.length > 0 || intent.entities.merchants.length > 0 || queryMentionsFinance || queryIsAggregation) {
     const hasSpecificLookup = intent.entities.merchants.length > 0 || intent.entities.amount !== null;
 
-    // Always add aggregation for spending queries
-    if (primary === "spending_analysis" || primary === "finance") {
+    // Always add aggregation for spending/trend queries
+    if (primary === "spending_analysis" || primary === "finance" || queryIsAggregation) {
       steps.push(step("aggregated_finance", "compute spending breakdown", {
         categories: intent.entities.categories,
         merchants: resolved.merchantNames,
@@ -118,8 +122,8 @@ export function buildRetrievalPlan(
   }
 
   // Search lookup — communications + topics
-  // Also fires for email keywords, or temporal-investigative queries ("what happened around/since X")
-  if (primary === "search_lookup" || queryMentionsEmail || queryIsTemporalLookup) {
+  // Also fires for non-finance inv=1.0 lookups, or temporal-investigative queries ("what happened around/since X")
+  if (primary === "search_lookup" || isNonFinanceLookup || queryCommunicationExplicit || queryIsTemporalLookup) {
     steps.push(step("sql_communications", "search email archive", {
       topics: intent.entities.topics,
       merchants: resolved.merchantNames,

@@ -126,6 +126,21 @@ function inferTemporal(query: string): TemporalAnchor | null {
     const to = new Date(from.getTime() + 864e5);
     return { type: "absolute", dateRange: { from: from.toISOString(), to: to.toISOString() } };
   }
+  const MONTH_NAMES: Record<string, number> = {
+    january: 0, february: 1, march: 2, april: 3, may: 4, june: 5,
+    july: 6, august: 7, september: 8, october: 9, november: 10, december: 11,
+    jan: 0, feb: 1, mar: 2, apr: 3, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11,
+  };
+  const monthMatch = /\bin\s+(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec)\b/i.exec(query);
+  if (monthMatch) {
+    const idx = MONTH_NAMES[monthMatch[1].toLowerCase()];
+    const today = new Date();
+    let year = today.getFullYear();
+    if (idx > today.getMonth()) year -= 1;
+    const from = new Date(year, idx, 1);
+    const to = new Date(year, idx + 1, 0, 23, 59, 59);
+    return { type: "absolute", dateRange: { from: from.toISOString(), to: to.toISOString() } };
+  }
   for (const { pattern, period } of TEMPORAL_PATTERNS) {
     if (pattern.test(query)) return { type: "relative", relativePeriod: period };
   }
@@ -163,6 +178,12 @@ function inferPeople(query: string): string[] {
     const name = didIMeet[1].trim().replace(/[.!?]+$/, "");
     if (name.length > 1 && !FIRST_PERSON.has(name.split(/\s+/)[0].toLowerCase())) matches.push(name);
   }
+  // "last/latest thing X asked/said/told" — captures name before communication verb
+  const lastThingPattern = /\b(?:last|latest|recent)\s+(?:thing|message|question|email)?\s*([A-Za-z][a-zA-Z]+(?:\s+[A-Za-z]+)?)\s+(?:asked?|said?|wrote?|told?|sent?|mention(?:ed)?)\b/i.exec(query);
+  if (lastThingPattern) {
+    const name = lastThingPattern[1].trim();
+    if (name.length > 1 && !FIRST_PERSON.has(name.split(/\s+/)[0].toLowerCase())) matches.push(name);
+  }
   return [...new Set(matches.filter(Boolean))];
 }
 
@@ -173,30 +194,19 @@ function applyDeterministicOverrides(
 ): RetrievalWeights {
   const lower = query.toLowerCase();
 
-  // Analytical "why/am I/should I" queries benefit from operational insights too
-  const isAnalyticalQuery = /\b(why|am i|should i|is it|are we)\b/.test(lower);
+  // Analytical reasoning queries: "why X", "am I over-X", "is it X", "should I [action]"
+  // Exclude "should I know" — that's informational (daily brief scope), not analytical
+  const isAnalyticalQuery = /\b(why|am i|is it|are we)\b/.test(lower) ||
+    (/\bshould i\b/.test(lower) && !/\bshould i know\b/.test(lower));
 
   const isSpendingQuery =
     !isAnalyticalQuery && (
       ["finance", "spending_analysis", "subscriptions", "bills_payments"].includes(primary) ||
-      /\b(show|how much|breakdown|spent|spending|expenses?|charges?|paid|transactions?)\b/.test(lower)
+      /\b(show|how much|breakdown|spent|spending|expenses?|charges?|paid|transactions?|merchant|merchants|compare|savings?)\b/.test(lower)
     );
 
   if (isSpendingQuery) {
     return { operational_weight: 0.1, investigative_weight: 1.0 };
-  }
-
-  // Analytical spending queries need transaction data too — floor investigative at 0.6
-  const isAnalyticalSpending =
-    isAnalyticalQuery && (
-      ["finance", "spending_analysis"].includes(primary) ||
-      /\b(spend|spending|overspend|expenses?|charges?|budget)\b/.test(lower)
-    );
-  if (isAnalyticalSpending) {
-    return {
-      operational_weight: Math.max(weights.operational_weight, 0.6),
-      investigative_weight: Math.max(weights.investigative_weight, 0.6),
-    };
   }
 
   if (primary === "search_lookup" || /\b(find|search|look up|show me)\b/.test(lower)) {
@@ -217,10 +227,20 @@ function applyDeterministicOverrides(
   const isLookupQuery = !isDailyBriefScope && (
     /\bwhat do i know about\b/.test(lower) ||
     /\bwhat (happened|changed)\s+(before|after|around|since|in|during)\b/.test(lower) ||
-    /\bdid i (get|receive|have|see)\b/.test(lower)
+    /\bdid (i|anyone|someone|anybody)\s+(get|receive|have|see|mention|say|ask|write|send|meet|pay)\b/.test(lower) ||
+    /\bhow many times did (i|we)\s+(meet|see|talk|speak|chat)\b/.test(lower) ||
+    /\b(last|latest|most recent)\s+(thing|message|email|question)\s+\w+\s+(ask|said?|wrote?|told?|sent?|mention)/i.test(lower)
   );
   if (isLookupQuery) {
     return { operational_weight: 0.0, investigative_weight: 1.0 };
+  }
+
+  // Analytical queries always need some investigative signal — floor before op_summary zeroing
+  if (isAnalyticalQuery) {
+    return {
+      operational_weight: Math.max(weights.operational_weight, 0.3),
+      investigative_weight: Math.max(weights.investigative_weight, 0.5),
+    };
   }
 
   if (
