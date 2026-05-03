@@ -153,7 +153,8 @@ function normalizeCommunications(rows: any[], query: string, entities: EntityCon
 
 function normalizeMeetings(rows: any[], query: string, entities: EntityContext, weights: (typeof PROFILE_WEIGHTS)[RankingProfile]): MeetingRetrievalItem[] {
   return rows.map((row) => {
-    const text = `${row.title ?? ""} ${row.executive_summary ?? ""}`;
+    const summary = row.transcript_summary ?? row.executive_summary ?? row.description ?? "";
+    const text = `${row.title ?? ""} ${summary}`;
     return {
       item_type: "meeting" as const,
       source: "sql_meetings" as const,
@@ -161,7 +162,7 @@ function normalizeMeetings(rows: any[], query: string, entities: EntityContext, 
       retrieval_score: scoreItem(text, row.start_time, 0.80, 0.3, query, entities, weights),
       data: {
         id: row.id, title: row.title, start_time: row.start_time,
-        executive_summary: row.executive_summary, attendees: row.attendees,
+        executive_summary: summary, attendees: row.attendees,
       },
     };
   });

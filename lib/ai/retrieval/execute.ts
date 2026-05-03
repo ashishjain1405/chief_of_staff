@@ -77,7 +77,7 @@ async function executeStep(
     case "sql_transactions": {
       let q = supabase
         .from("transactions_normalized")
-        .select("id, merchant_normalized, amount, currency, category, transaction_datetime, transaction_type, bank_name, payment_method")
+        .select("id, merchant_normalized, amount, currency, category, transaction_datetime, transaction_type")
         .eq("user_id", userId)
         .order("transaction_datetime", { ascending: false })
         .limit(step.max_results);
@@ -88,6 +88,8 @@ async function executeStep(
         q = q.gte("transaction_datetime", f.dateRange.from).lte("transaction_datetime", f.dateRange.to);
       }
       if (f.amount) q = q.eq("amount", f.amount);
+      // categories not applied — intent category labels don't reliably match DB category values;
+      // aggregate.ts handles category filtering with a fallback retry
 
       const { data } = await q;
       return data ?? [];
@@ -125,7 +127,7 @@ async function executeStep(
     case "sql_meetings": {
       let q = supabase
         .from("meetings")
-        .select("id, title, start_time, executive_summary, attendees")
+        .select("id, title, start_time, transcript_summary, attendees, description")
         .eq("user_id", userId)
         .order("start_time", { ascending: false })
         .limit(step.max_results);

@@ -72,8 +72,6 @@ export interface TransactionRetrievalItem extends BaseRetrievalItem {
     category: string | null;
     transaction_datetime: string | null;
     transaction_type: string | null;
-    bank_name: string | null;
-    payment_method: string | null;
   };
 }
 
@@ -99,7 +97,7 @@ export interface MeetingRetrievalItem extends BaseRetrievalItem {
     id: string;
     title: string | null;
     start_time: string | null;
-    executive_summary: string | null;
+    executive_summary: string | null; // maps to transcript_summary in DB
     attendees: string[] | null;
   };
 }
@@ -190,7 +188,7 @@ export interface RetrievalTrace {
   temporal: TemporalAnchor | null;
   retrieval_plan: RetrievalStep[];
   retrieved_sources: { source: string; count: number; success: boolean }[];
-  top_ranked_items: { source: string; score: number; title?: string }[];
+  top_ranked_items: { source: string; score: number; title?: string; snippet?: string }[];
   total_latency_ms: number;
   budget_exhausted: boolean;
 }
