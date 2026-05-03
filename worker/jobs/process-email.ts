@@ -55,7 +55,7 @@ export async function processEmail(job: Job) {
   // Quick importance heuristic before AI
   const labels = message.labelIds ?? [];
   let importanceScore = 0.5;
-  if (labels.includes("IMPORTANT")) importanceScore += 0.2;
+  if (labels.includes("IMPORTANT") && !listUnsubscribe) importanceScore += 0.2;
   if (!to.includes(",")) importanceScore += 0.1; // direct, not CC'd
   if (body.match(/urgent|asap|deadline|invoice|contract|term sheet/i)) importanceScore += 0.15;
   if (body.match(/unsubscribe|list-unsubscribe/i)) importanceScore = 0.05;

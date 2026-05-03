@@ -160,8 +160,10 @@ Examples: "50% off today only", "Exclusive offer for you", "New collection launc
 NOT for: newsletters (editorial content) or social notifications.
 
 "important"
-Personal human emails requiring nuanced attention: investor/client/founder communication, direct relationship emails, urgent personal correspondence, emails that don't fit any automated category.
+ONLY for direct human-to-human emails where a real person wrote to you personally: investor updates, client escalations, colleague messages, founder correspondence, urgent personal emails.
+The sender must be a real human writing directly to you — NOT a mailing list, newsletter, news alert, automated system, or bulk sender.
 Examples: Investor asking for an update, client escalation, personal email from a colleague, board member message.
+NOT for: news alerts, market updates, newsletters, promotional emails, automated notifications, or any email sent to a list. Use "other" for emails that don't fit any category.
 
 "pending_reply"
 Sender clearly expects a response: unanswered question, thread awaiting reply, follow-up on a previous conversation, introduction expecting acknowledgement.
@@ -193,6 +195,13 @@ PRIORITY ORDER (resolve conflicts by checking top-down):
 20. Personal human emails needing attention → "important"
 21. Sender awaiting a reply → "pending_reply"
 22. Everything else → "other"
+
+IMPORTANCE SCORE GUIDANCE:
+- "news", "newsletters", "promotions", "entertainment", "social": importance_score <= 0.3
+- "account_security", "system_notifications": importance_score <= 0.25
+- "transactions", "finance_bills": 0.4–0.7 based on urgency/amount
+- "important", "pending_reply": 0.7–1.0
+- Personal emails from known humans: 0.6–1.0
 
 Set fallback_category ONLY when email_category is "transactions", "finance_bills", or "subscriptions_memberships". Set it to what you would classify this email as if it were NOT a financial/subscription email. Valid values: "travel", "account_security", "receipts_documents", "legal_government", "meetings_calendar", "shipping_orders", "productivity_tools", "career", "social", "newsletters", "news", "learning", "entertainment", "fitness", "system_notifications", "promotions", "important", "pending_reply", "other".
 For all other categories, set fallback_category to null.`;

@@ -36,6 +36,14 @@ export async function summarizeCommunication(job: Job) {
   // Stage 0: General email triage
   const triage = await triageEmail(businessContext, senderInfo, comm.body ?? "");
 
+  const LOW_SIGNAL_CATEGORIES = new Set([
+    "news", "newsletters", "promotions", "entertainment",
+    "social", "system_notifications",
+  ]);
+  const cappedScore = LOW_SIGNAL_CATEGORIES.has(triage.email_category)
+    ? Math.min(triage.importance_score, 0.3)
+    : triage.importance_score;
+
   const existingMeta = (comm.channel_metadata as any) ?? {};
 
   await supabase
@@ -43,7 +51,7 @@ export async function summarizeCommunication(job: Job) {
     .update({
       body_summary: triage.summary,
       sentiment: triage.sentiment,
-      importance_score: triage.importance_score,
+      importance_score: cappedScore,
       requires_action: triage.requires_action,
       email_category: triage.email_category,
       category_processed: true,
@@ -108,7 +116,7 @@ export async function summarizeCommunication(job: Job) {
     }
   }
 
-  if (triage.requires_action && triage.importance_score >= 0.7) {
+  if (triage.requires_action && cappedScore >= 0.7) {
     await supabase.from("tasks").insert({
       user_id: userId,
       title: triage.action_description ?? `Reply to: ${comm.subject}`,
@@ -116,8 +124,8 @@ export async function summarizeCommunication(job: Job) {
       source_id: communicationId,
       contact_id: comm.contact_id,
       due_date: triage.follow_up_deadline,
-      priority: triage.importance_score >= 0.85 ? "high" : "medium",
-      ai_reasoning: `Importance: ${triage.importance_score.toFixed(2)}. ${triage.summary}`,
+      priority: cappedScore >= 0.85 ? "high" : "medium",
+      ai_reasoning: `Importance: ${cappedScore.toFixed(2)}. ${triage.summary}`,
     });
   }
 
