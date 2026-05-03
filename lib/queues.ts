@@ -10,6 +10,7 @@ export function getRedisConnection(): IORedis {
     connection = new IORedis(url, {
       maxRetriesPerRequest: null,
       enableReadyCheck: false,
+      tls: url.startsWith("rediss://") ? { rejectUnauthorized: false } : undefined,
     });
   }
   return connection;
