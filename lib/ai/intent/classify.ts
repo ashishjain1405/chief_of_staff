@@ -116,6 +116,16 @@ function inferRollingDays(query: string): TemporalAnchor | null {
 function inferTemporal(query: string): TemporalAnchor | null {
   const rolling = inferRollingDays(query);
   if (rolling) return rolling;
+  if (/\byesterday\b/i.test(query)) {
+    const to = new Date();
+    const from = new Date(to.getTime() - 864e5);
+    return { type: "absolute", dateRange: { from: from.toISOString(), to: to.toISOString() } };
+  }
+  if (/\btomorrow\b/i.test(query)) {
+    const from = new Date();
+    const to = new Date(from.getTime() + 864e5);
+    return { type: "absolute", dateRange: { from: from.toISOString(), to: to.toISOString() } };
+  }
   for (const { pattern, period } of TEMPORAL_PATTERNS) {
     if (pattern.test(query)) return { type: "relative", relativePeriod: period };
   }
@@ -128,7 +138,7 @@ function inferPeople(query: string): string[] {
   const matches: string[] = [];
   const FIRST_PERSON = new Set(["i", "me", "my", "we", "our", "us"]);
   // Trigger words before a name — case-insensitive, any casing
-  const triggerPattern = /\b(?:did|with|told|asked|about|regarding|to|by|meet|met)\s+([A-Za-z][a-zA-Z\s]{1,40}?)(?=\s+(?:say|tell|send|write|message|call|contact|email|about|on|regarding|in|after|before)|$)/gi;
+  const triggerPattern = /\b(?:did|with|told|asked|about|regarding|to|by|meet|met)\s+([A-Za-z][a-zA-Z\s]{1,40}?)(?=\s+(?:say|tell|send|write|message|call|contact|email|about|on|regarding|in|after|before)|[.!?]?$)/gi;
   let m: RegExpExecArray | null;
   while ((m = triggerPattern.exec(query)) !== null) {
     const name = m[1].trim();
@@ -147,6 +157,12 @@ function inferPeople(query: string): string[] {
   // Leading: "What did Ashish Jain say"
   const leading = /^(?:what|when|why|how|show|find|get)\s+did\s+([A-Za-z][\w\s]{1,40}?)\s+(?:say|send|write|tell)/i.exec(query);
   if (leading && !FIRST_PERSON.has(leading[1].trim().toLowerCase())) matches.push(leading[1].trim());
+  // "Did I meet/see/talk to X" — first-person activity with named person
+  const didIMeet = /\bdid\s+(?:i|we)\s+(?:meet|see|talk\s+to|speak\s+with|chat\s+with)\s+([A-Za-z][\w\s]{1,40}?)(?:[.!?]?$|\s+(?:about|on|regarding|in|after|before))/i.exec(query);
+  if (didIMeet) {
+    const name = didIMeet[1].trim().replace(/[.!?]+$/, "");
+    if (name.length > 1 && !FIRST_PERSON.has(name.split(/\s+/)[0].toLowerCase())) matches.push(name);
+  }
   return [...new Set(matches.filter(Boolean))];
 }
 
@@ -157,7 +173,7 @@ function applyDeterministicOverrides(
 ): RetrievalWeights {
   const lower = query.toLowerCase();
 
-  // Analytical "why/am I/should I" queries benefit from operational insights too — let LLM weights stand
+  // Analytical "why/am I/should I" queries benefit from operational insights too
   const isAnalyticalQuery = /\b(why|am i|should i|is it|are we)\b/.test(lower);
 
   const isSpendingQuery =
@@ -168,6 +184,19 @@ function applyDeterministicOverrides(
 
   if (isSpendingQuery) {
     return { operational_weight: 0.1, investigative_weight: 1.0 };
+  }
+
+  // Analytical spending queries need transaction data too — floor investigative at 0.6
+  const isAnalyticalSpending =
+    isAnalyticalQuery && (
+      ["finance", "spending_analysis"].includes(primary) ||
+      /\b(spend|spending|overspend|expenses?|charges?|budget)\b/.test(lower)
+    );
+  if (isAnalyticalSpending) {
+    return {
+      operational_weight: Math.max(weights.operational_weight, 0.6),
+      investigative_weight: Math.max(weights.investigative_weight, 0.6),
+    };
   }
 
   if (primary === "search_lookup" || /\b(find|search|look up|show me)\b/.test(lower)) {
@@ -183,17 +212,20 @@ function applyDeterministicOverrides(
   }
 
   // Specific lookup patterns — not daily briefs even if LLM says operational_summary
-  const isLookupQuery =
+  // Exclude only "since yesterday/today" — "since last week/month/quarter" is investigative
+  const isDailyBriefScope = /\bsince\s+(yesterday|today)\b/.test(lower);
+  const isLookupQuery = !isDailyBriefScope && (
     /\bwhat do i know about\b/.test(lower) ||
     /\bwhat (happened|changed)\s+(before|after|around|since|in|during)\b/.test(lower) ||
-    /\bdid i (get|receive|have|see)\b/.test(lower);
+    /\bdid i (get|receive|have|see)\b/.test(lower)
+  );
   if (isLookupQuery) {
     return { operational_weight: 0.0, investigative_weight: 1.0 };
   }
 
   if (
     primary === "operational_summary" ||
-    /\b(catch me up|brief me|what.s urgent|daily brief|status update|what.s important|whats new|what happened|anything new|what do i need to know|what should i focus on|what changed)\b/.test(lower)
+    /\b(catch me up|brief me|what.s urgent|daily brief|status update|what.s important|whats new|what happened|anything new|what do i need to know|what should i focus on|what changed|what needs attention|what am i missing)\b/.test(lower)
   ) {
     return { operational_weight: 1.0, investigative_weight: 0.0 };
   }
@@ -227,8 +259,25 @@ function applyOverrides(query: string, result: IntentResult): IntentResult {
     ? people
     : result.entities.topics;
   const entities = { ...result.entities, categories, people, merchants, topics };
-  const retrieval_weights = applyDeterministicOverrides(result.primary, query, result.retrieval_weights);
   const temporal = result.temporal ?? inferTemporal(query);
+  let retrieval_weights = applyDeterministicOverrides(result.primary, query, result.retrieval_weights);
+  // Structural catch-up detection: "What X?" with no specific target → daily brief
+  // Only applies when LLM also classified as operational/productivity (no specific domain)
+  // Excluded when query has finance/spending/task domain keywords (even if LLM misclassifies)
+  const queryLower = query.toLowerCase();
+  const hasFinanceDomain = /\b(spend|spending|spent|expense|expenses|transaction|transactions|merchant|merchants|charge|charges|overdue|commit|deadline|bill|payment|atm|withdrawal|refund|invest)\b/.test(queryLower);
+  const isCatchUpQuery =
+    (result.primary === "operational_summary" || result.primary === "productivity") &&
+    /^(what|anything)\b/i.test(queryLower) &&
+    !hasFinanceDomain &&
+    retrieval_weights.investigative_weight < 0.5 &&
+    entities.people.length === 0 &&
+    entities.merchants.length === 0 &&
+    entities.topics.length === 0 &&
+    temporal === null;
+  if (isCatchUpQuery) {
+    retrieval_weights = { operational_weight: 1.0, investigative_weight: 0.0 };
+  }
   return { ...result, entities, retrieval_weights, temporal };
 }
 

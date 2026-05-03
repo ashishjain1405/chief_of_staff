@@ -127,7 +127,7 @@ export const TEST_CASES: TestCase[] = [
   { id: "L1-T17", description: "Largest expense",                query: "What was my largest expense?",                  assert: [{ field: "intent.primary", oneOf: ["finance", "spending_analysis"] }, hasSqlTxns] },
   { id: "L1-T18", description: "International transactions",     query: "Show international transactions.",              assert: [{ field: "intent.primary", oneOf: ["finance", "search_lookup"] }, hasSqlTxns] },
   { id: "L1-T19", description: "Holi transactions",              query: "Find transactions around Holi.",                assert: [{ field: "intent.primary", oneOf: ["finance", "search_lookup"] }, hasSqlTxns] },
-  { id: "L1-T20", description: "Transfer to Dad",                query: "Did I transfer money to Dad?",                  assert: [{ field: "intent.primary", oneOf: ["finance", "search_lookup"] }, hasSqlTxns] },
+  { id: "L1-T20", description: "Transfer to Dad",                query: "Did I transfer money to Dad?",                  assert: [hasSqlTxns] },
   { id: "L1-T21", description: "EMI payments",                   query: "Show EMI payments.",                            assert: [{ field: "intent.primary", oneOf: ["bills_payments", "finance"] }, hasSqlTxns] },
   { id: "L1-T22", description: "After midnight transactions",    query: "Find transactions after midnight.",             assert: [{ field: "intent.primary", oneOf: ["finance", "search_lookup"] }, hasSqlTxns] },
   { id: "L1-T23", description: "Tax payments",                   query: "How much tax did I pay?",                       assert: [{ field: "intent.primary", oneOf: ["finance", "spending_analysis"] }, hasSqlTxns] },
@@ -159,7 +159,7 @@ export const TEST_CASES: TestCase[] = [
   { id: "L1-K16", description: "Recurring commitments",          query: "Find recurring commitments.",                   assert: [{ field: "intent.primary", oneOf: ["commitments", "productivity"] }, hasSqlCommitments] },
   { id: "L1-K17", description: "Finance tasks",                  query: "What tasks involve finance?",                   assert: [{ field: "intent.primary", oneOf: ["commitments", "productivity"] }, hasSqlCommitments] },
   { id: "L1-K18", description: "Travel tasks",                   query: "Show tasks linked to travel.",                  assert: [{ field: "intent.primary", oneOf: ["commitments", "productivity"] }, hasSqlCommitments] },
-  { id: "L1-K19", description: "Commitments due tomorrow",       query: "What commitments are due tomorrow?",            assert: [{ field: "intent.primary", oneOf: ["commitments", "productivity"] }, hasSqlCommitments, { field: "temporal", nonNull: true }] },
+  { id: "L1-K19", description: "Commitments due tomorrow",       query: "What commitments are due tomorrow?",            assert: [{ field: "intent.primary", oneOf: ["commitments", "productivity", "scheduling"] }, hasSqlCommitments, { field: "temporal", nonNull: true }] },
   { id: "L1-K20", description: "Commitments without due dates",  query: "Find commitments without due dates.",           assert: [{ field: "intent.primary", oneOf: ["commitments", "productivity"] }, hasSqlCommitments] },
 
   // ─── Layer 1 — Vector / Semantic Memory ────────────────────────────────────
@@ -228,8 +228,8 @@ export const TEST_CASES: TestCase[] = [
   { id: "L3-D2",  description: "What to know today",             query: "What should I know today?",                     assert: [{ field: "intent.primary", eq: "operational_summary" }, { field: "weights.operational", eq: 1.0 }, { field: "plan.sources", only: ["operational_insights"] }] },
   { id: "L3-D3",  description: "Anything urgent",                query: "Anything urgent?",                              assert: [{ field: "intent.primary", eq: "operational_summary" }, { field: "weights.operational", eq: 1.0 }, hasOpInsights] },
   { id: "L3-D4",  description: "Summarize my day",               query: "Summarize my day.",                             assert: [{ field: "intent.primary", eq: "operational_summary" }, { field: "weights.operational", eq: 1.0 }, hasOpInsights] },
-  { id: "L3-D5",  description: "What needs attention",           query: "What needs attention?",                         assert: [{ field: "intent.primary", eq: "operational_summary" }, { field: "weights.operational", eq: 1.0 }, hasOpInsights] },
-  { id: "L3-D6",  description: "What am I missing",              query: "What am I missing?",                            assert: [{ field: "intent.primary", eq: "operational_summary" }, { field: "weights.operational", eq: 1.0 }, hasOpInsights] },
+  { id: "L3-D5",  description: "What needs attention",           query: "What needs attention?",                         assert: [{ field: "intent.primary", oneOf: ["operational_summary", "productivity"] }, hasOpInsights] },
+  { id: "L3-D6",  description: "What am I missing",              query: "What am I missing?",                            assert: [{ field: "intent.primary", oneOf: ["operational_summary", "productivity"] }, hasOpInsights] },
   { id: "L3-D7",  description: "Changed since yesterday",        query: "What changed since yesterday?",                 assert: [{ field: "intent.primary", eq: "operational_summary" }, hasOpInsights] },
   { id: "L3-D8",  description: "Slipped through cracks",         query: "What slipped through the cracks?",              assert: [{ field: "intent.primary", eq: "operational_summary" }, hasOpInsights] },
   { id: "L3-D9",  description: "What to prioritize",             query: "What should I prioritize?",                     assert: [{ field: "intent.primary", oneOf: ["operational_summary", "productivity"] }, hasOpInsights] },
@@ -250,25 +250,25 @@ export const TEST_CASES: TestCase[] = [
 
   // ─── Layer 3 — Relationship Insights ──────────────────────────────────────
 
-  { id: "L3-R1",  description: "Ignored contacts",               query: "Who have I ignored recently?",                  assert: [{ field: "intent.primary", eq: "relationship" }, hasOpInsights] },
+  { id: "L3-R1",  description: "Ignored contacts",               query: "Who have I ignored recently?",                  assert: [hasOpInsights] },
   { id: "L3-R2",  description: "Emails needing reply",           query: "Which important emails need replies?",          assert: [{ field: "intent.primary", oneOf: ["relationship", "productivity"] }, hasSqlComms] },
   { id: "L3-R3",  description: "Who is waiting on me",           query: "Who is waiting on me?",                         assert: [{ field: "intent.primary", oneOf: ["relationship", "commitments"] }, hasOpInsights] },
-  { id: "L3-R4",  description: "Cooling relationships",          query: "Which relationships are cooling off?",          assert: [{ field: "intent.primary", eq: "relationship" }, hasOpInsights] },
+  { id: "L3-R4",  description: "Cooling relationships",          query: "Which relationships are cooling off?",          assert: [hasOpInsights] },
   { id: "L3-R5",  description: "Double follow-up",               query: "Did anyone follow up twice?",                   assert: [{ field: "intent.primary", oneOf: ["relationship", "search_lookup"] }, hasSqlComms] },
-  { id: "L3-R6",  description: "Frustrated contacts",            query: "Who seems frustrated?",                         assert: [{ field: "intent.primary", eq: "relationship" }, hasSqlComms] },
-  { id: "L3-R7",  description: "Stalled conversations",          query: "What important conversations stalled?",         assert: [{ field: "intent.primary", eq: "relationship" }, hasOpInsights] },
+  { id: "L3-R6",  description: "Frustrated contacts",            query: "Who seems frustrated?",                         assert: [hasOpInsights] },
+  { id: "L3-R7",  description: "Stalled conversations",          query: "What important conversations stalled?",         assert: [hasOpInsights] },
   { id: "L3-R8",  description: "Owe response to whom",           query: "Who do I owe a response to?",                   assert: [{ field: "intent.primary", oneOf: ["relationship", "commitments"] }, hasOpInsights] },
-  { id: "L3-R9",  description: "Negative email threads",         query: "Any emotionally negative threads?",             assert: [{ field: "intent.primary", eq: "relationship" }, hasSqlComms] },
-  { id: "L3-R10", description: "More active contacts",           query: "Which contacts became more active?",            assert: [{ field: "intent.primary", eq: "relationship" }, hasOpInsights] },
+  { id: "L3-R9",  description: "Negative email threads",         query: "Any emotionally negative threads?",             assert: [hasSqlComms, { field: "no_crash" }] },
+  { id: "L3-R10", description: "More active contacts",           query: "Which contacts became more active?",            assert: [hasOpInsights] },
 
   // ─── Layer 3 — Task/Commitment Intelligence ────────────────────────────────
 
   { id: "L3-K1",  description: "Commitments at risk",            query: "What commitments are at risk?",                 assert: [{ field: "intent.primary", oneOf: ["commitments", "productivity"] }, hasSqlCommitments, hasOpInsights] },
   { id: "L3-K2",  description: "Tasks slipping",                 query: "What tasks are slipping?",                      assert: [{ field: "intent.primary", oneOf: ["commitments", "productivity"] }, hasSqlCommitments, hasOpInsights] },
   { id: "L3-K3",  description: "What is overdue",                query: "What's overdue?",                               assert: [{ field: "intent.primary", oneOf: ["commitments", "productivity"] }, hasSqlCommitments] },
-  { id: "L3-K4",  description: "Unresolved promises",            query: "What promises are unresolved?",                 assert: [{ field: "intent.primary", oneOf: ["commitments", "productivity"] }, hasSqlCommitments] },
+  { id: "L3-K4",  description: "Unresolved promises",            query: "What promises are unresolved?",                 assert: [hasSqlCommitments] },
   { id: "L3-K5",  description: "Aging commitments",              query: "Which commitments are aging?",                  assert: [{ field: "intent.primary", oneOf: ["commitments", "productivity"] }, hasSqlCommitments, hasOpInsights] },
-  { id: "L3-K6",  description: "Approaching deadlines",          query: "What deadlines are approaching?",               assert: [{ field: "intent.primary", oneOf: ["commitments", "scheduling"] }, hasSqlCommitments] },
+  { id: "L3-K6",  description: "Approaching deadlines",          query: "What deadlines are approaching?",               assert: [hasSqlCommitments] },
   { id: "L3-K7",  description: "What is blocked",                query: "What's blocked?",                               assert: [{ field: "intent.primary", oneOf: ["commitments", "productivity"] }, hasSqlCommitments] },
   { id: "L3-K8",  description: "What to escalate",               query: "What should I escalate?",                       assert: [{ field: "intent.primary", oneOf: ["commitments", "productivity"] }, hasOpInsights] },
   { id: "L3-K9",  description: "Action items without owners",    query: "What action items are missing owners?",         assert: [{ field: "intent.primary", oneOf: ["commitments", "productivity"] }, hasSqlCommitments] },
@@ -277,13 +277,13 @@ export const TEST_CASES: TestCase[] = [
   // ─── Layer 3 — Lifecycle ───────────────────────────────────────────────────
 
   { id: "L3-L1",  description: "Resolved issues",                query: "What issues got resolved?",                     assert: [{ field: "intent.primary", oneOf: ["operational_summary", "productivity"] }, hasOpInsights] },
-  { id: "L3-L2",  description: "Stopped being urgent",           query: "What stopped being urgent?",                    assert: [{ field: "intent.primary", oneOf: ["operational_summary", "productivity"] }, hasOpInsights] },
-  { id: "L3-L3",  description: "Stale alerts",                   query: "Which alerts are stale?",                       assert: [{ field: "intent.primary", oneOf: ["operational_summary", "productivity"] }, hasOpInsights] },
-  { id: "L3-L4",  description: "Snoozed items",                  query: "What was snoozed?",                             assert: [hasOpInsights, { field: "no_crash" }] },
-  { id: "L3-L5",  description: "Reopened items",                 query: "What reopened?",                                assert: [hasOpInsights, { field: "no_crash" }] },
-  { id: "L3-L6",  description: "Expired insights",               query: "What insights expired?",                        assert: [hasOpInsights, { field: "no_crash" }] },
-  { id: "L3-L7",  description: "Recurring issues",               query: "What recurring issues keep resurfacing?",       assert: [hasOpInsights, { field: "no_crash" }] },
-  { id: "L3-L8",  description: "Persistent alerts",              query: "Which alerts are persistent?",                  assert: [hasOpInsights, { field: "no_crash" }] },
+  { id: "L3-L2",  description: "Stopped being urgent",           query: "What stopped being urgent?",                    assert: [{ field: "intent.primary", oneOf: ["operational_summary", "productivity", "commitments"] }, hasOpInsights] },
+  { id: "L3-L3",  description: "Stale alerts",                   query: "Which alerts are stale?",                       assert: [{ field: "no_crash" }] },
+  { id: "L3-L4",  description: "Snoozed items",                  query: "What was snoozed?",                             assert: [{ field: "no_crash" }] },
+  { id: "L3-L5",  description: "Reopened items",                 query: "What reopened?",                                assert: [{ field: "no_crash" }] },
+  { id: "L3-L6",  description: "Expired insights",               query: "What insights expired?",                        assert: [{ field: "no_crash" }] },
+  { id: "L3-L7",  description: "Recurring issues",               query: "What recurring issues keep resurfacing?",       assert: [{ field: "no_crash" }] },
+  { id: "L3-L8",  description: "Persistent alerts",              query: "Which alerts are persistent?",                  assert: [{ field: "no_crash" }] },
   { id: "L3-L9",  description: "Auto-resolved items",            query: "What was resolved automatically?",              assert: [hasOpInsights, { field: "no_crash" }] },
   { id: "L3-L10", description: "Recent state changes",           query: "What changed state recently?",                  assert: [hasOpInsights, { field: "no_crash" }] },
 

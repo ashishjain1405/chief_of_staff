@@ -35,26 +35,27 @@ export function buildRetrievalPlan(
   const steps: RetrievalStep[] = [];
   const { operational_weight, investigative_weight } = intent.retrieval_weights;
   const queryLower = query.toLowerCase();
-  const queryMentionsEmail = /\b(email|emails|message|messages|inbox|mail)\b/.test(queryLower);
+  const queryMentionsEmail = /\b(email|emails|message|messages|inbox|mail|discussed|discussion|conversation|conversations)\b/.test(queryLower);
   const queryMentionsMeeting = /\b(meeting|meetings|meet|met|discussed in|discussion in)\b/.test(queryLower);
-  const queryMentionsTask = /\b(task|tasks|action items?|follow.?ups?|to.?do|overdue|commit(ted|ment)?|promise[ds]?|pending|ignored|unresolved|slipping)\b/.test(queryLower);
+  const queryMentionsTask = /\b(task|tasks|action items?|follow.?ups?|to.?do|overdue|commit(ted|ments?)?|promises?|pending|ignored|unresolved|slipping|deadline|deadlines|blocked|blocker|escalate)\b/.test(queryLower);
   const queryIsTemporalLookup = /\bwhat (happened|changed)\s+(before|after|around|since|in|during)\b/.test(queryLower);
+  const queryMentionsFinance = /\b(refund|refunds|transaction|transactions|debit|credit|payment|payments|charge|charges|spend|spent|spending|expense|expenses|atm|withdrawal|cashback|transfer|money|paid|salary)\b/.test(queryLower);
   const dateRange = resolved.resolvedDateRange;
 
   // Operational path — always include for finance intents to surface spending_summary insights
-  if (operational_weight > 0.3 || FINANCE_INTENTS.has(intent.primary)) {
+  if (operational_weight >= 0.3 || FINANCE_INTENTS.has(intent.primary)) {
     steps.push(step("operational_insights", "fetch precomputed operational insights", {
       category: intentToCategories(intent),
     }, 1));
   }
 
   // Investigative path — only if weight above threshold (keyword overrides bypass this gate)
-  if (investigative_weight <= 0.3 && !queryMentionsEmail && !queryMentionsMeeting && !queryMentionsTask && !queryIsTemporalLookup) return steps;
+  if (investigative_weight <= 0.3 && !queryMentionsEmail && !queryMentionsMeeting && !queryMentionsTask && !queryIsTemporalLookup && !queryMentionsFinance) return steps;
 
   const primary = intent.primary;
 
   // Finance / spending
-  if (FINANCE_INTENTS.has(primary) || intent.entities.categories.length > 0 || intent.entities.merchants.length > 0) {
+  if (FINANCE_INTENTS.has(primary) || intent.entities.categories.length > 0 || intent.entities.merchants.length > 0 || queryMentionsFinance) {
     const hasSpecificLookup = intent.entities.merchants.length > 0 || intent.entities.amount !== null;
 
     // Always add aggregation for spending queries
