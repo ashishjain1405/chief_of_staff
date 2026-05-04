@@ -1,6 +1,5 @@
 export const MERCHANT_DATA: Record<string, { aliases: string[]; domain: string; category: string }> = {
   "Amazon":            { domain: "amazon.in",          category: "ecommerce",            aliases: ["AMAZON","AMAZON IN","AMAZON INDIA","AMAZON SELLER SERVICES","AMZN","AMZN MKTPLACE","AMZN MKTP","AMAZON RETAIL","AMAZON PRIME","WWW AMAZON IN"] },
-  "Amazon Pay":        { domain: "amazonpay.in",        category: "payments",             aliases: ["AMAZON PAY","AMAZONPAY","AMZN PAY"] },
   "Flipkart":          { domain: "flipkart.com",        category: "ecommerce",            aliases: ["FLIPKART","FKRT","FKRT INTERNET","FLIPKART INTERNET","FLIPKART INDIA"] },
   "Myntra":            { domain: "myntra.com",          category: "fashion",              aliases: ["MYNTRA","MYNTRA DESIGNS","MYNTRA.COM"] },
   "Ajio":              { domain: "ajio.com",            category: "fashion",              aliases: ["AJIO","AJIO RETAIL","RELIANCE AJIO"] },
@@ -55,6 +54,7 @@ export const MERCHANT_DATA: Record<string, { aliases: string[]; domain: string; 
   "Apple":             { domain: "apple.com",           category: "technology",           aliases: ["APPLE","APPLE.COM","APPLE SERVICES","APPLE BILL","APPLE ONLINE"] },
   "Google":            { domain: "google.com",          category: "technology",           aliases: ["GOOGLE","GOOGLE CLOUD","GOOGLE STORAGE","GOOGLE PLAY","GOOGLE ADS","GOOGLE *SERVICES"] },
   "Microsoft":         { domain: "microsoft.com",       category: "technology",           aliases: ["MICROSOFT","MSFT","MICROSOFT 365","AZURE","XBOX"] },
+  "AWS":               { domain: "aws.amazon.com",       category: "technology",           aliases: ["AWS","AMAZON WEB SERVICES","AMAZON AWS","AWS EMEA"] },
   "OpenAI":            { domain: "openai.com",          category: "ai_tools",             aliases: ["OPENAI","CHATGPT","CHATGPT PLUS"] },
   "Notion":            { domain: "notion.so",           category: "productivity",         aliases: ["NOTION","NOTION LABS"] },
   "Slack":             { domain: "slack.com",           category: "productivity",         aliases: ["SLACK","SLACK TECHNOLOGIES"] },
@@ -131,4 +131,21 @@ export function getCategoryForMerchant(normalized: string): string | null {
 
 export function getMerchantFromDomain(domain: string): string | null {
   return DOMAIN_LOOKUP[domain] ?? null;
+}
+
+// Wallet/payment-mode senders — not merchants; transactions from these should use
+// payment_method = label and merchant_normalized = null
+const WALLET_PAYMENT_MODES: Record<string, string> = {
+  "amazonpay.in":  "Amazon Pay",
+  "mobikwik.com":  "MobiKwik",
+  "freecharge.in": "FreeCharge",
+  "paytm.com":     "Paytm",
+  "phonepe.com":   "PhonePe",
+  "phonepe.in":    "PhonePe",
+  "gpay.com":      "Google Pay",
+  "googlepay.in":  "Google Pay",
+};
+
+export function getWalletPaymentModeLabel(senderDomain: string): string | null {
+  return WALLET_PAYMENT_MODES[senderDomain.toLowerCase()] ?? null;
 }

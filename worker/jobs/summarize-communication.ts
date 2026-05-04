@@ -5,7 +5,7 @@ import { embedAndStoreChunks, updateCommunicationEmbedding } from "@/lib/memory/
 import { classifySender, getSenderHint, shouldRunStage1 } from "@/lib/finance/senders";
 import { operationalQueue } from "@/lib/queues";
 import { extractFinancialTransaction } from "@/lib/ai/extractors/financial";
-import { normalizeMerchant, getCategoryForMerchant } from "@/lib/finance/normalize";
+import { normalizeMerchant, getCategoryForMerchant, getWalletPaymentModeLabel } from "@/lib/finance/normalize";
 import { deduplicateRawTransactions, type TransactionRaw } from "@/lib/finance/dedup";
 
 export async function summarizeCommunication(job: Job) {
@@ -158,14 +158,19 @@ async function runFinancialExtraction(
 
   if (!extraction.is_financial_email && !needsReview) return;
 
-  const merchantRaw = raw?.merchant_name ?? null;
+  const senderDomain = senderEmail.includes("@") ? senderEmail.split("@")[1].toLowerCase() : "";
+  const walletLabel = getWalletPaymentModeLabel(senderDomain);
+
+  // If the email is from a wallet/payment-mode sender, don't record it as a merchant
+  const merchantRaw = walletLabel ? null : (raw?.merchant_name ?? null);
   const deterministicNormalized = merchantRaw ? normalizeMerchant(merchantRaw) : null;
   // Prefer deterministic normalization; fall back to LLM's suggestion for unknown merchants
   const isKnownMerchant = deterministicNormalized !== null &&
     deterministicNormalized !== merchantRaw?.trim().replace(/\w\S*/g, (w) => w[0].toUpperCase() + w.slice(1).toLowerCase());
-  const merchantNormalized = isKnownMerchant
-    ? deterministicNormalized
-    : (raw?.merchant_normalized ?? deterministicNormalized);
+  const merchantNormalized = walletLabel
+    ? null
+    : (isKnownMerchant ? deterministicNormalized : (raw?.merchant_normalized ?? deterministicNormalized));
+  const paymentMethod = walletLabel ?? raw?.payment_method ?? null;
   const category = merchantNormalized
     ? (getCategoryForMerchant(merchantNormalized) ?? raw?.category ?? null)
     : (raw?.category ?? null);
@@ -189,7 +194,7 @@ async function runFinancialExtraction(
       merchant_name: merchantRaw,
       merchant_normalized: merchantNormalized,
       bank_name: raw?.bank_name ?? null,
-      payment_method: raw?.payment_method ?? null,
+      payment_method: paymentMethod,
       transaction_datetime: raw?.transaction_datetime ?? null,
       due_date: raw?.due_date ?? null,
       transaction_id: raw?.transaction_id ?? null,
