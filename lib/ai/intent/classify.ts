@@ -46,15 +46,18 @@ function regexCandidates(query: string): Map<IntentType, number> {
 }
 
 const CATEGORY_KEYWORDS: Record<string, string[]> = {
-  food_delivery:   ["food", "swiggy", "zomato", "uber eats", "delivery", "meal", "restaurant", "dinner", "lunch"],
-  groceries:       ["grocery", "groceries", "bigbasket", "blinkit", "zepto", "supermarket", "vegetables", "fruits"],
-  travel:          ["travel", "flight", "hotel", "trip", "booking", "cab", "uber", "ola", "rapido", "train", "bus"],
-  entertainment:   ["entertainment", "netflix", "spotify", "prime", "hotstar", "youtube", "movie", "music"],
-  subscriptions:   ["subscription", "subscriptions", "membership", "renewal", "saas", "plan"],
-  utilities:       ["electricity", "water", "gas", "broadband", "internet", "recharge", "mobile"],
-  healthcare:      ["hospital", "doctor", "medicine", "pharmacy", "health", "clinic", "insurance"],
-  shopping:        ["amazon", "flipkart", "myntra", "shopping", "clothes", "fashion", "electronics"],
-  education:       ["course", "udemy", "coursera", "tuition", "school", "college", "education"],
+  food_delivery:   ["food", "swiggy", "zomato", "uber eats", "delivery", "meal", "restaurant", "dinner", "lunch", "eating", "ordered food"],
+  groceries:       ["grocery", "groceries", "bigbasket", "blinkit", "zepto", "supermarket", "vegetables", "fruits", "kirana"],
+  transport:       ["cab", "cabs", "taxi", "taxis", "auto", "autos", "rickshaw", "uber", "ola", "rapido", "commute", "ride", "rides"],
+  travel:          ["travel", "flight", "flights", "hotel", "hotels", "trip", "trips", "booking", "train", "bus", "airport", "makemytrip", "goibibo", "indigo"],
+  entertainment:   ["entertainment", "netflix", "spotify", "prime", "hotstar", "youtube", "movie", "movies", "music", "streaming"],
+  subscriptions:   ["subscription", "subscriptions", "membership", "renewal", "saas", "plan", "annual plan", "monthly plan"],
+  utilities:       ["electricity", "water", "gas", "broadband", "internet", "recharge", "mobile", "wifi", "bill", "bills"],
+  healthcare:      ["hospital", "doctor", "medicine", "pharmacy", "health", "clinic", "insurance", "medical", "apollo", "pharmeasy"],
+  shopping:        ["amazon", "flipkart", "myntra", "shopping", "clothes", "fashion", "electronics", "purchase", "bought", "order"],
+  education:       ["course", "udemy", "coursera", "tuition", "school", "college", "education", "learning", "class"],
+  investments:     ["investment", "investments", "mutual fund", "sip", "stocks", "zerodha", "groww", "trading", "portfolio"],
+  fuel:            ["fuel", "petrol", "diesel", "gas station", "fasttag", "toll"],
 };
 
 function inferCategories(query: string): string[] {
@@ -202,7 +205,7 @@ function applyDeterministicOverrides(
   const isSpendingQuery =
     !isAnalyticalQuery && (
       ["finance", "spending_analysis", "subscriptions", "bills_payments"].includes(primary) ||
-      /\b(show|how much|breakdown|spent|spending|expenses?|charges?|paid|transactions?|merchant|merchants|compare|savings?)\b/.test(lower)
+      /\b(show|list|how much|breakdown|spent|spending|expenses?|charges?|paid|transactions?|merchant|merchants|compare|savings?|total|amount|cost|costs|bills?|what did i (spend|pay|buy))\b/.test(lower)
     );
 
   if (isSpendingQuery) {
