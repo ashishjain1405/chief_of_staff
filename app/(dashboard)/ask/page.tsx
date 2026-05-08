@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import AskChat from "@/components/ask/ask-chat";
 
 export default function AskPage() {
