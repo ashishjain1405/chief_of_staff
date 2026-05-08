@@ -12,6 +12,7 @@
     "backfill:categories": "npx tsx --env-file=.env.local --tsconfig tsconfig.json worker/jobs/backfill-categories.ts",
     "backfill:transactions": "npx tsx --env-file=.env.local --tsconfig tsconfig.json worker/jobs/backfill-transactions.ts",
     "backfill:gmail": "npx tsx --env-file=.env.local --tsconfig tsconfig.json worker/jobs/backfill-gmail.ts",
+    "backfill:gmail:railway": "npx tsx --tsconfig tsconfig.json worker/jobs/backfill-gmail.ts",
     "backfill:embeddings": "npx tsx --env-file=.env.local --tsconfig tsconfig.json worker/jobs/backfill-embeddings.ts",
     "backfill:html": "npx tsx --env-file=.env.local --tsconfig tsconfig.json worker/jobs/backfill-html.ts"
   },
