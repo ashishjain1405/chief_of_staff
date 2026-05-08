@@ -49,7 +49,7 @@ async function backfillUser(supabase: any, userId: string, days: number) {
   do {
     const { data } = await gmail.users.messages.list({
       userId: "me",
-      q: `after:${after}`,
+      q: `after:${after} -in:spam -in:trash`,
       maxResults: 100,
       pageToken,
     });
