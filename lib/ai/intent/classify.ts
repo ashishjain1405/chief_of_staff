@@ -322,7 +322,10 @@ async function classifyWithLLM(
       })}`
     : "";
 
+  const today = new Date().toISOString().slice(0, 10);
   const prompt = `Classify this query and extract retrieval parameters.
+
+Today's date: ${today}
 
 Query: "${query}"${contextHint}
 
@@ -364,7 +367,7 @@ Return ONLY valid JSON:
 temporal can be:
 - null (no time reference)
 - {"type":"relative","relativePeriod":"last_month"} (this_week/last_week/this_month/last_month/last_quarter/today/this_year)
-- {"type":"absolute","dateRange":{"from":"2026-01-01","to":"2026-01-31"}}
+- {"type":"absolute","dateRange":{"from":"YYYY-MM-01","to":"YYYY-MM-30"}} (use current year ${new Date().getFullYear()} unless the user specifies otherwise)
 - {"type":"event_relative","anchor_event":"salary_credit|travel_booking|named_meeting|named_contact_interaction","anchor_ref":"...","relative_window":"+7d"}
 
 entities guidance:
