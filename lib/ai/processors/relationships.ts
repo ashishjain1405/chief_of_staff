@@ -86,7 +86,7 @@ export function processRelationships(
   // Negative sentiment trend: 2+ recent negative emails from same contact
   const negativeBySender = new Map<string, RawCommunication[]>();
   for (const comm of communications) {
-    if (comm.sentiment !== "negative" || !comm.contact_id) continue;
+    if (comm.sentiment?.toLowerCase() !== "negative" || !comm.contact_id) continue;
     const arr = negativeBySender.get(comm.contact_id) ?? [];
     arr.push(comm);
     negativeBySender.set(comm.contact_id, arr);

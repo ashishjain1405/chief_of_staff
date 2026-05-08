@@ -15,8 +15,8 @@ export function processCommitments(commitments: RawCommitment[]): ProcessorInsig
     const contactName =
       commitment.contacts?.name ?? commitment.contacts?.email ?? null;
     const isOverdue =
-      commitment.status === "overdue" ||
-      (commitment.due_date != null && isBefore(new Date(commitment.due_date), now) && commitment.status !== "done");
+      commitment.status?.toLowerCase() === "overdue" ||
+      (commitment.due_date != null && isBefore(new Date(commitment.due_date), now) && commitment.status?.toLowerCase() !== "done");
 
     if (isOverdue) {
       const daysOverdue = commitment.due_date

@@ -12,10 +12,10 @@ export function processTasks(tasks: RawTask[]): ProcessorInsight[] {
   const now = new Date();
 
   const overdueTasks = tasks.filter(
-    (t) => t.due_date && isBefore(new Date(t.due_date), now) && t.status !== "done"
+    (t) => t.due_date && isBefore(new Date(t.due_date), now) && t.status?.toLowerCase() !== "done"
   );
   const highPriorityPending = tasks.filter(
-    (t) => t.priority === "high" && t.status === "pending"
+    (t) => t.priority?.toLowerCase() === "high" && t.status?.toLowerCase() === "pending"
   );
 
   // Overdue task overload signal

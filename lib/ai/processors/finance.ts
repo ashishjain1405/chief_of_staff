@@ -145,7 +145,7 @@ export function processFinance(
 
   // Pending refunds
   for (const txn of transactions) {
-    if (txn.status === "refund_pending") {
+    if (txn.status?.toLowerCase() === "refund_pending") {
       insights.push({
         state_key: `finance:pending_refund:${txn.id ?? txn.merchant_normalized}`,
         category: "finance",

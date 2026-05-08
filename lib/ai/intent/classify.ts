@@ -67,15 +67,15 @@ function inferCategories(query: string): string[] {
 }
 
 const TEMPORAL_PATTERNS: { pattern: RegExp; period: NonNullable<TemporalAnchor["relativePeriod"]> }[] = [
-  { pattern: /\btoday\b/i,          period: "today" },
-  { pattern: /\bthis week\b/i,      period: "this_week" },
-  { pattern: /\blast week\b/i,      period: "last_week" },
-  { pattern: /\bthis month\b/i,     period: "this_month" },
-  { pattern: /\blast month\b/i,     period: "last_month" },
-  { pattern: /\bthis quarter\b/i,   period: "this_quarter" },
-  { pattern: /\blast quarter\b/i,   period: "last_quarter" },
-  { pattern: /\bthis year\b/i,      period: "this_year" },
-  { pattern: /\blast year\b/i,      period: "last_year" },
+  { pattern: /\btoday\b/i,                           period: "today" },
+  { pattern: /\bthis week\b/i,                       period: "this_week" },
+  { pattern: /\b(last|past|previous)\s+week\b/i,     period: "last_week" },
+  { pattern: /\bthis month\b/i,                      period: "this_month" },
+  { pattern: /\b(last|past|previous)\s+month\b/i,    period: "last_month" },
+  { pattern: /\bthis quarter\b/i,                    period: "this_quarter" },
+  { pattern: /\b(last|past|previous)\s+quarter\b/i,  period: "last_quarter" },
+  { pattern: /\bthis year\b/i,                       period: "this_year" },
+  { pattern: /\b(last|past|previous)\s+year\b/i,     period: "last_year" },
 ];
 
 function inferMerchants(query: string): string[] {
@@ -131,7 +131,7 @@ function inferTemporal(query: string): TemporalAnchor | null {
     july: 6, august: 7, september: 8, october: 9, november: 10, december: 11,
     jan: 0, feb: 1, mar: 2, apr: 3, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11,
   };
-  const monthMatch = /\b(?:in|for|during|of)\s+(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec)\b/i.exec(query);
+  const monthMatch = /\b(?:(?:in|for|during|of)\s+)?(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec)\b/i.exec(query);
   if (monthMatch) {
     const idx = MONTH_NAMES[monthMatch[1].toLowerCase()];
     const today = new Date();

@@ -58,7 +58,7 @@ export function processFollowUps(
     if (ageDays < 3) continue;
 
     const contactName = comm.contacts?.name ?? comm.contacts?.email ?? "Unknown";
-    const sentimentBoost = comm.sentiment === "negative" ? 0.2 : 0;
+    const sentimentBoost = comm.sentiment?.toLowerCase() === "negative" ? 0.2 : 0;
     const ageBoost = clamp(ageDays / 30) * 0.2;
 
     const priorityScore = clamp(0.4 + sentimentBoost + ageBoost);
