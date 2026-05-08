@@ -36,7 +36,9 @@ export async function proxy(request: NextRequest) {
     pathname === "/" ||
     pathname.startsWith("/auth") ||
     pathname.startsWith("/api/webhooks") ||
-    pathname.startsWith("/api/auth")
+    pathname.startsWith("/api/auth") ||
+    pathname.startsWith("/api/admin") ||
+    (pathname === "/api/ask" && request.nextUrl.searchParams.get("eval") === "true")
   ) {
     return supabaseResponse;
   }
