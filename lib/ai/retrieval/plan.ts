@@ -43,27 +43,36 @@ export function buildRetrievalPlan(
   // Intent-signal: inv=1.0 + non-finance primary + no finance domain → comms are the natural source
   const isNonFinanceLookup = investigative_weight >= 1.0 && !FINANCE_INTENTS.has(intent.primary) && !queryMentionsFinance && !queryIsAggregation;
   // Explicit comms noun in query — stable narrow set that names the data source, not topic words
-  const queryCommunicationExplicit = /\b(communication|communications|conversation|conversations|discussion|discussions|thread|threads|chat|correspondence)\b/.test(queryLower);
+  const queryCommunicationExplicit = /\b(email|emails|communication|communications|conversation|conversations|discussion|discussions|thread|threads|chat|correspondence|said|wrote|message|messages)\b/.test(queryLower);
   const dateRange = resolved.resolvedDateRange;
 
-  // Operational path — always include for finance intents to surface spending_summary insights
-  if (operational_weight >= 0.3 || FINANCE_INTENTS.has(intent.primary)) {
+  const allIntents = [intent.primary, ...intent.secondary];
+  const hasOperationalSummaryIntent = allIntents.includes("operational_summary");
+
+  // Operational path — always include for finance intents or when operational_summary is in intents
+  if (operational_weight >= 0.3 || FINANCE_INTENTS.has(intent.primary) || hasOperationalSummaryIntent) {
     steps.push(step("operational_insights", "fetch precomputed operational insights", {
       category: intentToCategories(intent),
     }, 1));
   }
 
   // Investigative path — only if weight above threshold (keyword overrides bypass this gate)
-  if (investigative_weight <= 0.3 && !isNonFinanceLookup && !queryMentionsMeeting && !queryMentionsTask && !queryIsTemporalLookup && !queryMentionsFinance) return steps;
+  if (investigative_weight <= 0.3 && !isNonFinanceLookup && !queryMentionsMeeting && !queryMentionsTask && !queryIsTemporalLookup && !queryMentionsFinance && !queryCommunicationExplicit) return steps;
 
   const primary = intent.primary;
 
   // Finance / spending
-  if (FINANCE_INTENTS.has(primary) || intent.entities.categories.length > 0 || intent.entities.merchants.length > 0 || queryMentionsFinance || queryIsAggregation) {
+  const hasFinanceSignal = FINANCE_INTENTS.has(primary) || allIntents.some(i => FINANCE_INTENTS.has(i)) ||
+    intent.entities.categories.length > 0 || intent.entities.merchants.length > 0 ||
+    queryMentionsFinance || queryIsAggregation;
+
+  if (hasFinanceSignal) {
     const hasSpecificLookup = intent.entities.merchants.length > 0 || intent.entities.amount !== null;
+    const isSpendingIntent = primary === "spending_analysis" || primary === "finance" ||
+      allIntents.includes("spending_analysis") || allIntents.includes("finance");
 
     // Always add aggregation for spending/trend queries
-    if (primary === "spending_analysis" || primary === "finance" || queryIsAggregation) {
+    if (isSpendingIntent || queryIsAggregation) {
       steps.push(step("aggregated_finance", "compute spending breakdown", {
         categories: intent.entities.categories,
         merchants: resolved.merchantNames,
@@ -89,6 +98,16 @@ export function buildRetrievalPlan(
       ...(resolved.contactIds.length > 0 ? { contactIds: resolved.contactIds } : {}),
       dateRange,
     }, 2));
+    steps.push(step("sql_tasks", "find tasks", {
+      dateRange,
+    }, 2));
+  }
+
+  // Operational summary — also include tasks for full situational picture
+  if (hasOperationalSummaryIntent && !queryMentionsTask) {
+    steps.push(step("sql_tasks", "find pending tasks", {
+      dateRange,
+    }, 3));
   }
 
   // Scheduling — also fires when query explicitly mentions meeting keywords
@@ -139,9 +158,16 @@ export function buildRetrievalPlan(
       dateRange,
     }, 2));
     steps.push(step("sql_transactions", "find bill transactions", {
-      transactionTypes: ["bill_payment", "emi_payment"],
+      merchants: resolved.merchantNames,
       dateRange,
     }, 3));
+  }
+
+  // Operational summary / productivity — fetch recent communications for full situational context
+  if (primary === "operational_summary" || primary === "productivity") {
+    steps.push(step("sql_communications", "find recent emails for situational overview", {
+      dateRange,
+    }, 2));
   }
 
   // Vector search — for semantic recall intents
