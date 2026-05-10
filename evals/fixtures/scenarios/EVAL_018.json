@@ -1,0 +1,149 @@
+{
+  "scenario_id": "SCENARIO_045",
+  "eval_id": "EVAL_018",
+  "theme": "Discrepancy Detection between Operational Insights and Raw Transactions",
+  "entities": {
+    "people": [
+      {
+        "name": "Alex Johnson",
+        "email": "alex.j@startuptudio.com",
+        "relationship_type": "CEO"
+      },
+      {
+        "name": "Jamie Chen",
+        "email": "jamie.chen@startuptudio.com",
+        "relationship_type": "CFO"
+      }
+    ],
+    "companies": [
+      "Startup Studio Inc"
+    ],
+    "projects": [
+      "Apollo Launch",
+      "Project Mercury"
+    ],
+    "merchants": [
+      "Tech Supplies Co",
+      "OfficeMart",
+      "OfficeMax",
+      "TechCentral"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_301",
+      "subject": "Re: Monthly Financial Reconciliation",
+      "body_summary": "Please review the discrepancies noted in Tech Supplies Co transactions.",
+      "occurred_at": "2026-05-08T14:22:10.718Z",
+      "email_category": "finance",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "alex.j@startuptudio.com",
+        "sender_name": "Alex Johnson"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_204",
+      "title": "Weekly Operations Review",
+      "start_time": "2026-05-07T15:00:00.718Z",
+      "end_time": "2026-05-07T16:00:00.718Z",
+      "transcript_summary": "Focused on the latest invoice inconsistencies with Office supplies merchants.",
+      "attendees": [
+        {
+          "email": "alex.j@startuptudio.com",
+          "name": "Alex Johnson"
+        },
+        {
+          "email": "jamie.chen@startuptudio.com",
+          "name": "Jamie Chen"
+        }
+      ],
+      "description": "Discussion on operational efficiency and transaction verification."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "Tech Supplies Co",
+      "amount": 2300,
+      "currency": "USD",
+      "category": "supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-02T09:15:30.718Z"
+    },
+    {
+      "merchant_normalized": "OfficeMart",
+      "amount": 450,
+      "currency": "USD",
+      "category": "equipment",
+      "transaction_type": "credit",
+      "transaction_datetime": "2026-05-03T11:25:50.718Z"
+    },
+    {
+      "merchant_normalized": "TechCentral",
+      "amount": 1250,
+      "currency": "USD",
+      "category": "technology",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-03T14:12:17.718Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Review Tech Supplies Co discrepancies",
+      "status": "in-progress",
+      "priority": "high",
+      "due_date": "2026-05-11",
+      "source_type": "email"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Ensure accurate financial statements by end of Q2",
+      "due_date": "2026-06-30",
+      "status": "pending",
+      "ai_confidence": 0.85
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "insight_78b",
+      "category": "finance",
+      "insight_type": "financial_discrepancy",
+      "title": "Mismatch in Tech Supplies Co Transactions",
+      "summary": "Reports indicate Tech Supplies Co was overcharged by $300 compared to documented credits.",
+      "urgency": "critical",
+      "priority_score": 92,
+      "recommended_action": "Verify transaction records and request refunds if necessary.",
+      "explanation": "Automated reconciliation shows mismatched credits and debits contradicting latest ledger updates.",
+      "status": "pending"
+    },
+    {
+      "state_key": "insight_27c",
+      "category": "operations",
+      "insight_type": "inventory_availability",
+      "title": "Office Supplies Overorder",
+      "summary": "Possible unnecessary overordering with OfficeMart detected. Check for potential returns.",
+      "urgency": "medium",
+      "priority_score": 65,
+      "recommended_action": "Evaluate supplier contracts and recent orders for cancelation opportunities.",
+      "explanation": "High inventory levels could indicate ordering errors contrary to procurement policy.",
+      "status": "review"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": [],
+    "actual_intent": [
+      "operational_summary",
+      "search_lookup"
+    ],
+    "expected_answer_facts": [
+      "Tech Supplies Co reported overcharge",
+      "Operational insight mismatched with latest Tech Supplies Co debit records",
+      "No matching credit found in raw transactions"
+    ]
+  }
+}

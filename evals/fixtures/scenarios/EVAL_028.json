@@ -1,0 +1,187 @@
+{
+  "scenario_id": "SCENARIO_056",
+  "eval_id": "EVAL_028",
+  "theme": "Strategic Insight Aggregation and Analysis",
+  "entities": {
+    "people": [
+      {
+        "name": "Alex Johnson",
+        "email": "alex.j@example.com",
+        "relationship_type": "team_member"
+      },
+      {
+        "name": "Jamie L.",
+        "email": "jamiel@examplecorp.com",
+        "relationship_type": "external_partner"
+      }
+    ],
+    "companies": [
+      "ExampleCorp",
+      "TechVenture"
+    ],
+    "projects": [
+      "Nexus Initiative",
+      "Orion Expansion"
+    ],
+    "merchants": [
+      "Delta Airlines",
+      "DeltaFinancials"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_872",
+      "subject": "Follow-up on the Nexus Initiative strategy session",
+      "body_summary": "We discussed key points and next steps from the Monday meeting...",
+      "occurred_at": "2026-04-28T15:22:10Z",
+      "email_category": "meeting_followup",
+      "requires_action": false,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "alex.j@example.com",
+        "sender_name": "Alex Johnson"
+      },
+      "embedding_null": false
+    },
+    {
+      "external_id": "email_873",
+      "subject": "Current market trends affecting Orion Expansion plans",
+      "body_summary": "Recent forecasts indicate the need to reevaluate our timelines...",
+      "occurred_at": "2026-05-07T10:50:00Z",
+      "email_category": "strategic_update",
+      "requires_action": true,
+      "sentiment": "cautionary",
+      "channel_metadata": {
+        "sender": "jamiel@examplecorp.com",
+        "sender_name": "Jamie L."
+      },
+      "embedding_null": true
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_54",
+      "title": "Nexus Initiative Weekly Check-in",
+      "start_time": "2026-05-01T14:00:00Z",
+      "end_time": "2026-05-01T15:00:00Z",
+      "transcript_summary": "Reviewed last week's progress and set short-term goals.",
+      "attendees": [
+        {
+          "email": "alex.j@example.com",
+          "name": "Alex Johnson"
+        },
+        {
+          "email": "jamiel@examplecorp.com",
+          "name": "Jamie L."
+        }
+      ],
+      "description": "A strategic alignment meeting on current initiatives."
+    },
+    {
+      "external_id": "meeting_55",
+      "title": "Orion Expansion Strategy Reevaluation",
+      "start_time": "2026-05-05T09:00:00Z",
+      "end_time": "2026-05-05T11:00:00Z",
+      "transcript_summary": "Discussion focused on adjustments to the expansion strategy due to market shifts.",
+      "attendees": [
+        {
+          "email": "alex.j@example.com",
+          "name": "Alex Johnson"
+        },
+        {
+          "email": "jamiel@examplecorp.com",
+          "name": "Jamie L."
+        }
+      ],
+      "description": "Critical analysis of the proposed expansion strategy."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "Delta Airlines",
+      "amount": 450,
+      "currency": "USD",
+      "category": "Travel",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-04T18:43:45Z"
+    },
+    {
+      "merchant_normalized": "DeltaFinancials",
+      "amount": 5000,
+      "currency": "USD",
+      "category": "Professional Services",
+      "transaction_type": "credit",
+      "transaction_datetime": "2026-05-02T10:15:30Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Review Orion strategy comments",
+      "status": "pending",
+      "priority": "high",
+      "due_date": "2026-05-12",
+      "source_type": "email_followup"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Present revised strategy by end of month",
+      "due_date": "2026-05-31",
+      "status": "open",
+      "ai_confidence": 0.8
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "orion_expansion_202605",
+      "category": "strategic_planning",
+      "insight_type": "market_adjustment",
+      "title": "Orion Expansion requires strategy update",
+      "summary": "Recent financial data suggests timelines need adjustment.",
+      "urgency": "high",
+      "priority_score": 75,
+      "recommended_action": "Reevaluate current market position and adjust timelines.",
+      "explanation": "Economic shifts are impacting timeline feasibility for the expansion.",
+      "status": "active"
+    },
+    {
+      "state_key": "nexus_initiative_202604",
+      "category": "project_management",
+      "insight_type": "status_update",
+      "title": "Nexus Initiative on track",
+      "summary": "Operations are proceeding as planned, but staffing levels are tight.",
+      "urgency": "medium",
+      "priority_score": 60,
+      "recommended_action": "Consider additional team resources.",
+      "explanation": "Resource constraints might impact future phases.",
+      "status": "active"
+    },
+    {
+      "state_key": "delta_transactions_202604",
+      "category": "finance",
+      "insight_type": "transaction_discrepancy",
+      "title": "Delta Airlines vs DeltaFinancials activities",
+      "summary": "Recent transactions under similar merchants require reconciliation.",
+      "urgency": "low",
+      "priority_score": 45,
+      "recommended_action": "Verify expense categorization.",
+      "explanation": "Differences in merchant records can cause reporting errors.",
+      "status": "stale"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": [
+      "team_member",
+      "external_partner"
+    ],
+    "actual_intent": [
+      "scheduling",
+      "operational_summary"
+    ],
+    "expected_answer_facts": [
+      "Nexus Initiative progress review",
+      "Need for Orion strategy adjustment due to market shifts",
+      "Transaction discrepancies under Delta merchants"
+    ]
+  }
+}

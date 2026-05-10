@@ -1,0 +1,4134 @@
+[
+  {
+    "eval_id": "EVAL_001",
+    "difficulty": "hard",
+    "query": "Verify last quarter's spending against operational insights.",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "Can you provide details for last quarter's spending?"
+      },
+      {
+        "role": "assistant",
+        "text": "Last quarter's spending was $500,000 in total."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L3",
+      "L4",
+      "L5"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "absolute",
+      "relativePeriod": "last_quarter"
+    },
+    "expected_retrieval_sources": [
+      "sql_transactions",
+      "operational_insights",
+      "aggregated_finance"
+    ],
+    "expected_intents": {
+      "required": [
+        "finance",
+        "operational_summary"
+      ],
+      "forbidden": [
+        "reminders",
+        "productivity"
+      ],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": true,
+      "should_refuse": false,
+      "should_admit_uncertainty": false
+    },
+    "expected_evidence_requirements": [
+      "sufficient cross-referenced financial data"
+    ],
+    "likely_failure_modes": [
+      "conflicting evidence between financial transactions and insights"
+    ],
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "This eval targets verifying spending data's congruence between raw transactions and operational insights, highlighting retrieval conflicts."
+  },
+  {
+    "eval_id": "EVAL_002",
+    "difficulty": "extreme",
+    "query": "Reconcile last month's expenses with stated operational goals.",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "I need to know if last month's expenses align with our goals."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L5"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "absolute",
+      "relativePeriod": "last_month"
+    },
+    "expected_retrieval_sources": [
+      "sql_transactions",
+      "operational_insights"
+    ],
+    "expected_intents": {
+      "required": [
+        "finance",
+        "operational_summary"
+      ],
+      "forbidden": [
+        "reminders"
+      ],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": true,
+      "should_refuse": false,
+      "should_admit_uncertainty": false
+    },
+    "expected_evidence_requirements": [
+      "cross-verification with operational goals"
+    ],
+    "likely_failure_modes": [
+      "rank prioritization challenge due to layer conflicts"
+    ],
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "To challenge the system on its ability to synthesize financial data with operational objectives, ensuring robust evidence support."
+  },
+  {
+    "eval_id": "EVAL_003",
+    "difficulty": "medium",
+    "query": "Summarize this week's financial decisions and compare to actuals.",
+    "conversation_context": [
+      {
+        "role": "assistant",
+        "text": "We made several key spending decisions this week."
+      },
+      {
+        "role": "user",
+        "text": "Are those in line with what actually occurred?"
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L4"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "relative",
+      "relativePeriod": "this_week"
+    },
+    "expected_retrieval_sources": [
+      "sql_transactions",
+      "operational_insights"
+    ],
+    "expected_intents": {
+      "required": [
+        "finance",
+        "operational_summary"
+      ],
+      "forbidden": [],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": false,
+      "should_refuse": false,
+      "should_admit_uncertainty": false
+    },
+    "expected_evidence_requirements": [
+      "decision records and transaction confirmations"
+    ],
+    "likely_failure_modes": [
+      "misaligned insights vs transaction confirmations"
+    ],
+    "hallucination_risk": "low",
+    "why_this_eval_exists": "Assessing synthesis capability when cross-referencing weekly financial decisions with actual transaction data."
+  },
+  {
+    "eval_id": "EVAL_004",
+    "difficulty": "hard",
+    "query": "Analyze last year's spending trends against operational summaries.",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "How did spending trend over last year according to our reports?"
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L5"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "absolute",
+      "relativePeriod": "last_year"
+    },
+    "expected_retrieval_sources": [
+      "operational_insights",
+      "sql_transactions",
+      "aggregated_finance"
+    ],
+    "expected_intents": {
+      "required": [
+        "finance",
+        "spending_analysis"
+      ],
+      "forbidden": [],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": true,
+      "should_refuse": false,
+      "should_admit_uncertainty": false
+    },
+    "expected_evidence_requirements": [
+      "comprehensive trend data"
+    ],
+    "likely_failure_modes": [
+      "evidence conflict between aggregated reports and raw transactions"
+    ],
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "Designed to test ranking and retrieval capabilities when faced with voluminous and potentially conflicting data sources."
+  },
+  {
+    "eval_id": "EVAL_005",
+    "difficulty": "extreme",
+    "query": "What are the discrepancies in last quarter's operational and financial summaries?",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "I need to find discrepancies in our financial and operational reports from last quarter."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L2",
+      "L3"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "absolute",
+      "relativePeriod": "last_quarter"
+    },
+    "expected_retrieval_sources": [
+      "sql_transactions",
+      "operational_insights"
+    ],
+    "expected_intents": {
+      "required": [
+        "finance",
+        "operational_summary"
+      ],
+      "forbidden": [
+        "relationship"
+      ],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": false,
+      "should_clarify": true,
+      "should_refuse": true,
+      "should_admit_uncertainty": true
+    },
+    "expected_evidence_requirements": [
+      "comparative analysis between reports"
+    ],
+    "likely_failure_modes": [
+      "transaction and summary discrepancy detection"
+    ],
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "Targets capability to detect and report inconsistencies across large datasets, ensuring reliable synthesis and conflict detection."
+  },
+  {
+    "eval_id": "EVAL_006",
+    "difficulty": "medium",
+    "query": "Provide an overview of this month's operational spending insights.",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "What's the operational spending insight for this month?"
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L4"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "absolute",
+      "relativePeriod": "this_month"
+    },
+    "expected_retrieval_sources": [
+      "operational_insights",
+      "sql_transactions"
+    ],
+    "expected_intents": {
+      "required": [
+        "finance",
+        "operational_summary"
+      ],
+      "forbidden": [
+        "scheduling"
+      ],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": false,
+      "should_refuse": false,
+      "should_admit_uncertainty": false
+    },
+    "expected_evidence_requirements": [
+      "up-to-date operational insights"
+    ],
+    "likely_failure_modes": [
+      "temporal freshness of operational data"
+    ],
+    "hallucination_risk": "low",
+    "why_this_eval_exists": "To determine the system's accuracy in retrieving recent operational insights and identifying spending patterns."
+  },
+  {
+    "eval_id": "EVAL_007",
+    "difficulty": "hard",
+    "query": "Can you identify gaps in monthly spending reports and operational targets?",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "I suspect there are gaps between our spending and targets this month."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L5"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "absolute",
+      "relativePeriod": "this_month"
+    },
+    "expected_retrieval_sources": [
+      "sql_transactions",
+      "operational_insights"
+    ],
+    "expected_intents": {
+      "required": [
+        "finance",
+        "operational_summary"
+      ],
+      "forbidden": [
+        "search_lookup"
+      ],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": true,
+      "should_refuse": false,
+      "should_admit_uncertainty": false
+    },
+    "expected_evidence_requirements": [
+      "detailed mismatch report"
+    ],
+    "likely_failure_modes": [
+      "failure to accurately align spending with targets"
+    ],
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "To evaluate the system's precision in identifying and reporting misalignments between transactional data and stated operational objectives."
+  },
+  {
+    "eval_id": "EVAL_008",
+    "difficulty": "medium",
+    "query": "Collate all mismatched entries between transactions and operation records this year.",
+    "conversation_context": [
+      {
+        "role": "assistant",
+        "text": "Yearly records show several mismatched entries."
+      },
+      {
+        "role": "user",
+        "text": "Can you gather these mismatches for me?"
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L3",
+      "L4"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "absolute",
+      "relativePeriod": "this_year"
+    },
+    "expected_retrieval_sources": [
+      "sql_transactions",
+      "operational_insights"
+    ],
+    "expected_intents": {
+      "required": [
+        "finance",
+        "operational_summary"
+      ],
+      "forbidden": [],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": false,
+      "should_refuse": false,
+      "should_admit_uncertainty": false
+    },
+    "expected_evidence_requirements": [
+      "all relevant mismatch data"
+    ],
+    "likely_failure_modes": [
+      "incomplete retrieval of mismatched data"
+    ],
+    "hallucination_risk": "low",
+    "why_this_eval_exists": "To test retrieval depth and capability in accurately collating mismatched data over extensive periods."
+  },
+  {
+    "eval_id": "EVAL_009",
+    "difficulty": "medium",
+    "query": "Refine next quarter's budgetary constraints based on current operational insights.",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "What should we adjust in next quarter's budget?"
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L3",
+      "L4"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "absolute",
+      "relativePeriod": "this_quarter"
+    },
+    "expected_retrieval_sources": [
+      "operational_insights",
+      "aggregated_finance"
+    ],
+    "expected_intents": {
+      "required": [
+        "finance",
+        "spending_analysis"
+      ],
+      "forbidden": [
+        "search_lookup"
+      ],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": true,
+      "should_refuse": false,
+      "should_admit_uncertainty": true
+    },
+    "expected_evidence_requirements": [
+      "current insights basis for future constraints"
+    ],
+    "likely_failure_modes": [
+      "imprecise prognostics from current insights"
+    ],
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "To ensure the system can intelligently project and refine budgets using current insights and financial forecasts."
+  },
+  {
+    "eval_id": "EVAL_010",
+    "difficulty": "hard",
+    "query": "Highlight inconsistencies in operational spending vs approved transactions yesterday.",
+    "conversation_context": [
+      {
+        "role": "assistant",
+        "text": "Yesterday had high spending but at what inconsistencies?"
+      },
+      {
+        "role": "user",
+        "text": "Can you pinpoint these spending inconsistencies?"
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L4"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "relative",
+      "relativePeriod": "yesterday"
+    },
+    "expected_retrieval_sources": [
+      "sql_transactions",
+      "operational_insights"
+    ],
+    "expected_intents": {
+      "required": [
+        "finance",
+        "spending_analysis"
+      ],
+      "forbidden": [],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": false,
+      "should_refuse": false,
+      "should_admit_uncertainty": false
+    },
+    "expected_evidence_requirements": [
+      "yesterday's transaction audit"
+    ],
+    "likely_failure_modes": [
+      "incomplete recognition of transaction details"
+    ],
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "Focuses on identifying detail-oriented retrieval issues when reviewing short-term inconsistencies."
+  },
+  {
+    "eval_id": "EVAL_011",
+    "difficulty": "extreme",
+    "query": "Detect fraudulent patterns in this month's operational financial synopsis.",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "Is there any sign of fraud this month in our operations?"
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L5"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "absolute",
+      "relativePeriod": "this_month"
+    },
+    "expected_retrieval_sources": [
+      "sql_transactions",
+      "operational_insights"
+    ],
+    "expected_intents": {
+      "required": [
+        "finance",
+        "spending_analysis"
+      ],
+      "forbidden": [
+        "reminders"
+      ],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": false,
+      "should_clarify": true,
+      "should_refuse": true,
+      "should_admit_uncertainty": true
+    },
+    "expected_evidence_requirements": [
+      "anomalous spending pattern detection"
+    ],
+    "likely_failure_modes": [
+      "assumed correlations leading to false fraud indication"
+    ],
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "Challenges system on robustness in fraud detection, balancing high precision and recall to avoid false positives."
+  },
+  {
+    "eval_id": "EVAL_012",
+    "difficulty": "medium",
+    "query": "Contrast year-to-date operational expenses with last year's budget predictions.",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "Have this year's expenses matched our budget forecast?"
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L3"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "absolute",
+      "relativePeriod": "this_year"
+    },
+    "expected_retrieval_sources": [
+      "operational_insights",
+      "aggregated_finance"
+    ],
+    "expected_intents": {
+      "required": [
+        "finance",
+        "spending_analysis"
+      ],
+      "forbidden": [],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": false,
+      "should_refuse": false,
+      "should_admit_uncertainty": false
+    },
+    "expected_evidence_requirements": [
+      "historical versus actual expense reconciliation"
+    ],
+    "likely_failure_modes": [
+      "temporal mismatch in prediction versus actual"
+    ],
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "Testing on ability to reconcile budget predictions with current fiscal metrics in a high-data context."
+  },
+  {
+    "eval_id": "EVAL_013",
+    "difficulty": "hard",
+    "query": "Where does our operating spend diverge from expected patterns this week?",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "I'm looking for any off-pattern spending this week."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L4"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "relative",
+      "relativePeriod": "this_week"
+    },
+    "expected_retrieval_sources": [
+      "sql_transactions",
+      "operational_insights"
+    ],
+    "expected_intents": {
+      "required": [
+        "spending_analysis",
+        "finance"
+      ],
+      "forbidden": [],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": true,
+      "should_refuse": false,
+      "should_admit_uncertainty": false
+    },
+    "expected_evidence_requirements": [
+      "comparison of transaction data to expected benchmarks"
+    ],
+    "likely_failure_modes": [
+      "failure to detect nuanced spending anomalies"
+    ],
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "Focus on anomaly detection in current operations, requiring precise alignment with expected financial patterns."
+  },
+  {
+    "eval_id": "EVAL_014",
+    "difficulty": "medium",
+    "query": "Seek alignment of our financial operations for the upcoming quarter.",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "What needs aligning in our financial operations next quarter?"
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L3"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "absolute",
+      "relativePeriod": "this_quarter"
+    },
+    "expected_retrieval_sources": [
+      "operational_insights",
+      "aggregated_finance"
+    ],
+    "expected_intents": {
+      "required": [
+        "finance",
+        "scheduling"
+      ],
+      "forbidden": [],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": true,
+      "should_refuse": false,
+      "should_admit_uncertainty": false
+    },
+    "expected_evidence_requirements": [
+      "proactive alignment recommendations"
+    ],
+    "likely_failure_modes": [
+      "inadequate synthesis of current and future data"
+    ],
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "Testing proactive intelligent alignment strategies for finance and operations in a planning context."
+  },
+  {
+    "eval_id": "EVAL_015",
+    "difficulty": "hard",
+    "query": "Summarize divergent spend observations between operational and actual data points this year.",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "What are this year's divergences between our operational plans and actual spending?"
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L5"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "absolute",
+      "relativePeriod": "this_year"
+    },
+    "expected_retrieval_sources": [
+      "sql_transactions",
+      "operational_insights"
+    ],
+    "expected_intents": {
+      "required": [
+        "finance",
+        "operational_summary"
+      ],
+      "forbidden": [],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": true,
+      "should_refuse": false,
+      "should_admit_uncertainty": false
+    },
+    "expected_evidence_requirements": [
+      "comprehensive comparison report"
+    ],
+    "likely_failure_modes": [
+      "failure to reconcile diverse data sources"
+    ],
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "Designed to challenge the synthesis of operational intentions with actual spending, focusing on conflicting data points."
+  },
+  {
+    "eval_id": "EVAL_016",
+    "difficulty": "hard",
+    "query": "Summarize meeting insights and validate against operational data",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "Please ensure the meeting summary aligns with operations."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L3",
+      "L4"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "relative",
+      "relativePeriod": "this_quarter"
+    },
+    "expected_retrieval_sources": [
+      "sql_meetings",
+      "operational_insights"
+    ],
+    "expected_intents": {
+      "required": [
+        "operational_summary"
+      ],
+      "forbidden": [],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": true,
+      "should_refuse": false,
+      "should_admit_uncertainty": false
+    },
+    "expected_evidence_requirements": [
+      "Both meeting notes and operational insights must be aligned"
+    ],
+    "likely_failure_modes": [
+      "retrieval conflicts",
+      "contradictory evidence situations"
+    ],
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "Highlight the discrepancy between synthesized insights from meetings and operational data."
+  },
+  {
+    "eval_id": "EVAL_017",
+    "difficulty": "hard",
+    "query": "Generate a report integrating financial and operational data",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "I need a comprehensive view of finance and operations."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L2",
+      "L5"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "absolute",
+      "relativePeriod": "this_year"
+    },
+    "expected_retrieval_sources": [
+      "aggregated_finance",
+      "operational_insights"
+    ],
+    "expected_intents": {
+      "required": [
+        "finance",
+        "operational_summary"
+      ],
+      "forbidden": [],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": true,
+      "should_refuse": false,
+      "should_admit_uncertainty": true
+    },
+    "expected_evidence_requirements": [
+      "Presence of both financial data and corresponding operational insights"
+    ],
+    "likely_failure_modes": [
+      "ranking failures",
+      "cross-layer conflicts"
+    ],
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "To test systems ability to accurately rank and synthesize cross-domain data."
+  },
+  {
+    "eval_id": "EVAL_018",
+    "difficulty": "extreme",
+    "query": "Identify discrepancies between current operational insights and raw transactions",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "Find what's being missed in our transaction logs versus our operations dashboard."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L2",
+      "L4"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "relative",
+      "relativePeriod": "last_month"
+    },
+    "expected_retrieval_sources": [
+      "sql_transactions",
+      "operational_insights"
+    ],
+    "expected_intents": {
+      "required": [
+        "operational_summary",
+        "search_lookup"
+      ],
+      "forbidden": [],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": true,
+      "should_refuse": true,
+      "should_admit_uncertainty": true
+    },
+    "expected_evidence_requirements": [
+      "Comparison between transaction logs and operational insights"
+    ],
+    "likely_failure_modes": [
+      "contradictory evidence situations",
+      "retrieval conflicts"
+    ],
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "Ensure that the system can detect and report discrepancies while avoiding false positives or fabricated insights."
+  },
+  {
+    "eval_id": "EVAL_019",
+    "difficulty": "medium",
+    "query": "Compare operational and financial records to explain expenditures",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "Explain gaps in our operational versus financial expenditures from last quarter."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L1",
+      "L3"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "relative",
+      "relativePeriod": "last_quarter"
+    },
+    "expected_retrieval_sources": [
+      "aggregated_finance",
+      "operational_insights"
+    ],
+    "expected_intents": {
+      "required": [
+        "finance",
+        "operational_summary"
+      ],
+      "forbidden": [],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": false,
+      "should_refuse": false,
+      "should_admit_uncertainty": false
+    },
+    "expected_evidence_requirements": [
+      "Both financial records and operational details required"
+    ],
+    "likely_failure_modes": [
+      "retrieval conflicts",
+      "entity resolution failures"
+    ],
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "To verify that the system correlates disparate data to provide a coherent explanation for expenditures."
+  },
+  {
+    "eval_id": "EVAL_020",
+    "difficulty": "medium",
+    "query": "Integrate operational insights and stakeholder communications",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "Do our communications with stakeholders reflect current operational insights?"
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L4"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "relative",
+      "relativePeriod": "this_month"
+    },
+    "expected_retrieval_sources": [
+      "sql_communications",
+      "operational_insights"
+    ],
+    "expected_intents": {
+      "required": [
+        "relationship",
+        "operational_summary"
+      ],
+      "forbidden": [],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": true,
+      "should_refuse": false,
+      "should_admit_uncertainty": true
+    },
+    "expected_evidence_requirements": [
+      "Aligned communications data and operational insights"
+    ],
+    "likely_failure_modes": [
+      "retrieval conflicts",
+      "cross-layer conflicts"
+    ],
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "To test how the system validates that operational messaging is consistent with stakeholder communications."
+  },
+  {
+    "eval_id": "EVAL_021",
+    "difficulty": "hard",
+    "query": "Explain mismatches between operational performance reviews and actual task deliveries",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "There seem to be mismatches in the task performance reviews and actual task outcomes."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L3"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "relative",
+      "relativePeriod": "this_month"
+    },
+    "expected_retrieval_sources": [
+      "sql_tasks",
+      "operational_insights"
+    ],
+    "expected_intents": {
+      "required": [
+        "productivity",
+        "operational_summary"
+      ],
+      "forbidden": [],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": true,
+      "should_refuse": false,
+      "should_admit_uncertainty": true
+    },
+    "expected_evidence_requirements": [
+      "Clear linkage between task records and operational performance reviews"
+    ],
+    "likely_failure_modes": [
+      "contradictory evidence situations",
+      "retrieval conflicts"
+    ],
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "Assess the system's ability to resolve conflicts between documented reviews and actual task deliveries."
+  },
+  {
+    "eval_id": "EVAL_022",
+    "difficulty": "extreme",
+    "query": "Correctly identify task progress discrepancies in operational dashboards",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "Identify issues in task reporting versus actual progress in our systems."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L5"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "relative",
+      "relativePeriod": "this_week"
+    },
+    "expected_retrieval_sources": [
+      "sql_tasks",
+      "operational_insights"
+    ],
+    "expected_intents": {
+      "required": [
+        "scheduling",
+        "operational_summary"
+      ],
+      "forbidden": [],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": true,
+      "should_refuse": false,
+      "should_admit_uncertainty": true
+    },
+    "expected_evidence_requirements": [
+      "Comparative analysis of task tracking systems against operational dashboards"
+    ],
+    "likely_failure_modes": [
+      "retrieval conflicts",
+      "under-retrieval"
+    ],
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "Evaluate the system's competence in handling discrepancies between task management systems and operational insights."
+  },
+  {
+    "eval_id": "EVAL_023",
+    "difficulty": "hard",
+    "query": "Reconcile differences between financial summaries and operational budgets",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "Do our financial summaries reflect our operational budgeting accurately?"
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L4"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "relative",
+      "relativePeriod": "this_year"
+    },
+    "expected_retrieval_sources": [
+      "aggregated_finance",
+      "operational_insights"
+    ],
+    "expected_intents": {
+      "required": [
+        "finance"
+      ],
+      "forbidden": [],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": true,
+      "should_refuse": false,
+      "should_admit_uncertainty": true
+    },
+    "expected_evidence_requirements": [
+      "Evidence of linkage between financial data and operational budgets"
+    ],
+    "likely_failure_modes": [
+      "contradictory evidence situations",
+      "retrieval conflicts"
+    ],
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "To verify that financial summaries are accurately reconciled with operational budgets and there is clear evidence path in support."
+  },
+  {
+    "eval_id": "EVAL_024",
+    "difficulty": "medium",
+    "query": "Integrate historical communications to assess operational trends",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "Peruse past communications to see how they reflect current operational trends."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L3"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "relative",
+      "relativePeriod": "last_year"
+    },
+    "expected_retrieval_sources": [
+      "sql_communications",
+      "operational_insights"
+    ],
+    "expected_intents": {
+      "required": [
+        "operational_summary",
+        "relationship"
+      ],
+      "forbidden": [],
+      "matchMode": "any"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": false,
+      "should_refuse": false,
+      "should_admit_uncertainty": false
+    },
+    "expected_evidence_requirements": [
+      "Conclusive evidence between communication patterns and operational trends"
+    ],
+    "likely_failure_modes": [
+      "retrieval ambiguity",
+      "entity resolution failures"
+    ],
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "Ensure that integration of historical communications properly reflects and corroborates current operational trends without fabrication."
+  },
+  {
+    "eval_id": "EVAL_025",
+    "difficulty": "hard",
+    "query": "Align task outcomes with operational insights for strategic alignment",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "Confirm that task outcomes are in sync with our strategic operational insights."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L5"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "relative",
+      "relativePeriod": "this_quarter"
+    },
+    "expected_retrieval_sources": [
+      "sql_tasks",
+      "operational_insights"
+    ],
+    "expected_intents": {
+      "required": [
+        "operational_summary",
+        "productivity"
+      ],
+      "forbidden": [],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": true,
+      "should_refuse": false,
+      "should_admit_uncertainty": true
+    },
+    "expected_evidence_requirements": [
+      "Clear evidence alignment between task data and strategic insights"
+    ],
+    "likely_failure_modes": [
+      "retrieval conflicts",
+      "cross-layer conflicts"
+    ],
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "Assess system's fortitude in aligning task outcomes and strategic operational insights, ensuring logical consistency."
+  },
+  {
+    "eval_id": "EVAL_026",
+    "difficulty": "medium",
+    "query": "Diagnose operational hindrances using raw data access",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "Use raw data to find what's slowing down operations."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L2"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "relative",
+      "relativePeriod": "this_month"
+    },
+    "expected_retrieval_sources": [
+      "sql_transactions",
+      "operational_insights"
+    ],
+    "expected_intents": {
+      "required": [
+        "scheduling",
+        "operational_summary"
+      ],
+      "forbidden": [],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": true,
+      "should_refuse": false,
+      "should_admit_uncertainty": true
+    },
+    "expected_evidence_requirements": [
+      "Access to both transaction and operational data to identify bottlenecks"
+    ],
+    "likely_failure_modes": [
+      "retrieval conflicts",
+      "entity drift"
+    ],
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "Verify system's ability to utilize raw data for diagnosing operational hindrances without introducing ambiguity or errors."
+  },
+  {
+    "eval_id": "EVAL_027",
+    "difficulty": "hard",
+    "query": "Revise operational statuses prompted by recent financial trends",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "Have recent financial trends prompted any new operational changes?"
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L4"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "relative",
+      "relativePeriod": "this_month"
+    },
+    "expected_retrieval_sources": [
+      "aggregated_finance",
+      "operational_insights"
+    ],
+    "expected_intents": {
+      "required": [
+        "finance"
+      ],
+      "forbidden": [],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": false,
+      "should_refuse": false,
+      "should_admit_uncertainty": true
+    },
+    "expected_evidence_requirements": [
+      "Evidence intersect between operational statuses and recent financial trends"
+    ],
+    "likely_failure_modes": [
+      "cross-layer conflicts",
+      "retrieval conflicts"
+    ],
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "Challenge systems to converge operational adjustments and financial trend analytics seamlessly."
+  },
+  {
+    "eval_id": "EVAL_028",
+    "difficulty": "hard",
+    "query": "Evaluate the integrity of strategic insights from combined meetings data",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "Ensure our strategic insights correctly reflect the data from various meetings."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L5"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "relative",
+      "relativePeriod": "this_month"
+    },
+    "expected_retrieval_sources": [
+      "sql_meetings",
+      "operational_insights"
+    ],
+    "expected_intents": {
+      "required": [
+        "scheduling",
+        "operational_summary"
+      ],
+      "forbidden": [],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": true,
+      "should_refuse": false,
+      "should_admit_uncertainty": false
+    },
+    "expected_evidence_requirements": [
+      "Inclusive proof across multi-meeting data"
+    ],
+    "likely_failure_modes": [
+      "retrieval conflicts",
+      "cross-layer conflicts"
+    ],
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "Evaluate system dexterity in fusing meeting-derived insights with operational strategic data without causing muddled or inaccurate results."
+  },
+  {
+    "eval_id": "EVAL_029",
+    "difficulty": "extreme",
+    "query": "Synthesize multi-domain data to address the latest operational challenges",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "Using the latest data, find solutions to current operational challenges."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L5"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "relative",
+      "relativePeriod": "this_week"
+    },
+    "expected_retrieval_sources": [
+      "sql_tasks",
+      "operational_insights",
+      "vector_search"
+    ],
+    "expected_intents": {
+      "required": [
+        "operational_summary",
+        "productivity"
+      ],
+      "forbidden": [],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": false,
+      "should_clarify": true,
+      "should_refuse": true,
+      "should_admit_uncertainty": true
+    },
+    "expected_evidence_requirements": [
+      "Extensive synthesis across multi-domain data"
+    ],
+    "likely_failure_modes": [
+      "contradictory evidence situations",
+      "retrieval conflicts"
+    ],
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "Push system's multi-domain synthesis capacity, ensuring challenges are addressed without overgeneralization or sector-specific oversight."
+  },
+  {
+    "eval_id": "EVAL_030",
+    "difficulty": "medium",
+    "query": "Identify and resolve misalignment between scheduled tasks and operational insights",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "Check for task scheduling alignment with operational plans, and fix found gaps."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L3"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "relative",
+      "relativePeriod": "this_month"
+    },
+    "expected_retrieval_sources": [
+      "sql_tasks",
+      "operational_insights"
+    ],
+    "expected_intents": {
+      "required": [
+        "scheduling",
+        "operational_summary"
+      ],
+      "forbidden": [],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": true,
+      "should_refuse": false,
+      "should_admit_uncertainty": true
+    },
+    "expected_evidence_requirements": [
+      "Clear documentation on schedule vs insights alignment"
+    ],
+    "likely_failure_modes": [
+      "retrieval conflicts",
+      "cross-layer conflicts"
+    ],
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "Test system acuity in employing scheduling information aligned with current operational insights while ensuring gaps are clearly addressed."
+  },
+  {
+    "eval_id": "EVAL_031",
+    "difficulty": "hard",
+    "query": "Summarize key financial anomalies from last quarter.",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "Can you update me on last quarter's finance?"
+      },
+      {
+        "role": "assistant",
+        "text": "What specific details about the finance are you interested in?"
+      },
+      {
+        "role": "user",
+        "text": "I'm interested in anomalies."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L3",
+      "L5"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "absolute",
+      "relativePeriod": "last_quarter"
+    },
+    "expected_retrieval_sources": [
+      "sql_transactions",
+      "operational_insights"
+    ],
+    "expected_intents": {
+      "required": [
+        "spending_analysis"
+      ],
+      "forbidden": [
+        "reminders",
+        "travel"
+      ],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": false,
+      "should_refuse": true,
+      "should_admit_uncertainty": true
+    },
+    "expected_evidence_requirements": [
+      "objective evidence for anomalies"
+    ],
+    "likely_failure_modes": [
+      "ranking failures",
+      "contradictory evidence situations"
+    ],
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "To ensure anomalies are detected and reported accurately even with potential contradictory data between operational insights and raw transaction logs."
+  },
+  {
+    "eval_id": "EVAL_032",
+    "query": "What was the status of project timelines ending last month?",
+    "difficulty": "extreme",
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "To check if the system can accurately align project timelines with task completions, given potential discrepancies between operational insights and task logs.",
+    "likely_failure_modes": [
+      "over-retrieval",
+      "semantic mismatch"
+    ],
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "How are our projects progressing?"
+      },
+      {
+        "role": "assistant",
+        "text": "Can you specify which projects you're inquiring about?"
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L2",
+      "L3"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "relative",
+      "relativePeriod": "last_month"
+    },
+    "expected_retrieval_sources": [
+      "sql_tasks",
+      "operational_insights"
+    ],
+    "expected_intents": {
+      "required": [
+        "operational_summary",
+        "scheduling"
+      ],
+      "forbidden": [],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": false,
+      "should_refuse": false,
+      "should_admit_uncertainty": true
+    },
+    "expected_evidence_requirements": [
+      "task_logs",
+      "completion_reports"
+    ]
+  },
+  {
+    "eval_id": "EVAL_033",
+    "difficulty": "medium",
+    "query": "Do recent meetings align with commitments made?",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "How well are our meetings keeping up with commitments?"
+      },
+      {
+        "role": "assistant",
+        "text": "I will need to verify the specific commitments."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L1",
+      "L3"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "relative",
+      "relativePeriod": "this_month"
+    },
+    "expected_retrieval_sources": [
+      "sql_meetings",
+      "sql_commitments"
+    ],
+    "expected_intents": {
+      "required": [
+        "commitments",
+        "scheduling"
+      ],
+      "forbidden": [
+        "search_lookup"
+      ],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": false,
+      "should_refuse": false,
+      "should_admit_uncertainty": false
+    },
+    "expected_evidence_requirements": [
+      "meeting agendas",
+      "commitments records"
+    ],
+    "likely_failure_modes": [
+      "operational vs investigative conflicts",
+      "wrong ranking"
+    ],
+    "hallucination_risk": "low",
+    "why_this_eval_exists": "To check for alignment between meeting outcomes and pre-existing commitments, ensuring commitments are consistently addressed in meetings."
+  },
+  {
+    "eval_id": "EVAL_034",
+    "difficulty": "extreme",
+    "query": "Have any urgent tasks emerged due to recent market changes?",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "Are there any new urgent tasks following market updates?"
+      },
+      {
+        "role": "assistant",
+        "text": "I will check based on recent updates."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L2",
+      "L5"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "relative",
+      "relativePeriod": "this_week"
+    },
+    "expected_retrieval_sources": [
+      "sql_tasks",
+      "operational_insights"
+    ],
+    "expected_intents": {
+      "required": [
+        "productivity"
+      ],
+      "forbidden": [
+        "finance",
+        "travel"
+      ],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": true,
+      "should_refuse": true,
+      "should_admit_uncertainty": true
+    },
+    "expected_evidence_requirements": [
+      "market report evidence",
+      "urgent task creation records"
+    ],
+    "likely_failure_modes": [
+      "entity drift",
+      "stale operational insights"
+    ],
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "To test the system's ability to dynamically update task priorities in response to late-breaking market information that may conflict with other data."
+  },
+  {
+    "eval_id": "EVAL_035",
+    "difficulty": "hard",
+    "query": "What discrepancies are visible in current transaction summaries?",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "Identify discrepancies in current transactions."
+      },
+      {
+        "role": "assistant",
+        "text": "Are you interested in recent summaries or any particular category?"
+      },
+      {
+        "role": "user",
+        "text": "Just give a general overview."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L4",
+      "L5"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "relative",
+      "relativePeriod": "today"
+    },
+    "expected_retrieval_sources": [
+      "sql_transactions",
+      "aggregated_finance"
+    ],
+    "expected_intents": {
+      "required": [
+        "finance"
+      ],
+      "forbidden": [
+        "reminders"
+      ],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": false,
+      "should_refuse": true,
+      "should_admit_uncertainty": true
+    },
+    "expected_evidence_requirements": [
+      "transaction reports",
+      "audit logs"
+    ],
+    "likely_failure_modes": [
+      "retrieval ambiguity",
+      "false positives"
+    ],
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "To challenge the system's ability to identify and resolve discrepancies in financial data with potentially conflicting evidence sources."
+  },
+  {
+    "eval_id": "EVAL_036",
+    "difficulty": "medium",
+    "query": "Are there unresolved commitments linked to this week's meetings?",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "Have all meeting-related commitments been resolved this week?"
+      },
+      {
+        "role": "assistant",
+        "text": "I'll check if any commitments remain unattended."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L1",
+      "L4"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "relative",
+      "relativePeriod": "this_week"
+    },
+    "expected_retrieval_sources": [
+      "sql_meetings",
+      "sql_commitments"
+    ],
+    "expected_intents": {
+      "required": [
+        "commitments",
+        "scheduling"
+      ],
+      "forbidden": [],
+      "matchMode": "any"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": false,
+      "should_refuse": false,
+      "should_admit_uncertainty": false
+    },
+    "expected_evidence_requirements": [
+      "commitment logs",
+      "meeting minutes"
+    ],
+    "likely_failure_modes": [
+      "stale context carry-forward",
+      "ranking failures"
+    ],
+    "hallucination_risk": "low",
+    "why_this_eval_exists": "To ensure that pending commitments linked to meetings are accurately identified and reported on amidst dynamic organizational activities."
+  },
+  {
+    "eval_id": "EVAL_037",
+    "difficulty": "hard",
+    "query": "How does the latest financial summary differ from raw data?",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "Compare the financial summary with raw data."
+      },
+      {
+        "role": "assistant",
+        "text": "Are you looking for specific discrepancies or trends?"
+      },
+      {
+        "role": "user",
+        "text": "Focus on discrepancies."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L2",
+      "L5"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "absolute",
+      "relativePeriod": "this_month"
+    },
+    "expected_retrieval_sources": [
+      "aggregated_finance"
+    ],
+    "expected_intents": {
+      "required": [
+        "finance"
+      ],
+      "forbidden": [
+        "reminders",
+        "travel"
+      ],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": true,
+      "should_refuse": false,
+      "should_admit_uncertainty": true
+    },
+    "expected_evidence_requirements": [
+      "financial summary reports",
+      "raw transaction logs"
+    ],
+    "likely_failure_modes": [
+      "conflicting dates",
+      "over-retrieval"
+    ],
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "To verify the system\u2019s proficiency in distinguishing discrepancies between summarized and raw financial data, especially when evidence might conflict."
+  },
+  {
+    "eval_id": "EVAL_038",
+    "difficulty": "extreme",
+    "query": "Can you detect scheduling anomalies in last month's meetings?",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "Review last month's meeting schedules."
+      },
+      {
+        "role": "assistant",
+        "text": "I'll analyze for any scheduling anomalies."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L3",
+      "L5"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "relative",
+      "relativePeriod": "last_month"
+    },
+    "expected_retrieval_sources": [
+      "sql_meetings",
+      "operational_insights"
+    ],
+    "expected_intents": {
+      "required": [
+        "scheduling"
+      ],
+      "forbidden": [
+        "travel",
+        "subscriptions"
+      ],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": false,
+      "should_refuse": true,
+      "should_admit_uncertainty": true
+    },
+    "expected_evidence_requirements": [
+      "scheduling logs",
+      "anomaly detection reports"
+    ],
+    "likely_failure_modes": [
+      "wrong ranking",
+      "false positives"
+    ],
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "To stress-test the system's capacity to identify unexpected scheduling anomalies, especially where operational insights might conflict with meeting data."
+  },
+  {
+    "eval_id": "EVAL_039",
+    "difficulty": "medium",
+    "query": "Which key project insights have been updated recently?",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "What are the latest updates on key projects?"
+      },
+      {
+        "role": "assistant",
+        "text": "I'll provide the most recent insights."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L4",
+      "L5"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "relative",
+      "relativePeriod": "this_month"
+    },
+    "expected_retrieval_sources": [
+      "operational_insights",
+      "sql_transactions"
+    ],
+    "expected_intents": {
+      "required": [
+        "productivity"
+      ],
+      "forbidden": [
+        "travel",
+        "subscriptions"
+      ],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": true,
+      "should_refuse": false,
+      "should_admit_uncertainty": true
+    },
+    "expected_evidence_requirements": [
+      "project insight logs",
+      "transaction records"
+    ],
+    "likely_failure_modes": [
+      "stale operational insights",
+      "ranking failures"
+    ],
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "To ensure that only the latest and most relevant project insights are presented, challenging the system's freshness of operational insights."
+  },
+  {
+    "eval_id": "EVAL_040",
+    "difficulty": "hard",
+    "query": "What future commitments have emerged from this month's meetings?",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "Show upcoming commitments resulting from this month's meetings."
+      },
+      {
+        "role": "assistant",
+        "text": "I'll look into commitments made during recent meetings."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L3",
+      "L4"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "relative",
+      "relativePeriod": "this_month"
+    },
+    "expected_retrieval_sources": [
+      "sql_meetings",
+      "sql_commitments"
+    ],
+    "expected_intents": {
+      "required": [
+        "commitments",
+        "scheduling"
+      ],
+      "forbidden": [],
+      "matchMode": "any"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": false,
+      "should_refuse": true,
+      "should_admit_uncertainty": true
+    },
+    "expected_evidence_requirements": [
+      "meeting notes",
+      "commitment logs"
+    ],
+    "likely_failure_modes": [
+      "under-retrieval",
+      "semantic mismatch"
+    ],
+    "hallucination_risk": "low",
+    "why_this_eval_exists": "To evaluate the system's ability to accurately project future commitments derived from recent meetings, with a focus on resolving semantic mismatches."
+  },
+  {
+    "eval_id": "EVAL_041",
+    "difficulty": "extreme",
+    "query": "Have there been any unexpected financial trends this month?",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "Identify any unusual financial trends this month."
+      },
+      {
+        "role": "assistant",
+        "text": "I will analyze the current month's data."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L2",
+      "L5"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "relative",
+      "relativePeriod": "this_month"
+    },
+    "expected_retrieval_sources": [
+      "sql_transactions",
+      "aggregated_finance"
+    ],
+    "expected_intents": {
+      "required": [
+        "finance"
+      ],
+      "forbidden": [
+        "reminders"
+      ],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": true,
+      "should_refuse": false,
+      "should_admit_uncertainty": true
+    },
+    "expected_evidence_requirements": [
+      "trend analysis reports",
+      "transaction logs"
+    ],
+    "likely_failure_modes": [
+      "retrieval ambiguity",
+      "false positives"
+    ],
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "To assess the system's capacity to detect and accurately report financial anomalies within the current month, despite retrieval ambiguities."
+  },
+  {
+    "eval_id": "EVAL_042",
+    "difficulty": "medium",
+    "query": "What major issues have arisen from ongoing strategic meetings?",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "Update me on major issues from strategic meetings."
+      },
+      {
+        "role": "assistant",
+        "text": "Analyzing notes from recent strategic discussions."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L3",
+      "L5"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "relative",
+      "relativePeriod": "this_week"
+    },
+    "expected_retrieval_sources": [
+      "sql_meetings",
+      "operational_insights"
+    ],
+    "expected_intents": {
+      "required": [
+        "operational_summary"
+      ],
+      "forbidden": [
+        "bills_payments"
+      ],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": false,
+      "should_refuse": false,
+      "should_admit_uncertainty": false
+    },
+    "expected_evidence_requirements": [
+      "meeting notes",
+      "issue logs"
+    ],
+    "likely_failure_modes": [
+      "semantic mismatch",
+      "operational vs investigative conflicts"
+    ],
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "To test the system's proficiency in capturing significant issues from strategic meetings while mitigating semantic mismatches and conflict between operational data."
+  },
+  {
+    "eval_id": "EVAL_043",
+    "difficulty": "hard",
+    "query": "Is operational efficiency consistent with current financial metrics?",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "How does operational efficiency compare with our financial metrics?"
+      },
+      {
+        "role": "assistant",
+        "text": "Cross-referencing operational performance with financial data."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L4",
+      "L5"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "relative",
+      "relativePeriod": "this_quarter"
+    },
+    "expected_retrieval_sources": [
+      "operational_insights",
+      "aggregated_finance"
+    ],
+    "expected_intents": {
+      "required": [
+        "operational_summary",
+        "finance"
+      ],
+      "forbidden": [],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": true,
+      "should_refuse": true,
+      "should_admit_uncertainty": true
+    },
+    "expected_evidence_requirements": [
+      "efficiency reports",
+      "financial summaries"
+    ],
+    "likely_failure_modes": [
+      "over-retrieval",
+      "entity conflicts"
+    ],
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "To verify the alignment and consistency between operational efficiency data and financial metrics, challenging cross-layer data coherence."
+  },
+  {
+    "eval_id": "EVAL_044",
+    "difficulty": "extreme",
+    "query": "Have any key insights been missed in recent project reviews?",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "What was potentially overlooked during project reviews?"
+      },
+      {
+        "role": "assistant",
+        "text": "I'll investigate the reviews thoroughly."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L2",
+      "L4"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "relative",
+      "relativePeriod": "this_week"
+    },
+    "expected_retrieval_sources": [
+      "operational_insights",
+      "sql_transactions"
+    ],
+    "expected_intents": {
+      "required": [
+        "productivity"
+      ],
+      "forbidden": [
+        "subscriptions",
+        "travel"
+      ],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": false,
+      "should_refuse": true,
+      "should_admit_uncertainty": true
+    },
+    "expected_evidence_requirements": [
+      "review reports",
+      "project logs"
+    ],
+    "likely_failure_modes": [
+      "missing evidence situations",
+      "retrieval ambiguity"
+    ],
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "To evaluate the system\u2019s ability to identify overlooked insights during project assessments, particularly within constraints of retrieval ambiguity."
+  },
+  {
+    "eval_id": "EVAL_045",
+    "difficulty": "hard",
+    "query": "What are the top unresolved issues affecting ongoing tasks?",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "Identify current bottlenecks in our ongoing tasks."
+      },
+      {
+        "role": "assistant",
+        "text": "Searching for unresolved issues in active tasks."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L1",
+      "L3"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "relative",
+      "relativePeriod": "today"
+    },
+    "expected_retrieval_sources": [
+      "sql_tasks",
+      "operational_insights"
+    ],
+    "expected_intents": {
+      "required": [
+        "productivity"
+      ],
+      "forbidden": [
+        "bills_payments"
+      ],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": false,
+      "should_refuse": true,
+      "should_admit_uncertainty": true
+    },
+    "expected_evidence_requirements": [
+      "task status logs",
+      "bottleneck reports"
+    ],
+    "likely_failure_modes": [
+      "retrieval conflicts",
+      "false positives"
+    ],
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "To confirm the system's capability to identify unresolved issues and bottlenecks in ongoing tasks while avoiding retrieval conflicts."
+  },
+  {
+    "eval_id": "EVAL_046",
+    "difficulty": "medium",
+    "query": "Consolidate operational insights and suggest improvements.",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "How can we optimize our processes?"
+      },
+      {
+        "role": "assistant",
+        "text": "Let me check the operational insights and precomputed data for suggestions."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L2",
+      "L4"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "event_relative",
+      "relativePeriod": "this_quarter"
+    },
+    "expected_retrieval_sources": [
+      "operational_insights",
+      "sql_tasks"
+    ],
+    "expected_intents": {
+      "required": [
+        "operational_summary"
+      ],
+      "forbidden": [
+        "finance"
+      ],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": true,
+      "should_refuse": false,
+      "should_admit_uncertainty": false
+    },
+    "expected_evidence_requirements": [
+      "complete operational insights",
+      "real-time task data"
+    ],
+    "likely_failure_modes": [
+      "cross-layer conflicts",
+      "ranking failures"
+    ],
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "To test the system's ability to reconcile operational summaries with real-time task data and suggest optimizations without hallucinating insights."
+  },
+  {
+    "eval_id": "EVAL_047",
+    "difficulty": "hard",
+    "query": "Resolve conflicts between our operational insights and raw transactions.",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "There seems to be a discrepancy between our operational reports and transaction logs."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L3",
+      "L5"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "relative",
+      "relativePeriod": "last_month"
+    },
+    "expected_retrieval_sources": [
+      "operational_insights",
+      "sql_transactions"
+    ],
+    "expected_intents": {
+      "required": [
+        "operational_summary",
+        "finance"
+      ],
+      "forbidden": [],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": true,
+      "should_refuse": false,
+      "should_admit_uncertainty": false
+    },
+    "expected_evidence_requirements": [
+      "transaction logs",
+      "insight reports"
+    ],
+    "likely_failure_modes": [
+      "retrieval conflicts",
+      "operational vs investigative insights mismatch"
+    ],
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "To challenge the system\u2019s ability to detect and clarify discrepancies between different data layers, ensuring accurate insights without fabrication."
+  },
+  {
+    "eval_id": "EVAL_048",
+    "difficulty": "extreme",
+    "query": "Provide an operational summary of department efficiency across various insights.",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "I need a comprehensive efficiency report for the departments."
+      },
+      {
+        "role": "assistant",
+        "text": "I will analyze both precomputed data and real-time figures."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L4"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "absolute",
+      "relativePeriod": "this_year"
+    },
+    "expected_retrieval_sources": [
+      "operational_insights",
+      "sql_tasks",
+      "vector_search"
+    ],
+    "expected_intents": {
+      "required": [
+        "operational_summary",
+        "productivity"
+      ],
+      "forbidden": [
+        "finance"
+      ],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": false,
+      "should_refuse": false,
+      "should_admit_uncertainty": true
+    },
+    "expected_evidence_requirements": [
+      "complete department metrics",
+      "integrated data streams"
+    ],
+    "likely_failure_modes": [
+      "ranking errors",
+      "conflicts between vector and task data"
+    ],
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "To identify potential weaknesses in multi-source integration and the ability to synthesize accurate department-level reports without erroneous assumptions."
+  },
+  {
+    "eval_id": "EVAL_049",
+    "difficulty": "hard",
+    "query": "Have recent operational summaries aligned with transactional data?",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "Verify that our operational reports are consistent with actual transactions."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L1",
+      "L3"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "relative",
+      "relativePeriod": "last_quarter"
+    },
+    "expected_retrieval_sources": [
+      "operational_insights",
+      "sql_transactions"
+    ],
+    "expected_intents": {
+      "required": [
+        "operational_summary",
+        "search_lookup"
+      ],
+      "forbidden": [
+        "travel"
+      ],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": false,
+      "should_clarify": true,
+      "should_refuse": false,
+      "should_admit_uncertainty": true
+    },
+    "expected_evidence_requirements": [
+      "transaction validation",
+      "operation insights"
+    ],
+    "likely_failure_modes": [
+      "discrepancies between insights and transactions",
+      "retrieval mismatches"
+    ],
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "To stress-test the system's capability to reconcile and correct conflicts between high-level summaries and granular transaction data, ensuring evidence-backed responses."
+  },
+  {
+    "eval_id": "EVAL_050",
+    "difficulty": "medium",
+    "query": "How do operational insights compare to our recent task accomplishments?",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "I want to know if our tasks are aligning with the overall operational strategies."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L2"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "event_relative",
+      "relativePeriod": "this_week"
+    },
+    "expected_retrieval_sources": [
+      "operational_insights",
+      "sql_tasks"
+    ],
+    "expected_intents": {
+      "required": [
+        "scheduling",
+        "productivity"
+      ],
+      "forbidden": [
+        "finance"
+      ],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": false,
+      "should_refuse": false,
+      "should_admit_uncertainty": false
+    },
+    "expected_evidence_requirements": [
+      "task logs",
+      "current operational insights"
+    ],
+    "likely_failure_modes": [
+      "operational vs task discrepancies",
+      "ranking alignment errors"
+    ],
+    "hallucination_risk": "low",
+    "why_this_eval_exists": "To ensure synchronization between ongoing tasks and operational insights, highlighting possible gaps or mismatches in data interpretation."
+  },
+  {
+    "eval_id": "EVAL_051",
+    "difficulty": "hard",
+    "query": "Highlight any significant deviations in operational and transactional insights.",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "Identify key areas where our operational insights deviate from transactions."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L3",
+      "L4"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "relative",
+      "relativePeriod": "last_quarter"
+    },
+    "expected_retrieval_sources": [
+      "operational_insights",
+      "sql_transactions",
+      "vector_search"
+    ],
+    "expected_intents": {
+      "required": [
+        "spending_analysis",
+        "operational_summary"
+      ],
+      "forbidden": [
+        "travel"
+      ],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": true,
+      "should_refuse": false,
+      "should_admit_uncertainty": false
+    },
+    "expected_evidence_requirements": [
+      "deviation analysis",
+      "transactional cross-references"
+    ],
+    "likely_failure_modes": [
+      "significant disparity detection errors",
+      "misalignment in retrieval prioritization"
+    ],
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "To rigorously test the system's ability to detect and articulate deviations between operational insights and transactional data, ensuring robust explanation and accurate retrieval."
+  },
+  {
+    "eval_id": "EVAL_052",
+    "difficulty": "extreme",
+    "query": "Synthesize insights from financial and operational data for strategic guidance.",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "Provide strategic insights integrating financial and operational data."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L5"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "absolute",
+      "relativePeriod": "this_year"
+    },
+    "expected_retrieval_sources": [
+      "operational_insights",
+      "aggregated_finance",
+      "vector_search"
+    ],
+    "expected_intents": {
+      "required": [
+        "operational_summary",
+        "finance"
+      ],
+      "forbidden": [
+        "subscriptions"
+      ],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": false,
+      "should_clarify": true,
+      "should_refuse": false,
+      "should_admit_uncertainty": true
+    },
+    "expected_evidence_requirements": [
+      "comprehensive financial data",
+      "integrated operational insights"
+    ],
+    "likely_failure_modes": [
+      "complexity in data blending",
+      "strategic insight synthesis errors"
+    ],
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "To expose retrieval and synthesis challenges in merging data from diverse domains with competing details, testing the system\u2019s holistic strategic insight capabilities."
+  },
+  {
+    "eval_id": "EVAL_053",
+    "difficulty": "extreme",
+    "query": "Determine the consistency of operational summaries with latest task outcomes.",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "Are our operational strategies consistent with what has been achieved recently?"
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L4"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "event_relative",
+      "relativePeriod": "this_month"
+    },
+    "expected_retrieval_sources": [
+      "operational_insights",
+      "sql_tasks"
+    ],
+    "expected_intents": {
+      "required": [
+        "operational_summary",
+        "productivity"
+      ],
+      "forbidden": [
+        "reminders"
+      ],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": false,
+      "should_clarify": true,
+      "should_refuse": false,
+      "should_admit_uncertainty": false
+    },
+    "expected_evidence_requirements": [
+      "task completion details",
+      "strategic alignment confirmation"
+    ],
+    "likely_failure_modes": [
+      "operational insight misalignment",
+      "ranking prioritization issues"
+    ],
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "To critically evaluate the system\u2019s ability to align operational summaries with actual task accomplishments, identifying misalignments without incorrectly inferring causality."
+  },
+  {
+    "eval_id": "EVAL_054",
+    "difficulty": "hard",
+    "query": "Why do our operational insights show different trends than transaction summaries?",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "There's a conflicting trend in operational insights versus the transaction summaries for this quarter."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L3",
+      "L5"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "absolute",
+      "relativePeriod": "this_quarter"
+    },
+    "expected_retrieval_sources": [
+      "operational_insights",
+      "sql_transactions"
+    ],
+    "expected_intents": {
+      "required": [
+        "finance",
+        "operational_summary"
+      ],
+      "forbidden": [],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": false,
+      "should_clarify": true,
+      "should_refuse": false,
+      "should_admit_uncertainty": true
+    },
+    "expected_evidence_requirements": [
+      "trend analysis",
+      "data cross-referencing"
+    ],
+    "likely_failure_modes": [
+      "trend misinterpretations",
+      "operational vs transactional inconsistencies"
+    ],
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "To expose the challenge of reconciling different data-driven trends and reinforce the need for careful analysis without speculative causation in complex data scenarios."
+  },
+  {
+    "eval_id": "EVAL_055",
+    "difficulty": "medium",
+    "query": "What tasks and operations are in conflict with our financial commitments?",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "Identify conflicts between our planned tasks and existing financial commitments."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L2",
+      "L4"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "relative",
+      "relativePeriod": "this_month"
+    },
+    "expected_retrieval_sources": [
+      "sql_tasks",
+      "sql_commitments",
+      "operational_insights"
+    ],
+    "expected_intents": {
+      "required": [
+        "commitments",
+        "productivity"
+      ],
+      "forbidden": [
+        "relationship"
+      ],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": true,
+      "should_refuse": false,
+      "should_admit_uncertainty": false
+    },
+    "expected_evidence_requirements": [
+      "task details",
+      "commitment agreements"
+    ],
+    "likely_failure_modes": [
+      "conflict identification errors",
+      "misalignment in data interpretation"
+    ],
+    "hallucination_risk": "low",
+    "why_this_eval_exists": "To determine the system's handling of conflicts between tasks and financial commitments without excess assumptions, emphasizing direct evidence use."
+  },
+  {
+    "eval_id": "EVAL_056",
+    "difficulty": "extreme",
+    "query": "Integrate insights from operational reviews with transaction-led finance patterns.",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "Merge insights from our operational reviews with financial patterns found in transactions."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L5"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "absolute",
+      "relativePeriod": "this_year"
+    },
+    "expected_retrieval_sources": [
+      "operational_insights",
+      "aggregated_finance",
+      "sql_transactions"
+    ],
+    "expected_intents": {
+      "required": [
+        "finance",
+        "operational_summary"
+      ],
+      "forbidden": [
+        "subscriptions"
+      ],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": false,
+      "should_clarify": true,
+      "should_refuse": true,
+      "should_admit_uncertainty": false
+    },
+    "expected_evidence_requirements": [
+      "complete financial transactions",
+      "integrated operational insights"
+    ],
+    "likely_failure_modes": [
+      "data blending difficulties",
+      "integrative insight errors"
+    ],
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "To challenge the ability of simultaneous multi-domain insight integration, aiming for precise, not speculative, conclusions from vast data ranges."
+  },
+  {
+    "eval_id": "EVAL_057",
+    "difficulty": "hard",
+    "query": "Are our operational directives in sync with task execution statuses?",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "Check if our operational directives are being reflected in the execution of tasks."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L4"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "relative",
+      "relativePeriod": "this_quarter"
+    },
+    "expected_retrieval_sources": [
+      "operational_insights",
+      "sql_tasks"
+    ],
+    "expected_intents": {
+      "required": [
+        "operational_summary",
+        "search_lookup"
+      ],
+      "forbidden": [
+        "bills_payments"
+      ],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": false,
+      "should_refuse": false,
+      "should_admit_uncertainty": true
+    },
+    "expected_evidence_requirements": [
+      "task execution records",
+      "alignment metrics"
+    ],
+    "likely_failure_modes": [
+      "execution alignment detection errors",
+      "retrieval versus operational directive mismatches"
+    ],
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "To assess whether task statuses accurately reflect higher-level operational directives, ensuring actionable insights are grounded in recorded task execution."
+  },
+  {
+    "eval_id": "EVAL_058",
+    "difficulty": "extreme",
+    "query": "Can you find coherence between latest operational summaries and expense logs?",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "There seems to be inconsistency between what expenses are reported and our operational summaries."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L3",
+      "L5"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "event_relative",
+      "relativePeriod": "this_month"
+    },
+    "expected_retrieval_sources": [
+      "operational_insights",
+      "sql_transactions"
+    ],
+    "expected_intents": {
+      "required": [
+        "operational_summary",
+        "finance"
+      ],
+      "forbidden": [],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": false,
+      "should_clarify": true,
+      "should_refuse": true,
+      "should_admit_uncertainty": true
+    },
+    "expected_evidence_requirements": [
+      "coherent expenditure analysis",
+      "operational summary validation"
+    ],
+    "likely_failure_modes": [
+      "alignment detection challenges",
+      "ranking conflicts"
+    ],
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "To rigorously evaluate the AI's proficiency in integrating and validating financial and operational data while mitigating inference errors and unwarranted assumptions."
+  },
+  {
+    "eval_id": "EVAL_059",
+    "difficulty": "medium",
+    "query": "What insights link our operational reviews with transaction outcomes?",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "Find linkages between operations reviews and transactional results available."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L2",
+      "L4"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "relative",
+      "relativePeriod": "last_year"
+    },
+    "expected_retrieval_sources": [
+      "operational_insights",
+      "sql_transactions"
+    ],
+    "expected_intents": {
+      "required": [
+        "operational_summary",
+        "finance"
+      ],
+      "forbidden": [],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": false,
+      "should_refuse": false,
+      "should_admit_uncertainty": false
+    },
+    "expected_evidence_requirements": [
+      "operational review details",
+      "transaction outcome analysis"
+    ],
+    "likely_failure_modes": [
+      "evidence linkage errors",
+      "insight synthesis discrepancies"
+    ],
+    "hallucination_risk": "low",
+    "why_this_eval_exists": "To verify the system's capabilities in linking operational and transactional insights effectively, fostering accurate relational mappings without unsupported hyperbole."
+  },
+  {
+    "eval_id": "EVAL_060",
+    "difficulty": "extreme",
+    "query": "Determine if financial metrics validate operational predictions.",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "Test if our financial metrics substantiate the operational predictions made this quarter."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L5"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "relative",
+      "relativePeriod": "this_quarter"
+    },
+    "expected_retrieval_sources": [
+      "operational_insights",
+      "aggregated_finance",
+      "sql_transactions"
+    ],
+    "expected_intents": {
+      "required": [
+        "finance",
+        "operational_summary"
+      ],
+      "forbidden": [
+        "commitments"
+      ],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": false,
+      "should_clarify": true,
+      "should_refuse": true,
+      "should_admit_uncertainty": false
+    },
+    "expected_evidence_requirements": [
+      "financial substantiation metrics",
+      "operational prediction records"
+    ],
+    "likely_failure_modes": [
+      "validation alignment failures",
+      "evidence misinterpretation"
+    ],
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "To challenge predictive validation robustness, ensuring financial metrics correctly corroborate operational forecasts without speculative insight drifts."
+  },
+  {
+    "eval_id": "EVAL_061",
+    "difficulty": "extreme",
+    "query": "Summarize overall operational performance and compare with last quarter's reports.",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "Can I get a summary of our operations?"
+      },
+      {
+        "role": "assistant",
+        "text": "I'll fetch the operational insights for you."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L3",
+      "L5"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "event_relative",
+      "relativePeriod": "last_quarter"
+    },
+    "expected_retrieval_sources": [
+      "operational_insights",
+      "sql_transactions"
+    ],
+    "expected_intents": {
+      "required": [
+        "operational_summary"
+      ],
+      "forbidden": [
+        "finance"
+      ],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": false,
+      "should_clarify": true,
+      "should_refuse": false,
+      "should_admit_uncertainty": true
+    },
+    "expected_evidence_requirements": [
+      "consistency_check",
+      "data_range_validation"
+    ],
+    "likely_failure_modes": [
+      "ranking failures",
+      "cross-layer conflicts"
+    ],
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "To test if the system can handle conflicting insights between operational summaries and historical raw transactional data."
+  },
+  {
+    "eval_id": "EVAL_062",
+    "difficulty": "hard",
+    "query": "Can you predict the operational bottlenecks for the upcoming quarter?",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "Highlight operational difficulties from last quarter."
+      },
+      {
+        "role": "assistant",
+        "text": "Retrieving the data for analysis."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L2",
+      "L4"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "event_relative",
+      "relativePeriod": "this_quarter"
+    },
+    "expected_retrieval_sources": [
+      "operational_insights",
+      "sql_tasks"
+    ],
+    "expected_intents": {
+      "required": [
+        "productivity",
+        "operational_summary"
+      ],
+      "forbidden": [
+        "finance"
+      ],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": false,
+      "should_clarify": true,
+      "should_refuse": false,
+      "should_admit_uncertainty": true
+    },
+    "expected_evidence_requirements": [
+      "historical_trend_analysis",
+      "predictive_model_consistency"
+    ],
+    "likely_failure_modes": [
+      "retrieval conflicts",
+      "temporal ambiguities"
+    ],
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "To evaluate whether the system can apply predictive analytics in the presence of past data inconsistencies and achieve contextually accurate insights for future projections."
+  },
+  {
+    "eval_id": "EVAL_063",
+    "difficulty": "medium",
+    "query": "What are the discrepancies between our operational insights and recent transactions for this month?",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "Review this month's operational performance."
+      },
+      {
+        "role": "assistant",
+        "text": "Checking for discrepancies now."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L3",
+      "L5"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "absolute",
+      "relativePeriod": "this_month"
+    },
+    "expected_retrieval_sources": [
+      "sql_transactions",
+      "operational_insights"
+    ],
+    "expected_intents": {
+      "required": [
+        "finance",
+        "operational_summary"
+      ],
+      "forbidden": [],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": true,
+      "should_refuse": false,
+      "should_admit_uncertainty": false
+    },
+    "expected_evidence_requirements": [
+      "cross_verification",
+      "consistency_validation"
+    ],
+    "likely_failure_modes": [
+      "missing evidence situations",
+      "ranking conflicts"
+    ],
+    "hallucination_risk": "low",
+    "why_this_eval_exists": "To determine the system's ability to identify and handle discrepancies across layers of operational data and transactional records."
+  },
+  {
+    "eval_id": "EVAL_064",
+    "difficulty": "hard",
+    "query": "Assess how our operational insights align with recent financial transactions.",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "Evaluate alignment with financial data."
+      },
+      {
+        "role": "assistant",
+        "text": "Checking the data alignment now."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L4",
+      "L5"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "absolute",
+      "relativePeriod": "this_month"
+    },
+    "expected_retrieval_sources": [
+      "aggregated_finance",
+      "operational_insights"
+    ],
+    "expected_intents": {
+      "required": [
+        "finance",
+        "operational_summary"
+      ],
+      "forbidden": [
+        "scheduling"
+      ],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": false,
+      "should_refuse": false,
+      "should_admit_uncertainty": true
+    },
+    "expected_evidence_requirements": [
+      "financial_integrity_check",
+      "operational_alignment_assessment"
+    ],
+    "likely_failure_modes": [
+      "retrieval conflicts",
+      "ranking failures"
+    ],
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "To investigate if the system effectively cross-verifies operational insights with financial data and avoids alignment errors."
+  },
+  {
+    "eval_id": "EVAL_065",
+    "difficulty": "medium",
+    "query": "Provide an operational summary and evidence of raw transaction diversions from expected trends.",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "What's the latest on our transactions?"
+      },
+      {
+        "role": "assistant",
+        "text": "Retrieving transactional trends."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L3",
+      "L5"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "event_relative",
+      "relativePeriod": "this_month"
+    },
+    "expected_retrieval_sources": [
+      "sql_transactions",
+      "operational_insights"
+    ],
+    "expected_intents": {
+      "required": [
+        "finance",
+        "operational_summary"
+      ],
+      "forbidden": [],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": true,
+      "should_refuse": false,
+      "should_admit_uncertainty": false
+    },
+    "expected_evidence_requirements": [
+      "trend_deviation_detection",
+      "evidence-backed summary"
+    ],
+    "likely_failure_modes": [
+      "retrieval ambiguity",
+      "ranking inconsistencies"
+    ],
+    "hallucination_risk": "low",
+    "why_this_eval_exists": "To ensure systematic consistency in operational summaries when forecasting trends and identifying discrepancies within transactional data."
+  },
+  {
+    "eval_id": "EVAL_066",
+    "difficulty": "extreme",
+    "query": "Uncover and detail any mismatches between operational metrics and the raw data from last year's transactions.",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "Review last year's operational metrics in detail."
+      },
+      {
+        "role": "assistant",
+        "text": "Looking into historical transaction data now."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L3",
+      "L4"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "absolute",
+      "relativePeriod": "last_year"
+    },
+    "expected_retrieval_sources": [
+      "operational_insights",
+      "sql_transactions"
+    ],
+    "expected_intents": {
+      "required": [
+        "finance",
+        "operational_summary"
+      ],
+      "forbidden": [],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": true,
+      "should_refuse": false,
+      "should_admit_uncertainty": true
+    },
+    "expected_evidence_requirements": [
+      "data_discrepancy_analysis",
+      "backward_consistency_check"
+    ],
+    "likely_failure_modes": [
+      "cross-layer conflicts",
+      "entity differentiation failures"
+    ],
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "To test if the system manages complex historical data integrations and exposes operational vs transactional data conflicts clearly."
+  },
+  {
+    "eval_id": "EVAL_067",
+    "difficulty": "hard",
+    "query": "Illustrate differences between the operational report and live transaction outcomes.",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "Outline live transaction outcomes versus reports."
+      },
+      {
+        "role": "assistant",
+        "text": "Collating live data and report inconsistencies."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L4",
+      "L5"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "relative",
+      "relativePeriod": "this_month"
+    },
+    "expected_retrieval_sources": [
+      "sql_transactions",
+      "operational_insights"
+    ],
+    "expected_intents": {
+      "required": [
+        "spending_analysis",
+        "operational_summary"
+      ],
+      "forbidden": [
+        "productivity"
+      ],
+      "matchMode": "any"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": false,
+      "should_refuse": true,
+      "should_admit_uncertainty": false
+    },
+    "expected_evidence_requirements": [
+      "real_vs_report_consistency",
+      "data_validity_check"
+    ],
+    "likely_failure_modes": [
+      "retrieval ambiguity",
+      "incorrect categorization"
+    ],
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "To challenge the system with real-time data integration, ensuring accuracy and consistency in its operational insights versus live transaction comparisons."
+  },
+  {
+    "eval_id": "EVAL_068",
+    "difficulty": "easy",
+    "query": "Identify operational and transactional inconsistency patterns from the last week.",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "Describe this week's operational inconsistencies."
+      },
+      {
+        "role": "assistant",
+        "text": "Analyzing the transaction data for patterns."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L2",
+      "L3"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "relative",
+      "relativePeriod": "last_week"
+    },
+    "expected_retrieval_sources": [
+      "sql_transactions",
+      "operational_insights"
+    ],
+    "expected_intents": {
+      "required": [
+        "operational_summary",
+        "search_lookup"
+      ],
+      "forbidden": [
+        "commitments"
+      ],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": false,
+      "should_refuse": false,
+      "should_admit_uncertainty": true
+    },
+    "expected_evidence_requirements": [
+      "pattern_recording",
+      "data_txoperational_correlation"
+    ],
+    "likely_failure_modes": [
+      "false positive retrieval cases",
+      "matching mismatches"
+    ],
+    "hallucination_risk": "low",
+    "why_this_eval_exists": "To ensure the system effectively identifies and understands micro-inconsistencies in operational versus transactional data within short-lived periods."
+  },
+  {
+    "eval_id": "EVAL_069",
+    "difficulty": "medium",
+    "query": "Are there real-time operational insights contrary to the last quarter's raw data reports?",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "Have last quarter's reports become outdated?"
+      },
+      {
+        "role": "assistant",
+        "text": "Checking the real-time dynamics against previous data."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L3",
+      "L5"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "event_relative",
+      "relativePeriod": "last_quarter"
+    },
+    "expected_retrieval_sources": [
+      "operational_insights",
+      "sql_transactions"
+    ],
+    "expected_intents": {
+      "required": [
+        "operational_summary"
+      ],
+      "forbidden": [
+        "relationship"
+      ],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": true,
+      "should_refuse": true,
+      "should_admit_uncertainty": false
+    },
+    "expected_evidence_requirements": [
+      "real_time_trend_confirmation",
+      "historical_discrepancy_check"
+    ],
+    "likely_failure_modes": [
+      "retrieval_rank_conflicts",
+      "temporal inconsistencies"
+    ],
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "To challenge the system with up-to-the-minute accuracy to counteract possible obsolete data using present-day insights and report validation."
+  },
+  {
+    "eval_id": "EVAL_070",
+    "difficulty": "extreme",
+    "query": "Evaluate the shifts in operational metrics derived from error-laden transaction data.",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "Assess transaction errors in reporting."
+      },
+      {
+        "role": "assistant",
+        "text": "Scanning for errors impacting reports."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L3",
+      "L5"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "absolute",
+      "relativePeriod": "last_month"
+    },
+    "expected_retrieval_sources": [
+      "sql_transactions",
+      "operational_insights"
+    ],
+    "expected_intents": {
+      "required": [
+        "operational_summary",
+        "finance"
+      ],
+      "forbidden": [],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": false,
+      "should_clarify": true,
+      "should_refuse": true,
+      "should_admit_uncertainty": true
+    },
+    "expected_evidence_requirements": [
+      "error_impact_analysis",
+      "metric_correlation"
+    ],
+    "likely_failure_modes": [
+      "ranking inconsistencies",
+      "error propagation uncertainties"
+    ],
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "To test the system's ability under extreme stress to appropriately navigate and recalibrate operational metrics influenced by data inconsistencies and errors."
+  },
+  {
+    "eval_id": "EVAL_071",
+    "difficulty": "hard",
+    "query": "Detail any shifts between operational insights and current transactional shifts noticed this week.",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "Focus on current shifts against past insights."
+      },
+      {
+        "role": "assistant",
+        "text": "Detecting current transactional shifts."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L2",
+      "L4"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "relative",
+      "relativePeriod": "this_week"
+    },
+    "expected_retrieval_sources": [
+      "operational_insights",
+      "sql_transactions"
+    ],
+    "expected_intents": {
+      "required": [
+        "operational_summary",
+        "spending_analysis"
+      ],
+      "forbidden": [
+        "reminders"
+      ],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": false,
+      "should_refuse": false,
+      "should_admit_uncertainty": false
+    },
+    "expected_evidence_requirements": [
+      "real-time_shift_detection",
+      "insight_consistency_check"
+    ],
+    "likely_failure_modes": [
+      "semantic mismatches",
+      "ranking challenges"
+    ],
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "To monitor for the unevenness in system responses, checking its ability to provide comprehensive coherence in operational insights considering recent transactional shifts."
+  },
+  {
+    "eval_id": "EVAL_072",
+    "difficulty": "medium",
+    "query": "Cross-validate real-time insights against the last quarter's transactional dataset.",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "Check current insights against previous data."
+      },
+      {
+        "role": "assistant",
+        "text": "Matching insights with historical transactions."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L3",
+      "L5"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "event_relative",
+      "relativePeriod": "last_quarter"
+    },
+    "expected_retrieval_sources": [
+      "sql_transactions",
+      "operational_insights"
+    ],
+    "expected_intents": {
+      "required": [
+        "operational_summary"
+      ],
+      "forbidden": [
+        "travel"
+      ],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": true,
+      "should_refuse": false,
+      "should_admit_uncertainty": true
+    },
+    "expected_evidence_requirements": [
+      "insight_to_transaction_match",
+      "historical_cross-validation"
+    ],
+    "likely_failure_modes": [
+      "data interpretation errors",
+      "ranking misalignments"
+    ],
+    "hallucination_risk": "low",
+    "why_this_eval_exists": "To verify that the system effortlessly executes across temporal cross-checking tasks, ensuring faithful representation of insights and data consistency checks."
+  },
+  {
+    "eval_id": "EVAL_073",
+    "difficulty": "hard",
+    "query": "Analyze why operational insights are misaligned with recent real-time transactions.",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "Find causes for misalignment in data."
+      },
+      {
+        "role": "assistant",
+        "text": "Investigating alignment discrepancies now."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L3",
+      "L5"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "absolute",
+      "relativePeriod": "this_month"
+    },
+    "expected_retrieval_sources": [
+      "sql_transactions",
+      "operational_insights"
+    ],
+    "expected_intents": {
+      "required": [
+        "operational_summary",
+        "spending_analysis"
+      ],
+      "forbidden": [
+        "relationship"
+      ],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": false,
+      "should_refuse": true,
+      "should_admit_uncertainty": false
+    },
+    "expected_evidence_requirements": [
+      "misalignment_causation",
+      "solution_path"
+    ],
+    "likely_failure_modes": [
+      "retrieval_rank_errors",
+      "consistency vs inconsistency errors"
+    ],
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "To deeply investigate systemic issues that could arise from discrepancies between operational insights and real-time transactional data, ensuring accurate causal analysis."
+  },
+  {
+    "eval_id": "EVAL_074",
+    "query": "Critically review the current discrepancies in operational data against historical performance reports.",
+    "difficulty": "hard",
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "To target potential areas of weakness where the system might fail in reconciling existing operational data trends with historical report figures.",
+    "likely_failure_modes": [
+      "error propagation",
+      "cross-temporal relevance conflicts"
+    ],
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "Can you provide an overview of our current operational data?"
+      },
+      {
+        "role": "assistant",
+        "text": "Certainly. Are you looking for a comparison with past data?"
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L3",
+      "L4"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "relative",
+      "relativePeriod": "this_month"
+    },
+    "expected_retrieval_sources": [
+      "sql_transactions",
+      "operational_insights",
+      "aggregated_finance"
+    ],
+    "expected_intents": {
+      "required": [
+        "operational_summary",
+        "search_lookup"
+      ],
+      "forbidden": [],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": true,
+      "should_clarify": false,
+      "should_refuse": false,
+      "should_admit_uncertainty": true
+    },
+    "expected_evidence_requirements": [
+      "current_operational_data",
+      "historical_performance_reports"
+    ]
+  },
+  {
+    "eval_id": "EVAL_075",
+    "difficulty": "extreme",
+    "query": "Establish operational corrections for this quarter, given transaction errors from last year.",
+    "conversation_context": [
+      {
+        "role": "user",
+        "text": "Correct operations based on past errors."
+      },
+      {
+        "role": "assistant",
+        "text": "Implementing corrective measures based on historical data."
+      }
+    ],
+    "expected_retrieval_layers": [
+      "L4",
+      "L5"
+    ],
+    "expected_entities": {
+      "people": [],
+      "merchants": [],
+      "categories": [],
+      "topics": []
+    },
+    "expected_temporal_resolution": {
+      "type": "event_relative",
+      "relativePeriod": "this_quarter"
+    },
+    "expected_retrieval_sources": [
+      "operational_insights",
+      "sql_transactions"
+    ],
+    "expected_intents": {
+      "required": [
+        "finance",
+        "operational_summary"
+      ],
+      "forbidden": [],
+      "matchMode": "all"
+    },
+    "expected_behavior": {
+      "should_answer": false,
+      "should_clarify": true,
+      "should_refuse": true,
+      "should_admit_uncertainty": true
+    },
+    "expected_evidence_requirements": [
+      "correction_path_identification",
+      "error_impact_quantification"
+    ],
+    "likely_failure_modes": [
+      "error insight application errors",
+      "solution-to-source misalignments"
+    ],
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "To stress test system integrity under critical scenarios needing rectifications based on historical transactional error insights and subsequent operational corrections."
+  }
+]

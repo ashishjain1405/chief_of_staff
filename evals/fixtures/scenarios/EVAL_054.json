@@ -1,0 +1,161 @@
+{
+  "scenario_id": "SCENARIO_042",
+  "eval_id": "EVAL_054",
+  "theme": "Operational vs Transactional Data Discrepancies",
+  "entities": {
+    "people": [
+      {
+        "name": "Alex Johnson",
+        "email": "alex.johnson@creativedesigns.com",
+        "relationship_type": "CEO"
+      },
+      {
+        "name": "Sam Tyler",
+        "email": "sam.tyler@finanalysis.com",
+        "relationship_type": "Finance Advisor"
+      }
+    ],
+    "companies": [
+      "Creative Designs Ltd."
+    ],
+    "projects": [
+      "New Product Launch"
+    ],
+    "merchants": [
+      "CitySupermarket",
+      "Super CityMart",
+      "OfficeSupplies Co."
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_001",
+      "subject": "Re: Q1 Spending Summary",
+      "body_summary": "Hey Alex, the operational insights are showing a higher decrease in spending compared to our transaction reports. Could it be a data syncing issue?",
+      "occurred_at": "2026-04-30T14:23:45.125Z",
+      "email_category": "finance",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "sam.tyler@finanalysis.com",
+        "sender_name": "Sam Tyler"
+      },
+      "embedding_null": false
+    },
+    {
+      "external_id": "email_002",
+      "subject": "Fwd: Weekly Finance Team Sync",
+      "body_summary": "Forwarding our latest insights report. Let’s discuss any disparities in tomorrow's call.",
+      "occurred_at": "2026-05-01T09:12:08.512Z",
+      "email_category": "communication",
+      "requires_action": false,
+      "sentiment": "positive",
+      "channel_metadata": {
+        "sender": "alex.johnson@creativedesigns.com",
+        "sender_name": "Alex Johnson"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_001",
+      "title": "Finance Team Weekly Sync",
+      "start_time": "2026-05-01T15:00:00.000Z",
+      "end_time": "2026-05-01T16:00:00.000Z",
+      "transcript_summary": "Discussions about discrepancies between operational insights and transaction reports.",
+      "attendees": [
+        {
+          "email": "alex.johnson@creativedesigns.com",
+          "name": "Alex Johnson"
+        },
+        {
+          "email": "sam.tyler@finanalysis.com",
+          "name": "Sam Tyler"
+        }
+      ],
+      "description": "Weekly discussion to align finance data insights with on-ground transaction realities."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "CitySupermarket",
+      "amount": 450.75,
+      "currency": "USD",
+      "category": "groceries",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-04-25T13:45:30.000Z"
+    },
+    {
+      "merchant_normalized": "CitySupermarket",
+      "amount": 450.75,
+      "currency": "USD",
+      "category": "groceries",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-02T10:00:00.000Z"
+    },
+    {
+      "merchant_normalized": "OfficeSupplies Co.",
+      "amount": 1200,
+      "currency": "USD",
+      "category": "office supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-04-28T11:30:45.000Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Verify Operational Insight Data",
+      "status": "in-progress",
+      "priority": "high",
+      "due_date": "2026-05-05",
+      "source_type": "automated"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Review spending trends with finance team",
+      "due_date": "2026-05-06",
+      "status": "pending",
+      "ai_confidence": 0.85
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "op_insight_001",
+      "category": "operations",
+      "insight_type": "spending trend",
+      "title": "Decreased Q1 Expenses",
+      "summary": "Operational analysis indicates a 15% drop in overall expenses for Q1 compared to last year.",
+      "urgency": "high",
+      "priority_score": 7,
+      "recommended_action": "Investigate discrepancy with transaction data.",
+      "explanation": "Trend based on initial transaction processing records.",
+      "status": "active"
+    },
+    {
+      "state_key": "op_insight_stale_001",
+      "category": "finance",
+      "insight_type": "historical spending",
+      "title": "Stable Q1 Spending",
+      "summary": "A prior report suggested consistent Q1 spending, which contradicts current operational analysis.",
+      "urgency": "medium",
+      "priority_score": 5,
+      "recommended_action": "Compare old and new datasets for discrepancies.",
+      "explanation": "Based on outdated financial trends without recent data incorporation.",
+      "status": "inactive"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": {
+      "Alex Johnson": "CEO",
+      "Sam Tyler": "Finance Advisor"
+    },
+    "actual_intent": "spending_analysis",
+    "expected_answer_facts": [
+      "Operational analysis indicates a 15% drop in Q1 expenses.",
+      "Current operational insights contradict initial stable spending reports.",
+      "The difference may arise due to data syncing or processing delays."
+    ]
+  }
+}

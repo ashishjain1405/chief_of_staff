@@ -1,0 +1,189 @@
+{
+  "scenario_id": "SCENARIO_001",
+  "eval_id": "EVAL_033",
+  "theme": "Meeting and Commitments Alignment",
+  "entities": {
+    "people": [
+      {
+        "name": "Alex Johnson",
+        "email": "alex.j@example.com",
+        "relationship_type": "colleague"
+      },
+      {
+        "name": "Jordan Lee",
+        "email": "jordanl@startincorp.com",
+        "relationship_type": "client"
+      },
+      {
+        "name": "Jordan Lee",
+        "email": "jordan.lee@example.com",
+        "relationship_type": "vendor"
+      }
+    ],
+    "companies": [
+      "Startin Corp",
+      "NextUp Holdings"
+    ],
+    "projects": [
+      "Project Alpha",
+      "Beta Initiative"
+    ],
+    "merchants": [
+      "OfficeMax",
+      "Offiz Mart",
+      "Tech Supplies Co"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_001",
+      "subject": "Follow-up on Project Alpha",
+      "body_summary": "Discussing next steps and budget concerns.",
+      "occurred_at": "2026-05-02T09:35:00.197Z",
+      "email_category": "project_update",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "alex.j@example.com",
+        "sender_name": "Alex Johnson"
+      },
+      "embedding_null": false
+    },
+    {
+      "external_id": "email_002",
+      "subject": "Meeting Reminder: Budget Reconciliation",
+      "body_summary": "Reminder to discuss budget allocations for upcoming quarter.",
+      "occurred_at": "2026-05-07T12:00:00.197Z",
+      "email_category": "reminders",
+      "requires_action": false,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "jordanl@startincorp.com",
+        "sender_name": "Jordan Lee"
+      },
+      "embedding_null": true
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_001",
+      "title": "Project Alpha Planning",
+      "start_time": "2026-05-05T14:00:00.197Z",
+      "end_time": "2026-05-05T15:30:00.197Z",
+      "transcript_summary": "Reviewed projected goals, assigned tasks, Alex to finalize the budget.",
+      "attendees": [
+        {
+          "email": "alex.j@example.com",
+          "name": "Alex Johnson"
+        },
+        {
+          "email": "jordanl@startincorp.com",
+          "name": "Jordan Lee"
+        }
+      ],
+      "description": "Initial planning for Project Alpha."
+    },
+    {
+      "external_id": "meeting_002",
+      "title": "Budget Reconciliation",
+      "start_time": "2026-05-08T10:00:00.197Z",
+      "end_time": "2026-05-08T11:00:00.197Z",
+      "transcript_summary": "Discussed discrepancies in current projections against budget.",
+      "attendees": [
+        {
+          "email": "alex.j@example.com",
+          "name": "Alex Johnson"
+        },
+        {
+          "email": "jordanl@startincorp.com",
+          "name": "Jordan Lee"
+        }
+      ],
+      "description": "Review budget status and adjustments."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "OfficeMax",
+      "amount": 3500,
+      "currency": "USD",
+      "category": "Office Supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-06T10:00:00.197Z"
+    },
+    {
+      "merchant_normalized": "Offiz Mart",
+      "amount": 3500,
+      "currency": "USD",
+      "category": "Office Supplies",
+      "transaction_type": "refund",
+      "transaction_datetime": "2026-05-08T11:20:00.197Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Finalize Project Alpha Budget",
+      "status": "in_progress",
+      "priority": "high",
+      "due_date": "2026-05-10T23:59:59.197Z",
+      "source_type": "manual"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Ensure Project Alpha is within budget by mid-May.",
+      "due_date": "2026-05-15T23:59:59.197Z",
+      "status": "pending",
+      "ai_confidence": 0.85
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "budget_status_mismatch",
+      "category": "financial",
+      "insight_type": "analysis",
+      "title": "Potential Budget Overrun Detected",
+      "summary": "Projected expenses for Office Supplies surpass budget allocations.",
+      "urgency": "high",
+      "priority_score": 80,
+      "recommended_action": "Immediate review of expenditures and adjustments.",
+      "explanation": "Discrepancies found between projected budget and latest expenses reported.",
+      "status": "active"
+    },
+    {
+      "state_key": "office_supply_expenditure_check",
+      "category": "financial",
+      "insight_type": "analysis",
+      "title": "Office Supplies Budget Status",
+      "summary": "OfficeMax transactions indicate stable supply costs.",
+      "urgency": "low",
+      "priority_score": 20,
+      "recommended_action": "Monitor regularly with weekly reports.",
+      "explanation": "Recent refund adjusted previous overestimate of expenses.",
+      "status": "active"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": [
+      {
+        "entity1": "alex.j@example.com",
+        "entity2": "jordanl@startincorp.com",
+        "relationship": "client meeting"
+      },
+      {
+        "entity1": "alex.j@example.com",
+        "entity2": "jordan.lee@example.com",
+        "relationship": "vendor negotiation"
+      }
+    ],
+    "actual_intent": [
+      "commitments",
+      "scheduling"
+    ],
+    "expected_answer_facts": [
+      "Meeting on 2026-05-05 addressed tasks relevant to commitments due on 2026-05-15.",
+      "The Project Alpha planning session sought to align projected goals with existing commitments.",
+      "Budget reconciliation meeting focused on resolving projected vs actual discrepancies."
+    ]
+  }
+}

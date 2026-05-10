@@ -1,0 +1,158 @@
+{
+  "scenario_id": "SCENARIO_098",
+  "eval_id": "EVAL_036",
+  "theme": "Pending Commitments Linked to Meetings",
+  "entities": {
+    "people": [
+      {
+        "name": "Alice W.",
+        "email": "alice.w@example.com",
+        "relationship_type": "colleague"
+      },
+      {
+        "name": "Bob Harris",
+        "email": "bob.harris@ventureco.com",
+        "relationship_type": "business_partner"
+      }
+    ],
+    "companies": [
+      "SynTech Solutions",
+      "VentureCo"
+    ],
+    "projects": [
+      "Expansion Initiative",
+      "Cost Optimization Plan"
+    ],
+    "merchants": [
+      "OfficeMart Supplies",
+      "TravelEasy",
+      "OfficeMart Returns"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_231",
+      "subject": "Follow-Up on Expansion Initiative Meeting",
+      "body_summary": "Let's ensure the tasks from the meeting are completed.",
+      "occurred_at": "2026-05-08T14:22:15Z",
+      "email_category": "work",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "alice.w@example.com",
+        "sender_name": "Alice W."
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_082",
+      "title": "Weekly Sync on Expansion Initiative",
+      "start_time": "2026-05-09T10:00:00Z",
+      "end_time": "2026-05-09T11:00:00Z",
+      "transcript_summary": "Discussed deliverables. Alice will finalize report. Bob to contact new vendors.",
+      "attendees": [
+        {
+          "email": "alice.w@example.com",
+          "name": "Alice W."
+        },
+        {
+          "email": "bob.harris@ventureco.com",
+          "name": "Bob Harris"
+        }
+      ],
+      "description": "Weekly update and action planning for the Expansion Initiative."
+    },
+    {
+      "external_id": "meeting_083",
+      "title": "Cost Optimization Review",
+      "start_time": "2026-05-10T09:30:00Z",
+      "end_time": "2026-05-10T10:30:00Z",
+      "transcript_summary": "Reviewed budget constraints and potential adjustments.",
+      "attendees": [
+        {
+          "email": "alice.w@example.com",
+          "name": "Alice W."
+        }
+      ],
+      "description": "Reassessing the cost optimization strategies."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "OfficeMart Supplies",
+      "amount": 340.5,
+      "currency": "USD",
+      "category": "Office Supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-09T13:45:00Z"
+    },
+    {
+      "merchant_normalized": "OfficeMart Returns",
+      "amount": 15,
+      "currency": "USD",
+      "category": "Refund",
+      "transaction_type": "credit",
+      "transaction_datetime": "2026-05-10T15:00:00Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Compile Expansion Report",
+      "status": "incomplete",
+      "priority": "high",
+      "due_date": "2026-05-11",
+      "source_type": "meeting"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Finalize vendor contacts for Expansion Initiative",
+      "due_date": "2026-05-11",
+      "status": "pending",
+      "ai_confidence": 0.9
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "expansion_status_update",
+      "category": "strategic_planning",
+      "insight_type": "status_report",
+      "title": "Expansion Initiative Status",
+      "summary": "Deliverables are on track; meeting set for vendor finalization.",
+      "urgency": "medium",
+      "priority_score": 2.5,
+      "recommended_action": "Finalize vendor contracts by due date.",
+      "explanation": "Resources are aligned and available.",
+      "status": "active"
+    },
+    {
+      "state_key": "budget_analysis_stale",
+      "category": "financial_review",
+      "insight_type": "budget_report",
+      "title": "Cost Optimization Analysis",
+      "summary": "Initial budget constraints require additional assessment.",
+      "urgency": "low",
+      "priority_score": 1,
+      "recommended_action": "Review next quarter.",
+      "explanation": "Previous evaluations may not reflect current conditions.",
+      "status": "obsolete"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": {
+      "commitments_to_meetings": {
+        "meeting_082": "Finalize vendor contacts for Expansion Initiative"
+      }
+    },
+    "actual_intent": [
+      "commitments",
+      "scheduling"
+    ],
+    "expected_answer_facts": [
+      "Pending commitment to finalize vendor contacts linked to 2026-05-09 meeting.",
+      "Report compilation task linked to 2026-05-09 meeting."
+    ]
+  }
+}

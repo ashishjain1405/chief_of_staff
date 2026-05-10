@@ -1,0 +1,166 @@
+{
+  "scenario_id": "SCENARIO_119",
+  "eval_id": "EVAL_035",
+  "theme": "Financial Discrepancies Identification",
+  "entities": {
+    "people": [
+      {
+        "name": "Alex Johnson",
+        "email": "alex.j@example.com",
+        "relationship_type": "CEO"
+      },
+      {
+        "name": "Jordan Blake",
+        "email": "jordan.b@financecorp.com",
+        "relationship_type": "CFO"
+      }
+    ],
+    "companies": [
+      "FinanceCorp",
+      "TechVend"
+    ],
+    "projects": [
+      "Q2 Budget Review"
+    ],
+    "merchants": [
+      "GlobalMart",
+      "GlobalMart Ltd",
+      "TechSupply",
+      "OfficeDepot"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_001",
+      "subject": "Re: Q2 Budget Finalization",
+      "body_summary": "Please check the discrepancies in our recent transaction reports. Attached are the latest summaries as of April 30.",
+      "occurred_at": "2026-05-05T10:23:45.451Z",
+      "email_category": "finance",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "jordan.b@financecorp.com",
+        "sender_name": "Jordan Blake"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_001",
+      "title": "Budget Review with Finance Team",
+      "start_time": "2026-05-09T14:00:00.451Z",
+      "end_time": "2026-05-09T15:00:00.451Z",
+      "transcript_summary": "Discussion on budget allocation and discrepancy in reported figures for vendor payments.",
+      "attendees": [
+        {
+          "email": "alex.j@example.com",
+          "name": "Alex Johnson"
+        },
+        {
+          "email": "jordan.b@financecorp.com",
+          "name": "Jordan Blake"
+        }
+      ],
+      "description": "Monthly review on the budget performance and issue resolution."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "GlobalMart",
+      "amount": 5000,
+      "currency": "USD",
+      "category": "Office Supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-04-29T11:00:00.451Z"
+    },
+    {
+      "merchant_normalized": "GlobalMart Ltd",
+      "amount": 4800,
+      "currency": "USD",
+      "category": "Office Supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-04-29T11:30:00.451Z"
+    },
+    {
+      "merchant_normalized": "TechSupply",
+      "amount": 7200,
+      "currency": "USD",
+      "category": "Hardware",
+      "transaction_type": "credit",
+      "transaction_datetime": "2026-04-22T09:45:00.451Z"
+    },
+    {
+      "merchant_normalized": "OfficeDepot",
+      "amount": 3000,
+      "currency": "USD",
+      "category": "Stationary",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-04-21T16:15:00.451Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Investigate transaction discrepancies",
+      "status": "in_progress",
+      "priority": "high",
+      "due_date": "2026-05-12T00:00:00.000Z",
+      "source_type": "email"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Complete Q2 budget adjustments",
+      "due_date": "2026-05-14T00:00:00.000Z",
+      "status": "pending",
+      "ai_confidence": 0.85
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "op_001",
+      "category": "finance",
+      "insight_type": "alert",
+      "title": "Duplicate Transactions Identified",
+      "summary": "A review of April's statements flagged several instances of the same merchant under different names.",
+      "urgency": "high",
+      "priority_score": 7,
+      "recommended_action": "Verify and resolve naming discrepancies in financial records.",
+      "explanation": "The appearance of duplicates could indicate data entry errors or misclassification.",
+      "status": "open"
+    },
+    {
+      "state_key": "stale_001",
+      "category": "finance",
+      "insight_type": "report",
+      "title": "April Transactions Summary",
+      "summary": "Transactions showed stable trends with no significant irregularities noted at first review.",
+      "urgency": "low",
+      "priority_score": 2,
+      "recommended_action": "Proceed with usual reconciliation steps as per end-of-month routines.",
+      "explanation": "Initial summaries did not account for merchant name variations.",
+      "status": "resolved"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": [
+      {
+        "name": "Alex Johnson",
+        "title": "CEO",
+        "reports_to": "None"
+      },
+      {
+        "name": "Jordan Blake",
+        "title": "CFO",
+        "reports_to": "Alex Johnson"
+      }
+    ],
+    "actual_intent": [
+      "finance"
+    ],
+    "expected_answer_facts": [
+      "Duplicate transactions from GlobalMart and GlobalMart Ltd for the same date with slight amount variations.",
+      "Operational insight notes potential data entry errors due to differently named identical merchants."
+    ]
+  }
+}

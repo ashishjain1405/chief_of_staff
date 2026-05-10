@@ -1,0 +1,167 @@
+{
+  "scenario_id": "SCN_012",
+  "eval_id": "EVAL_007",
+  "theme": "Identify and report gaps in spending reports and operational targets",
+  "entities": {
+    "people": [
+      {
+        "name": "Alice Trent",
+        "email": "alice.trent@venturecope.com",
+        "relationship_type": "CFO"
+      },
+      {
+        "name": "Bob Marlin",
+        "email": "bob.marlin@projectspeare.com",
+        "relationship_type": "Project Manager"
+      }
+    ],
+    "companies": [
+      "VentureCope Inc.",
+      "TechCrunch Solutions"
+    ],
+    "projects": [
+      "Project A",
+      "Revenue Optimization"
+    ],
+    "merchants": [
+      "OfficeSuppliesCo",
+      "SupplyHub",
+      "Central TechStore"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_001",
+      "subject": "Monthly Financial Review",
+      "body_summary": "Discuss discrepancies in spending patterns and operational budget alignment.",
+      "occurred_at": "2026-05-05T10:15:30.000Z",
+      "email_category": "finance",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "ceo@venturecope.com",
+        "sender_name": "Eli Spencer"
+      },
+      "embedding_null": false
+    },
+    {
+      "external_id": "email_002",
+      "subject": "Operational Adjustments",
+      "body_summary": "Reconsideration of operational targets due to higher project costs.",
+      "occurred_at": "2026-05-06T15:22:47.000Z",
+      "email_category": "operations",
+      "requires_action": false,
+      "sentiment": "cautious",
+      "channel_metadata": {
+        "sender": "bob.marlin@projectspeare.com",
+        "sender_name": "Bob Marlin"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_001",
+      "title": "Strategic Planning Session",
+      "start_time": "2026-05-07T14:00:00.000Z",
+      "end_time": "2026-05-07T15:30:00.000Z",
+      "transcript_summary": "Discussions on adjusting project milestones and budget allocations.",
+      "attendees": [
+        {
+          "email": "alice.trent@venturecope.com",
+          "name": "Alice Trent"
+        },
+        {
+          "email": "ceo@venturecope.com",
+          "name": "Eli Spencer"
+        }
+      ],
+      "description": "Review of ongoing project targets and next steps."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "OfficeSuppliesCo",
+      "amount": 1250,
+      "currency": "USD",
+      "category": "Office Supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-01T09:30:00.000Z"
+    },
+    {
+      "merchant_normalized": "SupplyHub",
+      "amount": 500,
+      "currency": "USD",
+      "category": "Office Supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-03T11:45:00.000Z"
+    },
+    {
+      "merchant_normalized": "Central TechStore",
+      "amount": 3200,
+      "currency": "USD",
+      "category": "Technology",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-06T14:05:00.000Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Review Financial Discrepancies",
+      "status": "in-progress",
+      "priority": "high",
+      "due_date": "2026-05-07",
+      "source_type": "manual"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Align operational insights with financial records",
+      "due_date": "2026-05-08",
+      "status": "not-started",
+      "ai_confidence": 0.9
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "op_insight_001",
+      "category": "finance",
+      "insight_type": "summary",
+      "title": "Financial Overview - April",
+      "summary": "Projected vs Actual expenses shows a variance in office supplies.",
+      "urgency": "high",
+      "priority_score": 0.85,
+      "recommended_action": "Adjust procurement strategy.",
+      "explanation": "Office supply spending exceeded target by 15%.",
+      "status": "active"
+    },
+    {
+      "state_key": "op_insight_002",
+      "category": "operations",
+      "insight_type": "alert",
+      "title": "Budget Mismatch",
+      "summary": "Recent expenses at Central TechStore are unplanned yet critical.",
+      "urgency": "critical",
+      "priority_score": 0.95,
+      "recommended_action": "Review and reallocate funds.",
+      "explanation": "Tech purchases deviated from planned budget.",
+      "status": "stale"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": [],
+    "actual_intent": {
+      "required": [
+        "finance",
+        "operational_summary"
+      ],
+      "forbidden": [
+        "search_lookup"
+      ]
+    },
+    "expected_answer_facts": [
+      "Office supply spending exceeded budget by 15%.",
+      "Unplanned tech expenses at Central TechStore need budget reallocation."
+    ]
+  }
+}

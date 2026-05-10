@@ -1,0 +1,175 @@
+{
+  "scenario_id": "SCENARIO_013",
+  "eval_id": "EVAL_013",
+  "theme": "Operating Spend Analysis",
+  "entities": {
+    "people": [
+      {
+        "name": "Alex Johnson",
+        "email": "alex.j@example.com",
+        "relationship_type": "CFO"
+      },
+      {
+        "name": "Jamie Smith",
+        "email": "jamie.smith@startupinc.com",
+        "relationship_type": "Finance Manager"
+      }
+    ],
+    "companies": [
+      "Startup Inc."
+    ],
+    "projects": [
+      "Cost Reduction Initiative"
+    ],
+    "merchants": [
+      "OfficeSupply Inc.",
+      "OfficeSupplies Ltd."
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "EML_001",
+      "subject": "Budget Adjustment for Q2",
+      "body_summary": "Discuss potential overspend in marketing and unexpected software costs.",
+      "occurred_at": "2026-05-08T14:00:57.337Z",
+      "email_category": "finance",
+      "requires_action": true,
+      "sentiment": "concerned",
+      "channel_metadata": {
+        "sender": "alex.j@example.com",
+        "sender_name": "Alex Johnson"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "MTG_001",
+      "title": "Weekly Financial Review",
+      "start_time": "2026-05-07T09:00:00.000Z",
+      "end_time": "2026-05-07T10:00:00.000Z",
+      "transcript_summary": "Discussed variance in marketing spend, and anomalies in recurring software subscriptions.",
+      "attendees": [
+        {
+          "email": "jamie.smith@startupinc.com",
+          "name": "Jamie Smith"
+        },
+        {
+          "email": "alex.j@example.com",
+          "name": "Alex Johnson"
+        }
+      ],
+      "description": "Review weekly financial reports and analyze expenditures."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "OfficeSupply Inc.",
+      "amount": 1500,
+      "currency": "USD",
+      "category": "Office Supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-05T12:30:00.000Z"
+    },
+    {
+      "merchant_normalized": "Software Solutions Co.",
+      "amount": 2500,
+      "currency": "USD",
+      "category": "Software Subscriptions",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-04T15:45:00.000Z"
+    },
+    {
+      "merchant_normalized": "OfficeSupplies Ltd.",
+      "amount": 1600,
+      "currency": "USD",
+      "category": "Office Supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-06T11:00:00.000Z"
+    },
+    {
+      "merchant_normalized": "Marketing Agency",
+      "amount": 4500,
+      "currency": "USD",
+      "category": "Marketing",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-05T14:15:00.000Z"
+    },
+    {
+      "merchant_normalized": "Travel Co",
+      "amount": 300,
+      "currency": "USD",
+      "category": "Travel",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-03T09:00:00.000Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Analyze software and marketing expenditure",
+      "status": "in progress",
+      "priority": "high",
+      "due_date": "2026-05-10",
+      "source_type": "manual"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Reduce unnecessary marketing spend by end of Q2",
+      "due_date": "2026-06-30",
+      "status": "planned",
+      "ai_confidence": 0.85
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "insight_001",
+      "category": "Finance",
+      "insight_type": "anomaly_detection",
+      "title": "Recurring Software Subscription Anomaly",
+      "summary": "Software subscription costs exceeded benchmarks by 20% this week.",
+      "urgency": "high",
+      "priority_score": 8.5,
+      "recommended_action": "Review subscription plans and identify potential downgrades.",
+      "explanation": "Increased frequency of subscription payments or upgrades are the likely cause.",
+      "status": "active"
+    },
+    {
+      "state_key": "insight_002",
+      "category": "Finance",
+      "insight_type": "historical_analysis",
+      "title": "Office Supplies Multiple Vendors",
+      "summary": "Office supplies were ordered from multiple similar vendors at differing prices.",
+      "urgency": "medium",
+      "priority_score": 6,
+      "recommended_action": "Consolidate orders to a single vendor for better pricing.",
+      "explanation": "Previous consolidations have resulted in cost savings.",
+      "status": "active"
+    },
+    {
+      "state_key": "insight_003",
+      "category": "Finance",
+      "insight_type": "prediction_error",
+      "title": "Marketing Spend Exceeds Forecast",
+      "summary": "Marketing spend is 15% over forecast, possibly due to an unplanned campaign.",
+      "urgency": "critical",
+      "priority_score": 9,
+      "recommended_action": "Immediately verify campaign spend and assess necessity.",
+      "explanation": "Historical trends indicate variance should be within +/- 5%.",
+      "status": "stale"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": {
+      "OfficeSupply Inc.": "primary vendor",
+      "OfficeSupplies Ltd.": "secondary vendor",
+      "Software Solutions Co.": "renewed contract"
+    },
+    "actual_intent": "spending_analysis and finance",
+    "expected_answer_facts": [
+      "Office supplies purchased from both 'OfficeSupply Inc.' and 'OfficeSupplies Ltd.' resulted in higher costs.",
+      "Software subscriptions exceeded expectations due to a mix of frequency and upgrade issues.",
+      "Marketing spend anomaly likely due to an unscheduled surge in campaign approvals."
+    ]
+  }
+}

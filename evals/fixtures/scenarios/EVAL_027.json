@@ -1,0 +1,139 @@
+{
+  "scenario_id": "SCENARIO_A203",
+  "eval_id": "EVAL_027",
+  "theme": "Operational Finance Review",
+  "entities": {
+    "people": [
+      {
+        "name": "Alex Johnson",
+        "email": "alex.j@startupco.com",
+        "relationship_type": "CEO"
+      },
+      {
+        "name": "Jamie Lee",
+        "email": "jamie.lee@financefirm.com",
+        "relationship_type": "Financial Advisor"
+      }
+    ],
+    "companies": [
+      "StartupCo",
+      "Fintech Ventures"
+    ],
+    "projects": [
+      "Project Blue Sky",
+      "Efficient Horizon"
+    ],
+    "merchants": [
+      "QuickFinance",
+      "Finquick"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_8392",
+      "subject": "Re: Latest Financial Adjustments",
+      "body_summary": "Jamie highlights need to adjust operation targets based on April's declining revenue.",
+      "occurred_at": "2026-05-03T14:23:11Z",
+      "email_category": "finance",
+      "requires_action": true,
+      "sentiment": "cautious",
+      "channel_metadata": {
+        "sender": "jamie.lee@financefirm.com",
+        "sender_name": "Jamie Lee"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_4821",
+      "title": "Quarterly Finance Review",
+      "start_time": "2026-05-07T10:00:00Z",
+      "end_time": "2026-05-07T11:30:00Z",
+      "transcript_summary": "Discussion on April's financial report and operational impact. Agree to explore cost reduction strategies.",
+      "attendees": [
+        {
+          "email": "alex.j@startupco.com",
+          "name": "Alex Johnson"
+        },
+        {
+          "email": "jamie.lee@financefirm.com",
+          "name": "Jamie Lee"
+        }
+      ],
+      "description": "Review financial health and operational directives."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "QuickFinance",
+      "amount": 125000,
+      "currency": "USD",
+      "category": "investment",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-04-28T09:15:00Z"
+    },
+    {
+      "merchant_normalized": "Finquick",
+      "amount": 30000,
+      "currency": "USD",
+      "category": "loan_payment",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-01T15:45:00Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Review May financial forecast",
+      "status": "pending",
+      "priority": "high",
+      "due_date": "2026-05-12T00:00:00Z",
+      "source_type": "strategic_plan"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Finalize the operational budget revisions",
+      "due_date": "2026-05-15T00:00:00Z",
+      "status": "in_progress",
+      "ai_confidence": 0.85
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "blue_sky_adjustment",
+      "category": "operations",
+      "insight_type": "strategic recommendation",
+      "title": "Operation Blue Sky Efficiency Boost",
+      "summary": "Propose labor restructuring and equipment optimization to enhance output against current financial backdrop.",
+      "urgency": "high",
+      "priority_score": 8.2,
+      "recommended_action": "Deploy resources to critical areas",
+      "explanation": "April's financial dip warrants resource reallocation.",
+      "status": "draft"
+    },
+    {
+      "state_key": "outdated_loan_payment",
+      "category": "finance",
+      "insight_type": "historical assessment",
+      "title": "Loan Payment Overview",
+      "summary": "Analyzes previous loan payments and their operational strain, with data not reflecting latest payment.",
+      "urgency": "medium",
+      "priority_score": 6,
+      "recommended_action": "Re-evaluate loan terms",
+      "explanation": "Impact analysis incomplete due to recent payments not incorporated.",
+      "status": "stale"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": [
+      "Alex Johnson oversees operational and financial realignments",
+      "Jamie Lee provides financial consultation"
+    ],
+    "actual_intent": "Update operational procedures in response to financial shifts",
+    "expected_answer_facts": [
+      "April's declining revenue requires operational cost adjustments",
+      "Recent loan payment activity influences budget constraints"
+    ]
+  }
+}

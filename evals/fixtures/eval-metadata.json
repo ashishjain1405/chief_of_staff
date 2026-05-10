@@ -1,0 +1,646 @@
+{
+  "EVAL_001": {
+    "difficulty": "hard",
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "This eval targets verifying spending data's congruence between raw transactions and operational insights, highlighting retrieval conflicts.",
+    "expected_evidence_requirements": [
+      "sufficient cross-referenced financial data"
+    ]
+  },
+  "EVAL_002": {
+    "difficulty": "extreme",
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "To challenge the system on its ability to synthesize financial data with operational objectives, ensuring robust evidence support.",
+    "expected_evidence_requirements": [
+      "cross-verification with operational goals"
+    ]
+  },
+  "EVAL_003": {
+    "difficulty": "medium",
+    "hallucination_risk": "low",
+    "why_this_eval_exists": "Assessing synthesis capability when cross-referencing weekly financial decisions with actual transaction data.",
+    "expected_evidence_requirements": [
+      "decision records and transaction confirmations"
+    ]
+  },
+  "EVAL_004": {
+    "difficulty": "hard",
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "Designed to test ranking and retrieval capabilities when faced with voluminous and potentially conflicting data sources.",
+    "expected_evidence_requirements": [
+      "comprehensive trend data"
+    ]
+  },
+  "EVAL_005": {
+    "difficulty": "extreme",
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "Targets capability to detect and report inconsistencies across large datasets, ensuring reliable synthesis and conflict detection.",
+    "expected_evidence_requirements": [
+      "comparative analysis between reports"
+    ]
+  },
+  "EVAL_006": {
+    "difficulty": "medium",
+    "hallucination_risk": "low",
+    "why_this_eval_exists": "To determine the system's accuracy in retrieving recent operational insights and identifying spending patterns.",
+    "expected_evidence_requirements": [
+      "up-to-date operational insights"
+    ]
+  },
+  "EVAL_007": {
+    "difficulty": "hard",
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "To evaluate the system's precision in identifying and reporting misalignments between transactional data and stated operational objectives.",
+    "expected_evidence_requirements": [
+      "detailed mismatch report"
+    ]
+  },
+  "EVAL_008": {
+    "difficulty": "medium",
+    "hallucination_risk": "low",
+    "why_this_eval_exists": "To test retrieval depth and capability in accurately collating mismatched data over extensive periods.",
+    "expected_evidence_requirements": [
+      "all relevant mismatch data"
+    ]
+  },
+  "EVAL_009": {
+    "difficulty": "medium",
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "To ensure the system can intelligently project and refine budgets using current insights and financial forecasts.",
+    "expected_evidence_requirements": [
+      "current insights basis for future constraints"
+    ]
+  },
+  "EVAL_010": {
+    "difficulty": "hard",
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "Focuses on identifying detail-oriented retrieval issues when reviewing short-term inconsistencies.",
+    "expected_evidence_requirements": [
+      "yesterday's transaction audit"
+    ]
+  },
+  "EVAL_011": {
+    "difficulty": "extreme",
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "Challenges system on robustness in fraud detection, balancing high precision and recall to avoid false positives.",
+    "expected_evidence_requirements": [
+      "anomalous spending pattern detection"
+    ]
+  },
+  "EVAL_012": {
+    "difficulty": "medium",
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "Testing on ability to reconcile budget predictions with current fiscal metrics in a high-data context.",
+    "expected_evidence_requirements": [
+      "historical versus actual expense reconciliation"
+    ]
+  },
+  "EVAL_013": {
+    "difficulty": "hard",
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "Focus on anomaly detection in current operations, requiring precise alignment with expected financial patterns.",
+    "expected_evidence_requirements": [
+      "comparison of transaction data to expected benchmarks"
+    ]
+  },
+  "EVAL_014": {
+    "difficulty": "medium",
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "Testing proactive intelligent alignment strategies for finance and operations in a planning context.",
+    "expected_evidence_requirements": [
+      "proactive alignment recommendations"
+    ]
+  },
+  "EVAL_015": {
+    "difficulty": "hard",
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "Designed to challenge the synthesis of operational intentions with actual spending, focusing on conflicting data points.",
+    "expected_evidence_requirements": [
+      "comprehensive comparison report"
+    ]
+  },
+  "EVAL_016": {
+    "difficulty": "hard",
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "Highlight the discrepancy between synthesized insights from meetings and operational data.",
+    "expected_evidence_requirements": [
+      "Both meeting notes and operational insights must be aligned"
+    ]
+  },
+  "EVAL_017": {
+    "difficulty": "hard",
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "To test systems ability to accurately rank and synthesize cross-domain data.",
+    "expected_evidence_requirements": [
+      "Presence of both financial data and corresponding operational insights"
+    ]
+  },
+  "EVAL_018": {
+    "difficulty": "extreme",
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "Ensure that the system can detect and report discrepancies while avoiding false positives or fabricated insights.",
+    "expected_evidence_requirements": [
+      "Comparison between transaction logs and operational insights"
+    ]
+  },
+  "EVAL_019": {
+    "difficulty": "medium",
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "To verify that the system correlates disparate data to provide a coherent explanation for expenditures.",
+    "expected_evidence_requirements": [
+      "Both financial records and operational details required"
+    ]
+  },
+  "EVAL_020": {
+    "difficulty": "medium",
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "To test how the system validates that operational messaging is consistent with stakeholder communications.",
+    "expected_evidence_requirements": [
+      "Aligned communications data and operational insights"
+    ]
+  },
+  "EVAL_021": {
+    "difficulty": "hard",
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "Assess the system's ability to resolve conflicts between documented reviews and actual task deliveries.",
+    "expected_evidence_requirements": [
+      "Clear linkage between task records and operational performance reviews"
+    ]
+  },
+  "EVAL_022": {
+    "difficulty": "extreme",
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "Evaluate the system's competence in handling discrepancies between task management systems and operational insights.",
+    "expected_evidence_requirements": [
+      "Comparative analysis of task tracking systems against operational dashboards"
+    ]
+  },
+  "EVAL_023": {
+    "difficulty": "hard",
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "To verify that financial summaries are accurately reconciled with operational budgets and there is clear evidence path in support.",
+    "expected_evidence_requirements": [
+      "Evidence of linkage between financial data and operational budgets"
+    ]
+  },
+  "EVAL_024": {
+    "difficulty": "medium",
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "Ensure that integration of historical communications properly reflects and corroborates current operational trends without fabrication.",
+    "expected_evidence_requirements": [
+      "Conclusive evidence between communication patterns and operational trends"
+    ]
+  },
+  "EVAL_025": {
+    "difficulty": "hard",
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "Assess system's fortitude in aligning task outcomes and strategic operational insights, ensuring logical consistency.",
+    "expected_evidence_requirements": [
+      "Clear evidence alignment between task data and strategic insights"
+    ]
+  },
+  "EVAL_026": {
+    "difficulty": "medium",
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "Verify system's ability to utilize raw data for diagnosing operational hindrances without introducing ambiguity or errors.",
+    "expected_evidence_requirements": [
+      "Access to both transaction and operational data to identify bottlenecks"
+    ]
+  },
+  "EVAL_027": {
+    "difficulty": "hard",
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "Challenge systems to converge operational adjustments and financial trend analytics seamlessly.",
+    "expected_evidence_requirements": [
+      "Evidence intersect between operational statuses and recent financial trends"
+    ]
+  },
+  "EVAL_028": {
+    "difficulty": "hard",
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "Evaluate system dexterity in fusing meeting-derived insights with operational strategic data without causing muddled or inaccurate results.",
+    "expected_evidence_requirements": [
+      "Inclusive proof across multi-meeting data"
+    ]
+  },
+  "EVAL_029": {
+    "difficulty": "extreme",
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "Push system's multi-domain synthesis capacity, ensuring challenges are addressed without overgeneralization or sector-specific oversight.",
+    "expected_evidence_requirements": [
+      "Extensive synthesis across multi-domain data"
+    ]
+  },
+  "EVAL_030": {
+    "difficulty": "medium",
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "Test system acuity in employing scheduling information aligned with current operational insights while ensuring gaps are clearly addressed.",
+    "expected_evidence_requirements": [
+      "Clear documentation on schedule vs insights alignment"
+    ]
+  },
+  "EVAL_031": {
+    "difficulty": "hard",
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "To ensure anomalies are detected and reported accurately even with potential contradictory data between operational insights and raw transaction logs.",
+    "expected_evidence_requirements": [
+      "objective evidence for anomalies"
+    ]
+  },
+  "EVAL_032": {
+    "difficulty": "extreme",
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "To check if the system can accurately align project timelines with task completions, given potential discrepancies between operational insights and task logs.",
+    "expected_evidence_requirements": [
+      "task_logs",
+      "completion_reports"
+    ]
+  },
+  "EVAL_033": {
+    "difficulty": "medium",
+    "hallucination_risk": "low",
+    "why_this_eval_exists": "To check for alignment between meeting outcomes and pre-existing commitments, ensuring commitments are consistently addressed in meetings.",
+    "expected_evidence_requirements": [
+      "meeting agendas",
+      "commitments records"
+    ]
+  },
+  "EVAL_034": {
+    "difficulty": "extreme",
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "To test the system's ability to dynamically update task priorities in response to late-breaking market information that may conflict with other data.",
+    "expected_evidence_requirements": [
+      "market report evidence",
+      "urgent task creation records"
+    ]
+  },
+  "EVAL_035": {
+    "difficulty": "hard",
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "To challenge the system's ability to identify and resolve discrepancies in financial data with potentially conflicting evidence sources.",
+    "expected_evidence_requirements": [
+      "transaction reports",
+      "audit logs"
+    ]
+  },
+  "EVAL_036": {
+    "difficulty": "medium",
+    "hallucination_risk": "low",
+    "why_this_eval_exists": "To ensure that pending commitments linked to meetings are accurately identified and reported on amidst dynamic organizational activities.",
+    "expected_evidence_requirements": [
+      "commitment logs",
+      "meeting minutes"
+    ]
+  },
+  "EVAL_037": {
+    "difficulty": "hard",
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "To verify the system’s proficiency in distinguishing discrepancies between summarized and raw financial data, especially when evidence might conflict.",
+    "expected_evidence_requirements": [
+      "financial summary reports",
+      "raw transaction logs"
+    ]
+  },
+  "EVAL_038": {
+    "difficulty": "extreme",
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "To stress-test the system's capacity to identify unexpected scheduling anomalies, especially where operational insights might conflict with meeting data.",
+    "expected_evidence_requirements": [
+      "scheduling logs",
+      "anomaly detection reports"
+    ]
+  },
+  "EVAL_039": {
+    "difficulty": "medium",
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "To ensure that only the latest and most relevant project insights are presented, challenging the system's freshness of operational insights.",
+    "expected_evidence_requirements": [
+      "project insight logs",
+      "transaction records"
+    ]
+  },
+  "EVAL_040": {
+    "difficulty": "hard",
+    "hallucination_risk": "low",
+    "why_this_eval_exists": "To evaluate the system's ability to accurately project future commitments derived from recent meetings, with a focus on resolving semantic mismatches.",
+    "expected_evidence_requirements": [
+      "meeting notes",
+      "commitment logs"
+    ]
+  },
+  "EVAL_041": {
+    "difficulty": "extreme",
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "To assess the system's capacity to detect and accurately report financial anomalies within the current month, despite retrieval ambiguities.",
+    "expected_evidence_requirements": [
+      "trend analysis reports",
+      "transaction logs"
+    ]
+  },
+  "EVAL_042": {
+    "difficulty": "medium",
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "To test the system's proficiency in capturing significant issues from strategic meetings while mitigating semantic mismatches and conflict between operational data.",
+    "expected_evidence_requirements": [
+      "meeting notes",
+      "issue logs"
+    ]
+  },
+  "EVAL_043": {
+    "difficulty": "hard",
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "To verify the alignment and consistency between operational efficiency data and financial metrics, challenging cross-layer data coherence.",
+    "expected_evidence_requirements": [
+      "efficiency reports",
+      "financial summaries"
+    ]
+  },
+  "EVAL_044": {
+    "difficulty": "extreme",
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "To evaluate the system’s ability to identify overlooked insights during project assessments, particularly within constraints of retrieval ambiguity.",
+    "expected_evidence_requirements": [
+      "review reports",
+      "project logs"
+    ]
+  },
+  "EVAL_045": {
+    "difficulty": "hard",
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "To confirm the system's capability to identify unresolved issues and bottlenecks in ongoing tasks while avoiding retrieval conflicts.",
+    "expected_evidence_requirements": [
+      "task status logs",
+      "bottleneck reports"
+    ]
+  },
+  "EVAL_046": {
+    "difficulty": "medium",
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "To test the system's ability to reconcile operational summaries with real-time task data and suggest optimizations without hallucinating insights.",
+    "expected_evidence_requirements": [
+      "complete operational insights",
+      "real-time task data"
+    ]
+  },
+  "EVAL_047": {
+    "difficulty": "hard",
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "To challenge the system’s ability to detect and clarify discrepancies between different data layers, ensuring accurate insights without fabrication.",
+    "expected_evidence_requirements": [
+      "transaction logs",
+      "insight reports"
+    ]
+  },
+  "EVAL_048": {
+    "difficulty": "extreme",
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "To identify potential weaknesses in multi-source integration and the ability to synthesize accurate department-level reports without erroneous assumptions.",
+    "expected_evidence_requirements": [
+      "complete department metrics",
+      "integrated data streams"
+    ]
+  },
+  "EVAL_049": {
+    "difficulty": "hard",
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "To stress-test the system's capability to reconcile and correct conflicts between high-level summaries and granular transaction data, ensuring evidence-backed responses.",
+    "expected_evidence_requirements": [
+      "transaction validation",
+      "operation insights"
+    ]
+  },
+  "EVAL_050": {
+    "difficulty": "medium",
+    "hallucination_risk": "low",
+    "why_this_eval_exists": "To ensure synchronization between ongoing tasks and operational insights, highlighting possible gaps or mismatches in data interpretation.",
+    "expected_evidence_requirements": [
+      "task logs",
+      "current operational insights"
+    ]
+  },
+  "EVAL_051": {
+    "difficulty": "hard",
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "To rigorously test the system's ability to detect and articulate deviations between operational insights and transactional data, ensuring robust explanation and accurate retrieval.",
+    "expected_evidence_requirements": [
+      "deviation analysis",
+      "transactional cross-references"
+    ]
+  },
+  "EVAL_052": {
+    "difficulty": "extreme",
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "To expose retrieval and synthesis challenges in merging data from diverse domains with competing details, testing the system’s holistic strategic insight capabilities.",
+    "expected_evidence_requirements": [
+      "comprehensive financial data",
+      "integrated operational insights"
+    ]
+  },
+  "EVAL_053": {
+    "difficulty": "extreme",
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "To critically evaluate the system’s ability to align operational summaries with actual task accomplishments, identifying misalignments without incorrectly inferring causality.",
+    "expected_evidence_requirements": [
+      "task completion details",
+      "strategic alignment confirmation"
+    ]
+  },
+  "EVAL_054": {
+    "difficulty": "hard",
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "To expose the challenge of reconciling different data-driven trends and reinforce the need for careful analysis without speculative causation in complex data scenarios.",
+    "expected_evidence_requirements": [
+      "trend analysis",
+      "data cross-referencing"
+    ]
+  },
+  "EVAL_055": {
+    "difficulty": "medium",
+    "hallucination_risk": "low",
+    "why_this_eval_exists": "To determine the system's handling of conflicts between tasks and financial commitments without excess assumptions, emphasizing direct evidence use.",
+    "expected_evidence_requirements": [
+      "task details",
+      "commitment agreements"
+    ]
+  },
+  "EVAL_056": {
+    "difficulty": "extreme",
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "To challenge the ability of simultaneous multi-domain insight integration, aiming for precise, not speculative, conclusions from vast data ranges.",
+    "expected_evidence_requirements": [
+      "complete financial transactions",
+      "integrated operational insights"
+    ]
+  },
+  "EVAL_057": {
+    "difficulty": "hard",
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "To assess whether task statuses accurately reflect higher-level operational directives, ensuring actionable insights are grounded in recorded task execution.",
+    "expected_evidence_requirements": [
+      "task execution records",
+      "alignment metrics"
+    ]
+  },
+  "EVAL_058": {
+    "difficulty": "extreme",
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "To rigorously evaluate the AI's proficiency in integrating and validating financial and operational data while mitigating inference errors and unwarranted assumptions.",
+    "expected_evidence_requirements": [
+      "coherent expenditure analysis",
+      "operational summary validation"
+    ]
+  },
+  "EVAL_059": {
+    "difficulty": "medium",
+    "hallucination_risk": "low",
+    "why_this_eval_exists": "To verify the system's capabilities in linking operational and transactional insights effectively, fostering accurate relational mappings without unsupported hyperbole.",
+    "expected_evidence_requirements": [
+      "operational review details",
+      "transaction outcome analysis"
+    ]
+  },
+  "EVAL_060": {
+    "difficulty": "extreme",
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "To challenge predictive validation robustness, ensuring financial metrics correctly corroborate operational forecasts without speculative insight drifts.",
+    "expected_evidence_requirements": [
+      "financial substantiation metrics",
+      "operational prediction records"
+    ]
+  },
+  "EVAL_061": {
+    "difficulty": "extreme",
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "To test if the system can handle conflicting insights between operational summaries and historical raw transactional data.",
+    "expected_evidence_requirements": [
+      "consistency_check",
+      "data_range_validation"
+    ]
+  },
+  "EVAL_062": {
+    "difficulty": "hard",
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "To evaluate whether the system can apply predictive analytics in the presence of past data inconsistencies and achieve contextually accurate insights for future projections.",
+    "expected_evidence_requirements": [
+      "historical_trend_analysis",
+      "predictive_model_consistency"
+    ]
+  },
+  "EVAL_063": {
+    "difficulty": "medium",
+    "hallucination_risk": "low",
+    "why_this_eval_exists": "To determine the system's ability to identify and handle discrepancies across layers of operational data and transactional records.",
+    "expected_evidence_requirements": [
+      "cross_verification",
+      "consistency_validation"
+    ]
+  },
+  "EVAL_064": {
+    "difficulty": "hard",
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "To investigate if the system effectively cross-verifies operational insights with financial data and avoids alignment errors.",
+    "expected_evidence_requirements": [
+      "financial_integrity_check",
+      "operational_alignment_assessment"
+    ]
+  },
+  "EVAL_065": {
+    "difficulty": "medium",
+    "hallucination_risk": "low",
+    "why_this_eval_exists": "To ensure systematic consistency in operational summaries when forecasting trends and identifying discrepancies within transactional data.",
+    "expected_evidence_requirements": [
+      "trend_deviation_detection",
+      "evidence-backed summary"
+    ]
+  },
+  "EVAL_066": {
+    "difficulty": "extreme",
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "To test if the system manages complex historical data integrations and exposes operational vs transactional data conflicts clearly.",
+    "expected_evidence_requirements": [
+      "data_discrepancy_analysis",
+      "backward_consistency_check"
+    ]
+  },
+  "EVAL_067": {
+    "difficulty": "hard",
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "To challenge the system with real-time data integration, ensuring accuracy and consistency in its operational insights versus live transaction comparisons.",
+    "expected_evidence_requirements": [
+      "real_vs_report_consistency",
+      "data_validity_check"
+    ]
+  },
+  "EVAL_068": {
+    "difficulty": "easy",
+    "hallucination_risk": "low",
+    "why_this_eval_exists": "To ensure the system effectively identifies and understands micro-inconsistencies in operational versus transactional data within short-lived periods.",
+    "expected_evidence_requirements": [
+      "pattern_recording",
+      "data_txoperational_correlation"
+    ]
+  },
+  "EVAL_069": {
+    "difficulty": "medium",
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "To challenge the system with up-to-the-minute accuracy to counteract possible obsolete data using present-day insights and report validation.",
+    "expected_evidence_requirements": [
+      "real_time_trend_confirmation",
+      "historical_discrepancy_check"
+    ]
+  },
+  "EVAL_070": {
+    "difficulty": "extreme",
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "To test the system's ability under extreme stress to appropriately navigate and recalibrate operational metrics influenced by data inconsistencies and errors.",
+    "expected_evidence_requirements": [
+      "error_impact_analysis",
+      "metric_correlation"
+    ]
+  },
+  "EVAL_071": {
+    "difficulty": "hard",
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "To monitor for the unevenness in system responses, checking its ability to provide comprehensive coherence in operational insights considering recent transactional shifts.",
+    "expected_evidence_requirements": [
+      "real-time_shift_detection",
+      "insight_consistency_check"
+    ]
+  },
+  "EVAL_072": {
+    "difficulty": "medium",
+    "hallucination_risk": "low",
+    "why_this_eval_exists": "To verify that the system effortlessly executes across temporal cross-checking tasks, ensuring faithful representation of insights and data consistency checks.",
+    "expected_evidence_requirements": [
+      "insight_to_transaction_match",
+      "historical_cross-validation"
+    ]
+  },
+  "EVAL_073": {
+    "difficulty": "hard",
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "To deeply investigate systemic issues that could arise from discrepancies between operational insights and real-time transactional data, ensuring accurate causal analysis.",
+    "expected_evidence_requirements": [
+      "misalignment_causation",
+      "solution_path"
+    ]
+  },
+  "EVAL_074": {
+    "difficulty": "hard",
+    "hallucination_risk": "medium",
+    "why_this_eval_exists": "To target potential areas of weakness where the system might fail in reconciling existing operational data trends with historical report figures.",
+    "expected_evidence_requirements": [
+      "current_operational_data",
+      "historical_performance_reports"
+    ]
+  },
+  "EVAL_075": {
+    "difficulty": "extreme",
+    "hallucination_risk": "high",
+    "why_this_eval_exists": "To stress test system integrity under critical scenarios needing rectifications based on historical transactional error insights and subsequent operational corrections.",
+    "expected_evidence_requirements": [
+      "correction_path_identification",
+      "error_impact_quantification"
+    ]
+  }
+}

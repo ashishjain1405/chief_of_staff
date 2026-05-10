@@ -1,0 +1,165 @@
+{
+  "scenario_id": "SCEN_050",
+  "eval_id": "EVAL_050",
+  "theme": "Task and Operational Insight Synchronization",
+  "entities": {
+    "people": [
+      {
+        "name": "Alex Parker",
+        "email": "alex.parker@example.com",
+        "relationship_type": "colleague"
+      },
+      {
+        "name": "Jamie Lee",
+        "email": "jamie.lee@external-partner.com",
+        "relationship_type": "vendor"
+      }
+    ],
+    "companies": [
+      "Tech Fusion Inc.",
+      "Innovate Solutions"
+    ],
+    "projects": [
+      "Alpha Expansion",
+      "Market Optimization"
+    ],
+    "merchants": [
+      "Cloud Services Co.",
+      "CloudServiceCo"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_101",
+      "subject": "Update on Market Optimization tasks",
+      "body_summary": "Discuss recent task progresses and align operational insights.",
+      "occurred_at": "2026-05-02T15:12:10.395Z",
+      "email_category": "project_updates",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "alex.parker@example.com",
+        "sender_name": "Alex Parker"
+      },
+      "embedding_null": false
+    },
+    {
+      "external_id": "email_102",
+      "subject": "Issues with Cloud Services billing",
+      "body_summary": "Discrepancies noted in recent invoice, requires investigation.",
+      "occurred_at": "2026-05-01T10:25:50.395Z",
+      "email_category": "finance_issues",
+      "requires_action": false,
+      "sentiment": "negative",
+      "channel_metadata": {
+        "sender": "jamie.lee@external-partner.com",
+        "sender_name": "Jamie Lee"
+      },
+      "embedding_null": true
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_401",
+      "title": "Alpha Expansion Strategy Discussion",
+      "start_time": "2026-05-03T13:00:00.395Z",
+      "end_time": "2026-05-03T14:00:00.395Z",
+      "transcript_summary": "Review of current strategy and operational alignment.",
+      "attendees": [
+        {
+          "email": "alex.parker@example.com",
+          "name": "Alex Parker"
+        },
+        {
+          "email": "jamie.lee@external-partner.com",
+          "name": "Jamie Lee"
+        }
+      ],
+      "description": "Focus on aligning tasks with the current state of operations."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "Cloud Services Co.",
+      "amount": 150,
+      "currency": "USD",
+      "category": "SaaS",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-04-30T10:00:00.395Z"
+    },
+    {
+      "merchant_normalized": "CloudServiceCo",
+      "amount": 150,
+      "currency": "USD",
+      "category": "SaaS",
+      "transaction_type": "credit",
+      "transaction_datetime": "2026-04-29T09:00:00.395Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Review operational efficiency metrics",
+      "status": "completed",
+      "priority": "high",
+      "due_date": "2026-05-01",
+      "source_type": "project"
+    },
+    {
+      "title": "Finalize budget allocation for Alpha Expansion",
+      "status": "pending",
+      "priority": "medium",
+      "due_date": "2026-05-05",
+      "source_type": "strategic_planning"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Deliver insights report to project leads",
+      "due_date": "2026-05-03",
+      "status": "completed",
+      "ai_confidence": 0.88
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "alpha_task_progress",
+      "category": "operations",
+      "insight_type": "progress_review",
+      "title": "Alpha Expansion Progress",
+      "summary": "Tasks are progressing slower than expected; high importance for realignment.",
+      "urgency": "high",
+      "priority_score": 8,
+      "recommended_action": "Re-evaluate timelines and resource distribution.",
+      "explanation": "Current task completion rates do not align with operational goals.",
+      "status": "active"
+    },
+    {
+      "state_key": "market_task_sync",
+      "category": "operations",
+      "insight_type": "task_insight",
+      "title": "Market Optimization Task Synchronization",
+      "summary": "Tasks completed; awaiting operational indicators update for sync.",
+      "urgency": "medium",
+      "priority_score": 6,
+      "recommended_action": "Cross-check operational updates with recent task completions.",
+      "explanation": "Lack of updated operational insights causing delays in task synchronization.",
+      "status": "active"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": [],
+    "actual_intent": {
+      "required": [
+        "scheduling",
+        "productivity"
+      ],
+      "forbidden": [
+        "finance"
+      ]
+    },
+    "expected_answer_facts": [
+      "Discrepancy between task completion and operational insight progress",
+      "Task 'Review operational efficiency metrics' completed without updating insights"
+    ]
+  }
+}

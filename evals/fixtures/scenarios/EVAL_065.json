@@ -1,0 +1,151 @@
+{
+  "scenario_id": "SCENARIO_065",
+  "eval_id": "EVAL_065",
+  "theme": "Transactional Analysis & Operational Summary",
+  "entities": {
+    "people": [
+      {
+        "name": "John Doe",
+        "email": "john.doe@startuphub.com",
+        "relationship_type": "CEO"
+      },
+      {
+        "name": "Jane Smith",
+        "email": "jane.smith@startuphub.com",
+        "relationship_type": "CFO"
+      }
+    ],
+    "companies": [
+      "Startup Hub LLC"
+    ],
+    "projects": [
+      "Q2 Financial Audit",
+      "Expense Optimization Initiative"
+    ],
+    "merchants": [
+      "FastTrack Supplies",
+      "Fast Trak Supplies",
+      "Quick Office Supplies"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "msg-20260501-001",
+      "subject": "Re: Discrepancies in last month's expenses",
+      "body_summary": "Please review the unexpected increase in office supply expenses.",
+      "occurred_at": "2026-05-01T09:15:00.000Z",
+      "email_category": "finance",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "jane.smith@startuphub.com",
+        "sender_name": "Jane Smith"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting-20260429-001",
+      "title": "Monthly Financial Review",
+      "start_time": "2026-04-29T14:00:00.000Z",
+      "end_time": "2026-04-29T15:00:00.000Z",
+      "transcript_summary": "Discussed trends in office supply expenses, noting an upward trend compared to last quarter.",
+      "attendees": [
+        {
+          "email": "john.doe@startuphub.com",
+          "name": "John Doe"
+        },
+        {
+          "email": "jane.smith@startuphub.com",
+          "name": "Jane Smith"
+        }
+      ],
+      "description": "Review of financial trends and upcoming budgeting allocations."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "FastTrack Supplies",
+      "amount": 1500,
+      "currency": "USD",
+      "category": "office supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-04-15T10:00:00.000Z"
+    },
+    {
+      "merchant_normalized": "Quick Office Supplies",
+      "amount": 300,
+      "currency": "USD",
+      "category": "office supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-04-20T09:30:00.000Z"
+    },
+    {
+      "merchant_normalized": "Fast Trak Supplies",
+      "amount": 1570,
+      "currency": "USD",
+      "category": "office supplies",
+      "transaction_type": "refund",
+      "transaction_datetime": "2026-05-02T14:00:00.000Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Investigate office supply purchase discrepancies",
+      "status": "in progress",
+      "priority": "high",
+      "due_date": "2026-05-05",
+      "source_type": "email_reminder"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Complete financial trend analysis by end of Q2",
+      "due_date": "2026-06-30",
+      "status": "active",
+      "ai_confidence": 0.85
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "financial_trend_analysis_20260430",
+      "category": "finance",
+      "insight_type": "trend_analysis",
+      "title": "Rising expenses in office supplies",
+      "summary": "An upward trend in expenses for office supplies has been identified, exceeding expected levels by 25% this month.",
+      "urgency": "high",
+      "priority_score": 0.9,
+      "recommended_action": "Investigate and confirm vendor reliability and pricing.",
+      "explanation": "Data comparison shows a notable increase in similar vendor charges.",
+      "status": "open"
+    },
+    {
+      "state_key": "expense_verification_20260428",
+      "category": "finance",
+      "insight_type": "verification",
+      "title": "Expense Verification Required",
+      "summary": "Monthly expense records for office supplies appear consistent, no immediate discrepancies identified.",
+      "urgency": "medium",
+      "priority_score": 0.6,
+      "recommended_action": "Conduct routine checks.",
+      "explanation": "Previous month’s data validated through standard checks, no initial anomalies found.",
+      "status": "resolved"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": [
+      "John Doe => company executive",
+      "Jane Smith => company executive"
+    ],
+    "actual_intent": [
+      "operational_summary",
+      "spending_analysis"
+    ],
+    "expected_answer_facts": [
+      "The operational summary should highlight discrepancies in transaction trends this month.",
+      "A refund from 'Fast Trak Supplies' signals a potential correction post-trend spike.",
+      "Prior insights erroneously confirmed stability, contradicting rising transaction data."
+    ]
+  }
+}

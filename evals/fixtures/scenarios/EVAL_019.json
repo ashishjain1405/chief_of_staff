@@ -1,0 +1,154 @@
+{
+  "scenario_id": "SCENARIO_019",
+  "eval_id": "EVAL_019",
+  "theme": "Expenditure Analysis",
+  "entities": {
+    "people": [
+      {
+        "name": "Alex Smith",
+        "email": "alex.smith@startupinc.com",
+        "relationship_type": "executive"
+      },
+      {
+        "name": "Jordan Lee",
+        "email": "jlee@bookkeepservices.com",
+        "relationship_type": "accountant"
+      }
+    ],
+    "companies": [
+      "Startup Inc.",
+      "BookKeep Services"
+    ],
+    "projects": [
+      "Project Skyrocket",
+      "Expansion Initiative"
+    ],
+    "merchants": [
+      "Office Supplies Central",
+      "IT Services Co.",
+      "OfficeCentral",
+      "TechSolutions Ltd."
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_001",
+      "subject": "Invoice Discrepancy Clarification",
+      "body_summary": "Discussing discrepancies in the last two invoices from IT Services Co. Might need adjustments.",
+      "occurred_at": "2026-05-05T14:23:11.224Z",
+      "email_category": "finance",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "jlee@bookkeepservices.com",
+        "sender_name": "Jordan Lee"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_001",
+      "title": "Quarterly Financial Review",
+      "start_time": "2026-05-05T10:00:00.000Z",
+      "end_time": "2026-05-05T11:30:00.000Z",
+      "transcript_summary": "Reviewed financial status; highlighted discrepancies with recent office supply expenses.",
+      "attendees": [
+        {
+          "email": "alex.smith@startupinc.com",
+          "name": "Alex Smith"
+        },
+        {
+          "email": "jlee@bookkeepservices.com",
+          "name": "Jordan Lee"
+        }
+      ],
+      "description": "Discuss financials, evaluate transaction discrepancies."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "Office Supplies Central",
+      "amount": "1250.00",
+      "currency": "USD",
+      "category": "office_supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-01T09:15:00.000Z"
+    },
+    {
+      "merchant_normalized": "TechSolutions Ltd.",
+      "amount": "2750.00",
+      "currency": "USD",
+      "category": "IT_services",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-03T16:45:00.000Z"
+    },
+    {
+      "merchant_normalized": "OfficeCentral",
+      "amount": "1250.00",
+      "currency": "USD",
+      "category": "office_supplies",
+      "transaction_type": "refund",
+      "transaction_datetime": "2026-05-06T12:10:00.000Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Investigate IT invoice discrepancies",
+      "status": "in-progress",
+      "priority": "high",
+      "due_date": "2026-05-10",
+      "source_type": "email"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Finalize adjustment of last quarter expenditures",
+      "due_date": "2026-05-12",
+      "status": "pending",
+      "ai_confidence": 0.85
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "office_supplies_expense_2026",
+      "category": "finance",
+      "insight_type": "aggregated_finance",
+      "title": "Increased Office Supply Expenses",
+      "summary": "Notice a spike in office supply expenses over the last quarter",
+      "urgency": "medium",
+      "priority_score": 0.7,
+      "recommended_action": "Review and validate expenses",
+      "explanation": "Significant charges noted from both 'Office Supplies Central' and 'OfficeCentral'.",
+      "status": "new"
+    },
+    {
+      "state_key": "it_services_report_2026",
+      "category": "finance",
+      "insight_type": "operational_summary",
+      "title": "Conflicting IT Service Invoices",
+      "summary": "Inconsistent invoice amounts noted from IT Services Co. An adjustment might be necessary.",
+      "urgency": "high",
+      "priority_score": 0.8,
+      "recommended_action": "Audit recent IT expenses",
+      "explanation": "Charges from TechSolutions Ltd. mismatch with recently reported IT services utilization.",
+      "status": "stale"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": [],
+    "actual_intent": {
+      "required": [
+        "finance",
+        "operational_summary"
+      ],
+      "forbidden": [],
+      "matchMode": "all"
+    },
+    "expected_answer_facts": [
+      "Discrepancy in IT Services Co. invoices noted in emails and operational insights.",
+      "Office supply expenses show refunds and may double charge due to similar merchant names.",
+      "Suggested audit for recent IT expenses based on transaction analysis."
+    ]
+  }
+}

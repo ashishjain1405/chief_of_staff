@@ -1,0 +1,148 @@
+{
+  "scenario_id": "SCEN_045",
+  "eval_id": "EVAL_021",
+  "theme": "Operational Performance vs. Task Deliveries",
+  "entities": {
+    "people": [
+      {
+        "name": "Alex Jordan",
+        "email": "alex.jordan@innotech.com",
+        "relationship_type": "colleague"
+      },
+      {
+        "name": "Jordan Wilhelm",
+        "email": "j.wilhelm@innotech.com",
+        "relationship_type": "colleague"
+      }
+    ],
+    "companies": [
+      "InnoTech Solutions"
+    ],
+    "projects": [
+      "Project Phoenix",
+      "Project Aquila"
+    ],
+    "merchants": [
+      "Workspace Supplies",
+      "Tech Vendors Ltd."
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_1987",
+      "subject": "Re: Performance Review Highlights",
+      "body_summary": "Discussion on the discrepancies noted in the quarterly reviews.",
+      "occurred_at": "2026-05-05T12:34:56.789Z",
+      "email_category": "corporate_comm",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "alex.jordan@innotech.com",
+        "sender_name": "Alex Jordan"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_2103",
+      "title": "Project Phoenix Review",
+      "start_time": "2026-05-03T15:00:00.000Z",
+      "end_time": "2026-05-03T16:00:00.000Z",
+      "transcript_summary": "Comparing the performance review against project delivery metrics, noting discrepancies.",
+      "attendees": [
+        {
+          "email": "alex.jordan@innotech.com",
+          "name": "Alex Jordan"
+        },
+        {
+          "email": "j.wilhelm@innotech.com",
+          "name": "Jordan Wilhelm"
+        }
+      ],
+      "description": "A detailed discussion on the operational performance vs. actual task completion."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "Workspace Supplies",
+      "amount": 1500,
+      "currency": "USD",
+      "category": "office_expenses",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-02T10:45:00.000Z"
+    },
+    {
+      "merchant_normalized": "Tech Vendors Ltd.",
+      "amount": 2500,
+      "currency": "USD",
+      "category": "software_purchase",
+      "transaction_type": "credit",
+      "transaction_datetime": "2026-04-28T14:20:00.000Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Deliver Final Report for Project Phoenix",
+      "status": "completed",
+      "priority": "high",
+      "due_date": "2026-04-30T00:00:00.000Z",
+      "source_type": "project_management"
+    },
+    {
+      "title": "Revise Operational Goals Document",
+      "status": "in_progress",
+      "priority": "medium",
+      "due_date": "2026-05-05T00:00:00.000Z",
+      "source_type": "executive_request"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "QA Review for Project Aquila",
+      "due_date": "2026-05-10T23:59:59.999Z",
+      "status": "pending",
+      "ai_confidence": 0.85
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "review_mismatch_2026",
+      "category": "performance_analysis",
+      "insight_type": "anomaly",
+      "title": "Mismatch in Performance Review and Task Completion",
+      "summary": "Review indicates higher performance than actual task completion metrics.",
+      "urgency": "high",
+      "priority_score": 8.5,
+      "recommended_action": "Conduct detailed analysis to identify root causes.",
+      "explanation": "The verified task completions do not align with the high performance reviews noted, suggesting potential review discrepancies.",
+      "status": "active"
+    },
+    {
+      "state_key": "stale_review_insight",
+      "category": "historical_review",
+      "insight_type": "summary",
+      "title": "Stale Operational Review",
+      "summary": "Previous reviews report a consistent performance pattern highly exceeding tasks delivered, outdated by 2 weeks.",
+      "urgency": "low",
+      "priority_score": 5,
+      "recommended_action": "Update reports with current data.",
+      "explanation": "The reviews are outdated and do not reflect latest task completions as per system transactions.",
+      "status": "stale"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": [],
+    "actual_intent": {
+      "required": [
+        "productivity",
+        "operational_summary"
+      ],
+      "forbidden": []
+    },
+    "expected_answer_facts": [
+      "Operational reviews seem to have anomalies where reported performance is higher than actual task outputs.",
+      "Recent task completions do not substantiate the high performance metrics from the reviews."
+    ]
+  }
+}

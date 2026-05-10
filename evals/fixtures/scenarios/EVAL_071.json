@@ -1,0 +1,141 @@
+{
+  "scenario_id": "SCENARIO_071",
+  "eval_id": "EVAL_071",
+  "theme": "Coherence in Operational and Transactional Shifts",
+  "entities": {
+    "people": [
+      {
+        "name": "John Doe",
+        "email": "john.doe@techstartup.com",
+        "relationship_type": "CEO"
+      },
+      {
+        "name": "Jane Smith",
+        "email": "jane.smith@techstartup.com",
+        "relationship_type": "COO"
+      }
+    ],
+    "companies": [
+      "TechStartup Inc.",
+      "FinPartners LLC"
+    ],
+    "projects": [
+      "NewMarket Expansion",
+      "CloudMigration"
+    ],
+    "merchants": [
+      "FastTech Supplies",
+      "QuickElectronics"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_1034",
+      "subject": "Q1 Financial Overview Meeting Reschedule",
+      "body_summary": "Discussed the need to analyze the recent shifts in spending and adjust forecasts.",
+      "occurred_at": "2026-05-02T14:30:45.125Z",
+      "email_category": "finance",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "john.doe@techstartup.com",
+        "sender_name": "John Doe"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_2084",
+      "title": "Weekly Operations Sync",
+      "start_time": "2026-05-03T09:00:00.000Z",
+      "end_time": "2026-05-03T10:30:00.000Z",
+      "transcript_summary": "Jane underscored discrepancies in operational insights with recent purchase spikes from FastTech Supplies.",
+      "attendees": [
+        {
+          "email": "john.doe@techstartup.com",
+          "name": "John Doe"
+        },
+        {
+          "email": "jane.smith@techstartup.com",
+          "name": "Jane Smith"
+        }
+      ],
+      "description": "Weekly review of ongoing operational issues and financial adjustments."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "FastTech Supplies",
+      "amount": 2500,
+      "currency": "USD",
+      "category": "hardware",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-01T13:30:00.000Z"
+    },
+    {
+      "merchant_normalized": "QuickElectronics",
+      "amount": 1800,
+      "currency": "USD",
+      "category": "hardware",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-01T14:00:00.000Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Analyze Transactional Discrepancies",
+      "status": "in-progress",
+      "priority": "high",
+      "due_date": "2026-05-05",
+      "source_type": "email"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Present Updated Operational Insights to Board",
+      "due_date": "2026-05-06",
+      "status": "pending",
+      "ai_confidence": 0.85
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "insight_4827",
+      "category": "transaction changes",
+      "insight_type": "spending",
+      "title": "Q1 Spending Overrun in Hardware",
+      "summary": "Noted increase in hardware expenses, primarily from FastTech Supplies, contradicting the April forecast.",
+      "urgency": "high",
+      "priority_score": 75,
+      "recommended_action": "Investigate supplier contract terms.",
+      "explanation": "Unexpected spending necessitates budget revision discussions.",
+      "status": "open"
+    },
+    {
+      "state_key": "insight_4828",
+      "category": "operations",
+      "insight_type": "budget",
+      "title": "Projected 10% Reduction in Operational Costs",
+      "summary": "Original insight predicted significant savings this quarter, but contradicted by current transactional activity.",
+      "urgency": "medium",
+      "priority_score": 60,
+      "recommended_action": "Review cost-saving measures.",
+      "explanation": "Stale insight, likely outdated by recent purchase patterns.",
+      "status": "stale"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": [
+      "Jane and John manage financial communications at TechStartup"
+    ],
+    "actual_intent": [
+      "operational_summary",
+      "spending_analysis"
+    ],
+    "expected_answer_facts": [
+      "A spending increase was noted this week, particularly from FastTech Supplies.",
+      "This contradicts previous operational insights suggesting reduced hardware expenses."
+    ]
+  }
+}

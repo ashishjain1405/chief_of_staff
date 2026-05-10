@@ -1,0 +1,166 @@
+{
+  "scenario_id": "SCENARIO_001",
+  "eval_id": "EVAL_020",
+  "theme": "Operational integration with stakeholder communications",
+  "entities": {
+    "people": [
+      {
+        "name": "Jamie Allen",
+        "email": "jamie.allen@newwave.io",
+        "relationship_type": "team_member"
+      },
+      {
+        "name": "Sam Driscoll",
+        "email": "sam.driscoll@venturesky.com",
+        "relationship_type": "investor"
+      },
+      {
+        "name": "Jamie Chen",
+        "email": "j.chen@alternativevisions.com",
+        "relationship_type": "partner"
+      }
+    ],
+    "companies": [
+      "New Wave Technologies",
+      "Venture Sky Capital",
+      "Alternative Visions Ltd."
+    ],
+    "projects": [
+      "Project Phoenix",
+      "Venture Expansion",
+      "NextGen AI"
+    ],
+    "merchants": [
+      "Office Supplies Co.",
+      "Global Transport Ltd.",
+      "World Travel Service"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_001",
+      "subject": "Q1 Performance and Strategy for Next Quarter",
+      "body_summary": "Discussed Q1 results and strategic shifts for Q2. Emphasis on operational efficiency and stakeholder alignment.",
+      "occurred_at": "2026-05-07T13:20:30.888Z",
+      "email_category": "strategy_update",
+      "requires_action": true,
+      "sentiment": "positive",
+      "channel_metadata": {
+        "sender": "jamie.allen@newwave.io",
+        "sender_name": "Jamie Allen"
+      },
+      "embedding_null": false
+    },
+    {
+      "external_id": "email_002",
+      "subject": "Follow-up on Operational Plan Adjustments",
+      "body_summary": "Pending alignments with stakeholders on updated operational plans. Need confirmation from Sam Driscoll.",
+      "occurred_at": "2026-05-08T10:45:12.888Z",
+      "email_category": "operational_alignment",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "j.chen@alternativevisions.com",
+        "sender_name": "Jamie Chen"
+      },
+      "embedding_null": true
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_001",
+      "title": "Operational Goals Review",
+      "start_time": "2026-05-08T15:00:00.000Z",
+      "end_time": "2026-05-08T16:00:00.000Z",
+      "transcript_summary": "Reviewed current goals. Discussion on discrepancies in operational insights versus actual performance.",
+      "attendees": [
+        {
+          "email": "jamie.allen@newwave.io",
+          "name": "Jamie Allen"
+        },
+        {
+          "email": "sam.driscoll@venturesky.com",
+          "name": "Sam Driscoll"
+        }
+      ],
+      "description": "A critical review of the operational objectives and how they align with strategic stakeholder communications."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "Office Supplies Co.",
+      "amount": 450,
+      "currency": "USD",
+      "category": "office_supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-06T09:15:45.000Z"
+    },
+    {
+      "merchant_normalized": "World Travel Service",
+      "amount": 1200,
+      "currency": "USD",
+      "category": "travel",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-08T14:30:00.000Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Confirm Stakeholder Alignment on Operational Plans",
+      "status": "open",
+      "priority": "high",
+      "due_date": "2026-05-11T23:59:59.000Z",
+      "source_type": "email"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Implement strategic plan adjustments with confirmed stakeholder agreement.",
+      "due_date": "2026-05-12T23:59:59.000Z",
+      "status": "in_progress",
+      "ai_confidence": 0.85
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "op_insight_001",
+      "category": "performance_review",
+      "insight_type": "discrepancy_analysis",
+      "title": "Operational vs. Strategic Alignment Discrepancies",
+      "summary": "Detected potential discrepancies between operational reports and stakeholder expectations post-meeting.",
+      "urgency": "medium",
+      "priority_score": 0.7,
+      "recommended_action": "Re-evaluate operational metrics in light of new strategic goals.",
+      "explanation": "Recent transactions may indicate priority misalignment.",
+      "status": "review_pending"
+    },
+    {
+      "state_key": "op_insight_002",
+      "category": "strategy_update",
+      "insight_type": "trend_analysis",
+      "title": "Stale Data: Initial Strategy Report",
+      "summary": "The initial strategy report titled 'Initial Strategy Report for Q2' compiled five days ago may not reflect recent stakeholder feedback and adjustments.",
+      "urgency": "low",
+      "priority_score": 0.3,
+      "recommended_action": "Update report with latest insights.",
+      "explanation": "Old data signaling outdated strategy alignment.",
+      "status": "outdated"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": [
+      "team_member",
+      "investor",
+      "partner"
+    ],
+    "actual_intent": [
+      "relationship",
+      "operational_summary"
+    ],
+    "expected_answer_facts": [
+      "Stakeholder alignment required.",
+      "Operational discrepancies noted in meeting.",
+      "Pending confirmation from investor Sam Driscoll."
+    ]
+  }
+}

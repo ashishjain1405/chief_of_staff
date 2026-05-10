@@ -1,0 +1,142 @@
+{
+  "scenario_id": "SCENARIO_089",
+  "eval_id": "EVAL_067",
+  "theme": "Operational vs Transactional Divergence",
+  "entities": {
+    "people": [
+      {
+        "name": "Alex Johnson",
+        "email": "alex.j@venturecorp.com",
+        "relationship_type": "colleague"
+      },
+      {
+        "name": "Jordan Liu",
+        "email": "jordan.l@financegroup.com",
+        "relationship_type": "vendor"
+      }
+    ],
+    "companies": [
+      "VentureCorp",
+      "FinanceGroup"
+    ],
+    "projects": [
+      "Alpha Expansion",
+      "Delta Optimization"
+    ],
+    "merchants": [
+      "Tech Solutions Inc",
+      "Tech Sols Inc",
+      "Market Supplies LLC"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_124",
+      "subject": "Re: Budget discrepancies in latest operational report",
+      "body_summary": "We need to align reported expenses with live data. Distinctive variances noted in tech services...",
+      "occurred_at": "2026-05-03T16:00:00.000Z",
+      "email_category": "finance",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "alex.j@venturecorp.com",
+        "sender_name": "Alex Johnson"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_007",
+      "title": "Operational Financial Review",
+      "start_time": "2026-05-04T09:00:00.000Z",
+      "end_time": "2026-05-04T09:30:00.000Z",
+      "transcript_summary": "Review of expense alignments between operational reports and live transaction logs.",
+      "attendees": [
+        {
+          "email": "alex.j@venturecorp.com",
+          "name": "Alex Johnson"
+        },
+        {
+          "email": "jordan.l@financegroup.com",
+          "name": "Jordan Liu"
+        }
+      ],
+      "description": "Assess discrepancies in reported operation costs against recorded transactions."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "Tech Solutions Inc",
+      "amount": 1200,
+      "currency": "USD",
+      "category": "tech services",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-03T12:00:00.000Z"
+    },
+    {
+      "merchant_normalized": "Tech Sols Inc",
+      "amount": 300,
+      "currency": "USD",
+      "category": "office supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-03T15:30:00.000Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Verify operational report accuracy",
+      "status": "incomplete",
+      "priority": "high",
+      "due_date": "2026-05-05T17:00:00.000Z",
+      "source_type": "email"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Resolve financial discrepancies by end of week",
+      "due_date": "2026-05-06T23:59:59.000Z",
+      "status": "pending",
+      "ai_confidence": 0.8
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "insight_059",
+      "category": "finance",
+      "insight_type": "alert",
+      "title": "Potential Inconsistency in Financial Reporting",
+      "summary": "Detected discrepancies between reported transactions for 'Tech Solutions Inc' and live records.",
+      "urgency": "critical",
+      "priority_score": 9.8,
+      "recommended_action": "Conduct a detailed audit of the transaction records vs reports.",
+      "explanation": "Reported expenses: $1400; Actual recorded transactions: $1200.",
+      "status": "active"
+    },
+    {
+      "state_key": "insight_042",
+      "category": "finance",
+      "insight_type": "summary",
+      "title": "Weekly Spending Overview",
+      "summary": "Over budget on tech services; review required.",
+      "urgency": "high",
+      "priority_score": 7,
+      "recommended_action": "Adjust future budget allocations.",
+      "explanation": "Previously noted discrepancy in old insight, align recent reports.",
+      "status": "stale"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": [
+      "Jordan Liu acts as a financial vendor for VentureCorp's operations."
+    ],
+    "actual_intent": [
+      "spending_analysis",
+      "operational_summary"
+    ],
+    "expected_answer_facts": [
+      "The operational report overestimated expenses by $200 compared to live transactions for 'Tech Solutions Inc'.",
+      "There is a mismatch in expense reporting in the tech services category."
+    ]
+  }
+}

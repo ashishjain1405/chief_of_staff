@@ -1,0 +1,158 @@
+{
+  "scenario_id": "SCENARIO_060",
+  "eval_id": "EVAL_060",
+  "theme": "Financial and Operational Validation",
+  "entities": {
+    "people": [
+      {
+        "name": "Alex Jordan",
+        "email": "alex.j@exemplarcorp.com",
+        "relationship_type": "CEO"
+      },
+      {
+        "name": "Jamie Smith",
+        "email": "jamie.s@exemplarcorp.com",
+        "relationship_type": "CFO"
+      }
+    ],
+    "companies": [
+      "Exemplar Corp"
+    ],
+    "projects": [
+      "Project Orion",
+      "Project Nebula"
+    ],
+    "merchants": [
+      "Tech Supplies Inc.",
+      "Advanced Analytics Co."
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_2026_001",
+      "subject": "Q1 Financial Summary Insights",
+      "body_summary": "Attached is the Q1 financial summary. It seems operational predictions for Project Nebula were optimistic.",
+      "occurred_at": "2026-04-15T09:21:37.049Z",
+      "email_category": "finance",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "jamie.s@exemplarcorp.com",
+        "sender_name": "Jamie Smith"
+      },
+      "embedding_null": false
+    },
+    {
+      "external_id": "email_2026_002",
+      "subject": "Update Meeting on Predictions",
+      "body_summary": "Upcoming meeting to discuss the validation of operational assumptions made last quarter.",
+      "occurred_at": "2026-04-28T14:00:00.000Z",
+      "email_category": "operations",
+      "requires_action": false,
+      "sentiment": "positive",
+      "channel_metadata": {
+        "sender": "alex.j@exemplarcorp.com",
+        "sender_name": "Alex Jordan"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_2026_001",
+      "title": "Operational Prediction Review",
+      "start_time": "2026-05-02T15:00:00.000Z",
+      "end_time": "2026-05-02T16:00:00.000Z",
+      "transcript_summary": "Discussion about the misalignment between recent operational outcomes and forecasts. Suggestions included refining prediction models.",
+      "attendees": [
+        {
+          "email": "alex.j@exemplarcorp.com",
+          "name": "Alex Jordan"
+        },
+        {
+          "email": "jamie.s@exemplarcorp.com",
+          "name": "Jamie Smith"
+        }
+      ],
+      "description": "Review of past operational predictions versus actual performance."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "Tech Supplies Inc.",
+      "amount": 5000,
+      "currency": "USD",
+      "category": "supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-04-25T10:15:00.000Z"
+    },
+    {
+      "merchant_normalized": "Advanced Analytics Co.",
+      "amount": 15000,
+      "currency": "USD",
+      "category": "consulting",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-04-22T15:45:00.000Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Review Financial Metrics",
+      "status": "in_progress",
+      "priority": "high",
+      "due_date": "2026-05-05T17:00:00.000Z",
+      "source_type": "email"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Ensure financial metrics are aligned with operational predictions.",
+      "due_date": "2026-05-06T23:59:59.000Z",
+      "status": "pending",
+      "ai_confidence": 0.9
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "operation_pred_0426",
+      "category": "operations",
+      "insight_type": "predictive_analysis",
+      "title": "Project Nebula Forecast Review",
+      "summary": "Initial insights suggest operational costs are underpredicted by approximately 10%.",
+      "urgency": "critical",
+      "priority_score": 5,
+      "recommended_action": "Reevaluate cost forecasts and adjust project scope.",
+      "explanation": "Comparative analysis indicates variance in cost prediction due to outdated data inputs.",
+      "status": "open"
+    },
+    {
+      "state_key": "financial_metric_review_0425",
+      "category": "finance",
+      "insight_type": "metric_validation",
+      "title": "Quarterly Metric Assessment",
+      "summary": "Recent transaction data supports a 8% discrepancy between predicted and actual financials.",
+      "urgency": "high",
+      "priority_score": 4,
+      "recommended_action": "Conduct a detailed variance analysis to identify discrepancies.",
+      "explanation": "Discrepancies are reflected in consulting costs exceeding forecasts.",
+      "status": "open"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": [],
+    "actual_intent": {
+      "required": [
+        "finance",
+        "operational_summary"
+      ],
+      "forbidden": [
+        "commitments"
+      ],
+      "matchMode": "all"
+    },
+    "expected_answer_facts": [
+      "Operational prediction records indicate underestimation of project costs.",
+      "Financial substantiation shows higher incurred consulting costs."
+    ]
+  }
+}

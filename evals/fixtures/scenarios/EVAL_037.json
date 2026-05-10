@@ -1,0 +1,162 @@
+{
+  "scenario_id": "SCENARIO_00237",
+  "eval_id": "EVAL_037",
+  "theme": "Financial Data Discrepancies",
+  "entities": {
+    "people": [
+      {
+        "name": "Alice Johnson",
+        "email": "alice.j@example.com",
+        "relationship_type": "colleague"
+      },
+      {
+        "name": "Michael Thompson",
+        "email": "michael.t@example.co",
+        "relationship_type": "financial advisor"
+      }
+    ],
+    "companies": [
+      "Tech Innovations Inc."
+    ],
+    "projects": [
+      "NextGen AI",
+      "Financial Overhaul"
+    ],
+    "merchants": [
+      "QuickBooks",
+      "Quick Box Supplies",
+      "QuickBooks Payments"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_293",
+      "subject": "Final Edits on Financial Report",
+      "body_summary": "Please review the attached financial summary. There are some updates from the last version.",
+      "occurred_at": "2026-05-09T14:12:00.000Z",
+      "email_category": "work",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "michael.t@example.co",
+        "sender_name": "Michael Thompson"
+      },
+      "embedding_null": false
+    },
+    {
+      "external_id": "email_294",
+      "subject": "Re: Financial Summary Concerns",
+      "body_summary": "Noticed discrepancies in March and April expenses. Might need to revisit raw data.",
+      "occurred_at": "2026-05-08T09:30:00.000Z",
+      "email_category": "work",
+      "requires_action": true,
+      "sentiment": "concerned",
+      "channel_metadata": {
+        "sender": "alice.j@example.com",
+        "sender_name": "Alice Johnson"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "mtg_031",
+      "title": "Monthly Financial Review",
+      "start_time": "2026-05-08T15:00:00.000Z",
+      "end_time": "2026-05-08T16:00:00.000Z",
+      "transcript_summary": "Discussed insights from latest financial reports. Identified possible errors in expense entries.",
+      "attendees": [
+        {
+          "email": "alice.j@example.com",
+          "name": "Alice Johnson"
+        },
+        {
+          "email": "michael.t@example.co",
+          "name": "Michael Thompson"
+        }
+      ],
+      "description": "Critical meeting to go over discrepancies in financial data."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "QuickBooks Payments",
+      "amount": 1200,
+      "currency": "USD",
+      "category": "software",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-04-05T13:45:00.000Z"
+    },
+    {
+      "merchant_normalized": "Quick Box Supplies",
+      "amount": 250,
+      "currency": "USD",
+      "category": "office supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-04-08T21:00:00.000Z"
+    },
+    {
+      "merchant_normalized": "QuickBooks",
+      "amount": -50,
+      "currency": "USD",
+      "category": "refund",
+      "transaction_type": "refund",
+      "transaction_datetime": "2026-03-15T10:00:00.000Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Verify March expense entries",
+      "status": "open",
+      "priority": "high",
+      "due_date": "2026-05-12T23:59:00.000Z",
+      "source_type": "email_294"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Submit revised financial summary",
+      "due_date": "2026-05-11T23:59:00.000Z",
+      "status": "pending",
+      "ai_confidence": 0.9
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "stale_insight_revenue_drop_april",
+      "category": "finance",
+      "insight_type": "summary",
+      "title": "April Revenue Drop Detected",
+      "summary": "A 5% revenue drop was noticed in April.",
+      "urgency": "medium",
+      "priority_score": 5,
+      "recommended_action": "Investigate revenue sources for validation.",
+      "explanation": "Based on raw transaction data from sales.",
+      "status": "stale"
+    },
+    {
+      "state_key": "new_insight_on_expense_discrepancy",
+      "category": "finance",
+      "insight_type": "anomaly",
+      "title": "Identified Expense Discrepancy",
+      "summary": "Inconsistency found between raw transactions and reported expenses for April.",
+      "urgency": "critical",
+      "priority_score": 9,
+      "recommended_action": "Reconcile financial summary with raw data.",
+      "explanation": "Cross-checked summary figures against system logs.",
+      "status": "active"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": {
+      "alice.j@example.com": "colleague",
+      "michael.t@example.co": "financial advisor"
+    },
+    "actual_intent": "finance",
+    "expected_answer_facts": [
+      "Discrepancies noted in April expenses reported vs raw transactions",
+      "Summarized data reports a 5% revenue drop which contradicts latest transaction log",
+      "April reports do not align with debit transactions entries."
+    ]
+  }
+}

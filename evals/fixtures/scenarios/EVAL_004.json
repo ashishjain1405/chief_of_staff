@@ -1,0 +1,166 @@
+{
+  "scenario_id": "SCENARIO_004",
+  "eval_id": "EVAL_004",
+  "theme": "Financial Operations and Trend Analysis",
+  "entities": {
+    "people": [
+      {
+        "name": "Alice Johnson",
+        "email": "alice.j@example.com",
+        "relationship_type": "CEO"
+      },
+      {
+        "name": "Bob Smith",
+        "email": "bob.s@example.com",
+        "relationship_type": "CFO"
+      }
+    ],
+    "companies": [
+      "InnovateTech Inc."
+    ],
+    "projects": [
+      "Project Aurora",
+      "Project Zephyr"
+    ],
+    "merchants": [
+      "Office Supplies Co",
+      "Office Supplies Corp",
+      "Tech Market",
+      "Tech Mart"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_001",
+      "subject": "Q4 Financial Review Meeting",
+      "body_summary": "Discuss Q4 spending against budget projections...",
+      "occurred_at": "2026-01-10T10:15:30.000Z",
+      "email_category": "meeting",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "bob.s@example.com",
+        "sender_name": "Bob Smith"
+      },
+      "embedding_null": false
+    },
+    {
+      "external_id": "email_002",
+      "subject": "Re: Annual Operational Summary",
+      "body_summary": "Hey Alice, there are discrepancies in operational summary...",
+      "occurred_at": "2026-04-12T09:22:10.000Z",
+      "email_category": "review",
+      "requires_action": true,
+      "sentiment": "concerned",
+      "channel_metadata": {
+        "sender": "alice.j@example.com",
+        "sender_name": "Alice Johnson"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_001",
+      "title": "Annual Finance Strategy Session",
+      "start_time": "2026-02-15T13:00:00.000Z",
+      "end_time": "2026-02-15T15:00:00.000Z",
+      "transcript_summary": "Discussion on improving financial tracking and reducing discrepancies.",
+      "attendees": [
+        {
+          "email": "alice.j@example.com",
+          "name": "Alice Johnson"
+        },
+        {
+          "email": "bob.s@example.com",
+          "name": "Bob Smith"
+        }
+      ],
+      "description": "Strategize financial matters for the upcoming year."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "Office Supplies Co",
+      "amount": 500,
+      "currency": "USD",
+      "category": "office_supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2025-07-12T11:34:50.000Z"
+    },
+    {
+      "merchant_normalized": "Tech Market",
+      "amount": 1200,
+      "currency": "USD",
+      "category": "electronics",
+      "transaction_type": "debit",
+      "transaction_datetime": "2025-08-05T14:22:15.000Z"
+    },
+    {
+      "merchant_normalized": "Tech Mart",
+      "amount": 300,
+      "currency": "USD",
+      "category": "electronics",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-04-20T09:21:33.000Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Update Financial Dashboard",
+      "status": "in progress",
+      "priority": "high",
+      "due_date": "2026-05-15T00:00:00.000Z",
+      "source_type": "system"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Review and approve spending report",
+      "due_date": "2026-04-30T00:00:00.000Z",
+      "status": "unfulfilled",
+      "ai_confidence": 0.75
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "finance_trend_001",
+      "category": "finance",
+      "insight_type": "trend_analysis",
+      "title": "Q4 2025 Spending Trends",
+      "summary": "Unexpected spike in office supplies expenses in Q4 2025",
+      "urgency": "medium",
+      "priority_score": 80,
+      "recommended_action": "Investigate the cause of increased spending",
+      "explanation": "Office supplies expenses exceed the budget by 15% in Q4.",
+      "status": "active"
+    },
+    {
+      "state_key": "finance_conflict_001",
+      "category": "finance",
+      "insight_type": "conflicting_data",
+      "title": "Discrepancies in Office Supplies Accounting",
+      "summary": "Recent transactions show discrepancies with past insights",
+      "urgency": "high",
+      "priority_score": 90,
+      "recommended_action": "Cross-verify recent purchases with reported data",
+      "explanation": "Recent debit from Tech Mart contradicts previous data.",
+      "status": "stale"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": [],
+    "actual_intent": {
+      "required": [
+        "finance",
+        "spending_analysis"
+      ],
+      "forbidden": []
+    },
+    "expected_answer_facts": [
+      "Spending on office supplies spiked in Q4 2025",
+      "Operational summaries contain inconsistencies with transaction records",
+      "Recent transactions indicate unresolved discrepancies"
+    ]
+  }
+}

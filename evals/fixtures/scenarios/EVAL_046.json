@@ -1,0 +1,168 @@
+{
+  "scenario_id": "SCENARIO_046",
+  "eval_id": "EVAL_046",
+  "theme": "Operational Optimization",
+  "entities": {
+    "people": [
+      {
+        "name": "Alex Johnson",
+        "email": "alex.johnson@example.com",
+        "relationship_type": "CEO"
+      },
+      {
+        "name": "Jamie Lee",
+        "email": "jamie.lee@startupx.com",
+        "relationship_type": "COO"
+      },
+      {
+        "name": "Pat Morgan",
+        "email": "pat.morgan@consultant.com",
+        "relationship_type": "Consultant"
+      }
+    ],
+    "companies": [
+      "StartupX",
+      "Consultant LLP"
+    ],
+    "projects": [
+      "Project Phoenix",
+      "Efficiency 2026"
+    ],
+    "merchants": [
+      "Office Supply Co",
+      "Tech Hardware Inc",
+      "Software Solutions"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_001",
+      "subject": "Re: Operational Efficiency Audit",
+      "body_summary": "Discussed strategies for improving workflow efficiency. Awaiting feedback from the team.",
+      "occurred_at": "2026-04-30T14:12:00.000Z",
+      "email_category": "discussion",
+      "requires_action": false,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "jamie.lee@startupx.com",
+        "sender_name": "Jamie Lee"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_001",
+      "title": "Weekly Operations Review",
+      "start_time": "2026-04-29T09:00:00.000Z",
+      "end_time": "2026-04-29T10:30:00.000Z",
+      "transcript_summary": "Reviewed current operational status, identified bottlenecks in Project Phoenix.",
+      "attendees": [
+        {
+          "email": "alex.johnson@example.com",
+          "name": "Alex Johnson"
+        },
+        {
+          "email": "jamie.lee@startupx.com",
+          "name": "Jamie Lee"
+        }
+      ],
+      "description": "Discuss the current operational challenges and improvement plans."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "Office Supply Co",
+      "amount": 150,
+      "currency": "USD",
+      "category": "Office Supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-02T07:40:00.000Z"
+    },
+    {
+      "merchant_normalized": "Tech Hardware Inc",
+      "amount": 1200,
+      "currency": "USD",
+      "category": "Hardware Purchases",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-01T13:15:00.000Z"
+    },
+    {
+      "merchant_normalized": "Software Solutions",
+      "amount": 300,
+      "currency": "USD",
+      "category": "Software Licenses",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-04-28T11:00:00.000Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Update Operational Efficiency Reports",
+      "status": "in-progress",
+      "priority": "high",
+      "due_date": "2026-05-05T17:00:00.000Z",
+      "source_type": "manual_entry"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Complete Project Phoenix Phase 2",
+      "due_date": "2026-06-15T00:00:00.000Z",
+      "status": "on-track",
+      "ai_confidence": 0.85
+    },
+    {
+      "description": "Optimize resource allocation for Efficiency 2026",
+      "due_date": "2026-05-10T00:00:00.000Z",
+      "status": "pending",
+      "ai_confidence": 0.75
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "ops_insight_001",
+      "category": "operations",
+      "insight_type": "efficiency_review",
+      "title": "Bottleneck in Supply Chain",
+      "summary": "Periodical review of the supply chain indicates delays in hardware deliveries.",
+      "urgency": "high",
+      "priority_score": 8.5,
+      "recommended_action": "Explore alternate suppliers, potentially mitigate with a strategy session.",
+      "explanation": "Recurring delivery delays from Tech Hardware Inc impacting project timelines.",
+      "status": "active"
+    },
+    {
+      "state_key": "ops_insight_002",
+      "category": "resource_management",
+      "insight_type": "review",
+      "title": "Stale Resource Plan",
+      "summary": "The current resource allocation plan is outdated and inefficient.",
+      "urgency": "medium",
+      "priority_score": 7,
+      "recommended_action": "Re-evaluate allocation plans with recent project scopes.",
+      "explanation": "The plan was last updated prior to Project Phoenix changes.",
+      "status": "stale"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": [
+      {
+        "personA": "Alex Johnson",
+        "personB": "Jamie Lee",
+        "relationship": "professional"
+      },
+      {
+        "personA": "Alex Johnson",
+        "personB": "Pat Morgan",
+        "relationship": "consultant"
+      }
+    ],
+    "actual_intent": "operational_summary",
+    "expected_answer_facts": [
+      "Current bottleneck in supply chain with Tech Hardware Inc.",
+      "Outdated resource allocation for Efficiency 2026.",
+      "Action needed to explore new suppliers and update resource allocations."
+    ]
+  }
+}

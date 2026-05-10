@@ -1,0 +1,167 @@
+{
+  "scenario_id": "SCENARIO_456",
+  "eval_id": "EVAL_003",
+  "theme": "Weekly Financial Decisions and Actuals",
+  "entities": {
+    "people": [
+      {
+        "name": "Alex Johnson",
+        "email": "alex.j@finexec.com",
+        "relationship_type": "CFO"
+      },
+      {
+        "name": "Jamie Lee",
+        "email": "jamie.lee@startupco.com",
+        "relationship_type": "CEO"
+      },
+      {
+        "name": "Sam Brown",
+        "email": "sam.b@vendorcorp.com",
+        "relationship_type": "Vendor"
+      }
+    ],
+    "companies": [
+      "Finance Unlimited",
+      "Startup Co."
+    ],
+    "projects": [
+      "Q2 Financial Modelling",
+      "Product Launch Budget"
+    ],
+    "merchants": [
+      "Office Supplies Plus",
+      "Tech Equipment Co.",
+      "Utility Services"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_871",
+      "subject": "Budget Allocation for Q2 Projects",
+      "body_summary": "Discussed budget allocation for Q2 projects. Decided to increase allocation for tech resources.",
+      "occurred_at": "2026-05-05T10:15:32.958Z",
+      "email_category": "financial",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "Jamie Lee",
+        "sender_name": "Jamie Lee"
+      },
+      "embedding_null": false
+    },
+    {
+      "external_id": "email_872",
+      "subject": "April Financial Review",
+      "body_summary": "Review of April's financials. Noted discrepancies in vendor payments.",
+      "occurred_at": "2026-05-06T14:22:11.958Z",
+      "email_category": "financial",
+      "requires_action": false,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "Alex Johnson",
+        "sender_name": "Alex Johnson"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_515",
+      "title": "Weekly Financial Strategy Meeting",
+      "start_time": "2026-05-08T09:00:00.000Z",
+      "end_time": "2026-05-08T10:00:00.000Z",
+      "transcript_summary": "Decisions made on adjusting Q2 budgets and vendor contracts.",
+      "attendees": [
+        {
+          "email": "alex.j@finexec.com",
+          "name": "Alex Johnson"
+        },
+        {
+          "email": "jamie.lee@startupco.com",
+          "name": "Jamie Lee"
+        }
+      ],
+      "description": "Discussed financial strategy adjustments needed for Q2 operations."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "Office Supplies Plus",
+      "amount": 1500,
+      "currency": "USD",
+      "category": "office_supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-09T13:15:00.000Z"
+    },
+    {
+      "merchant_normalized": "Tech Equipment Co.",
+      "amount": 2500,
+      "currency": "USD",
+      "category": "hardware",
+      "transaction_type": "credit",
+      "transaction_datetime": "2026-05-09T13:30:00.000Z"
+    },
+    {
+      "merchant_normalized": "Utility Services",
+      "amount": 500,
+      "currency": "USD",
+      "category": "utilities",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-08T11:00:00.000Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Reconcile Vendor Payments",
+      "status": "in_progress",
+      "priority": "high",
+      "due_date": "2026-05-11",
+      "source_type": "email"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Approve additional budget for tech resources.",
+      "due_date": "2026-05-10",
+      "status": "pending",
+      "ai_confidence": 0.85
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "insight_328",
+      "category": "financial_decision",
+      "insight_type": "budget_analysis",
+      "title": "Q2 Budget Overrun Alert",
+      "summary": "Potential budget overrun detected in tech resources allocation.",
+      "urgency": "critical",
+      "priority_score": 95,
+      "recommended_action": "Schedule an immediate review of tech budgeting.",
+      "explanation": "Increase in tech resource allocation exceeds projected needs.",
+      "status": "active"
+    },
+    {
+      "state_key": "insight_329",
+      "category": "vendor_management",
+      "insight_type": "payment_anomaly",
+      "title": "Discrepancies in Vendor Payments",
+      "summary": "Detected discrepancies in recent payments to Office Supplies Plus.",
+      "urgency": "medium",
+      "priority_score": 65,
+      "recommended_action": "Conduct a payment audit.",
+      "explanation": "Recent debit entries appear inconsistent with agreed terms.",
+      "status": "stale"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": {
+      "finance_decision": "Budget adjustments for Q2 tech resources and vendor audit decisions."
+    },
+    "actual_intent": "cross_reference_financial_decisions_with_actual_transactions",
+    "expected_answer_facts": [
+      "Tech resource budget increased in financial decision was matched by recent spending.",
+      "Office Supplies Plus payments show discrepancies noted.",
+      "Operational insight on potential tech budget overrun aligned with increased spending."
+    ]
+  }
+}

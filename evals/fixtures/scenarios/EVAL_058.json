@@ -1,0 +1,147 @@
+{
+  "scenario_id": "SCENARIO_058",
+  "eval_id": "EVAL_058",
+  "theme": "Coherence in operational and financial tracking",
+  "entities": {
+    "people": [
+      {
+        "name": "Alex Johnson",
+        "email": "alex.j@company.com",
+        "relationship_type": "CFO"
+      }
+    ],
+    "companies": [
+      "TechSolutions Inc"
+    ],
+    "projects": [
+      "Project Omega"
+    ],
+    "merchants": [
+      "OfficeSupplyCo",
+      "SupplyStore",
+      "TechRental"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_101",
+      "subject": "Re: Q1 Financial Summary",
+      "body_summary": "Looking forward to your presentation on the Q1 summaries. Let's ensure alignment on operational expenses.",
+      "occurred_at": "2026-04-28T14:15:30.000Z",
+      "email_category": "finance",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "alex.j@company.com",
+        "sender_name": "Alex Johnson"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_204",
+      "title": "Operational Strategy Discussion",
+      "start_time": "2026-05-01T09:00:00.000Z",
+      "end_time": "2026-05-01T10:30:00.000Z",
+      "transcript_summary": "Discussion focused on aligning financial plans with operational execution for Project Omega.",
+      "attendees": [
+        {
+          "email": "alex.j@company.com",
+          "name": "Alex Johnson"
+        }
+      ],
+      "description": "Review of operational strategies and expense alignment."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "OfficeSupplyCo",
+      "amount": 1500,
+      "currency": "USD",
+      "category": "office supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-04-25T08:45:00.000Z"
+    },
+    {
+      "merchant_normalized": "SupplyStore",
+      "amount": 1500,
+      "currency": "USD",
+      "category": "office supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-04-26T08:45:00.000Z"
+    },
+    {
+      "merchant_normalized": "TechRental",
+      "amount": 5500,
+      "currency": "USD",
+      "category": "equipment",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-04-29T10:00:00.000Z"
+    },
+    {
+      "merchant_normalized": "TechRental",
+      "amount": -250,
+      "currency": "USD",
+      "category": "equipment refund",
+      "transaction_type": "refund",
+      "transaction_datetime": "2026-04-30T12:00:00.000Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Review Q1 Operational Summary",
+      "status": "complete",
+      "priority": "high",
+      "due_date": "2026-05-01",
+      "source_type": "internal_invitation"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Align operational expenses with Q1 finance report.",
+      "due_date": "2026-05-03",
+      "status": "pending",
+      "ai_confidence": 0.75
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "operation_omega_insight",
+      "category": "operations",
+      "insight_type": "expenditure",
+      "title": "Project Omega Expense Report",
+      "summary": "Expenditure on office supplies exceeded budget by $1,000.",
+      "urgency": "high",
+      "priority_score": 0.85,
+      "recommended_action": "Reallocate budget to balance over-expenditure.",
+      "explanation": "Higher office supplies purchase due to unexpected demand.",
+      "status": "active"
+    },
+    {
+      "state_key": "stale_expense_alert",
+      "category": "finance",
+      "insight_type": "anomaly",
+      "title": "Stale Equipment Rental Expense Warning",
+      "summary": "Noted an anomaly with TechRental repayment not reflected.",
+      "urgency": "medium",
+      "priority_score": 0.65,
+      "recommended_action": "Revisit and validate refund entries.",
+      "explanation": "Potential clerical oversight in refund records.",
+      "status": "under_review"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": [],
+    "actual_intent": {
+      "required": [
+        "operational_summary",
+        "spending_analysis"
+      ]
+    },
+    "expected_answer_facts": [
+      "Office supplies expenditure exceeded by $1,000",
+      "Equipment rental refund from TechRental might need review"
+    ]
+  }
+}

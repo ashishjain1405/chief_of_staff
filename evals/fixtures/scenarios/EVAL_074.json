@@ -1,0 +1,156 @@
+{
+  "scenario_id": "SCENARIO_074",
+  "eval_id": "EVAL_074",
+  "theme": "Operational and Historical Data Discrepancies",
+  "entities": {
+    "people": [
+      {
+        "name": "Alice Grant",
+        "email": "alice.grant@startupexample.com",
+        "relationship_type": "executive"
+      },
+      {
+        "name": "Bob Thornton",
+        "email": "bob@startupexample.com",
+        "relationship_type": "finance_manager"
+      }
+    ],
+    "companies": [
+      "StartupExample Inc."
+    ],
+    "projects": [
+      "Q2 Performance Analysis",
+      "Cost Minimization Initiative"
+    ],
+    "merchants": [
+      "DataCorp Subscriptions",
+      "Datasync Services"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_001",
+      "subject": "Quarterly performance insights",
+      "body_summary": "Discussing initial figures and discrepancies with Bob",
+      "occurred_at": "2026-04-28T14:27:06.056Z",
+      "email_category": "finance",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "alice.grant@startupexample.com",
+        "sender_name": "Alice Grant"
+      },
+      "embedding_null": false
+    },
+    {
+      "external_id": "email_002",
+      "subject": "Reconciled Transaction List",
+      "body_summary": "Updated transaction report has been attached for review.",
+      "occurred_at": "2026-05-02T11:15:00.123Z",
+      "email_category": "operations",
+      "requires_action": false,
+      "sentiment": "positive",
+      "channel_metadata": {
+        "sender": "bob@startupexample.com",
+        "sender_name": "Bob Thornton"
+      },
+      "embedding_null": true
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_001",
+      "title": "Weekly Operations Sync",
+      "start_time": "2026-05-01T09:00:00.000Z",
+      "end_time": "2026-05-01T10:00:00.000Z",
+      "transcript_summary": "Reviewed operational performance and historical report discrepancies.",
+      "attendees": [
+        {
+          "email": "alice.grant@startupexample.com",
+          "name": "Alice Grant"
+        },
+        {
+          "email": "bob@startupexample.com",
+          "name": "Bob Thornton"
+        }
+      ],
+      "description": "Discussion on aligning recent operational data with historical metrics."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "DataCorp Subscriptions",
+      "amount": 300,
+      "currency": "USD",
+      "category": "subscription",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-04-29T14:45:12.000Z"
+    },
+    {
+      "merchant_normalized": "Datasync Services",
+      "amount": 150,
+      "currency": "USD",
+      "category": "subscription",
+      "transaction_type": "credit",
+      "transaction_datetime": "2026-04-30T10:20:14.000Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Analyze Q2 Financial Forecast",
+      "status": "pending",
+      "priority": "high",
+      "due_date": "2026-05-15",
+      "source_type": "calendar"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Prepare report on cost discrepancies for board",
+      "due_date": "2026-05-07",
+      "status": "in_progress",
+      "ai_confidence": 0.85
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "monthly_perf_snapshot",
+      "category": "operational_data",
+      "insight_type": "summary",
+      "title": "April Operational Summary",
+      "summary": "April showed decreased operational efficiency by 5% compared to March.",
+      "urgency": "high",
+      "priority_score": 0.82,
+      "recommended_action": "Review department expenditures",
+      "explanation": "Based on latest department reports.",
+      "status": "unresolved"
+    },
+    {
+      "state_key": "historic_discrepancy_warning",
+      "category": "operational_data",
+      "insight_type": "alert",
+      "title": "Historic Report Discrepancy Alert",
+      "summary": "Current operational data conflicts with February historical reports.",
+      "urgency": "critical",
+      "priority_score": 0.9,
+      "recommended_action": "Re-evaluate February's transaction logs.",
+      "explanation": "Multiple entries showing inconsistencies.",
+      "status": "unresolved"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": {
+      "Alice Grant": "executive",
+      "Bob Thornton": "finance_manager"
+    },
+    "actual_intent": [
+      "operational_summary",
+      "search_lookup"
+    ],
+    "expected_answer_facts": [
+      "April operational efficiency decreased by 5%",
+      "Discrepancy with February's historical reports",
+      "Reconciliation required for updated transaction logs"
+    ]
+  }
+}

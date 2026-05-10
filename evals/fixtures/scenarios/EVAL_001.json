@@ -1,0 +1,137 @@
+{
+  "scenario_id": "SCENARIO_001",
+  "eval_id": "EVAL_001",
+  "theme": "Operational Spending Verification",
+  "entities": {
+    "people": [
+      {
+        "name": "Alex Johnson",
+        "email": "alex.j@startupinc.com",
+        "relationship_type": "CFO"
+      },
+      {
+        "name": "Jamie Lee",
+        "email": "jamie.l@startupinc.com",
+        "relationship_type": "CEO"
+      }
+    ],
+    "companies": [
+      "Startup Inc."
+    ],
+    "projects": [
+      "International Expansion",
+      "Product Revamp"
+    ],
+    "merchants": [
+      "TechSupplies Co.",
+      "OfficeMax Corp."
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_001",
+      "subject": "Q1 Spending Review",
+      "body_summary": "Discussed discrepancies noticed in TechSupplies Co. statements.",
+      "occurred_at": "2026-03-15T10:40:00.000Z",
+      "email_category": "financial",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "alex.j@startupinc.com",
+        "sender_name": "Alex Johnson"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_001",
+      "title": "Quarterly Spending Alignment",
+      "start_time": "2026-04-01T14:00:00.000Z",
+      "end_time": "2026-04-01T15:00:00.000Z",
+      "transcript_summary": "Reviewed Q1 expenditure and compared to operational insights.",
+      "attendees": [
+        {
+          "email": "alex.j@startupinc.com",
+          "name": "Alex Johnson"
+        },
+        {
+          "email": "jamie.l@startupinc.com",
+          "name": "Jamie Lee"
+        }
+      ],
+      "description": "Align finance records with strategic goals."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "TechSupplies Co.",
+      "amount": 3500,
+      "currency": "USD",
+      "category": "supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-03-10T13:45:00.000Z"
+    },
+    {
+      "merchant_normalized": "OfficeMax Corp.",
+      "amount": 1200,
+      "currency": "USD",
+      "category": "office supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-02-25T09:30:00.000Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Review Q1 Finance Reports",
+      "status": "completed",
+      "priority": "high",
+      "due_date": "2026-04-05",
+      "source_type": "email"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Ensure accurate quarterly reporting.",
+      "due_date": "2026-04-15",
+      "status": "pending",
+      "ai_confidence": 0.9
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "spending_review_q1",
+      "category": "financial",
+      "insight_type": "analysis",
+      "title": "Q1 Operational Spending",
+      "summary": "Detected inconsistency in TechSupplies Co. billing.",
+      "urgency": "high",
+      "priority_score": 0.85,
+      "recommended_action": "Verify all TechSupplies transactions.",
+      "explanation": "Inconsistencies found due to potential duplicate entries.",
+      "status": "active"
+    },
+    {
+      "state_key": "techsupplies_stale",
+      "category": "financial",
+      "insight_type": "summary",
+      "title": "Outdated TechSupplies Data",
+      "summary": "Previous records indicate higher expenses than current transactions.",
+      "urgency": "low",
+      "priority_score": 0.3,
+      "recommended_action": "Reconcile records.",
+      "explanation": "Stale insight not reflecting recent data.",
+      "status": "archived"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": [
+      "CFO to CEO"
+    ],
+    "actual_intent": "Verify financial accuracy",
+    "expected_answer_facts": [
+      "TechSupplies Co. transactions show inconsistencies.",
+      "Operational insights suggest data mismatch to be reviewed."
+    ]
+  }
+}

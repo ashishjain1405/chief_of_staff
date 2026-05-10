@@ -1,0 +1,167 @@
+{
+  "scenario_id": "SCN_045",
+  "eval_id": "EVAL_031",
+  "theme": "Financial Anomalies Detection",
+  "entities": {
+    "people": [
+      {
+        "name": "Alex Johnson",
+        "email": "alex.johnson@example.com",
+        "relationship_type": "colleague"
+      },
+      {
+        "name": "Jesse Lee",
+        "email": "jesse.lee@example.com",
+        "relationship_type": "finance_partner"
+      }
+    ],
+    "companies": [
+      "Tech Innovations LLC",
+      "Future Vision Corp"
+    ],
+    "projects": [
+      "Q1 Cost Optimization",
+      "Revenue Expansion Initiative"
+    ],
+    "merchants": [
+      "OfficeSupplies Inc",
+      "OffSupply",
+      "TechGadgets Inc"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "e001",
+      "subject": "Re: Office Supplies budget overage",
+      "body_summary": "Concern raised over recent spike in office supply expenses. Possible duplication of orders.",
+      "occurred_at": "2026-04-15T14:23:51Z",
+      "email_category": "financial",
+      "requires_action": true,
+      "sentiment": "concerned",
+      "channel_metadata": {
+        "sender": "finance@techinnovations.com",
+        "sender_name": "Finance Team"
+      },
+      "embedding_null": false
+    },
+    {
+      "external_id": "e002",
+      "subject": "Travel expenses update - Q1",
+      "body_summary": "Summary of travel expenses, note discrepancies in vendor data.",
+      "occurred_at": "2026-05-01T10:12:35Z",
+      "email_category": "financial",
+      "requires_action": false,
+      "sentiment": "informative",
+      "channel_metadata": {
+        "sender": "admin@techinnovations.com",
+        "sender_name": "Admin Dept"
+      },
+      "embedding_null": true
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "m001",
+      "title": "Quarterly Financial Review",
+      "start_time": "2026-04-05T09:00:00Z",
+      "end_time": "2026-04-05T11:00:00Z",
+      "transcript_summary": "Discussed cost overages in supplies. Action to verify duplicate entries.",
+      "attendees": [
+        {
+          "email": "alex.johnson@example.com",
+          "name": "Alex Johnson"
+        },
+        {
+          "email": "jesse.lee@example.com",
+          "name": "Jesse Lee"
+        }
+      ],
+      "description": "Quarterly review of finances, main focus on cost-cutting measures."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "OfficeSupplies Inc",
+      "amount": 1200,
+      "currency": "USD",
+      "category": "Office Supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-03-20T12:00:00Z"
+    },
+    {
+      "merchant_normalized": "OffSupply",
+      "amount": 1200,
+      "currency": "USD",
+      "category": "Office Supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-03-20T12:05:00Z"
+    },
+    {
+      "merchant_normalized": "TechGadgets Inc",
+      "amount": 3000,
+      "currency": "USD",
+      "category": "Hardware",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-03-18T15:30:00Z"
+    },
+    {
+      "merchant_normalized": "TechGadgets Inc",
+      "amount": 3000,
+      "currency": "USD",
+      "category": "Hardware",
+      "transaction_type": "refund",
+      "transaction_datetime": "2026-04-10T11:00:00Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Verify Office Supplies Transactions",
+      "status": "pending",
+      "priority": "high",
+      "due_date": "2026-05-15T00:00:00Z",
+      "source_type": "email"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Submit report on Q1 financial discrepancies",
+      "due_date": "2026-05-20T00:00:00Z",
+      "status": "open",
+      "ai_confidence": 0.8
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "office_supplies_anomaly_q1",
+      "category": "financial",
+      "insight_type": "anomaly_detection",
+      "title": "Office Supplies Spending Spike",
+      "summary": "Detected unusual increase in office supply spending. Suggest checking for duplicate orders.",
+      "urgency": "high",
+      "priority_score": 85,
+      "recommended_action": "Investigate potential duplicate transactions.",
+      "explanation": "Two identical transactions were recorded within minutes on March 20, 2026.",
+      "status": "open"
+    },
+    {
+      "state_key": "refund_contradiction_techgadgets",
+      "category": "financial",
+      "insight_type": "refund_review",
+      "title": "TechGadgets Refund Discrepancy",
+      "summary": "Refund processed, but no matching reversal on account.",
+      "urgency": "medium",
+      "priority_score": 70,
+      "recommended_action": "Verify refund legitimacy and its accounting.",
+      "explanation": "A refund was processed but doesn’t reflect in the latest account statement.",
+      "status": "open"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": [],
+    "actual_intent": "spending_analysis",
+    "expected_answer_facts": [
+      "Duplicate entries from OfficeSupplies Inc and OffSupply on March 20.",
+      "TechGadgets refund processed on April 10 doesn't match latest account data."
+    ]
+  }
+}

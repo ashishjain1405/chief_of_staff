@@ -1,0 +1,170 @@
+{
+  "scenario_id": "SCENARIO_042",
+  "eval_id": "EVAL_023",
+  "theme": "Finance Reconciliation",
+  "entities": {
+    "people": [
+      {
+        "name": "Sam Thompson",
+        "email": "sam.thompson@financialconsulting.com",
+        "relationship_type": "advisor"
+      },
+      {
+        "name": "Avery Liu",
+        "email": "avery@startupxyz.com",
+        "relationship_type": "colleague"
+      }
+    ],
+    "companies": [
+      "Startup XYZ"
+    ],
+    "projects": [
+      "Q3 Expansion Plan"
+    ],
+    "merchants": [
+      "Global Supplies",
+      "Global-Supply Co",
+      "G.S Enterprises"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "EMAIL_001",
+      "subject": "Re: Budget Overviews and Required Adjustments",
+      "body_summary": "Discussed discrepancies in the Q3 budget. Coordination needed between finance and ops for closure.",
+      "occurred_at": "2026-05-08T15:32:20.000Z",
+      "email_category": "coordination",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "avery@startupxyz.com",
+        "sender_name": "Avery Liu"
+      },
+      "embedding_null": false
+    },
+    {
+      "external_id": "EMAIL_002",
+      "subject": "Fwd: Supplier Discrepancies Report",
+      "body_summary": "Forwarding a report indicating variances between supplier charges and our records.",
+      "occurred_at": "2026-05-09T11:45:10.000Z",
+      "email_category": "information",
+      "requires_action": false,
+      "sentiment": "alert",
+      "channel_metadata": {
+        "sender": "sam.thompson@financialconsulting.com",
+        "sender_name": "Sam Thompson"
+      },
+      "embedding_null": true
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "MEET_001",
+      "title": "Weekly Finance Reconciliation Planning",
+      "start_time": "2026-05-10T09:00:00.000Z",
+      "end_time": "2026-05-10T10:00:00.000Z",
+      "transcript_summary": "Analyzed recent operational budget against finance summary reports. Identified muddled expense records for March.",
+      "attendees": [
+        {
+          "email": "sam.thompson@financialconsulting.com",
+          "name": "Sam Thompson"
+        },
+        {
+          "email": "avery@startupxyz.com",
+          "name": "Avery Liu"
+        }
+      ],
+      "description": "Discussion on financial summary and budget alignment."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "Global Supplies",
+      "amount": 3200,
+      "currency": "USD",
+      "category": "office supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-03-15T16:22:45.000Z"
+    },
+    {
+      "merchant_normalized": "Global Supplies",
+      "amount": 1500,
+      "currency": "USD",
+      "category": "refund",
+      "transaction_type": "refund",
+      "transaction_datetime": "2026-04-05T10:45:30.000Z"
+    },
+    {
+      "merchant_normalized": "Global-Supply Co",
+      "amount": 2000,
+      "currency": "USD",
+      "category": "office supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-04-01T11:00:00.000Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Verify supplier charge variances",
+      "status": "in-progress",
+      "priority": "high",
+      "due_date": "2026-05-15T00:00:00.000Z",
+      "source_type": "email"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Ensure department budget adherence for Q2",
+      "due_date": "2026-05-30T00:00:00.000Z",
+      "status": "planned",
+      "ai_confidence": 0.85
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "budget_balance_2026_q3",
+      "category": "finance",
+      "insight_type": "summary",
+      "title": "Q3 Operational Budget Status",
+      "summary": "The budget review for Q3 shows misaligned expenditure recording.",
+      "urgency": "high",
+      "priority_score": 4.5,
+      "recommended_action": "Initiate a cross-verification audit between operational entries and finance summaries.",
+      "explanation": "Operational budgets are not matching with finance due to reporting delays and system misuploads.",
+      "status": "active"
+    },
+    {
+      "state_key": "supplier_payment_discrepancy",
+      "category": "finance",
+      "insight_type": "alert",
+      "title": "Invoices vs. Payment Issues",
+      "summary": "Payment records from 'Global Supplies' appear inconsistent with invoice totals.",
+      "urgency": "critical",
+      "priority_score": 4.9,
+      "recommended_action": "Finance team should engage with 'Global Supplies' for a reconciliation meeting.",
+      "explanation": "Recent transactions indicate refunds and additional charges not properly logged.",
+      "status": "pending"
+    },
+    {
+      "state_key": "stale_report_022",
+      "category": "finance",
+      "insight_type": "historical",
+      "title": "March Expense Reconciliation",
+      "summary": "Older records from March suggest full payment received from all suppliers without discrepancies.",
+      "urgency": "low",
+      "priority_score": 2,
+      "recommended_action": "Review older transactions for historical analysis only.",
+      "explanation": "This report does not account for subsequent refund actions noted in April.",
+      "status": "stale"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": [],
+    "actual_intent": "reconcile discrepancies between operational and financial reports",
+    "expected_answer_facts": [
+      "Global Supplies has two aliases: Global Supplies and Global-Supply Co.",
+      "Discrepancy exists in payment logging for transactions in March.",
+      "Recent refunds need to be factored into March financial summaries."
+    ]
+  }
+}

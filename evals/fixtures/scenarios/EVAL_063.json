@@ -1,0 +1,141 @@
+{
+  "scenario_id": "SCENARIO_001",
+  "eval_id": "EVAL_063",
+  "theme": "Operational Data Discrepancy Analysis",
+  "entities": {
+    "people": [
+      {
+        "name": "Alice Johnson",
+        "email": "alice.j@example.com",
+        "relationship_type": "colleague"
+      },
+      {
+        "name": "Bob Smith",
+        "email": "bsmith@startupplace.com",
+        "relationship_type": "executive"
+      }
+    ],
+    "companies": [
+      "StartupPlace Inc."
+    ],
+    "projects": [
+      "Project Orion"
+    ],
+    "merchants": [
+      "Office Supplies Co.",
+      "Tech Gadgets World",
+      "Gourmet Coffee Shop"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_001",
+      "subject": "Re: Updated Financial Figures for April",
+      "body_summary": "Summary of updated figures shows a mismatch with projected expenses—requires urgent review.",
+      "occurred_at": "2026-05-01T09:21:00.000Z",
+      "email_category": "Finance",
+      "requires_action": true,
+      "sentiment": "cautious",
+      "channel_metadata": {
+        "sender": "finance@startupplace.com",
+        "sender_name": "Finance Team"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_001",
+      "title": "Monthly Financial Review",
+      "start_time": "2026-05-02T14:00:00.000Z",
+      "end_time": "2026-05-02T15:00:00.000Z",
+      "transcript_summary": "Discussion on operational spending and variances between accounting records and bank transactions.",
+      "attendees": [
+        {
+          "email": "alice.j@example.com",
+          "name": "Alice Johnson"
+        },
+        {
+          "email": "bsmith@startupplace.com",
+          "name": "Bob Smith"
+        }
+      ],
+      "description": "Analyzing the causes of discrepancies in financial records."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "office_supplies_co",
+      "amount": 1200,
+      "currency": "USD",
+      "category": "Office Supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-03T10:15:00.000Z"
+    },
+    {
+      "merchant_normalized": "tech_gadgets_world",
+      "amount": 2500,
+      "currency": "USD",
+      "category": "Technology",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-03T11:00:00.000Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Verify April's Financial Records",
+      "status": "In Progress",
+      "priority": "High",
+      "due_date": "2026-05-05",
+      "source_type": "Task Management System"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Submit discrepancy report",
+      "due_date": "2026-05-04",
+      "status": "Pending",
+      "ai_confidence": 0.85
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "monthly_financial_review_mismatch",
+      "category": "Finance",
+      "insight_type": "Analysis",
+      "title": "April Financial Discrepancies",
+      "summary": "Detected variances in anticipated and actual office supplies spending, identified suspect merchant inconsistencies.",
+      "urgency": "high",
+      "priority_score": 9,
+      "recommended_action": "Cross-check bank transaction entries with office supply invoices.",
+      "explanation": "Higher-than-usual charges from Office Supplies Co. did not reconcile with receipts.",
+      "status": "Open"
+    },
+    {
+      "state_key": "stale_tech_spending_alert",
+      "category": "Finance",
+      "insight_type": "Alert",
+      "title": "Tecnology Spend Alert - Potential Overrun",
+      "summary": "System flagged previous tech spending as exceeding budget, but recent transactions contradict low remaining funds alert.",
+      "urgency": "medium",
+      "priority_score": 5,
+      "recommended_action": "Review tech budget allocations and update operational insights.",
+      "explanation": "Misalignment in the tech budget reported last month now appears stale.",
+      "status": "Closed"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": [],
+    "actual_intent": {
+      "required": [
+        "spending_analysis",
+        "operational_summary"
+      ]
+    },
+    "expected_answer_facts": [
+      "Mismatch in office supply spending",
+      "Inconsistent records from Office Supplies Co.",
+      "Previously flagged tech spending now seems contradicted by recent transactions"
+    ]
+  }
+}

@@ -1,0 +1,138 @@
+{
+  "scenario_id": "SCENARIO_0876",
+  "eval_id": "EVAL_034",
+  "theme": "Urgent Response to Market Changes",
+  "entities": {
+    "people": [
+      {
+        "name": "Alice Johnson",
+        "email": "alice.j@company.com",
+        "relationship_type": "colleague"
+      },
+      {
+        "name": "Bob Smith",
+        "email": "bob.s@investor.com",
+        "relationship_type": "investor"
+      }
+    ],
+    "companies": [
+      "Techify Innovations",
+      "Market Intel Group"
+    ],
+    "projects": [
+      "Project Phoenix",
+      "Market Adapt"
+    ],
+    "merchants": [
+      "Fast Market Analytics",
+      "QuickMarket Data"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_3021",
+      "subject": "Re: Immediate Action Required - Market Downturn",
+      "body_summary": "Alice, a downturn in the market has been detected. Review the attached report and adjust your strategy.",
+      "occurred_at": "2026-05-10T15:34:50.493Z",
+      "email_category": "work",
+      "requires_action": true,
+      "sentiment": "urgent",
+      "channel_metadata": {
+        "sender": "bob.s@investor.com",
+        "sender_name": "Bob Smith"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_843",
+      "title": "Market Strategy Realignment",
+      "start_time": "2026-05-10T16:00:00Z",
+      "end_time": "2026-05-10T17:00:00Z",
+      "transcript_summary": "Discussion about recent market changes and how Project Phoenix needs to adapt.",
+      "attendees": [
+        {
+          "email": "alice.j@company.com",
+          "name": "Alice Johnson"
+        },
+        {
+          "email": "bob.s@investor.com",
+          "name": "Bob Smith"
+        }
+      ],
+      "description": "Strategy meeting with top priority to discuss market-induced project adjustments."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "Fast Market Analytics",
+      "amount": 1500,
+      "currency": "USD",
+      "category": "market analysis",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-10T13:45:00Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Review new market data",
+      "status": "in_progress",
+      "priority": "high",
+      "due_date": "2026-05-10T23:59:00Z",
+      "source_type": "email"
+    },
+    {
+      "title": "Adjust Project Phoenix strategy",
+      "status": "not_started",
+      "priority": "critical",
+      "due_date": "2026-05-11T12:00:00Z",
+      "source_type": "meeting"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Present updated strategy to the board",
+      "due_date": "2026-05-12T10:00:00Z",
+      "status": "pending",
+      "ai_confidence": 0.85
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "market_impact_summary_01",
+      "category": "market dynamics",
+      "insight_type": "report_analysis",
+      "title": "Market Downturn Impact Analysis",
+      "summary": "The market has shifted significantly impacting current projects.",
+      "urgency": "critical",
+      "priority_score": 9.8,
+      "recommended_action": "Review tasks and update project directions immediately.",
+      "explanation": "Prevent potential financial loss by adapting swiftly to market changes.",
+      "status": "active"
+    },
+    {
+      "state_key": "market_stability_report_02",
+      "category": "market dynamics",
+      "insight_type": "report_analysis",
+      "title": "Previous Market Stability Report",
+      "summary": "No major market volatility predicted this quarter. (Stale Insight)",
+      "urgency": "low",
+      "priority_score": 2.1,
+      "recommended_action": "Continue with existing plans.",
+      "explanation": "Analysis from last month indicating stability, now outdated.",
+      "status": "stale"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": [
+      "Alice Johnson and Bob Smith are coordinating on strategy adjustments due to market changes."
+    ],
+    "actual_intent": "productivity",
+    "expected_answer_facts": [
+      "Market downturn has been detected.",
+      "A critical task to adjust Project Phoenix strategy is pending.",
+      "Operational insights recommend immediate review and adaptation."
+    ]
+  }
+}

@@ -1,0 +1,160 @@
+{
+  "scenario_id": "SCENARIO_010",
+  "eval_id": "EVAL_010",
+  "theme": "Operational Spending Analysis",
+  "entities": {
+    "people": [
+      {
+        "name": "Alex Rivera",
+        "email": "alex.rivera@startupcorp.com",
+        "relationship_type": "CFO"
+      },
+      {
+        "name": "Jordan T.",
+        "email": "jordan@startupcorp.com",
+        "relationship_type": "Operations Manager"
+      }
+    ],
+    "companies": [
+      "StartupCorp"
+    ],
+    "projects": [
+      "Project Falcon"
+    ],
+    "merchants": [
+      "TechPro Supplies",
+      "Office Essentials",
+      "QuickTech"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_001",
+      "subject": "Approval for tech purchase",
+      "body_summary": "Approved purchase of new laptops from QuickTech, total $3,500.",
+      "occurred_at": "2026-05-09T15:27:45.636Z",
+      "email_category": "finance",
+      "requires_action": false,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "jordan@startupcorp.com",
+        "sender_name": "Jordan T."
+      },
+      "embedding_null": false
+    },
+    {
+      "external_id": "email_002",
+      "subject": "Monthly Expense Insights",
+      "body_summary": "Your monthly expense insights for May with a focus on efficiency improvements.",
+      "occurred_at": "2026-05-09T13:12:00.636Z",
+      "email_category": "operational",
+      "requires_action": false,
+      "sentiment": "positive",
+      "channel_metadata": {
+        "sender": "alex.rivera@startupcorp.com",
+        "sender_name": "Alex Rivera"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_001",
+      "title": "Project Falcon Weekly Sync",
+      "start_time": "2026-05-09T09:00:00.636Z",
+      "end_time": "2026-05-09T10:00:00.636Z",
+      "transcript_summary": "Discussed upcoming milestones and project budgets.",
+      "attendees": [
+        {
+          "email": "jordan@startupcorp.com",
+          "name": "Jordan T."
+        },
+        {
+          "email": "alex.rivera@startupcorp.com",
+          "name": "Alex Rivera"
+        }
+      ],
+      "description": "Weekly review of Project Falcon's progress and financials."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "TechPro Supplies",
+      "amount": 4500,
+      "currency": "USD",
+      "category": "Hardware & Tech",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-09T14:05:23.636Z"
+    },
+    {
+      "merchant_normalized": "Office Essentials",
+      "amount": 1500,
+      "currency": "USD",
+      "category": "Office Supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-09T11:35:12.636Z"
+    },
+    {
+      "merchant_normalized": "QuickTech",
+      "amount": 3500,
+      "currency": "USD",
+      "category": "Hardware & Tech",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-09T16:45:37.636Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Review tech purchase approvals",
+      "status": "completed",
+      "priority": "high",
+      "due_date": "2026-05-09",
+      "source_type": "email"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Maintain operational Budget for Q2",
+      "due_date": "2026-06-30",
+      "status": "ongoing",
+      "ai_confidence": 0.85
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "audit_tech_purchase",
+      "category": "Finance",
+      "insight_type": "Audit Alert",
+      "title": "Unapproved Tech Purchase Alert",
+      "summary": "Discrepancy found: $4500 purchase from TechPro Supplies was not pre-approved.",
+      "urgency": "critical",
+      "priority_score": 0.95,
+      "recommended_action": "Review and confirm purchase legitimacy with Jordan T.",
+      "explanation": "This transaction was not listed in the pre-approved expense documents.",
+      "status": "open"
+    },
+    {
+      "state_key": "monthly_insights_may",
+      "category": "Analysis",
+      "insight_type": "Spending Review",
+      "title": "May Expense Analysis Overview",
+      "summary": "Overall spending aligns with strategic goals except noted exception in tech spendings.",
+      "urgency": "medium",
+      "priority_score": 0.7,
+      "recommended_action": "Address highlighted exception.",
+      "explanation": "A previous review showed discrepancies in an earlier transaction batch with TechPro.",
+      "status": "stale"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": {
+      "TechPro Supplies": "Existing vendor for tech supplies",
+      "QuickTech": "Preferred vendor for tech purchases"
+    },
+    "actual_intent": "Analyze discrepancies in financial approvals vs. transactions",
+    "expected_answer_facts": [
+      "The $4500 transaction from TechPro Supplies was not approved beforehand.",
+      "The $3500 purchase from QuickTech was approved according to the email communication."
+    ]
+  }
+}

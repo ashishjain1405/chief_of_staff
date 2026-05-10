@@ -1,0 +1,175 @@
+{
+  "scenario_id": "SC_0987",
+  "eval_id": "EVAL_002",
+  "theme": "Monthly Financial Reconciliation",
+  "entities": {
+    "people": [
+      {
+        "name": "Alex Turner",
+        "email": "alex.turner@fakemail.com",
+        "relationship_type": "CFO"
+      },
+      {
+        "name": "Jordan Blake",
+        "email": "j.blake@fakemail.com",
+        "relationship_type": "Operations Manager"
+      }
+    ],
+    "companies": [
+      "TechNova Inc."
+    ],
+    "projects": [
+      "Project Atlas",
+      "Sustainability Initiative"
+    ],
+    "merchants": [
+      "OfficeSupplyCo",
+      "OfficeSuppliesCo",
+      "Daily Grind Coffee"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_1234",
+      "subject": "Summary: April Expenses & Impact Analysis",
+      "body_summary": "Details of last month's expenses against our goals. Some inconsistencies noted.",
+      "occurred_at": "2026-05-02T12:45:30.000Z",
+      "email_category": "finance",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "alex.turner@fakemail.com",
+        "sender_name": "Alex Turner"
+      },
+      "embedding_null": false
+    },
+    {
+      "external_id": "email_5678",
+      "subject": "Re: Clarification on Operational Budget",
+      "body_summary": "Need to align budget allocations to meet updated objectives for Q2.",
+      "occurred_at": "2026-04-25T08:30:10.000Z",
+      "email_category": "operations",
+      "requires_action": false,
+      "sentiment": "inquisitive",
+      "channel_metadata": {
+        "sender": "j.blake@fakemail.com",
+        "sender_name": "Jordan Blake"
+      },
+      "embedding_null": true
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_0098",
+      "title": "Monthly Budget Reconciliation",
+      "start_time": "2026-05-03T15:00:00.000Z",
+      "end_time": "2026-05-03T16:00:00.000Z",
+      "transcript_summary": "Discussion on discrepancies found in April's financial report and alignment with operational objectives.",
+      "attendees": [
+        {
+          "email": "alex.turner@fakemail.com",
+          "name": "Alex Turner"
+        },
+        {
+          "email": "j.blake@fakemail.com",
+          "name": "Jordan Blake"
+        }
+      ],
+      "description": "Review of April financials and reconciliation with operational goals."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "OfficeSupplyCo",
+      "amount": 250,
+      "currency": "USD",
+      "category": "Office Supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-04-10T09:30:00.000Z"
+    },
+    {
+      "merchant_normalized": "Daily Grind Coffee",
+      "amount": 90,
+      "currency": "USD",
+      "category": "Catering",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-04-15T10:45:00.000Z"
+    },
+    {
+      "merchant_normalized": "OfficeSuppliesCo",
+      "amount": 250,
+      "currency": "USD",
+      "category": "Office Supplies",
+      "transaction_type": "refund",
+      "transaction_datetime": "2026-04-20T14:20:00.000Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Review and Approve April Financial Statement",
+      "status": "pending",
+      "priority": "high",
+      "due_date": "2026-05-05T23:59:59.000Z",
+      "source_type": "email"
+    },
+    {
+      "title": "Update Operational Goals Based on Financials",
+      "status": "in-progress",
+      "priority": "medium",
+      "due_date": "2026-05-12T23:59:59.000Z",
+      "source_type": "meeting"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Align next month's budget with the Sustainability Initiative's target",
+      "due_date": "2026-05-15T23:59:59.000Z",
+      "status": "not_started",
+      "ai_confidence": 0.85
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "insight_001",
+      "category": "Finance",
+      "insight_type": "summary",
+      "title": "April Expenses Trend",
+      "summary": "Expenses in April were 15% higher than forecasted, partly due to unexpected equipment purchases.",
+      "urgency": "high",
+      "priority_score": 0.9,
+      "recommended_action": "Conduct thorough review of April's expense allocations.",
+      "explanation": "Ensure operational objectives are adjusted to account for variances.",
+      "status": "active"
+    },
+    {
+      "state_key": "insight_002",
+      "category": "Operations",
+      "insight_type": "performance",
+      "title": "Project Atlas Spending Mismatch",
+      "summary": "Previous insights overstated April's expenses on Project Atlas.",
+      "urgency": "medium",
+      "priority_score": 0.7,
+      "recommended_action": "Verify Project Atlas allocations against actual reports.",
+      "explanation": "Updated transaction records invalidate some prior planning estimates.",
+      "status": "stale"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": {},
+    "actual_intent": {
+      "required": [
+        "finance",
+        "operational_summary"
+      ],
+      "forbidden": [
+        "reminders"
+      ],
+      "matchMode": "all"
+    },
+    "expected_answer_facts": [
+      "April's expenses were higher by 15%",
+      "Project Atlas allocations showed discrepancies",
+      "Operational goals may need adjustment based on updated insights"
+    ]
+  }
+}

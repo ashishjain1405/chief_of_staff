@@ -1,0 +1,167 @@
+{
+  "scenario_id": "SCN_011",
+  "eval_id": "EVAL_011",
+  "theme": "fraud_detection",
+  "entities": {
+    "people": [
+      {
+        "name": "Alex Johnson",
+        "email": "alex.johnson@example.com",
+        "relationship_type": "executive_assistant"
+      },
+      {
+        "name": "Jordan Lee",
+        "email": "jordan.lee@company.com",
+        "relationship_type": "financial_analyst"
+      }
+    ],
+    "companies": [
+      "Tech Gear Inc.",
+      "Elite Consultants LLC"
+    ],
+    "projects": [
+      "Project Falcon",
+      "Swift Migration"
+    ],
+    "merchants": [
+      "Quick Mart",
+      "Quick Smart",
+      "TechHub Electronics"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "EML_1001",
+      "subject": "Quick Update: Financials Review",
+      "body_summary": "Please check the recent financial synopsis for anomalies. We might need to address some discrepancies.",
+      "occurred_at": "2026-05-05T09:30:47.123Z",
+      "email_category": "operational",
+      "requires_action": true,
+      "sentiment": "concerned",
+      "channel_metadata": {
+        "sender": "alex.johnson@example.com",
+        "sender_name": "Alex Johnson"
+      },
+      "embedding_null": false
+    },
+    {
+      "external_id": "EML_1002",
+      "subject": "Potential Fraud Alert?",
+      "body_summary": "Jordan, can you verify these questionable items in our latest transactions?",
+      "occurred_at": "2026-05-07T11:45:33.456Z",
+      "email_category": "urgent",
+      "requires_action": true,
+      "sentiment": "urgent",
+      "channel_metadata": {
+        "sender": "jordan.lee@company.com",
+        "sender_name": "Jordan Lee"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "MTG_2001",
+      "title": "Weekly Financial Review",
+      "start_time": "2026-05-03T13:00:00.000Z",
+      "end_time": "2026-05-03T14:00:00.000Z",
+      "transcript_summary": "Discussed this month's spending patterns and potential anomalies.",
+      "attendees": [
+        {
+          "email": "alex.johnson@example.com",
+          "name": "Alex Johnson"
+        },
+        {
+          "email": "jordan.lee@company.com",
+          "name": "Jordan Lee"
+        }
+      ],
+      "description": "Review financial transactions for any discrepancies."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "Quick Mart",
+      "amount": 501.25,
+      "currency": "USD",
+      "category": "Office Supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-01T10:30:00.000Z"
+    },
+    {
+      "merchant_normalized": "Quick Smart",
+      "amount": 1500,
+      "currency": "USD",
+      "category": "Electronics",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-03T15:45:00.000Z"
+    },
+    {
+      "merchant_normalized": "Quick Mart",
+      "amount": 501.25,
+      "currency": "USD",
+      "category": "Office Supplies",
+      "transaction_type": "refund",
+      "transaction_datetime": "2026-05-02T11:30:00.000Z"
+    },
+    {
+      "merchant_normalized": "TechHub Electronics",
+      "amount": 7500,
+      "currency": "USD",
+      "category": "Electronics",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-08T09:15:00.000Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Analyze spending for anomalies",
+      "status": "in_progress",
+      "priority": "high",
+      "due_date": "2026-05-10",
+      "source_type": "manual_entry"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Complete financial analysis for this month",
+      "due_date": "2026-05-14",
+      "status": "committed",
+      "ai_confidence": 0.95
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "analysis_needed_april",
+      "category": "finance",
+      "insight_type": "spending pattern",
+      "title": "April Spending Analysis Required",
+      "summary": "April's spending patterns require detailed analysis due to potential discrepancies.",
+      "urgency": "high",
+      "priority_score": 85,
+      "recommended_action": "Reassess and validate all transactions.",
+      "explanation": "Noticed unusual spending pattern compared to standard monthly trends.",
+      "status": "unaddressed"
+    },
+    {
+      "state_key": "potential_fraud_may",
+      "category": "finance",
+      "insight_type": "anomaly",
+      "title": "Potential Fraud Detected in May Transactions",
+      "summary": "Significant deviations identified, potentially indicating fraudulent activity.",
+      "urgency": "critical",
+      "priority_score": 95,
+      "recommended_action": "Immediate investigation and possible alert to relevant authorities.",
+      "explanation": "Detected unusual transactions with merchants similar in name but different in behavior.",
+      "status": "pending"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": [],
+    "actual_intent": "finance,spending_analysis",
+    "expected_answer_facts": [
+      "Anomalies in May transactions potentially fraudulent",
+      "Duplicate transaction patterns with different merchants"
+    ]
+  }
+}

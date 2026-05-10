@@ -1,0 +1,165 @@
+{
+  "scenario_id": "SCN_009",
+  "eval_id": "EVAL_005",
+  "theme": "Operating and Financial Discrepancies",
+  "entities": {
+    "people": [
+      {
+        "name": "Alex Johnson",
+        "email": "alex.j@venturestart.com",
+        "relationship_type": "CEO"
+      },
+      {
+        "name": "James Lee",
+        "email": "james.l@financepro.com",
+        "relationship_type": "CFO"
+      },
+      {
+        "name": "Sam Taylor",
+        "email": "sam.t@venturestart.com",
+        "relationship_type": "COO"
+      }
+    ],
+    "companies": [
+      "VentureStart Inc.",
+      "FinancePro Consulting"
+    ],
+    "projects": [
+      "Apollo Expansion",
+      "Market Fit Analysis"
+    ],
+    "merchants": [
+      "CloudStorageX",
+      "CloudStoragePro",
+      "TechGears"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_001",
+      "subject": "Re: Q1 Finance Summary",
+      "body_summary": "Awaiting updated operational insights to finalize the finance summary. Please confirm by next week.",
+      "occurred_at": "2026-04-07T14:22:30.000Z",
+      "email_category": "finance",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "james.l@financepro.com",
+        "sender_name": "James Lee"
+      },
+      "embedding_null": false
+    },
+    {
+      "external_id": "email_002",
+      "subject": "Q1 Operational Overview",
+      "body_summary": "The data discrepancies might impact strategic decisions. Let's review it alongside the Q1 finance summary.",
+      "occurred_at": "2026-04-08T09:18:11.000Z",
+      "email_category": "operations",
+      "requires_action": true,
+      "sentiment": "concerned",
+      "channel_metadata": {
+        "sender": "alex.j@venturestart.com",
+        "sender_name": "Alex Johnson"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_001",
+      "title": "Q1 Strategy Wrap-up",
+      "start_time": "2026-05-01T10:00:00.000Z",
+      "end_time": "2026-05-01T11:30:00.000Z",
+      "transcript_summary": "Discussed potential misalignment in data sets. Agreed to reconcile by comparing operational and financial summaries.",
+      "attendees": [
+        {
+          "email": "alex.j@venturestart.com",
+          "name": "Alex Johnson"
+        },
+        {
+          "email": "sam.t@venturestart.com",
+          "name": "Sam Taylor"
+        }
+      ],
+      "description": "Finalization of strategic goals based on Q1 performance."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "CloudStorageX",
+      "amount": 1500,
+      "currency": "USD",
+      "category": "software",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-04-01T12:30:00.000Z"
+    },
+    {
+      "merchant_normalized": "CloudStoragePro",
+      "amount": 1500,
+      "currency": "USD",
+      "category": "software",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-04-01T12:30:00.000Z"
+    },
+    {
+      "merchant_normalized": "TechGears",
+      "amount": 200,
+      "currency": "USD",
+      "category": "office_supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-04-10T09:45:00.000Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Reconcile Q1 Financial Data",
+      "status": "in_progress",
+      "priority": "high",
+      "due_date": "2026-05-12T23:59:59.000Z",
+      "source_type": "internal"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Complete analysis on Q1 discrepancies",
+      "due_date": "2026-05-15T00:00:00.000Z",
+      "status": "open",
+      "ai_confidence": 0.9
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "op_fin_summary_mismatch",
+      "category": "operations",
+      "insight_type": "discrepancy",
+      "title": "Potential Misalignment in Financial Data",
+      "summary": "Detected contradiction between reported financial summaries and actual transactions for Q1.",
+      "urgency": "high",
+      "priority_score": 85,
+      "recommended_action": "Conduct an in-depth review and reconciliation of the data.",
+      "explanation": "Operational expense reports do not match transaction records. Needs immediate attention to align strategic decisions.",
+      "status": "open"
+    },
+    {
+      "state_key": "stale_op_summary",
+      "category": "operations",
+      "insight_type": "summary",
+      "title": "Preliminary Operational Summary",
+      "summary": "Initial operational data for Q1. Awaiting final expense reconciliation.",
+      "urgency": "medium",
+      "priority_score": 60,
+      "recommended_action": "Hold review meetings to update and finalize summary.",
+      "explanation": "This summary is based on outdated data and may be misleading if used without reconciliation.",
+      "status": "stale"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": {},
+    "actual_intent": "{\"finance\":\"required\",\"operational_summary\":\"required\",\"relationship\":\"forbidden\"}",
+    "expected_answer_facts": [
+      "CloudStorageX figures do not match initially reported expenses",
+      "Stale operational summary needs reconciliation with recent transactions",
+      "Potential overlap in expense reporting for merchant CloudStorageX and CloudStoragePro"
+    ]
+  }
+}

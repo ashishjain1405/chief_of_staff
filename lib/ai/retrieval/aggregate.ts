@@ -11,7 +11,7 @@ export async function aggregateTransactions(
 ): Promise<AggregatedFinance> {
   let query = (supabase as any)
     .from("transactions_normalized")
-    .select("amount, currency, category, merchant_normalized, transaction_datetime")
+    .select("amount, currency, category, merchant_normalized, transaction_datetime, transaction_type")
     .eq("user_id", userId)
     .not("amount", "is", null);
 
@@ -40,7 +40,7 @@ export async function aggregateTransactions(
   if (!error && !data?.length && filters.categories?.length) {
     let retryQuery = supabase
       .from("transactions_normalized")
-      .select("amount, currency, category, merchant_normalized, transaction_datetime")
+      .select("amount, currency, category, merchant_normalized, transaction_datetime, transaction_type")
       .eq("user_id", userId)
       .not("amount", "is", null);
     if (filters.dateRange) {
@@ -69,7 +69,7 @@ export async function aggregateTransactions(
     return { total: 0, by_category: {}, by_merchant: {}, by_currency: {}, weekly_trend: [], period: periodLabel, transaction_count: 0 };
   }
 
-  const rows = data as { amount: number; currency: string | null; category: string | null; merchant_normalized: string | null; transaction_datetime: string | null }[];
+  const rows = data as { amount: number; currency: string | null; category: string | null; merchant_normalized: string | null; transaction_datetime: string | null; transaction_type: string | null }[];
 
   const by_category: Record<string, number> = {};
   const by_merchant: Record<string, number> = {};
@@ -78,18 +78,21 @@ export async function aggregateTransactions(
   let total = 0;
 
   for (const row of rows) {
-    total += row.amount;
+    const isRefund = row.transaction_type === "refund";
+    const signedAmount = isRefund ? -row.amount : row.amount;
+
+    total += signedAmount;
 
     const currency = row.currency ?? "INR";
     if (!by_currency[currency]) by_currency[currency] = { total: 0, count: 0 };
-    by_currency[currency].total += row.amount;
+    by_currency[currency].total += signedAmount;
     by_currency[currency].count += 1;
 
     const cat = row.category ?? "other";
-    by_category[cat] = (by_category[cat] ?? 0) + row.amount;
+    by_category[cat] = (by_category[cat] ?? 0) + signedAmount;
 
     const merchant = row.merchant_normalized ?? "Unknown";
-    by_merchant[merchant] = (by_merchant[merchant] ?? 0) + row.amount;
+    by_merchant[merchant] = (by_merchant[merchant] ?? 0) + signedAmount;
 
     if (row.transaction_datetime) {
       const d = new Date(row.transaction_datetime);
@@ -97,7 +100,7 @@ export async function aggregateTransactions(
       const day = d.getDay();
       const monday = new Date(d.getTime() - ((day === 0 ? 6 : day - 1) * 864e5));
       const weekKey = monday.toISOString().slice(0, 10);
-      by_week[weekKey] = (by_week[weekKey] ?? 0) + row.amount;
+      by_week[weekKey] = (by_week[weekKey] ?? 0) + signedAmount;
     }
   }
 

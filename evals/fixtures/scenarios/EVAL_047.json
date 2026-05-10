@@ -1,0 +1,135 @@
+{
+  "scenario_id": "SCN_1234",
+  "eval_id": "EVAL_047",
+  "theme": "Operational and Transaction Discrepancy Resolution",
+  "entities": {
+    "people": [
+      {
+        "name": "Alice Johnson",
+        "email": "alice.johnson@execstartup.com",
+        "relationship_type": "CEO"
+      },
+      {
+        "name": "Bob Smith",
+        "email": "bob.smith@vendorservices.com",
+        "relationship_type": "Vendor"
+      }
+    ],
+    "companies": [
+      "ExecStartup Inc.",
+      "VendorServices LLC"
+    ],
+    "projects": [
+      "Product Launch Q3"
+    ],
+    "merchants": [
+      "VendorServices LLC",
+      "VendorSolutions"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_001",
+      "subject": "Reconciliation Required: VendorServices Payment",
+      "body_summary": "Hi Alice, there seems to be a mismatch between our operational report and transaction records regarding our payment to VendorServices. Please review.",
+      "occurred_at": "2026-05-03T14:15:00Z",
+      "email_category": "financial",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "bob.smith@vendorservices.com",
+        "sender_name": "Bob Smith"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_001",
+      "title": "Operational Insights Review",
+      "start_time": "2026-05-04T09:00:00Z",
+      "end_time": "2026-05-04T10:00:00Z",
+      "transcript_summary": "Discussion on discrepancies between recorded transactions and our operational insights for the VendorServices account.",
+      "attendees": [
+        {
+          "email": "alice.johnson@execstartup.com",
+          "name": "Alice Johnson"
+        }
+      ],
+      "description": "Review discrepancies between operational insights and recorded transactions."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "VendorServices",
+      "amount": 5000,
+      "currency": "USD",
+      "category": "vendor payment",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-02T12:30:00Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Review VendorServices Discrepancy",
+      "status": "in-progress",
+      "priority": "high",
+      "due_date": "2026-05-05",
+      "source_type": "email"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Resolve the discrepancy in VendorServices transaction records",
+      "due_date": "2026-05-06",
+      "status": "pending",
+      "ai_confidence": 0.95
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "vendor_services_insight_01",
+      "category": "transactions",
+      "insight_type": "report",
+      "title": "VendorServices Payment Discrepancy",
+      "summary": "The operational report indicates a payment of $4500 to VendorServices, conflicting with a $5000 transaction record.",
+      "urgency": "critical",
+      "priority_score": 95,
+      "recommended_action": "Verify the actual payment processed and update records accordingly.",
+      "explanation": "Discrepancy caused by an incorrect operational assessment that has not been updated in light of new transactions.",
+      "status": "active"
+    },
+    {
+      "state_key": "vendor_services_insight_stale",
+      "category": "transactions",
+      "insight_type": "alert",
+      "title": "Stale Insight: VendorServices Payment",
+      "summary": "Previous reports showed no discrepancies with VendorServices payments.",
+      "urgency": "low",
+      "priority_score": 40,
+      "recommended_action": "None required at this time.",
+      "explanation": "Previous insights contradict current transaction records due to stale data not reflecting recent updates.",
+      "status": "inactive"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": [
+      "CEO-Vendor"
+    ],
+    "actual_intent": {
+      "required": [
+        "operational_summary",
+        "search_lookup"
+      ],
+      "forbidden": [
+        "commitments"
+      ],
+      "matchMode": "all"
+    },
+    "expected_answer_facts": [
+      "Transactional record shows a $500 discrepancy",
+      "Operational report out of date",
+      "Requires verification and reconciliation"
+    ]
+  }
+}

@@ -1,0 +1,159 @@
+{
+  "scenario_id": "SCENARIO_089",
+  "eval_id": "EVAL_051",
+  "theme": "Operational & Transactional Insight Deviation",
+  "entities": {
+    "people": [
+      {
+        "name": "Alex Chen",
+        "email": "alex.chen@venturesx.com",
+        "relationship_type": "CEO"
+      },
+      {
+        "name": "Jordan Taylor",
+        "email": "jtaylor@venturesx.com",
+        "relationship_type": "CFO"
+      }
+    ],
+    "companies": [
+      "VenturesX Inc."
+    ],
+    "projects": [
+      "Alpha Expansion",
+      "Beta Launch"
+    ],
+    "merchants": [
+      "Tech Supplies Co.",
+      "Global Tech Gear",
+      "Fast Tech Shipping"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_001",
+      "subject": "Re: Budget Overruns in Q2",
+      "body_summary": "Alex, please review the budget data from Q2. It seems our operational costs exceeded our estimates, particularly in tech supply purchases.",
+      "occurred_at": "2026-05-03T15:12:05.131Z",
+      "email_category": "financial_update",
+      "requires_action": false,
+      "sentiment": "concerned",
+      "channel_metadata": {
+        "sender": "jtaylor@venturesx.com",
+        "sender_name": "Jordan Taylor"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_01",
+      "title": "Weekly Financial Review",
+      "start_time": "2026-05-02T09:00:00.000Z",
+      "end_time": "2026-05-02T10:00:00.000Z",
+      "transcript_summary": "Discussion focused on discrepancies in Q2 budget projections versus actual spend, primarily due to increased operational expenses.",
+      "attendees": [
+        {
+          "email": "alex.chen@venturesx.com",
+          "name": "Alex Chen"
+        },
+        {
+          "email": "jtaylor@venturesx.com",
+          "name": "Jordan Taylor"
+        }
+      ],
+      "description": "Review of financial performance metrics and deviation from the budget."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "Tech Supplies Co.",
+      "amount": 15000,
+      "currency": "USD",
+      "category": "Office Supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-04-20T14:23:52.131Z"
+    },
+    {
+      "merchant_normalized": "Global Tech Gear",
+      "amount": 9500,
+      "currency": "USD",
+      "category": "Tech Equipment",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-04-22T16:45:34.131Z"
+    },
+    {
+      "merchant_normalized": "Fast Tech Shipping",
+      "amount": 1200,
+      "currency": "USD",
+      "category": "Logistics",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-04-25T12:33:45.131Z"
+    },
+    {
+      "merchant_normalized": "Tech Supplies Co.",
+      "amount": -2000,
+      "currency": "USD",
+      "category": "Office Supplies",
+      "transaction_type": "refund",
+      "transaction_datetime": "2026-05-01T08:27:14.131Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Analyze Q2 Budget Variance",
+      "status": "in_progress",
+      "priority": "high",
+      "due_date": "2026-05-07",
+      "source_type": "email"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Final report on budget analysis",
+      "due_date": "2026-05-09",
+      "status": "pending",
+      "ai_confidence": 0.85
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "overbudget_q2_supplies_error",
+      "category": "financial",
+      "insight_type": "alert",
+      "title": "Q2 Office Supplies Over Budget",
+      "summary": "Projected spend was $12,000; actual was $15,000.",
+      "urgency": "critical",
+      "priority_score": 9.5,
+      "recommended_action": "Investigate and reconcile office supplies purchases.",
+      "explanation": "Mismatch between expected and actual expenses requires analysis to identify potential overspending and adjust future budgets.",
+      "status": "open"
+    },
+    {
+      "state_key": "logistics_cost_under_estimate",
+      "category": "logistics",
+      "insight_type": "info",
+      "title": "Logistics Costs Meeting Budget",
+      "summary": "Costs align with budget estimations after refund adjustment.",
+      "urgency": "medium",
+      "priority_score": 6.2,
+      "recommended_action": "Maintain current shipping contracts.",
+      "explanation": "Refund and transaction correction have brought logistics spending back in line.",
+      "status": "closed"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": [
+      "Alex Chen reports to Board of Directors, oversight from Jordan Taylor"
+    ],
+    "actual_intent": [
+      "spending_analysis",
+      "operational_summary"
+    ],
+    "expected_answer_facts": [
+      "Office Supplies exceeded budget projections for Q2",
+      "A refund from Tech Supplies Co. adjusted total costs",
+      "Operational insight flagged critical over-budget alert for supplies",
+      "Logistics costs corrected post-refund aligning with predictions"
+    ]
+  }
+}

@@ -1,0 +1,148 @@
+{
+  "scenario_id": "SCENARIO_035",
+  "eval_id": "EVAL_008",
+  "theme": "Financial & Operational Mismatches",
+  "entities": {
+    "people": [
+      {
+        "name": "Alex Johnson",
+        "email": "alex.j@startupx.com",
+        "relationship_type": "chief_financial_officer"
+      },
+      {
+        "name": "Jordan Lee",
+        "email": "jordan.lee@consultancyfirm.com",
+        "relationship_type": "external_consultant"
+      }
+    ],
+    "companies": [
+      "StartupX",
+      "Consultancy Firm LLC"
+    ],
+    "projects": [
+      "Project Athena",
+      "Expansion X2024"
+    ],
+    "merchants": [
+      "Acme Office Supplies",
+      "Global Software Distribution",
+      "Tech World"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_1021",
+      "subject": "Re: Quarterly Financial Review",
+      "body_summary": "Jordan raised concerns about some large unrecorded expenses in Q1.",
+      "occurred_at": "2026-03-15T10:30:00.000Z",
+      "email_category": "finance",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "jordan.lee@consultancyfirm.com",
+        "sender_name": "Jordan Lee"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_752",
+      "title": "Year-End Financial Assessment",
+      "start_time": "2026-01-10T14:00:00.000Z",
+      "end_time": "2026-01-10T15:00:00.000Z",
+      "transcript_summary": "Discussed incomplete entries in financial systems and potential data sources for corrections.",
+      "attendees": [
+        {
+          "email": "alex.j@startupx.com",
+          "name": "Alex Johnson"
+        },
+        {
+          "email": "ceo@startupx.com",
+          "name": "Jamie Rogers"
+        }
+      ],
+      "description": "Review and address financial discrepancies from the past year."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "Acme Office Supplies",
+      "amount": 1200,
+      "currency": "USD",
+      "category": "office expenses",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-01-05T08:45:00.000Z"
+    },
+    {
+      "merchant_normalized": "Tech World",
+      "amount": 550,
+      "currency": "USD",
+      "category": "software licenses",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-02-12T11:25:00.000Z"
+    },
+    {
+      "merchant_normalized": "Global Software Distribution",
+      "amount": 550,
+      "currency": "USD",
+      "category": "software licenses",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-02-10T09:00:00.000Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Resolve Financial Discrepancies",
+      "status": "in_progress",
+      "priority": "high",
+      "due_date": "2026-05-30",
+      "source_type": "internal"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Complete the reconciliation of mismatched financial entries by the end of Q2",
+      "due_date": "2026-06-30",
+      "status": "pending",
+      "ai_confidence": 0.95
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "mismatch_2026_entry_acme",
+      "category": "finance",
+      "insight_type": "discrepancy",
+      "title": "Unmatched Entry: Acme Office Supplies",
+      "summary": "The entry for $1200 with Acme Office Supplies on Jan 5, 2026, does not match recorded expenses.",
+      "urgency": "high",
+      "priority_score": 7,
+      "recommended_action": "Verify all purchases from Acme Office Supplies and update records accordingly.",
+      "explanation": "Transaction appears in payment data but not in internal expense logs.",
+      "status": "unresolved"
+    },
+    {
+      "state_key": "stale_mismatch_software",
+      "category": "finance",
+      "insight_type": "discrepancy",
+      "title": "Potential Duplicate Software Payment",
+      "summary": "Existence of software expense matching $550 for Tech licenses could indicate a duplicate.",
+      "urgency": "medium",
+      "priority_score": 5,
+      "recommended_action": "Investigate potential duplicate transaction across categories.",
+      "explanation": "Transaction from Global Software Distribution could overlap with payments to Tech World previously.",
+      "status": "stale"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": [
+      "Jordan is an external consultant specializing in financial oversight for StartupX.",
+      "Alex Johnson oversees all financial records for StartupX."
+    ],
+    "actual_intent": "Retrieve all mismatched entries between transaction records and operational insights for 2026.",
+    "expected_answer_facts": [
+      "Mismatch entry for $1200 from Acme Office Supplies does not align with operational records.",
+      "Both $550 transactions from Tech World and Global Software Distribution potentially overlap; requires investigation."
+    ]
+  }
+}

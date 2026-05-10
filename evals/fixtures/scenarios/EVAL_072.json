@@ -1,0 +1,131 @@
+{
+  "scenario_id": "SCENARIO_054",
+  "eval_id": "EVAL_072",
+  "theme": "Transactional Insight Cross-Validation",
+  "entities": {
+    "people": [
+      {
+        "name": "Jordan Lee",
+        "email": "jordan.lee@techinnovators.com",
+        "relationship_type": "colleague"
+      }
+    ],
+    "companies": [
+      "Tech Innovators Inc.",
+      "Smart Solutions LLC"
+    ],
+    "projects": [
+      "Quarterly Analysis",
+      "Insight Evolution"
+    ],
+    "merchants": [
+      "Office Supplies Pro",
+      "OfficeStation"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "EML_0031",
+      "subject": "Last Quarter's Transactional Overview",
+      "body_summary": "Please review the attached summary of our transactions for the first quarter. Note any discrepancies or follow-up actions needed.",
+      "occurred_at": "2026-04-10T09:45:00.000Z",
+      "email_category": "financial",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "finance@techinnovators.com",
+        "sender_name": "Finance Department"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "MTG_0015",
+      "title": "Insight Validation Discussion",
+      "start_time": "2026-05-02T14:00:00.000Z",
+      "end_time": "2026-05-02T15:00:00.000Z",
+      "transcript_summary": "Discussed the potential discrepancies found in last quarter's transactional data, focusing on aligning them with current insights.",
+      "attendees": [
+        {
+          "email": "jordan.lee@techinnovators.com",
+          "name": "Jordan Lee"
+        },
+        {
+          "email": "finance@techinnovators.com",
+          "name": "Finance Department"
+        }
+      ],
+      "description": "Validating the insights against the past data."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "Office Supplies Pro",
+      "amount": 1200,
+      "currency": "USD",
+      "category": "office supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-01-15T12:34:56.000Z"
+    },
+    {
+      "merchant_normalized": "OfficeStation",
+      "amount": 1150,
+      "currency": "USD",
+      "category": "office supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-02-16T08:20:45.000Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Cross-validate Insights with Q1 Data",
+      "status": "in-progress",
+      "priority": "high",
+      "due_date": "2026-05-05T18:00:00.000Z",
+      "source_type": "project_management"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Complete Q1 transactional data validation",
+      "due_date": "2026-05-05",
+      "status": "pending",
+      "ai_confidence": 0.95
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "insight_092",
+      "category": "financial",
+      "insight_type": "trend_analysis",
+      "title": "Quarterly Expenditure Spike",
+      "summary": "An increase in office supply expenses was noted in Q1, potentially inflated due to overlapping vendor services.",
+      "urgency": "medium",
+      "priority_score": 75,
+      "recommended_action": "Review vendor contracts and renegotiate terms.",
+      "explanation": "Comparison against real-time data suggests discrepancies in cost allocation, potentially affecting operational budgets.",
+      "status": "active"
+    },
+    {
+      "state_key": "insight_071",
+      "category": "financial",
+      "insight_type": "data_mismatch",
+      "title": "Discrepancy in Supplier Payments",
+      "summary": "Identified mismatches in Office Supplies Pro's invoice totals compared to payment records.",
+      "urgency": "high",
+      "priority_score": 85,
+      "recommended_action": "Audit past payments for accuracy.",
+      "explanation": "There is a notable difference between invoice amounts and what has been recorded in the system transactions.",
+      "status": "stale"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": [],
+    "actual_intent": "Cross-validate real-time insights against the last quarter's transactional dataset.",
+    "expected_answer_facts": [
+      "Office supply transactions show a discrepancy between recorded amounts and operational insights.",
+      "Office Supplies Pro and OfficeStation have overlapping payment records suggesting potential vendor misclassification."
+    ]
+  }
+}

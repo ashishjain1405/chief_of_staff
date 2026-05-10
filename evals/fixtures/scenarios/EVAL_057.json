@@ -1,0 +1,148 @@
+{
+  "scenario_id": "SCENARIO_034",
+  "eval_id": "EVAL_057",
+  "theme": "Operational Alignment and Task Execution",
+  "entities": {
+    "people": [
+      {
+        "name": "Alex Johnson",
+        "email": "alex.johnson@startupedge.com",
+        "relationship_type": "executive"
+      },
+      {
+        "name": "Jordan Lee",
+        "email": "jordan.lee@taskforce.com",
+        "relationship_type": "project_manager"
+      }
+    ],
+    "companies": [
+      "Startup Edge",
+      "Taskforce Solutions"
+    ],
+    "projects": [
+      "Project Phoenix",
+      "Operational Overhaul Initiative"
+    ],
+    "merchants": [
+      "Microsoft Office",
+      "Slack Tech"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_001",
+      "subject": "Re: Alignment on Project Initiatives",
+      "body_summary": "Discussing the current status of Project Phoenix and whether tasks are aligning with operational goals.",
+      "occurred_at": "2026-05-02T12:45:33.077Z",
+      "email_category": "project_update",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "jordan.lee@taskforce.com",
+        "sender_name": "Jordan Lee"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_002",
+      "title": "Weekly Operational Sync",
+      "start_time": "2026-05-03T09:00:00.077Z",
+      "end_time": "2026-05-03T10:00:00.077Z",
+      "transcript_summary": "Review of task execution statuses against operational directives.",
+      "attendees": [
+        {
+          "email": "alex.johnson@startupedge.com",
+          "name": "Alex Johnson"
+        },
+        {
+          "email": "jordan.lee@taskforce.com",
+          "name": "Jordan Lee"
+        }
+      ],
+      "description": "Focus on ensuring tasks are aligned with ongoing operational goals."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "Microsoft Office",
+      "amount": 299.99,
+      "currency": "USD",
+      "category": "software",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-01T08:15:30.077Z"
+    },
+    {
+      "merchant_normalized": "Slack Tech",
+      "amount": 49.99,
+      "currency": "USD",
+      "category": "communication",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-04-25T07:45:20.077Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Deploy new integration for Project Phoenix",
+      "status": "in-progress",
+      "priority": "high",
+      "due_date": "2026-05-05",
+      "source_type": "project_management_tool"
+    },
+    {
+      "title": "Conduct operational directive review",
+      "status": "completed",
+      "priority": "medium",
+      "due_date": "2026-05-02",
+      "source_type": "internal_system"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Submit project status report",
+      "due_date": "2026-05-06",
+      "status": "pending",
+      "ai_confidence": 0.85
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "directive_sync_check",
+      "category": "operations",
+      "insight_type": "alignment",
+      "title": "Operational Directives vs Task Execution",
+      "summary": "A recent review indicates a potential misalignment between ongoing tasks and set directives.",
+      "urgency": "high",
+      "priority_score": 8.6,
+      "recommended_action": "Adjust task priorities to reflect updated operational goals.",
+      "explanation": "Significant tasks are falling behind planned operational timelines.",
+      "status": "urgent review needed"
+    },
+    {
+      "state_key": "stale_insight_conflict",
+      "category": "operations",
+      "insight_type": "completion_rate",
+      "title": "Task Completion Rates",
+      "summary": "Previous data suggested high completion rates, conflicting with recent slowdowns observed.",
+      "urgency": "medium",
+      "priority_score": 5.4,
+      "recommended_action": "Re-assess resources allocation.",
+      "explanation": "Stale insight contradicts newer transaction data regarding resource allocation.",
+      "status": "obsolete"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": [
+      "executive to project_manager"
+    ],
+    "actual_intent": [
+      "operational_summary",
+      "search_lookup"
+    ],
+    "expected_answer_facts": [
+      "Tasks are not fully aligning with updated operational directives.",
+      "Stale insight conflicts with current observation of task execution slowdown."
+    ]
+  }
+}

@@ -1,0 +1,146 @@
+{
+  "scenario_id": "SCN_1011",
+  "eval_id": "EVAL_059",
+  "theme": "Linking Operational Reviews with Transaction Outcomes",
+  "entities": {
+    "people": [
+      {
+        "name": "Alex Johnson",
+        "email": "alex.johnson@startupinc.com",
+        "relationship_type": "CEO"
+      },
+      {
+        "name": "Jamie Smith",
+        "email": "jamie.smith@startupinc.com",
+        "relationship_type": "CFO"
+      }
+    ],
+    "companies": [
+      "Startup Inc."
+    ],
+    "projects": [
+      "Q2 Growth Plan",
+      "Operational Efficiency Review"
+    ],
+    "merchants": [
+      "OfficeSupplyCo",
+      "Office Supplies Depot",
+      "TravelCorp"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_001",
+      "subject": "Re: Q2 Operational Review Insights",
+      "body_summary": "Attached are the insights from the Q2 operational review. Note discrepancies with April's transactions.",
+      "occurred_at": "2026-05-02T08:45:22.851Z",
+      "email_category": "operational",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "jamie.smith@startupinc.com",
+        "sender_name": "Jamie Smith"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_001",
+      "title": "Weekly Finance Sync",
+      "start_time": "2026-04-29T14:00:00.000Z",
+      "end_time": "2026-04-29T15:00:00.000Z",
+      "transcript_summary": "Discussion on aligning operational reviews with transaction history for Q2.",
+      "attendees": [
+        {
+          "email": "alex.johnson@startupinc.com",
+          "name": "Alex Johnson"
+        },
+        {
+          "email": "jamie.smith@startupinc.com",
+          "name": "Jamie Smith"
+        }
+      ],
+      "description": "Address discrepancies noted in operational reviews against transaction outcomes for further budget adjustments."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "OfficeSupplyCo",
+      "amount": 1200,
+      "currency": "USD",
+      "category": "Supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-04-27T10:15:00.000Z"
+    },
+    {
+      "merchant_normalized": "TravelCorp",
+      "amount": 5000,
+      "currency": "USD",
+      "category": "Travel",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-04-28T16:00:00.000Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Review Q2 Operational Insights against Transactions",
+      "status": "in_progress",
+      "priority": "high",
+      "due_date": "2026-05-05",
+      "source_type": "email"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Complete financial alignment for Q2",
+      "due_date": "2026-05-06",
+      "status": "open",
+      "ai_confidence": 0.85
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "op_review_april_mismatch",
+      "category": "operations",
+      "insight_type": "review",
+      "title": "April Operational Reviews and Transaction Mismatches",
+      "summary": "Operational spending was higher than approved budgets. Notable on office supplies and travel expenses.",
+      "urgency": "medium",
+      "priority_score": 75,
+      "recommended_action": "Investigate discrepancies and propose budget adjustments.",
+      "explanation": "There is a need to align spend allocations with transaction confirmations for accurate budget planning.",
+      "status": "under_review"
+    },
+    {
+      "state_key": "stale_op_review_february",
+      "category": "operations",
+      "insight_type": "stale_information",
+      "title": "February Review - Provisional Assessments",
+      "summary": "Initial assessments showed expected alignments, but recent data suggests discrepancies.",
+      "urgency": "low",
+      "priority_score": 40,
+      "recommended_action": "Review and compare with recent transactions for validity.",
+      "explanation": "Reports from February need updating with recent transactional data for consistency.",
+      "status": "stale"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": [],
+    "actual_intent": {
+      "required": [
+        "operational_summary",
+        "search_lookup"
+      ],
+      "forbidden": [
+        "relationship"
+      ],
+      "matchMode": "all"
+    },
+    "expected_answer_facts": [
+      "Q2 operational insights indicate overspend on office supplies and travel",
+      "April transactions mismatched approved spend",
+      "February reviews require updating due to newer transaction data"
+    ]
+  }
+}

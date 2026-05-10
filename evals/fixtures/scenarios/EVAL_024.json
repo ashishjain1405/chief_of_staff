@@ -1,0 +1,168 @@
+{
+  "scenario_id": "SCENARIO_024",
+  "eval_id": "EVAL_024",
+  "theme": "Assessing Operational Trends through Historical Communications",
+  "entities": {
+    "people": [
+      {
+        "name": "Alex Johnson",
+        "email": "ajohnson@ventureco.com",
+        "relationship_type": "colleague"
+      },
+      {
+        "name": "Jordan Lee",
+        "email": "jordan.l@fintechcorp.com",
+        "relationship_type": "partner"
+      }
+    ],
+    "companies": [
+      "VentureCo",
+      "FintechCorp"
+    ],
+    "projects": [
+      "Project Nexus",
+      "Apollo Integration"
+    ],
+    "merchants": [
+      "Amazon",
+      "Amzn Marketplace",
+      "AWS"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_001",
+      "subject": "Re: Apollo Integration Roadblocks",
+      "body_summary": "Reviewing the latest impediments in the Apollo Integration and seeking potential solutions with the team.",
+      "occurred_at": "2026-05-05T15:23:10.000Z",
+      "email_category": "project_update",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "ajohnson@ventureco.com",
+        "sender_name": "Alex Johnson"
+      },
+      "embedding_null": false
+    },
+    {
+      "external_id": "email_002",
+      "subject": "Weekly Update: Sales & Projections",
+      "body_summary": "Discussing the latest sales trends and how they affect future projections.",
+      "occurred_at": "2026-04-28T09:14:45.000Z",
+      "email_category": "report",
+      "requires_action": false,
+      "sentiment": "positive",
+      "channel_metadata": {
+        "sender": "jordan.l@fintechcorp.com",
+        "sender_name": "Jordan Lee"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_001",
+      "title": "Strategic Planning for Q3",
+      "start_time": "2026-05-04T10:00:00.000Z",
+      "end_time": "2026-05-04T11:00:00.000Z",
+      "transcript_summary": "Discussion focused on evaluating current strategy and preparing for Q3.",
+      "attendees": [
+        {
+          "email": "ajohnson@ventureco.com",
+          "name": "Alex Johnson"
+        },
+        {
+          "email": "jordan.l@fintechcorp.com",
+          "name": "Jordan Lee"
+        }
+      ],
+      "description": "Q3 strategic planning meeting."
+    },
+    {
+      "external_id": "meeting_002",
+      "title": "Project Nexus Status Update",
+      "start_time": "2026-04-29T14:00:00.000Z",
+      "end_time": "2026-04-29T15:00:00.000Z",
+      "transcript_summary": "Review of current status and next steps for Project Nexus.",
+      "attendees": [
+        {
+          "email": "ajohnson@ventureco.com",
+          "name": "Alex Johnson"
+        }
+      ],
+      "description": "Monthly update meeting for Project Nexus."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "AWS",
+      "amount": 320.75,
+      "currency": "USD",
+      "category": "cloud_services",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-02T08:47:00.000Z"
+    },
+    {
+      "merchant_normalized": "Amazon",
+      "amount": 56.4,
+      "currency": "USD",
+      "category": "office_supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-07T13:30:00.000Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Finalize Q3 Strategy Document",
+      "status": "in_progress",
+      "priority": "high",
+      "due_date": "2026-05-15",
+      "source_type": "strategic"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Meet with Project Nexus team to discuss roadblocks.",
+      "due_date": "2026-05-06",
+      "status": "completed",
+      "ai_confidence": 0.9
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "insight_001",
+      "category": "financial",
+      "insight_type": "cost_analysis",
+      "title": "Unexpected spike in cloud service costs",
+      "summary": "Recent transactions indicate an increase in AWS charges, potentially due to increased resource allocation for a new project.",
+      "urgency": "medium",
+      "priority_score": 70,
+      "recommended_action": "Review AWS usage and optimize resource allocation.",
+      "explanation": "The last AWS transaction suggests higher than expected spending, warranting a review.",
+      "status": "pending_review"
+    },
+    {
+      "state_key": "insight_002",
+      "category": "sales",
+      "insight_type": "trend_analysis",
+      "title": "Increased sales trend",
+      "summary": "Sales have shown a steady increase over the past month, largely influenced by new marketing strategies.",
+      "urgency": "low",
+      "priority_score": 50,
+      "recommended_action": "Monitor and continue current marketing efforts.",
+      "explanation": "April sales reports indicate improving trends.",
+      "status": "validated"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": [
+      "Colleagues: Alex Johnson - Jordan Lee",
+      "Partners: VentureCo - FintechCorp"
+    ],
+    "actual_intent": "Combine operational emails and insights to evaluate recent trends in cloud service costs and sales performance.",
+    "expected_answer_facts": [
+      "Recent AWS costs have increased significantly.",
+      "April sales trends show a positive trajectory."
+    ]
+  }
+}

@@ -1,0 +1,160 @@
+{
+  "scenario_id": "SCENARIO_049",
+  "eval_id": "EVAL_049",
+  "theme": "Operational and Transactional Alignment",
+  "entities": {
+    "people": [
+      {
+        "name": "Alice Zheng",
+        "email": "alice@startupexample.com",
+        "relationship_type": "CEO"
+      },
+      {
+        "name": "Bob Kim",
+        "email": "bob@startupexample.com",
+        "relationship_type": "COO"
+      }
+    ],
+    "companies": [
+      "StartupExample Inc"
+    ],
+    "projects": [
+      "ExpansionQ1",
+      "ProductLaunch2026"
+    ],
+    "merchants": [
+      "QuickBooks",
+      "Stripe Inc",
+      "Quick Book",
+      "Amazon Web Services"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_2026_001",
+      "subject": "Re: QuickBooks and Stripe Transactions",
+      "body_summary": "Let's ensure the latest operational summaries from last week align with Stripe and QuickBooks data.",
+      "occurred_at": "2026-04-28T13:15:00.000Z",
+      "email_category": "operations",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "bob@startupexample.com",
+        "sender_name": "Bob Kim"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_2026_002",
+      "title": "Weekly Operations Review",
+      "start_time": "2026-04-29T14:00:00.000Z",
+      "end_time": "2026-04-29T15:00:00.000Z",
+      "transcript_summary": "Summarized discrepancies in financial reporting discussed.",
+      "attendees": [
+        {
+          "email": "alice@startupexample.com",
+          "name": "Alice Zheng"
+        },
+        {
+          "email": "bob@startupexample.com",
+          "name": "Bob Kim"
+        }
+      ],
+      "description": "Review weekly operations and financial transactions."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "QuickBooks",
+      "amount": 5000,
+      "currency": "USD",
+      "category": "Software",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-04-27T09:00:00.000Z"
+    },
+    {
+      "merchant_normalized": "Stripe Inc",
+      "amount": 2500,
+      "currency": "USD",
+      "category": "Payment Processing",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-04-28T15:30:00.000Z"
+    },
+    {
+      "merchant_normalized": "Quick Book",
+      "amount": 5000,
+      "currency": "USD",
+      "category": "Software",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-04-26T09:00:00.000Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Reconcile April Transactions",
+      "status": "in progress",
+      "priority": "high",
+      "due_date": "2026-05-05",
+      "source_type": "finance"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Verify operational summaries for Q1",
+      "due_date": "2026-05-03",
+      "status": "pending",
+      "ai_confidence": 0.85
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "april_financial_report_insight",
+      "category": "financial_operations",
+      "insight_type": "summary",
+      "title": "April Financial Summary",
+      "summary": "Reported net income for April aligns with expected revenue but mismatches expenses by slight overstatement.",
+      "urgency": "medium",
+      "priority_score": 0.7,
+      "recommended_action": "Re-examine expense entries and match with transactional data.",
+      "explanation": "Differences detected in reported vs actual transactions.",
+      "status": "open"
+    },
+    {
+      "state_key": "q1_operations_report_stale",
+      "category": "operations",
+      "insight_type": "summary",
+      "title": "Q1 Operational Insights",
+      "summary": "Q1 summary indicates operational cost efficiency, conflicting with higher transaction costs in recent weeks.",
+      "urgency": "low",
+      "priority_score": 0.4,
+      "recommended_action": "Update the summary with current transaction information.",
+      "explanation": "Stale data may not accurately reflect current cost dynamics.",
+      "status": "stale"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": [
+      {
+        "entity_a": "Bob Kim",
+        "entity_b": "Stripe Inc",
+        "relationship": "service_provider"
+      }
+    ],
+    "actual_intent": {
+      "required": [
+        "operational_summary",
+        "search_lookup"
+      ],
+      "forbidden": [
+        "travel"
+      ],
+      "matchMode": "all"
+    },
+    "expected_answer_facts": [
+      "April Financial Summary mismatches expenses by an overstatement.",
+      "Existing Q1 insights do not reflect recent increases in transaction costs."
+    ]
+  }
+}

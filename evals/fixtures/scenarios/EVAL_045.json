@@ -1,0 +1,200 @@
+{
+  "scenario_id": "SCEN_0923",
+  "eval_id": "EVAL_045",
+  "theme": "Evaluating unresolved issues in ongoing tasks",
+  "entities": {
+    "people": [
+      {
+        "name": "Alex Johnson",
+        "email": "alex.j@futuristicsolutions.io",
+        "relationship_type": "executive assistant"
+      },
+      {
+        "name": "Jamie Lee",
+        "email": "jamie.l@futuristicsolutions.io",
+        "relationship_type": "project manager"
+      }
+    ],
+    "companies": [
+      "Futuristic Solutions Inc.",
+      "Visionary Tech Corp."
+    ],
+    "projects": [
+      "Project Neutron",
+      "Strategy Pulse"
+    ],
+    "merchants": [
+      "QuickSupply Co.",
+      "FastVendor Inc."
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_1034",
+      "subject": "Re: Follow-up on Project Neutron milestones",
+      "body_summary": "Let's ensure deliverables are aligned with current roadmap. There are unresolved blockers.",
+      "occurred_at": "2026-05-02T14:05:00Z",
+      "email_category": "project",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "jamie.l@futuristicsolutions.io",
+        "sender_name": "Jamie Lee"
+      },
+      "embedding_null": false
+    },
+    {
+      "external_id": "email_1045",
+      "subject": "Status Update Needed: Strategy Pulse",
+      "body_summary": "Awaiting reports from marketing; legal reviews pending.",
+      "occurred_at": "2026-04-30T09:00:00Z",
+      "email_category": "project",
+      "requires_action": true,
+      "sentiment": "slightly negative",
+      "channel_metadata": {
+        "sender": "alex.j@futuristicsolutions.io",
+        "sender_name": "Alex Johnson"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_2026_11",
+      "title": "Neutron Project Sync-Up",
+      "start_time": "2026-05-03T15:00:00Z",
+      "end_time": "2026-05-03T16:00:00Z",
+      "transcript_summary": "Brief discussion on task allocations with noted concerns on resource availability.",
+      "attendees": [
+        {
+          "email": "alex.j@futuristicsolutions.io",
+          "name": "Alex Johnson"
+        },
+        {
+          "email": "jamie.l@futuristicsolutions.io",
+          "name": "Jamie Lee"
+        }
+      ],
+      "description": "Weekly status meeting to align on the current state of Project Neutron."
+    },
+    {
+      "external_id": "meeting_2026_12",
+      "title": "Strategy Meeting for Visionary Tech",
+      "start_time": "2026-04-29T13:00:00Z",
+      "end_time": "2026-04-29T14:30:00Z",
+      "transcript_summary": "Pending reviews from legal team causing delays in project timelines.",
+      "attendees": [
+        {
+          "email": "alex.j@futuristicsolutions.io",
+          "name": "Alex Johnson"
+        }
+      ],
+      "description": "Strategic development session to evaluate bottlenecks."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "QuickSupply Co.",
+      "amount": 5000,
+      "currency": "USD",
+      "category": "office_supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-01T11:30:25Z"
+    },
+    {
+      "merchant_normalized": "FastVendor Inc.",
+      "amount": 1500,
+      "currency": "USD",
+      "category": "it_services",
+      "transaction_type": "credit",
+      "transaction_datetime": "2026-05-02T15:35:10Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Finalize Design Prototypes",
+      "status": "in_progress",
+      "priority": "high",
+      "due_date": "2026-05-07",
+      "source_type": "sql_tasks"
+    },
+    {
+      "title": "Prepare Legal Drafts for Review",
+      "status": "pending_approval",
+      "priority": "medium",
+      "due_date": "2026-05-05",
+      "source_type": "sql_tasks"
+    },
+    {
+      "title": "Resolve Server Downtime Issues",
+      "status": "blocked",
+      "priority": "critical",
+      "due_date": "2026-04-29",
+      "source_type": "sql_tasks"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Complete financial review by next board meeting",
+      "due_date": "2026-05-10",
+      "status": "in progress",
+      "ai_confidence": 0.85
+    },
+    {
+      "description": "Implement feedback from Neutron Project",
+      "due_date": "2026-05-11",
+      "status": "not started",
+      "ai_confidence": 0.67
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "server_uptime_report",
+      "category": "it_infrastructure",
+      "insight_type": "system_health",
+      "title": "Critical Downtime on Backend Servers",
+      "summary": "Servers went down on 2026-04-29 impacting client-facing systems.",
+      "urgency": "critical",
+      "priority_score": 95,
+      "recommended_action": "Immediate resolution required to restore service continuity.",
+      "explanation": "Server downtime likely caused by network security updates.",
+      "status": "open"
+    },
+    {
+      "state_key": "design_prototype_status",
+      "category": "project_management",
+      "insight_type": "task_progress",
+      "title": "Design Prototypes Behind Schedule",
+      "summary": "The design prototypes are two days behind schedule due to unexpected design revisions.",
+      "urgency": "high",
+      "priority_score": 80,
+      "recommended_action": "Boost team resources to recover lost time.",
+      "explanation": "Delayed feedback on design elements affecting timeline.",
+      "status": "ongoing"
+    },
+    {
+      "state_key": "stale_vendor_refund",
+      "category": "vendor_management",
+      "insight_type": "financial_discrepancy",
+      "title": "Pending Refund from Vendor",
+      "summary": "Refund from FastVendor Inc. recorded as pending since 2026-04-20. This contradicts recent transaction logs.",
+      "urgency": "low",
+      "priority_score": 40,
+      "recommended_action": "Verify with accounting records.",
+      "explanation": "Previous transaction log indicates refund issue.",
+      "status": "open"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": [
+      "blockers delaying project Neutron",
+      "pending legal reviews"
+    ],
+    "actual_intent": "productivity",
+    "expected_answer_facts": [
+      "Resolve Server Downtime Issues is blocked",
+      "Design Prototypes Behind Schedule",
+      "Pending legal reviews causing delays"
+    ]
+  }
+}

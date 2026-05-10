@@ -1,0 +1,171 @@
+{
+  "scenario_id": "SCENARIO_055",
+  "eval_id": "EVAL_055",
+  "theme": "Financial Conflict Management",
+  "entities": {
+    "people": [
+      {
+        "name": "Alex Jordan",
+        "email": "alex.jordan@startup-x.io",
+        "relationship_type": "CEO"
+      },
+      {
+        "name": "Jamie Smith",
+        "email": "jamie.smith@startup-x.io",
+        "relationship_type": "CFO"
+      }
+    ],
+    "companies": [
+      "Startup X"
+    ],
+    "projects": [
+      "Project Alpha",
+      "Expansion Initiative"
+    ],
+    "merchants": [
+      "OfficeSupply Co",
+      "OfficeSupplies Co.",
+      "Travel Express"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_001",
+      "subject": "Revised budget for Project Alpha",
+      "body_summary": "Attached is the revised budget approved last week. Note potential overlaps with existing commitments.",
+      "occurred_at": "2026-05-01T14:12:45.278Z",
+      "email_category": "finance",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "alex.jordan@startup-x.io",
+        "sender_name": "Alex Jordan"
+      },
+      "embedding_null": false
+    },
+    {
+      "external_id": "email_002",
+      "subject": "Office supplies delay due to payment",
+      "body_summary": "There seems to be a delay in delivery due to a pending payment. Please check.",
+      "occurred_at": "2026-04-28T09:07:33.278Z",
+      "email_category": "procurement",
+      "requires_action": true,
+      "sentiment": "negative",
+      "channel_metadata": {
+        "sender": "supplier@officesupplyco.com",
+        "sender_name": "OfficeSupply Co."
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_001",
+      "title": "Financial Planning Session - Expansion Initiative",
+      "start_time": "2026-05-02T15:00:00Z",
+      "end_time": "2026-05-02T16:30:00Z",
+      "transcript_summary": "Discussed alignment of tasks with financial commitments and identified potential conflicts in new project timelines.",
+      "attendees": [
+        {
+          "email": "alex.jordan@startup-x.io",
+          "name": "Alex Jordan"
+        },
+        {
+          "email": "jamie.smith@startup-x.io",
+          "name": "Jamie Smith"
+        }
+      ],
+      "description": "A detailed review of ongoing project finances and commitments versus planned operations."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "OfficeSupply Co",
+      "amount": 450,
+      "currency": "USD",
+      "category": "office supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-03T10:45:00.278Z"
+    },
+    {
+      "merchant_normalized": "Travel Express",
+      "amount": 1200,
+      "currency": "USD",
+      "category": "travel",
+      "transaction_type": "credit",
+      "transaction_datetime": "2026-04-29T11:30:00.278Z"
+    },
+    {
+      "merchant_normalized": "OfficeSupplies Co.",
+      "amount": 450,
+      "currency": "USD",
+      "category": "office supplies",
+      "transaction_type": "refund",
+      "transaction_datetime": "2026-04-25T08:00:00.278Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Finalize budget for Project Alpha",
+      "status": "in progress",
+      "priority": "high",
+      "due_date": "2026-05-05",
+      "source_type": "finance"
+    },
+    {
+      "title": "Review procurement delays",
+      "status": "not started",
+      "priority": "medium",
+      "due_date": "2026-05-04",
+      "source_type": "procurement"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Monthly office supply expenditure",
+      "due_date": "2026-05-03",
+      "status": "pending",
+      "ai_confidence": 0.85
+    },
+    {
+      "description": "Quarterly travel budget",
+      "due_date": "2026-05-01",
+      "status": "approved",
+      "ai_confidence": 0.9
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "financial_conflict_risk",
+      "category": "financial",
+      "insight_type": "risk assessment",
+      "title": "Potential Overlap in Office Supplies Budget",
+      "summary": "There appears to be a risk of budget overlap with current commitments. Urgent review required.",
+      "urgency": "critical",
+      "priority_score": 0.95,
+      "recommended_action": "Investigate outstanding payments and match against commitments.",
+      "explanation": "Historical data shows overdue payments impacting new transactions.",
+      "status": "pending"
+    },
+    {
+      "state_key": "travel_budget_discrepancy",
+      "category": "financial",
+      "insight_type": "budget check",
+      "title": "Travel Budget Excess",
+      "summary": "Total travel expenses exceed the budget cap set last quarter due to recent trips.",
+      "urgency": "high",
+      "priority_score": 0.88,
+      "recommended_action": "Assess recent travel and adjust budgets accordingly.",
+      "explanation": "Exceeding budget aligns with recent transaction data.",
+      "status": "active"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": "Alex Jordan and Jamie Smith work together on financial alignment tasks for Startup X.",
+    "actual_intent": "financial and operational alignment",
+    "expected_answer_facts": [
+      "OfficeSupply Co payment delay conflicting with current office supplies budget commitment.",
+      "Project Alpha's required budget finalization is delayed affecting financial commitments."
+    ]
+  }
+}

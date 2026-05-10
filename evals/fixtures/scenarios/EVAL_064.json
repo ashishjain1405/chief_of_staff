@@ -1,0 +1,138 @@
+{
+  "scenario_id": "SCENARIO_094",
+  "eval_id": "EVAL_064",
+  "theme": "Operational to Financial Alignment",
+  "entities": {
+    "people": [
+      {
+        "name": "Alice Johnson",
+        "email": "alice.j@startupinc.com",
+        "relationship_type": "CFO"
+      },
+      {
+        "name": "Robert Allen",
+        "email": "robert.a@startupinc.com",
+        "relationship_type": "CEO"
+      }
+    ],
+    "companies": [
+      "Startup Inc",
+      "FinAssist Co"
+    ],
+    "projects": [
+      "Project Phoenix",
+      "Finance Re-alignment"
+    ],
+    "merchants": [
+      "BrightFuture Software Solutions",
+      "Bright Future Corp"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_001",
+      "subject": "Review Recent Transactions",
+      "body_summary": "Alice discusses overlap in merchant names affecting transaction categorization.",
+      "occurred_at": "2026-05-02T14:23:15.683Z",
+      "email_category": "finance",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "alice.j@startupinc.com",
+        "sender_name": "Alice Johnson"
+      },
+      "embedding_null": false
+    },
+    {
+      "external_id": "email_002",
+      "subject": "Urgent: Operational Insights Update",
+      "body_summary": "A stale report on operational spending contradicts recent data.",
+      "occurred_at": "2026-05-03T09:12:45.561Z",
+      "email_category": "operations",
+      "requires_action": false,
+      "sentiment": "urgent",
+      "channel_metadata": {
+        "sender": "robert.a@startupinc.com",
+        "sender_name": "Robert Allen"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_001",
+      "title": "Weekly Financial Overview",
+      "start_time": "2026-05-04T13:00:00.000Z",
+      "end_time": "2026-05-04T14:00:00.000Z",
+      "transcript_summary": "Focused on alignment of financial forecasts with past expenditures.",
+      "attendees": [
+        {
+          "email": "alice.j@startupinc.com",
+          "name": "Alice Johnson"
+        },
+        {
+          "email": "robert.a@startupinc.com",
+          "name": "Robert Allen"
+        }
+      ],
+      "description": "Discuss how operational changes impact financial summaries."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "BrightFuture Software Solutions",
+      "amount": 15000,
+      "currency": "USD",
+      "category": "software",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-01T23:50:12.000Z"
+    },
+    {
+      "merchant_normalized": "Bright Future Corp",
+      "amount": 15000,
+      "currency": "USD",
+      "category": "consulting",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-02T03:22:45.000Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Cross-check April Expenses",
+      "status": "in-progress",
+      "priority": "high",
+      "due_date": "2026-05-05T00:00:00.000Z",
+      "source_type": "manual_entry"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Align Operational Insights with Financial Records",
+      "due_date": "2026-05-06T00:00:00.000Z",
+      "status": "pending",
+      "ai_confidence": 0.9
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "ops_insight_teen_vfg934",
+      "category": "finance",
+      "insight_type": "forecast",
+      "title": "Projected Q2 Software Spend",
+      "summary": "Initial projection shows a 20% decrease, conflicted by raw transaction data showing stable spend.",
+      "urgency": "medium",
+      "priority_score": 0.6,
+      "recommended_action": "Review recent software purchases",
+      "explanation": "Projection (created 2026-04-25) predicted decline, but monitoring was skewed.",
+      "status": "pending_review"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": [],
+    "actual_intent": "Verify operational insights against recent transactional records for misalignments.",
+    "expected_answer_facts": [
+      "Recent Transactions from BrightFuture Software Solutions match category, but operational forecast indicates a reduction in cost.",
+      "Operational insights are outdated compared to transaction records."
+    ]
+  }
+}

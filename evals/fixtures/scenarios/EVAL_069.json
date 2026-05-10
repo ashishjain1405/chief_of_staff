@@ -1,0 +1,151 @@
+{
+  "scenario_id": "SCENARIO_321",
+  "eval_id": "EVAL_069",
+  "theme": "Real-time Operational Insights Validation",
+  "entities": {
+    "people": [
+      {
+        "name": "Alice Benton",
+        "email": "alice.benton@innotechnologies.com",
+        "relationship_type": "colleague"
+      },
+      {
+        "name": "John Smith",
+        "email": "john.smith@innotechnologies.com",
+        "relationship_type": "supervisor"
+      }
+    ],
+    "companies": [
+      "Innotechnologies"
+    ],
+    "projects": [
+      "Real-Time Insight Project",
+      "Quarterly Analysis Initiative"
+    ],
+    "merchants": [
+      "Office Supplies Co",
+      "SupplyMart"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_001",
+      "subject": "Q1 Data Analysis Notes",
+      "body_summary": "Review of the key discrepancies noted last quarter. Particular attention required on operational cost overstatements.",
+      "occurred_at": "2026-04-28T15:45:00.000Z",
+      "email_category": "analysis",
+      "requires_action": false,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "john.smith@innotechnologies.com",
+        "sender_name": "John Smith"
+      },
+      "embedding_null": false
+    },
+    {
+      "external_id": "email_002",
+      "subject": "Operational Insight Review",
+      "body_summary": "Real-time operational insights might contradict the previous quarterly data. Request immediate validation.",
+      "occurred_at": "2026-05-01T08:30:00.000Z",
+      "email_category": "update request",
+      "requires_action": true,
+      "sentiment": "urgent",
+      "channel_metadata": {
+        "sender": "alice.benton@innotechnologies.com",
+        "sender_name": "Alice Benton"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_001",
+      "title": "Weekly Operations Sync",
+      "start_time": "2026-05-03T14:00:00.000Z",
+      "end_time": "2026-05-03T15:00:00.000Z",
+      "transcript_summary": "Discussion on aligning strategic directives with real-time operational insights. Emphasis on potential data conflicts.",
+      "attendees": [
+        {
+          "email": "alice.benton@innotechnologies.com",
+          "name": "Alice Benton"
+        },
+        {
+          "email": "john.smith@innotechnologies.com",
+          "name": "John Smith"
+        }
+      ],
+      "description": "Review and prepare insights for upcoming board presentation."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "SupplyMart",
+      "amount": 800,
+      "currency": "USD",
+      "category": "office supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-02T09:15:00.000Z"
+    },
+    {
+      "merchant_normalized": "Office Supplies Co",
+      "amount": 800,
+      "currency": "USD",
+      "category": "office supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-04-10T09:15:00.000Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Verify Real-Time Insight Accuracy",
+      "status": "in_progress",
+      "priority": "high",
+      "due_date": "2026-05-04",
+      "source_type": "email"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Review quarterly vs. real-time insight discrepancies",
+      "due_date": "2026-05-05",
+      "status": "pending",
+      "ai_confidence": 0.85
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "q1_operational_costs_conflict",
+      "category": "operations",
+      "insight_type": "cost analysis",
+      "title": "Q1 Operational Costs vs. Real-Time Data",
+      "summary": "Real-time insights suggest current costs are lower than Q1 reports indicated.",
+      "urgency": "critical",
+      "priority_score": 95,
+      "recommended_action": "Validate the real-time data accuracy against past reports immediately.",
+      "explanation": "Discrepancies could impact strategic planning and budgeting.",
+      "status": "unverified"
+    },
+    {
+      "state_key": "stale_overestimation",
+      "category": "operations",
+      "insight_type": "cost analysis",
+      "title": "Stale Data Overestimation",
+      "summary": "Previous data showed overestimated costs due to expanded inventory tracking.",
+      "urgency": "low",
+      "priority_score": 40,
+      "recommended_action": "Reevaluate inventory tracking processes.",
+      "explanation": "Inflated costs in Q1 may distort financial analysis.",
+      "status": "archived"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": [],
+    "actual_intent": [
+      "operational_summary"
+    ],
+    "expected_answer_facts": [
+      "Current costs are reportedly lower than previously stated for Q1 due to updated data insights.",
+      "Real-time insights require immediate validation to align strategic goals."
+    ]
+  }
+}

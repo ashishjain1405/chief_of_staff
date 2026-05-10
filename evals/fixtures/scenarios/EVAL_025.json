@@ -1,0 +1,164 @@
+{
+  "scenario_id": "SCENARIO_048",
+  "eval_id": "EVAL_025",
+  "theme": "Strategic Alignment Evaluation",
+  "entities": {
+    "people": [
+      {
+        "name": "Alex Kim",
+        "email": "alex.kim@startupz.com",
+        "relationship_type": "colleague"
+      },
+      {
+        "name": "Jordan Lee",
+        "email": "jordan.lee@ventureco.com",
+        "relationship_type": "external consultant"
+      }
+    ],
+    "companies": [
+      "StartupZ",
+      "VentureCo"
+    ],
+    "projects": [
+      "Project Catalyst",
+      "Project Horizon"
+    ],
+    "merchants": [
+      "CloudServe Hosting",
+      "CloudService Host"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_001",
+      "subject": "Re: Project Catalyst Updates",
+      "body_summary": "Discussion on aligning deliverables with strategic goals has become a priority...",
+      "occurred_at": "2026-05-08T15:18:30.000Z",
+      "email_category": "project",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "alex.kim@startupz.com",
+        "sender_name": "Alex Kim"
+      },
+      "embedding_null": false
+    },
+    {
+      "external_id": "email_002",
+      "subject": "CloudServe Invoice Concerns",
+      "body_summary": "There seems to be an inconsistency in the billing...",
+      "occurred_at": "2026-05-01T10:45:00.000Z",
+      "email_category": "finance",
+      "requires_action": true,
+      "sentiment": "negative",
+      "channel_metadata": {
+        "sender": "jordan.lee@ventureco.com",
+        "sender_name": "Jordan Lee"
+      },
+      "embedding_null": true
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_001",
+      "title": "Strategic Alignment for Project Horizon",
+      "start_time": "2026-05-10T09:00:00.000Z",
+      "end_time": "2026-05-10T10:30:00.000Z",
+      "transcript_summary": "Focusing on aligning current outcomes and strategic objectives...",
+      "attendees": [
+        {
+          "email": "alex.kim@startupz.com",
+          "name": "Alex Kim"
+        },
+        {
+          "email": "jordan.lee@ventureco.com",
+          "name": "Jordan Lee"
+        }
+      ],
+      "description": "Framework discussion to ensure project objectives are strategically aligned."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "CloudServe Hosting",
+      "amount": 500,
+      "currency": "USD",
+      "category": "web services",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-09T14:20:00.000Z"
+    },
+    {
+      "merchant_normalized": "CloudService Host",
+      "amount": 500,
+      "currency": "USD",
+      "category": "web services",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-08T14:20:00.000Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Align Task Outcomes",
+      "status": "in_progress",
+      "priority": "high",
+      "due_date": "2026-05-15",
+      "source_type": "email"
+    },
+    {
+      "title": "Review CloudServe Invoice",
+      "status": "pending",
+      "priority": "medium",
+      "due_date": "2026-05-12",
+      "source_type": "email"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Ensure strategic alignment of ongoing projects",
+      "due_date": "2026-05-20",
+      "status": "not_started",
+      "ai_confidence": 0.85
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "insight_045_q1_performance",
+      "category": "strategic",
+      "insight_type": "performance review",
+      "title": "Q1 Performance Analysis",
+      "summary": "The performance metrics show misalignment with strategic goals...",
+      "urgency": "critical",
+      "priority_score": 9.5,
+      "recommended_action": "Realign task outcomes with broader KPI targets.",
+      "explanation": "Data indicates a deviation from expected strategic outcomes.",
+      "status": "active"
+    },
+    {
+      "state_key": "stale_cloudserve_discrepancy",
+      "category": "financial",
+      "insight_type": "expense discrepancy",
+      "title": "Billing Discrepancy",
+      "summary": "A discrepancy with the CloudServe billing identified, review needed.",
+      "urgency": "low",
+      "priority_score": 3,
+      "recommended_action": "Verify current invoices against recent transactions.",
+      "explanation": "Older insight contradicts recent transaction details.",
+      "status": "active"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": {
+      "Alex Kim": [
+        "Colleague"
+      ],
+      "Jordan Lee": [
+        "External Consultant"
+      ]
+    },
+    "actual_intent": "Align task outcomes and operational insights for better strategic alignment",
+    "expected_answer_facts": [
+      "Task outcomes currently do not fully align with strategic goals.",
+      "Operational insights point out performance misalignment requiring realignment."
+    ]
+  }
+}

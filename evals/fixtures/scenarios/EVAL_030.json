@@ -1,0 +1,132 @@
+{
+  "scenario_id": "SCENARIO_057",
+  "eval_id": "EVAL_030",
+  "theme": "Task scheduling vs operational insights alignment",
+  "entities": {
+    "people": [
+      {
+        "name": "Alex Lang",
+        "email": "alex@innovate-rich.com",
+        "relationship_type": "employee"
+      }
+    ],
+    "companies": [
+      "InnovateRich Inc.",
+      "MarketPulse Ltd."
+    ],
+    "projects": [
+      "Project Phoenix",
+      "Market Expansion Strategy"
+    ],
+    "merchants": [
+      "Cafeluxe",
+      "Cafe Luxe"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_1032",
+      "subject": "Re: Market Data Analysis",
+      "body_summary": "Let's make sure the market analysis is detailed for the next launch meeting.",
+      "occurred_at": "2026-05-07T15:24:03.455Z",
+      "email_category": "work",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "alex@innovate-rich.com",
+        "sender_name": "Alex Lang"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_202",
+      "title": "Project Phoenix: Strategy Discussion",
+      "start_time": "2026-05-01T09:00:00.000Z",
+      "end_time": "2026-05-01T10:00:00.000Z",
+      "transcript_summary": "Discuss potential pivots for Project Phoenix. Alex seems worried about deadlines.",
+      "attendees": [
+        {
+          "email": "alex@innovate-rich.com",
+          "name": "Alex Lang"
+        }
+      ],
+      "description": "Strategize on next steps for Project Phoenix based on current data."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "Cafeluxe",
+      "amount": 15.5,
+      "currency": "USD",
+      "category": "food & drink",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-10T08:45:03.455Z"
+    },
+    {
+      "merchant_normalized": "Cafe Luxe",
+      "amount": 15.5,
+      "currency": "USD",
+      "category": "food & drink",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-09T08:45:03.455Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Complete market analysis for Project Phoenix",
+      "status": "in_progress",
+      "priority": "high",
+      "due_date": "2026-05-12T12:00:00.000Z",
+      "source_type": "email"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Prepare presentation for Market Expansion Strategy",
+      "due_date": "2026-05-15T09:00:00.000Z",
+      "status": "not_started",
+      "ai_confidence": 0.85
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "market_analysis_sync",
+      "category": "project",
+      "insight_type": "alignment",
+      "title": "Market Analysis Task Alignment Issue",
+      "summary": "The task for market analysis is delayed. Insight indicates different completion date.",
+      "urgency": "high",
+      "priority_score": 8,
+      "recommended_action": "Review task due dates and align with current insight timelines.",
+      "explanation": "Discrepancy between task due date and operational priority.",
+      "status": "unresolved"
+    },
+    {
+      "state_key": "cafe_luxe_spend_anomaly",
+      "category": "financial",
+      "insight_type": "anomaly_detection",
+      "title": "Duplicate Merchant Spending Detected",
+      "summary": "Transactions from Cafeluxe vs Cafe Luxe seem redundant.",
+      "urgency": "low",
+      "priority_score": 3,
+      "recommended_action": "Review recent transactions for duplicate sp spending.",
+      "explanation": "Two similar charges detected within 24 hours.",
+      "status": "under_review"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": [
+      "employee-managee alignment"
+    ],
+    "actual_intent": [
+      "scheduling harmony",
+      "operational summary assessment"
+    ],
+    "expected_answer_facts": [
+      "Task and operational insight misalignment",
+      "Possible financial redundancy with merchant"
+    ]
+  }
+}

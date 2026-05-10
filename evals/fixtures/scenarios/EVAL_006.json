@@ -1,0 +1,164 @@
+{
+  "scenario_id": "SCENARIO_2026_06_001",
+  "eval_id": "EVAL_006",
+  "theme": "Operational Finance Summary and Analysis",
+  "entities": {
+    "people": [
+      {
+        "name": "Alex Johnson",
+        "email": "alex.j@startupxyz.com",
+        "relationship_type": "CFO"
+      },
+      {
+        "name": "Patricia Lee",
+        "email": "patricia.l@startupxyz.com",
+        "relationship_type": "Finance Manager"
+      }
+    ],
+    "companies": [
+      "Startup XYZ"
+    ],
+    "projects": [
+      "Project Alpha",
+      "Project Beta"
+    ],
+    "merchants": [
+      "Office Supplies Co.",
+      "Cloud Solutions",
+      "Data Services LLC"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_001",
+      "subject": "Summary of April Transactions",
+      "body_summary": "Please find attached the April spending summary. Let me know if you need any clarifications.",
+      "occurred_at": "2026-05-02T08:45:00Z",
+      "email_category": "finance",
+      "requires_action": false,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "patricia.l@startupxyz.com",
+        "sender_name": "Patricia Lee"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_002",
+      "title": "Monthly Financial Review",
+      "start_time": "2026-05-05T14:00:00Z",
+      "end_time": "2026-05-05T15:30:00Z",
+      "transcript_summary": "Discussion centered on current spending trends and areas needing budget adjustments.",
+      "attendees": [
+        {
+          "email": "alex.j@startupxyz.com",
+          "name": "Alex Johnson"
+        },
+        {
+          "email": "patricia.l@startupxyz.com",
+          "name": "Patricia Lee"
+        }
+      ],
+      "description": "Financial review for April and projections for May."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "Cloud Solutions",
+      "amount": 2500,
+      "currency": "USD",
+      "category": "Software",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-01T10:30:00Z"
+    },
+    {
+      "merchant_normalized": "Office Supplies Co.",
+      "amount": 320,
+      "currency": "USD",
+      "category": "Office Supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-04T09:20:00Z"
+    },
+    {
+      "merchant_normalized": "Data Services LLC",
+      "amount": 1200,
+      "currency": "USD",
+      "category": "IT Services",
+      "transaction_type": "refund",
+      "transaction_datetime": "2026-05-07T13:47:00Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Review spending patterns",
+      "status": "in-progress",
+      "priority": "high",
+      "due_date": "2026-05-08T00:00:00Z",
+      "source_type": "task_manager"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Complete budget allocation for Project Beta",
+      "due_date": "2026-05-12T00:00:00Z",
+      "status": "open",
+      "ai_confidence": 0.95
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "software_spending_increase",
+      "category": "Finance",
+      "insight_type": "spending pattern",
+      "title": "Increase in cloud software expenses",
+      "summary": "An unexpected rise of 15% in cloud solutions spending compared to March.",
+      "urgency": "medium",
+      "priority_score": 70,
+      "recommended_action": "Review contract terms with the vendor for potential cost optimization.",
+      "explanation": "Consider renegotiations based on current usage assessment.",
+      "status": "active"
+    },
+    {
+      "state_key": "office_supplies_decline",
+      "category": "Finance",
+      "insight_type": "trend analysis",
+      "title": "Decrease in office supply expenses",
+      "summary": "April reflected a 10% decrease in office supply spending.",
+      "urgency": "low",
+      "priority_score": 45,
+      "recommended_action": "Continue monitoring for further reductions.",
+      "explanation": "Aligns with strategic reduction plans.",
+      "status": "active"
+    },
+    {
+      "state_key": "stale_it_services_cost",
+      "category": "Finance",
+      "insight_type": "outdated insight",
+      "title": "High IT service costs",
+      "summary": "Old data flagged continuous high costs in IT services.",
+      "urgency": "critical",
+      "priority_score": 85,
+      "recommended_action": "Review service agreements and seek discounts.",
+      "explanation": "Potential opportunity for immediate cost savings.",
+      "status": "stale"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": [],
+    "actual_intent": {
+      "required": [
+        "finance",
+        "operational_summary"
+      ],
+      "forbidden": [],
+      "matchMode": "all"
+    },
+    "expected_answer_facts": [
+      "Increase in cloud software expenses",
+      "Decrease in office supply expenses",
+      "Refund from Data Services LLC"
+    ]
+  }
+}

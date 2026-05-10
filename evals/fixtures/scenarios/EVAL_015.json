@@ -1,0 +1,147 @@
+{
+  "scenario_id": "SCENARIO_789",
+  "eval_id": "EVAL_015",
+  "theme": "Financial Discrepancies",
+  "entities": {
+    "people": [
+      {
+        "name": "Alicia West",
+        "email": "alicia.west@example.com",
+        "relationship_type": "CEO"
+      },
+      {
+        "name": "Bob Tang",
+        "email": "bob.tang@financecorp.com",
+        "relationship_type": "Finance Consultant"
+      }
+    ],
+    "companies": [
+      "FinanceCorp",
+      "TechSolutions"
+    ],
+    "projects": [
+      "Project Phoenix",
+      "Project Redux"
+    ],
+    "merchants": [
+      "Great Foods Inc.",
+      "Initech Supplies",
+      "GreatFoodz"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_1202",
+      "subject": "Re: Updated Spend Analysis",
+      "body_summary": "Please review the updated financial discrepancies. There are mismatches in the operational insights.",
+      "occurred_at": "2026-01-15T10:15:45.000Z",
+      "email_category": "finance",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "bob.tang@financecorp.com",
+        "sender_name": "Bob Tang"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_478",
+      "title": "Q1 Financial Review",
+      "start_time": "2026-02-05T13:00:00.000Z",
+      "end_time": "2026-02-05T14:00:00.000Z",
+      "transcript_summary": "Review of financial operations and identification of discrepancies in projected vs actual spends.",
+      "attendees": [
+        {
+          "email": "alicia.west@example.com",
+          "name": "Alicia West"
+        },
+        {
+          "email": "bob.tang@financecorp.com",
+          "name": "Bob Tang"
+        }
+      ],
+      "description": "Discuss and resolve disparities in financial records."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "Great Foods Inc.",
+      "amount": 2500,
+      "currency": "USD",
+      "category": "Food Supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-03-12T10:00:00.000Z"
+    },
+    {
+      "merchant_normalized": "GreatFoodz",
+      "amount": 2500,
+      "currency": "USD",
+      "category": "Food Supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-03-15T12:00:00.000Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Compile Financial Discrepancy Report",
+      "status": "in progress",
+      "priority": "high",
+      "due_date": "2026-04-30",
+      "source_type": "manual"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Review and address all financial discrepancies by end of Q1.",
+      "due_date": "2026-03-31",
+      "status": "pending",
+      "ai_confidence": 0.9
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "op_insight_3021",
+      "category": "financial",
+      "insight_type": "discrepancy_report",
+      "title": "Projected vs Actual Spend Analysis",
+      "summary": "Discovered discrepancies between projected and actual spend, especially in food supplies category. The operational data suggested double spending on the same date.",
+      "urgency": "critical",
+      "priority_score": 95,
+      "recommended_action": "Investigate transaction logs for potential double entry errors.",
+      "explanation": "Operational data shows multiple entries for Great Foods Inc., while the actual transactions list shows a single entry for each date.",
+      "status": "open"
+    },
+    {
+      "state_key": "op_insight_3022",
+      "category": "financial",
+      "insight_type": "stale_report",
+      "title": "Previous Quarter Spend",
+      "summary": "The insights from two months ago indicated no discrepancies in food supplies.",
+      "urgency": "low",
+      "priority_score": 30,
+      "recommended_action": "Cross-verify the old data with the new findings.",
+      "explanation": "Previous reports did not account for overlapping entries from different merchants.",
+      "status": "stale"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": [
+      {
+        "person": "Alicia West",
+        "relationship": "CEO overseeing operations"
+      },
+      {
+        "person": "Bob Tang",
+        "relationship": "Consultant tasked with financial oversight"
+      }
+    ],
+    "actual_intent": "To determine precise financial discrepancies and resolve conflicting data points.",
+    "expected_answer_facts": [
+      "Identify overlapping merchant names causing false spend duplications.",
+      "Clarify discrepancies between operational and transactional records, especially for food supplies.",
+      "Highlight operational insights indicating potential data entry errors."
+    ]
+  }
+}

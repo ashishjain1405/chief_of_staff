@@ -1,0 +1,144 @@
+{
+  "scenario_id": "SCENARIO_017",
+  "eval_id": "EVAL_017",
+  "theme": "Cross-Domain Financial and Operational Integration",
+  "entities": {
+    "people": [
+      {
+        "name": "Samantha Greer",
+        "email": "samantha.greer@example.com",
+        "relationship_type": "CFO"
+      },
+      {
+        "name": "Alex Johnson",
+        "email": "alex.johnson@example.com",
+        "relationship_type": "COO"
+      }
+    ],
+    "companies": [
+      "Tech Solutions Inc.",
+      "Innovatech Partners"
+    ],
+    "projects": [
+      "Quantum Leap",
+      "NextGen AI"
+    ],
+    "merchants": [
+      "Amazon Web Services",
+      "Google Cloud"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_001",
+      "subject": "Re: Q1 Financial Summary Needed",
+      "body_summary": "In this email, Samantha requests the latest financial summary to be integrated with our operational insights to align with upcoming board meetings.",
+      "occurred_at": "2026-05-08T16:45:12.420Z",
+      "email_category": "finance",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "alex.johnson@example.com",
+        "sender_name": "Alex Johnson"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_001",
+      "title": "Bi-weekly Operations Review",
+      "start_time": "2026-05-09T14:00:00.000Z",
+      "end_time": "2026-05-09T15:30:00.000Z",
+      "transcript_summary": "Discussion on operational performance metrics and integration with financial results.",
+      "attendees": [
+        {
+          "email": "samantha.greer@example.com",
+          "name": "Samantha Greer"
+        },
+        {
+          "email": "alex.johnson@example.com",
+          "name": "Alex Johnson"
+        },
+        {
+          "email": "jordan.lee@example.com",
+          "name": "Jordan Lee"
+        }
+      ],
+      "description": "Operations meeting to align on strategy and discuss the fusion of financial and operational data."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "Google Cloud",
+      "amount": 2000,
+      "currency": "USD",
+      "category": "cloud services",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-07T10:30:00.000Z"
+    },
+    {
+      "merchant_normalized": "Amazon Web Services",
+      "amount": 2500,
+      "currency": "USD",
+      "category": "cloud services",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-05T12:30:00.000Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Prepare integrated financial report",
+      "status": "incomplete",
+      "priority": "high",
+      "due_date": "2026-05-10",
+      "source_type": "email"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Present financial-operations integrated report at board meeting",
+      "due_date": "2026-05-12",
+      "status": "pending",
+      "ai_confidence": 0.9
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "operational_status_q1_2026",
+      "category": "financial",
+      "insight_type": "recurring",
+      "title": "Q1 Operational Overview",
+      "summary": "The operational costs have slightly increased due to higher cloud services usage. However, the stale insight contradicts the latest transactions.",
+      "urgency": "medium",
+      "priority_score": 3.5,
+      "recommended_action": "Review cloud service expenses and adjust strategy accordingly.",
+      "explanation": "Despite being moderately low urgency, it's crucial for validating the operational alignment.",
+      "status": "active"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": {
+      "Samantha Greer": [
+        "CFO",
+        "Finance"
+      ],
+      "Alex Johnson": [
+        "COO",
+        "Operations"
+      ]
+    },
+    "actual_intent": {
+      "required": [
+        "finance",
+        "operational_summary"
+      ],
+      "forbidden": []
+    },
+    "expected_answer_facts": [
+      "Integration of financial data from cloud service expenses",
+      "Incorporation of contradictory operational insights regarding cloud services expenses",
+      "Aggregation for cross-domain report generation"
+    ]
+  }
+}

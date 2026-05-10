@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createClientWithToken } from "@/lib/supabase/server";
 import { classifyIntent, FALLBACK_INTENT } from "@/lib/ai/intent/classify";
 import { resolveEntities } from "@/lib/ai/retrieval/resolve";
 import { buildRetrievalPlan } from "@/lib/ai/retrieval/plan";
@@ -8,15 +8,27 @@ import { unifiedRank, getRankingProfile, DEFAULT_DIVERSITY_CAPS } from "@/lib/ai
 import { decodeConversationContext, updateConversationContext, mergeContextWithIntent } from "@/lib/ai/retrieval/context";
 import { buildTrace } from "@/lib/ai/retrieval/trace";
 import { askSystemPrompt, askContextPrompt } from "@/lib/ai/prompts";
-import { streamText, convertToModelMessages, type UIMessage } from "ai";
+import { streamText, generateText, convertToModelMessages, type UIMessage } from "ai";
 import { openai } from "@ai-sdk/openai";
 
 export async function POST(request: Request) {
   const startTime = Date.now();
+  const isEvalMode = new URL(request.url).searchParams.get("eval") === "true";
 
   try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    let supabase;
+    let user;
+    if (isEvalMode) {
+      const token = request.headers.get("Authorization")?.replace("Bearer ", "");
+      if (!token) return new Response("Unauthorized", { status: 401 });
+      supabase = await createClientWithToken(token);
+      const { data } = await supabase.auth.getUser();
+      user = data.user;
+    } else {
+      supabase = await createClient();
+      const { data } = await supabase.auth.getUser();
+      user = data.user;
+    }
     if (!user) return new Response("Unauthorized", { status: 401 });
 
     const body = await request.json();
@@ -108,6 +120,16 @@ export async function POST(request: Request) {
     const contextBlock = askContextPrompt(rankedItems, intent);
 
     const modelMessages = await convertToModelMessages(messages);
+
+    if (isEvalMode) {
+      const { text } = await generateText({
+        model: openai("gpt-4o"),
+        system: `${systemPrompt}\n\n${contextBlock}`,
+        messages: modelMessages,
+        maxOutputTokens: 1024,
+      });
+      return Response.json({ response: text, trace });
+    }
 
     const result = streamText({
       model: openai("gpt-4o"),

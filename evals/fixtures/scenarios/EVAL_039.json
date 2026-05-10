@@ -1,0 +1,140 @@
+{
+  "scenario_id": "SCENARIO_0987",
+  "eval_id": "EVAL_039",
+  "theme": "Project Insight Update Evaluation",
+  "entities": {
+    "people": [
+      {
+        "name": "Alex Johnson",
+        "email": "alex.johnson@innoventech.com",
+        "relationship_type": "co-worker"
+      },
+      {
+        "name": "Jordan B.",
+        "email": "jordan.b@innoventech.com",
+        "relationship_type": "manager"
+      }
+    ],
+    "companies": [
+      "InnovenTech",
+      "Green Valley Consulting",
+      "TechPros"
+    ],
+    "projects": [
+      "FalconAI Expansion",
+      "Green Valley Tech Revamp"
+    ],
+    "merchants": [
+      "Amazon Web Services",
+      "Cloudflex Hosting"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_9871",
+      "subject": "Re: FalconAI Project Budget Update",
+      "body_summary": "Jordan mentioned updates on the budget constraints and potential reallocations.",
+      "occurred_at": "2026-05-09T14:23:45.262Z",
+      "email_category": "project",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "jordan.b@innoventech.com",
+        "sender_name": "Jordan B."
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_3245",
+      "title": "FalconAI Expansion Strategy",
+      "start_time": "2026-05-08T09:00:00.000Z",
+      "end_time": "2026-05-08T10:00:00.000Z",
+      "transcript_summary": "Discussed key milestones and obstacles; varied opinions on tech stack updates.",
+      "attendees": [
+        {
+          "email": "alex.johnson@innoventech.com",
+          "name": "Alex Johnson"
+        },
+        {
+          "email": "jordan.b@innoventech.com",
+          "name": "Jordan B."
+        }
+      ],
+      "description": "Strategy meeting for FalconAI project enhancements."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "Amazon Web Services",
+      "amount": 2000,
+      "currency": "USD",
+      "category": "services",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-07T12:00:00.000Z"
+    },
+    {
+      "merchant_normalized": "Green Valley Consulting",
+      "amount": 1500,
+      "currency": "USD",
+      "category": "consulting",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-09T15:30:00.000Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Update project timeline for FalconAI",
+      "status": "in-progress",
+      "priority": "high",
+      "due_date": "2026-05-12",
+      "source_type": "internal"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Finalize budget allocation adjustments",
+      "due_date": "2026-05-11",
+      "status": "outstanding",
+      "ai_confidence": 0.95
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "falconai_insight_001",
+      "category": "productivity",
+      "insight_type": "project update",
+      "title": "Enhanced resource allocation",
+      "summary": "Recent review shows re-allocated resources optimizing FalconAI project's deliverables.",
+      "urgency": "medium",
+      "priority_score": 7.2,
+      "recommended_action": "Reassess current resource allocations as new data may influence efficiency.",
+      "explanation": "Updated financial inputs support modified resource distribution improving project flow.",
+      "status": "updated"
+    },
+    {
+      "state_key": "stale_falconai_insight",
+      "category": "productivity",
+      "insight_type": "cost concern",
+      "title": "Potential Cost Overruns",
+      "summary": "Old insights suggested cost overruns without factoring current budgetary reallocations.",
+      "urgency": "high",
+      "priority_score": 8.5,
+      "recommended_action": "Temporary freeze on further expansions until financial alignment confirmed.",
+      "explanation": "Previous analysis dated back to unfresh data not reflective of present adjustments.",
+      "status": "stale"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": [
+      "manager",
+      "co-worker"
+    ],
+    "actual_intent": "productivity",
+    "expected_answer_facts": [
+      "Enhanced resource allocation optimizes deliverables.",
+      "Updated financial inputs improve project flow."
+    ]
+  }
+}

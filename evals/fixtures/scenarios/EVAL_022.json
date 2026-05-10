@@ -1,0 +1,142 @@
+{
+  "scenario_id": "SCENARIO_048",
+  "eval_id": "EVAL_022",
+  "theme": "Task Progress Discrepancies",
+  "entities": {
+    "people": [
+      {
+        "name": "Alice Bennett",
+        "email": "alice.bennett@syntheticmail.com",
+        "relationship_type": "colleague"
+      },
+      {
+        "name": "John Doe",
+        "email": "johndoe@syntheticmail.com",
+        "relationship_type": "finance_manager"
+      }
+    ],
+    "companies": [
+      "Tech Innovations LLC",
+      "Future Solutions Inc."
+    ],
+    "projects": [
+      "Project Phoenix",
+      "Expansion Initiative"
+    ],
+    "merchants": [
+      "Office Supplies Co",
+      "OfficeSupplies Store"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_1023",
+      "subject": "Re: Discrepancy in Task Dashboard - Urgent",
+      "body_summary": "Noticed mismatches between our task tracker and the operational dashboard regarding 'Project Phoenix'. Let's delve into this during the next sync.",
+      "occurred_at": "2026-05-07T10:15:32.000Z",
+      "email_category": "work",
+      "requires_action": true,
+      "sentiment": "concerned",
+      "channel_metadata": {
+        "sender": "alice.bennett@syntheticmail.com",
+        "sender_name": "Alice Bennett"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_2048",
+      "title": "Weekly Operational Sync",
+      "start_time": "2026-05-09T15:00:00.000Z",
+      "end_time": "2026-05-09T16:00:00.000Z",
+      "transcript_summary": "Discussed ongoing projects, noticed discrepancy in task progress for 'Project Phoenix'.",
+      "attendees": [
+        {
+          "email": "alice.bennett@syntheticmail.com",
+          "name": "Alice Bennett"
+        },
+        {
+          "email": "johndoe@syntheticmail.com",
+          "name": "John Doe"
+        }
+      ],
+      "description": "Weekly meeting to review project and operational dashboards."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "Office Supplies Co",
+      "amount": 1200,
+      "currency": "USD",
+      "category": "business expense",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-04T14:12:00.000Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Review Task Discrepancies for Project Phoenix",
+      "status": "in progress",
+      "priority": "high",
+      "due_date": "2026-05-11",
+      "source_type": "sql_tasks"
+    },
+    {
+      "title": "Finalize Expansion Initiative Report",
+      "status": "completed",
+      "priority": "medium",
+      "due_date": "2026-05-05",
+      "source_type": "sql_tasks"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Resolve task dashboard inconsistencies",
+      "due_date": "2026-05-15",
+      "status": "pending",
+      "ai_confidence": 0.85
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "task_discrepancy_report_778",
+      "category": "task tracking",
+      "insight_type": "discrepancy",
+      "title": "Mismatch in Task Progress: Project Phoenix",
+      "summary": "Task tracker shows 'on schedule', while the operational dashboard indicates 'lagging'.",
+      "urgency": "critical",
+      "priority_score": 90,
+      "recommended_action": "Conduct a detailed analysis to reconcile the differences.",
+      "explanation": "Data inconsistency detected between task tracker entries and real-time operational feedback.",
+      "status": "open"
+    },
+    {
+      "state_key": "supplier_expense_audit_654",
+      "category": "financial",
+      "insight_type": "audit",
+      "title": "Office Supplies Expenditure",
+      "summary": "Recent transaction from Office Supplies Co matches expected budget line item.",
+      "urgency": "low",
+      "priority_score": 40,
+      "recommended_action": "No immediate action necessary.",
+      "explanation": "Transaction reflects routine spending pattern.",
+      "status": "closed"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": [
+      {
+        "entity1": "alice.bennett@syntheticmail.com",
+        "entity2": "johndoe@syntheticmail.com",
+        "relationship": "collaborators"
+      }
+    ],
+    "actual_intent": "Identify and resolve task progress discrepancies between task tracking systems and operational dashboards.",
+    "expected_answer_facts": [
+      "The task tracker incorrectly shows 'Project Phoenix' as 'on schedule'.",
+      "Operational dashboard indicates 'lagging' status for 'Project Phoenix'.",
+      "Require detailed analysis to address inconsistencies."
+    ]
+  }
+}

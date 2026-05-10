@@ -1,0 +1,160 @@
+{
+  "scenario_id": "SCENARIO_096",
+  "eval_id": "EVAL_048",
+  "theme": "Operational Efficiency Analysis",
+  "entities": {
+    "people": [
+      {
+        "name": "Alex Johnson",
+        "email": "alex.johnson@startupxyz.com",
+        "relationship_type": "colleague"
+      },
+      {
+        "name": "Jordan Lee",
+        "email": "jordan.lee@startupxyz.com",
+        "relationship_type": "manager"
+      }
+    ],
+    "companies": [
+      "StartupXYZ Inc."
+    ],
+    "projects": [
+      "Revamp Operations",
+      "Project Phoenix"
+    ],
+    "merchants": [
+      "OfficeSupplies Plus",
+      "BizHardware Depot"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_001",
+      "subject": "Re: Weekly Performance Dashboard",
+      "body_summary": "Discussed insights from last quarter's operational metrics. Need clarification on certain data points.",
+      "occurred_at": "2026-05-01T14:12:00.000Z",
+      "email_category": "work",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "jordan.lee@startupxyz.com",
+        "sender_name": "Jordan Lee"
+      },
+      "embedding_null": false
+    },
+    {
+      "external_id": "email_002",
+      "subject": "Team Sync on Efficiency Initiatives",
+      "body_summary": "Reminder about the team meeting tomorrow to discuss ongoing efficiency initiatives.",
+      "occurred_at": "2026-05-02T09:30:00.000Z",
+      "email_category": "work",
+      "requires_action": false,
+      "sentiment": "positive",
+      "channel_metadata": {
+        "sender": "alex.johnson@startupxyz.com",
+        "sender_name": "Alex Johnson"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_001",
+      "title": "Department Efficiency Review",
+      "start_time": "2026-05-03T15:00:00.000Z",
+      "end_time": "2026-05-03T16:00:00.000Z",
+      "transcript_summary": "Examined recent departmental efficiency metrics; discussed potential areas for improvement.",
+      "attendees": [
+        {
+          "email": "alex.johnson@startupxyz.com",
+          "name": "Alex Johnson"
+        },
+        {
+          "email": "jordan.lee@startupxyz.com",
+          "name": "Jordan Lee"
+        }
+      ],
+      "description": "Review and feedback session on department efficiency."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "OfficeSupplies Plus",
+      "amount": 2500.5,
+      "currency": "USD",
+      "category": "office_expenses",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-03T12:00:00.000Z"
+    },
+    {
+      "merchant_normalized": "OfficeSupplies Plus",
+      "amount": 100,
+      "currency": "USD",
+      "category": "office_expenses",
+      "transaction_type": "refund",
+      "transaction_datetime": "2026-05-04T09:00:00.000Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Update Efficiency Metrics",
+      "status": "in_progress",
+      "priority": "high",
+      "due_date": "2026-05-05T17:00:00.000Z",
+      "source_type": "sql_tasks"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Finalize department efficiency report",
+      "due_date": "2026-05-06T19:00:00.000Z",
+      "status": "pending",
+      "ai_confidence": 0.85
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "dept_efficiency_2026_april",
+      "category": "operations",
+      "insight_type": "efficiency_trend",
+      "title": "April 2026 Efficiency Metrics",
+      "summary": "Overall efficiency improved by 5% compared to March with notable gains in the Operations team.",
+      "urgency": "medium",
+      "priority_score": 75,
+      "recommended_action": "Continue current initiatives",
+      "explanation": "Data suggests ongoing initiatives are yielding positive results.",
+      "status": "finalized"
+    },
+    {
+      "state_key": "dept_efficiency_2026_march_outdated",
+      "category": "operations",
+      "insight_type": "stale_data",
+      "title": "March 2026 Efficiency Metrics",
+      "summary": "Outdated information showing a decline in department efficiency.",
+      "urgency": "low",
+      "priority_score": 50,
+      "recommended_action": "Review data sources",
+      "explanation": "Metrics based on incomplete data. Needs reassessment.",
+      "status": "outdated"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": [
+      {
+        "source": "Jordan Lee",
+        "target": "Alex Johnson",
+        "type": "manager_to_subordinate"
+      }
+    ],
+    "actual_intent": [
+      "operational_summary",
+      "productivity"
+    ],
+    "expected_answer_facts": [
+      "Overall efficiency improvement of 5%",
+      "Notable gains in Operations team",
+      "Stale data for March requires reassessment",
+      "Importance of continuing current initiatives"
+    ]
+  }
+}

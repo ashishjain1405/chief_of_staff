@@ -1,0 +1,151 @@
+{
+  "scenario_id": "SCENARIO_069",
+  "eval_id": "EVAL_029",
+  "theme": "Cross-domain Analysis for Operational Challenges",
+  "entities": {
+    "people": [
+      {
+        "name": "Alex Johnson",
+        "email": "alex.j@acmecorp.com",
+        "relationship_type": "colleague"
+      },
+      {
+        "name": "Jordan Mendez",
+        "email": "j.mendez@financehelp.org",
+        "relationship_type": "vendor"
+      }
+    ],
+    "companies": [
+      "Acme Corp",
+      "Finance Help Group"
+    ],
+    "projects": [
+      "Project Quantum",
+      "Budget Optimization 2026"
+    ],
+    "merchants": [
+      "OfficeMax",
+      "OfficeMax-Ideal",
+      "Uber"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_001",
+      "subject": "Re: Project Quantum - Latest Challenges",
+      "body_summary": "Let's discuss the latest hurdles in Project Quantum. Need data synthesis across all insights gathered.",
+      "occurred_at": "2026-05-07T14:22:30.045Z",
+      "email_category": "work",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "alex.j@acmecorp.com",
+        "sender_name": "Alex Johnson"
+      },
+      "embedding_null": false
+    },
+    {
+      "external_id": "email_002",
+      "subject": "Monthly Financial Overview",
+      "body_summary": "Summary of this month’s transactions including discrepancies noted in OfficeMax charges.",
+      "occurred_at": "2026-05-02T09:15:00.045Z",
+      "email_category": "finance",
+      "requires_action": false,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "j.mendez@financehelp.org",
+        "sender_name": "Jordan Mendez"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_001",
+      "title": "Operational Review - Project Quantum",
+      "start_time": "2026-05-06T16:00:00.045Z",
+      "end_time": "2026-05-06T17:00:00.045Z",
+      "transcript_summary": "Detailed discussion on overcoming recent operational challenges in Project Quantum. Suggested areas for improvement identified.",
+      "attendees": [
+        {
+          "email": "alex.j@acmecorp.com",
+          "name": "Alex Johnson"
+        }
+      ],
+      "description": "Analysis and strategy planning for operations related to Project Quantum."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "OfficeMax",
+      "amount": 1500,
+      "currency": "USD",
+      "category": "office supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-01T12:34:56.045Z"
+    },
+    {
+      "merchant_normalized": "Uber",
+      "amount": 45,
+      "currency": "USD",
+      "category": "transport",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-08T08:45:00.045Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Analyze data anomalies in Project Quantum",
+      "status": "in-progress",
+      "priority": "high",
+      "due_date": "2026-05-10",
+      "source_type": "email"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Submit report on operational challenges for Project Quantum",
+      "due_date": "2026-05-12",
+      "status": "pending",
+      "ai_confidence": 0.85
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "insight_002",
+      "category": "financial_discrepancy",
+      "insight_type": "anomaly",
+      "title": "Recurring OfficeMax Charges",
+      "summary": "Unusual pattern detected in OfficeMax transactions, potentially overcharging or duplicate billing.",
+      "urgency": "high",
+      "priority_score": 0.78,
+      "recommended_action": "Verify recent OfficeMax transactions for authenticity and resolve discrepancies.",
+      "explanation": "Sequence of high-value transactions at OfficeMax in a short time frame.",
+      "status": "unresolved"
+    },
+    {
+      "state_key": "insight_003",
+      "category": "operational",
+      "insight_type": "stale",
+      "title": "Outdated Performance Report",
+      "summary": "Previous performance metrics for Project Quantum are outdated and may not reflect current realities.",
+      "urgency": "medium",
+      "priority_score": 0.55,
+      "recommended_action": "Review and update operational performance metrics to ensure alignment with current objectives.",
+      "explanation": "Last updated performance data appears to have outdated projections.",
+      "status": "stale"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": [
+      "colleague",
+      "vendor"
+    ],
+    "actual_intent": "Synthesize multi-domain data to address current operational challenges",
+    "expected_answer_facts": [
+      "Analyze anomalies in OfficeMax charges",
+      "Review outdated performance metrics in Project Quantum",
+      "Strategic planning adjustments based on current challenges"
+    ]
+  }
+}

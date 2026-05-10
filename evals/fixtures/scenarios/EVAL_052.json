@@ -1,0 +1,154 @@
+{
+  "scenario_id": "SCN_100052",
+  "eval_id": "EVAL_052",
+  "theme": "Strategic Insight Synthesis from Financial and Operational Data",
+  "entities": {
+    "people": [
+      {
+        "name": "Alex Johnson",
+        "email": "alex.j@example.com",
+        "relationship_type": "executive"
+      },
+      {
+        "name": "Jamie Smith",
+        "email": "jamie.smith@financials-ai.org",
+        "relationship_type": "financial_analyst"
+      }
+    ],
+    "companies": [
+      "GreenTech Innovations",
+      "UrbanCore Logistics"
+    ],
+    "projects": [
+      "Project Phoenix",
+      "Supply Chain Revamp 2026"
+    ],
+    "merchants": [
+      "TechPro Supplies",
+      "Tech Pro Supplies",
+      "City Bank",
+      "Urban Supplies"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_728",
+      "subject": "Q1 Financial Summary and Operational Updates",
+      "body_summary": "Highlights from our Q1 performance show positive trends. Please review the attached report for detailed insights.",
+      "occurred_at": "2026-04-29T15:13:00Z",
+      "email_category": "finance",
+      "requires_action": true,
+      "sentiment": "positive",
+      "channel_metadata": {
+        "sender": "jane.doe@greentech.com",
+        "sender_name": "Jane Doe"
+      },
+      "embedding_null": false
+    },
+    {
+      "external_id": "email_729",
+      "subject": "Operational Challenges in Supply Chain Revamp",
+      "body_summary": "Teams are reporting delays in the revamp rollout due to logistical bottlenecks.",
+      "occurred_at": "2026-04-28T11:47:30Z",
+      "email_category": "operations",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "operations@urbancorelogistics.com",
+        "sender_name": "Sam Green"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_1234",
+      "title": "Weekly Operations Review",
+      "start_time": "2026-05-02T09:00:00Z",
+      "end_time": "2026-05-02T10:00:00Z",
+      "transcript_summary": "Discussions on current operational effectiveness and upcoming strategic priorities.",
+      "attendees": [
+        {
+          "email": "alex.j@example.com",
+          "name": "Alex Johnson"
+        },
+        {
+          "email": "sam.green@urbancorelogistics.com",
+          "name": "Sam Green"
+        }
+      ],
+      "description": "Assessment and strategic planning for ongoing and future operational projects."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "TechPro Supplies",
+      "amount": 15200,
+      "currency": "USD",
+      "category": "expenses",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-04-30T19:55:00Z"
+    },
+    {
+      "merchant_normalized": "City Bank",
+      "amount": 50000,
+      "currency": "USD",
+      "category": "income",
+      "transaction_type": "credit",
+      "transaction_datetime": "2026-04-27T12:00:00Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Review financial projections for Q2",
+      "status": "pending",
+      "priority": "high",
+      "due_date": "2026-05-07T00:00:00Z",
+      "source_type": "email"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Finalize strategies for Project Phoenix",
+      "due_date": "2026-05-15",
+      "status": "in_progress",
+      "ai_confidence": 0.85
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "insight_fin_001",
+      "category": "finance",
+      "insight_type": "trend_analysis",
+      "title": "Profit Margins on the Rise",
+      "summary": "Projected profit margins show a 5% increase due to improved cost management.",
+      "urgency": "medium",
+      "priority_score": 7,
+      "recommended_action": "Continue current cost management strategies.",
+      "explanation": "Cost reduction initiatives from Project Phoenix contributing positively.",
+      "status": "review"
+    },
+    {
+      "state_key": "insight_op_345",
+      "category": "operations",
+      "insight_type": "risk_alert",
+      "title": "Potential Delay in Supply Chain Revamp",
+      "summary": "Logistical challenges may cause up to a two-week delay.",
+      "urgency": "high",
+      "priority_score": 10,
+      "recommended_action": "Allocate additional resources to bottleneck areas.",
+      "explanation": "Delays identified in receiving critical components.",
+      "status": "urgent_attention_required"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": [],
+    "actual_intent": "Synthesize insights for strategic guidance, focusing on operational summary and finance without subscriptions.",
+    "expected_answer_facts": [
+      "The Q1 report highlights positive financial trends.",
+      "Current operational challenges with supply chain logistics.",
+      "Projected profit margins are increasing by 5%.",
+      "A high urgency operational risk in supply chain revamp necessitates immediate intervention."
+    ]
+  }
+}

@@ -1,0 +1,143 @@
+{
+  "scenario_id": "SCENARIO_012",
+  "eval_id": "EVAL_009",
+  "theme": "Budget Refinement and Constraint Planning",
+  "entities": {
+    "people": [
+      {
+        "name": "Alex Johnson",
+        "email": "alex.j@startupinc.com",
+        "relationship_type": "colleague"
+      },
+      {
+        "name": "Jamie Lee",
+        "email": "jamie.lee@vcfirm.com",
+        "relationship_type": "investor"
+      }
+    ],
+    "companies": [
+      "Startup Inc.",
+      "Venture Capital Firm Co."
+    ],
+    "projects": [
+      "Q4 Budget Planning",
+      "New Product Launch"
+    ],
+    "merchants": [
+      "Tech Providers Inc.",
+      "Office Supplies Co."
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "EMAIL_3458",
+      "subject": "Re: Budget adjustment proposals",
+      "body_summary": "Hi Alex, I've reviewed last year's allocation and believe we need to tighten our expectations for next quarter.",
+      "occurred_at": "2026-05-03T14:27:32.912Z",
+      "email_category": "finance",
+      "requires_action": false,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "jamie.lee@vcfirm.com",
+        "sender_name": "Jamie Lee"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "MEETING_891",
+      "title": "Budget Review with Finance Team",
+      "start_time": "2026-05-08T09:00:00.000Z",
+      "end_time": "2026-05-08T10:00:00.000Z",
+      "transcript_summary": "Discussion on budget constraints and potential cuts for Q4.",
+      "attendees": [
+        {
+          "email": "alex.j@startupinc.com",
+          "name": "Alex Johnson"
+        }
+      ],
+      "description": "In-depth analysis of current budget allocations and spending forecasts."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "Tech Providers Inc.",
+      "amount": 15000,
+      "currency": "USD",
+      "category": "IT Services",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-04-29T11:00:00.000Z"
+    },
+    {
+      "merchant_normalized": "Office Supplies Co.",
+      "amount": 1200,
+      "currency": "USD",
+      "category": "Office Supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-02T15:23:00.000Z"
+    },
+    {
+      "merchant_normalized": "Tech Providers Inc.",
+      "amount": 1500,
+      "currency": "USD",
+      "category": "IT Services",
+      "transaction_type": "refund",
+      "transaction_datetime": "2026-05-04T16:30:00.000Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Finalize budget constraints report",
+      "status": "in progress",
+      "priority": "high",
+      "due_date": "2026-05-15",
+      "source_type": "internal"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Present refined budget strategy to executive board",
+      "due_date": "2026-05-20",
+      "status": "planned",
+      "ai_confidence": 0.8
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "budget_q4_constraints",
+      "category": "finance",
+      "insight_type": "report",
+      "title": "Preliminary Q4 Budget Constraints",
+      "summary": "An analysis suggesting a reduction in discretionary spending to align with revenue forecasts.",
+      "urgency": "medium",
+      "priority_score": 0.75,
+      "recommended_action": "Review insights and adjust expenditures as per new strategic priorities.",
+      "explanation": "Current spending trends indicate overspending in certain categories. Cost-saving measures needed.",
+      "status": "active"
+    },
+    {
+      "state_key": "spending_analysis_ageing",
+      "category": "finance",
+      "insight_type": "stale report",
+      "title": "Previous Spending Analysis",
+      "summary": "An outdated analysis suggesting stable IT costs contrary to recent increased expenses.",
+      "urgency": "low",
+      "priority_score": 0.3,
+      "recommended_action": "Re-evaluate IT expenses considering recent trends.",
+      "explanation": "IT costs have escalated contrary to past projections. Update needed.",
+      "status": "archived"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": [
+      "Alex Johnson is a colleague at Startup Inc.",
+      "Jamie Lee is an investor from Venture Capital Firm Co."
+    ],
+    "actual_intent": "Refine budgetary constraints using updated operational insights and spending analysis.",
+    "expected_answer_facts": [
+      "Q4 Budget Constraints suggest reducing discretionary spending.",
+      "IT services costs have increased, contradicting past stable forecasts."
+    ]
+  }
+}

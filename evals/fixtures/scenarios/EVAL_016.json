@@ -1,0 +1,185 @@
+{
+  "scenario_id": "SCENARIO_016",
+  "eval_id": "EVAL_016",
+  "theme": "Measuring Discrepancies Between Meeting Insights and Operational Data",
+  "entities": {
+    "people": [
+      {
+        "name": "Alice Johnson",
+        "email": "alice.johnson@fasttracksolutions.com",
+        "relationship_type": "colleague"
+      },
+      {
+        "name": "Bob Smith",
+        "email": "bob.smith@fasttracksolutions.com",
+        "relationship_type": "manager"
+      },
+      {
+        "name": "Charlie Brown",
+        "email": "charlieb@outsourcesupply.com",
+        "relationship_type": "vendor"
+      }
+    ],
+    "companies": [
+      "FastTrack Solutions",
+      "Outsource Supply"
+    ],
+    "projects": [
+      "Project Phoenix",
+      "Supply Chain Optimization"
+    ],
+    "merchants": [
+      "StapleWorks",
+      "OfficeMart"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_101",
+      "subject": "Re: Urgent: Supply Chain Review Updates",
+      "body_summary": "Discuss key items for Project Phoenix.",
+      "occurred_at": "2026-05-08T13:47:00.000Z",
+      "email_category": "project_updates",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "bob.smith@fasttracksolutions.com",
+        "sender_name": "Bob Smith"
+      },
+      "embedding_null": false
+    },
+    {
+      "external_id": "email_102",
+      "subject": "Meeting Follow-up: Action Points",
+      "body_summary": "Please ensure all action points from today's meetings are addressed.",
+      "occurred_at": "2026-05-07T19:20:00.000Z",
+      "email_category": "action_items",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "alice.johnson@fasttracksolutions.com",
+        "sender_name": "Alice Johnson"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_501",
+      "title": "Weekly Operations Review",
+      "start_time": "2026-05-05T14:00:00.000Z",
+      "end_time": "2026-05-05T15:00:00.000Z",
+      "transcript_summary": "Reviewed key operational metrics. Discussed discrepancies in the supply data.",
+      "attendees": [
+        {
+          "email": "alice.johnson@fasttracksolutions.com",
+          "name": "Alice Johnson"
+        },
+        {
+          "email": "bob.smith@fasttracksolutions.com",
+          "name": "Bob Smith"
+        }
+      ],
+      "description": "Ongoing weekly catch-up to align on operational KPIs and project updates."
+    },
+    {
+      "external_id": "meeting_502",
+      "title": "Project Phoenix Planning",
+      "start_time": "2026-05-06T10:00:00.000Z",
+      "end_time": "2026-05-06T11:30:00.000Z",
+      "transcript_summary": "Focused on project timeline adjustments and resource allocations.",
+      "attendees": [
+        {
+          "email": "alice.johnson@fasttracksolutions.com",
+          "name": "Alice Johnson"
+        },
+        {
+          "email": "charlieb@outsourcesupply.com",
+          "name": "Charlie Brown"
+        }
+      ],
+      "description": "Strategic planning session for Project Phoenix."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "StapleWorks",
+      "amount": 450,
+      "currency": "USD",
+      "category": "office_supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-06T16:13:00.000Z"
+    },
+    {
+      "merchant_normalized": "OfficeMart",
+      "amount": 450,
+      "currency": "USD",
+      "category": "office_supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-07T09:45:00.000Z"
+    },
+    {
+      "merchant_normalized": "OfficeMart",
+      "amount": 450,
+      "currency": "USD",
+      "category": "office_supplies",
+      "transaction_type": "refund",
+      "transaction_datetime": "2026-05-08T11:15:00.000Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Compile supply chain data",
+      "status": "in_progress",
+      "priority": "high",
+      "due_date": "2026-05-09",
+      "source_type": "meeting"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Complete the operational review and circulate the report.",
+      "due_date": "2026-05-10",
+      "status": "pending",
+      "ai_confidence": 0.85
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "supply_chain_review_2026_Q2",
+      "category": "supply_chain",
+      "insight_type": "overview",
+      "title": "Q2 Supply Chain Metrics",
+      "summary": "Initial insights suggest rising costs without corresponding inventory growth.",
+      "urgency": "critical",
+      "priority_score": 0.9,
+      "recommended_action": "Conduct a thorough audit of supply expenses.",
+      "explanation": "Significant cost discrepancies noted without matching sales growth.",
+      "status": "confirmed"
+    },
+    {
+      "state_key": "stale_insight_rev_office_supplies",
+      "category": "office_supplies",
+      "insight_type": "expense_review",
+      "title": "Office Supplies Expenditure Review",
+      "summary": "No recent excessive expenditures were recorded in office supplies.",
+      "urgency": "medium",
+      "priority_score": 0.5,
+      "recommended_action": "Maintain current spending level.",
+      "explanation": "Last reviewed expenditure was within expected limits.",
+      "status": "stale"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": {
+      "bob.smith@fasttracksolutions.com": "manager",
+      "alice.johnson@fasttracksolutions.com": "colleague",
+      "charlieb@outsourcesupply.com": "vendor"
+    },
+    "actual_intent": "operational_summary",
+    "expected_answer_facts": [
+      "Discrepancies identified in supply chain data during the operations review meeting.",
+      "Recent refund transaction at OfficeMart contradicts stale expenditure review insight."
+    ]
+  }
+}

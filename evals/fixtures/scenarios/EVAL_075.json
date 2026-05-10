@@ -1,0 +1,152 @@
+{
+  "scenario_id": "SCENARIO_EXTREME_OP_CORRECTION",
+  "eval_id": "EVAL_075",
+  "theme": "Corrective Action for Transaction Errors",
+  "entities": {
+    "people": [
+      {
+        "name": "Alex Robertson",
+        "email": "alex.robertson@startupinc.com",
+        "relationship_type": "CFO"
+      },
+      {
+        "name": "Jordan Tanner",
+        "email": "jordan.tanner@consultantagency.com",
+        "relationship_type": "Consultant"
+      }
+    ],
+    "companies": [
+      "Startup Inc.",
+      "Consultant Agency"
+    ],
+    "projects": [
+      "Q2 Corrections",
+      "Transaction Review Initiative"
+    ],
+    "merchants": [
+      "Office Supplies Co",
+      "Office Items",
+      "Coffee Shop"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_1001",
+      "subject": "Re: Analysis of last year's errors",
+      "body_summary": "Jordan, can we finalize the corrective measures for the Q2 meeting?",
+      "occurred_at": "2026-04-29T09:45:12.987Z",
+      "email_category": "Operations",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "alex.robertson@startupinc.com",
+        "sender_name": "Alex Robertson"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_001",
+      "title": "Q2 Operational Corrections Discussion",
+      "start_time": "2026-05-02T14:00:00Z",
+      "end_time": "2026-05-02T15:00:00Z",
+      "transcript_summary": "Discussion on identifying and correcting last year's transaction errors.",
+      "attendees": [
+        {
+          "email": "alex.robertson@startupinc.com",
+          "name": "Alex Robertson"
+        },
+        {
+          "email": "jordan.tanner@consultantagency.com",
+          "name": "Jordan Tanner"
+        }
+      ],
+      "description": "A meeting to layout strategies for addressing identified transaction errors."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "Office Supplies Co",
+      "amount": 1500,
+      "currency": "USD",
+      "category": "Office Supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2025-09-15T11:00:00Z"
+    },
+    {
+      "merchant_normalized": "Office Items",
+      "amount": 1500,
+      "currency": "USD",
+      "category": "Office Supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2025-09-15T11:00:00Z"
+    },
+    {
+      "merchant_normalized": "Coffee Shop",
+      "amount": 5,
+      "currency": "USD",
+      "category": "Meals and Entertainment",
+      "transaction_type": "refund",
+      "transaction_datetime": "2026-04-30T10:00:00Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Consolidate transaction error report",
+      "status": "completed",
+      "priority": "high",
+      "due_date": "2026-05-03",
+      "source_type": "email"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Review details of last year’s transaction errors with Jordan",
+      "due_date": "2026-05-01",
+      "status": "completed",
+      "ai_confidence": 0.95
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "transaction_error_risk_2025",
+      "category": "operations",
+      "insight_type": "risk_assessment",
+      "title": "Risk Assessment of 2025 Transaction Errors",
+      "summary": "High risk due to duplicated transactions in September.",
+      "urgency": "critical",
+      "priority_score": 95,
+      "recommended_action": "Initiate a detailed audit and implement corrective actions.",
+      "explanation": "Errors from September were not addressed, causing potential operational risk.",
+      "status": "active"
+    },
+    {
+      "state_key": "past_error_stale_summary",
+      "category": "operations",
+      "insight_type": "stale_data",
+      "title": "Old Summary Contradicting New Insights",
+      "summary": "Previous reports suggested minor issues without recognizing duplication.",
+      "urgency": "medium",
+      "priority_score": 60,
+      "recommended_action": "Review and amend past incorrect entries.",
+      "explanation": "Contradicts new findings regarding same-day duplications.",
+      "status": "stale"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": [
+      {
+        "from": "Alex Robertson",
+        "to": "Jordan Tanner",
+        "type": "consultant-advisor"
+      }
+    ],
+    "actual_intent": "operational_summary",
+    "expected_answer_facts": [
+      "Corrective measures include a comprehensive audit.",
+      "Identified critical risk due to September errors.",
+      "Past reviews underestimated impact of duplicate transactions."
+    ]
+  }
+}

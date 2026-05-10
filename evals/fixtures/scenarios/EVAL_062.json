@@ -1,0 +1,142 @@
+{
+  "scenario_id": "SCN_084",
+  "eval_id": "EVAL_062",
+  "theme": "Predictive Analytics for Operational Bottlenecks",
+  "entities": {
+    "people": [
+      {
+        "name": "Alex Johnson",
+        "email": "alex.johnson@company.com",
+        "relationship_type": "lead_engineer"
+      },
+      {
+        "name": "Jordan Lee",
+        "email": "jordan.lee@company.com",
+        "relationship_type": "operations_manager"
+      }
+    ],
+    "companies": [
+      "Tech Innovations Inc."
+    ],
+    "projects": [
+      "Project Phoenix"
+    ],
+    "merchants": [
+      "Cloud Services Co",
+      "CloudService Corp"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_102",
+      "subject": "Re: Q2 Project Milestones and Concerns",
+      "body_summary": "Following up on our last discussion regarding resources allocation for Project Phoenix. Need clarity on server capabilities before next phase.",
+      "occurred_at": "2026-04-28T14:23:04.677Z",
+      "email_category": "work",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "jordan.lee@company.com",
+        "sender_name": "Jordan Lee"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_058",
+      "title": "Project Phoenix Weekly Sync",
+      "start_time": "2026-04-29T09:00:00.000Z",
+      "end_time": "2026-04-29T10:00:00.000Z",
+      "transcript_summary": "Discussed updates on Project Phoenix, potential delays due to tooling issues.",
+      "attendees": [
+        {
+          "email": "alex.johnson@company.com",
+          "name": "Alex Johnson"
+        },
+        {
+          "email": "jordan.lee@company.com",
+          "name": "Jordan Lee"
+        }
+      ],
+      "description": "Weekly update on Project Phoenix, review action items and discuss blockers."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "Cloud Services Co",
+      "amount": 1200.75,
+      "currency": "USD",
+      "category": "cloud_infrastructure",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-04-27T12:00:00.000Z"
+    },
+    {
+      "merchant_normalized": "CloudService Corp",
+      "amount": 1200.75,
+      "currency": "USD",
+      "category": "cloud_infrastructure",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-02T15:00:00.000Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Update resource allocation for Project Phoenix",
+      "status": "in_progress",
+      "priority": "high",
+      "due_date": "2026-05-05",
+      "source_type": "sql_tasks"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Resolve tooling issues for Project Phoenix",
+      "due_date": "2026-05-12",
+      "status": "pending",
+      "ai_confidence": 0.85
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "insight_45_q2",
+      "category": "operations",
+      "insight_type": "bottleneck_prediction",
+      "title": "Expected Delays in Hardware Procurement",
+      "summary": "Anticipated delays in receiving new server hardware could impact project timelines.",
+      "urgency": "high",
+      "priority_score": 0.8,
+      "recommended_action": "Assess inventory and expedite procurement processes.",
+      "explanation": "Based on past procurement timelines and vendor communication.",
+      "status": "active"
+    },
+    {
+      "state_key": "insight_39_stale",
+      "category": "finance",
+      "insight_type": "cost_optimization",
+      "title": "Reducing Cloud Service Costs",
+      "summary": "Potential savings identified, but contradicts recent transactions suggesting increasing usage.",
+      "urgency": "low",
+      "priority_score": 0.45,
+      "recommended_action": "Review current cloud usage versus future needs.",
+      "explanation": "Previous analysis showed underutilized resources, now contradicted by spike in services usage.",
+      "status": "stale"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": {
+      "operations": [
+        "Project Phoenix"
+      ],
+      "tooling": [
+        "cloud_infrastructure"
+      ]
+    },
+    "actual_intent": "Predict operational bottlenecks with a focus on productivity",
+    "expected_answer_facts": [
+      "Potential delays due to tooling issues in Project Phoenix",
+      "Procurement delays for new server hardware",
+      "Increased reliance on cloud infrastructure impacting timelines"
+    ]
+  }
+}

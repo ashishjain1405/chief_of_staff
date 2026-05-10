@@ -1,0 +1,146 @@
+{
+  "scenario_id": "SCENARIO_081",
+  "eval_id": "EVAL_061",
+  "theme": "Operational Performance and Analysis",
+  "entities": {
+    "people": [
+      {
+        "name": "Alex Carter",
+        "email": "alex.carter@innovative.io",
+        "relationship_type": "CEO"
+      },
+      {
+        "name": "Jamie Lee",
+        "email": "jamie.lee@innovative.io",
+        "relationship_type": "COO"
+      }
+    ],
+    "companies": [
+      "Innovative Solutions",
+      "GreenSphere Analytics"
+    ],
+    "projects": [
+      "SmartCity Initiative",
+      "Eco-Logistics Optimization"
+    ],
+    "merchants": [
+      "Tech Supplies Co.",
+      "GreenTech Innovations"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_1020",
+      "subject": "Quarterly Review Preparation",
+      "body_summary": "Final draft of last quarter's ops review, pending your feedback. Significant changes in logistics metrics to note.",
+      "occurred_at": "2026-04-20T14:34:00.000Z",
+      "email_category": "internal",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "jamie.lee@innovative.io",
+        "sender_name": "Jamie Lee"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_307",
+      "title": "Annual Performance Metrics Discussion",
+      "start_time": "2026-05-01T09:00:00.000Z",
+      "end_time": "2026-05-01T10:30:00.000Z",
+      "transcript_summary": "Discussed discrepancies between operational data and analytics report for Q1 2026.",
+      "attendees": [
+        {
+          "email": "alex.carter@innovative.io",
+          "name": "Alex Carter"
+        },
+        {
+          "email": "jamie.lee@innovative.io",
+          "name": "Jamie Lee"
+        }
+      ],
+      "description": "Overview of performance trends and issues in data analytics."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "Tech Supplies Co.",
+      "amount": 15000,
+      "currency": "USD",
+      "category": "office_supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-04-25T15:00:00.000Z"
+    },
+    {
+      "merchant_normalized": "GreenTech Innovations",
+      "amount": 5000,
+      "currency": "USD",
+      "category": "education",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-04-26T17:00:00.000Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Compile quarterly performance report",
+      "status": "in_progress",
+      "priority": "high",
+      "due_date": "2026-05-10",
+      "source_type": "task_manager"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Submit draft for quarterly operations analysis to board",
+      "due_date": "2026-05-07",
+      "status": "pending",
+      "ai_confidence": 0.87
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "ops_performance_apr",
+      "category": "operations",
+      "insight_type": "report_summary",
+      "title": "April 2026 Operational Performance",
+      "summary": "Significant improvement in logistics while production efficiency slightly declined.",
+      "urgency": "critical",
+      "priority_score": 9,
+      "recommended_action": "Focus on resolving bottlenecks in production workflows.",
+      "explanation": "Requires immediate attention towards process optimization.",
+      "status": "reported"
+    },
+    {
+      "state_key": "ops_summary_mar",
+      "category": "operations",
+      "insight_type": "trend_analysis",
+      "title": "March 2026 Performance Analysis",
+      "summary": "Overall steady with indications of potential regression in IT support response times.",
+      "urgency": "medium",
+      "priority_score": 6,
+      "recommended_action": "Monitor IT infrastructure efficiency to prevent service lags.",
+      "explanation": "Proactive measures recommended to mitigate foreseeable issues.",
+      "status": "stale"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": {
+      "Alex Carter": [
+        "CEO",
+        "Decision Maker"
+      ],
+      "Jamie Lee": [
+        "COO",
+        "Operations Lead"
+      ]
+    },
+    "actual_intent": "operational_summary",
+    "expected_answer_facts": [
+      "April 2026 saw logistic improvements",
+      "March 2026 highlighted issues in IT response",
+      "Production efficiency issues need addressing"
+    ]
+  }
+}

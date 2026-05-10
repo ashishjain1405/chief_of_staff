@@ -1,0 +1,162 @@
+{
+  "scenario_id": "SCENARIO_123",
+  "eval_id": "EVAL_038",
+  "theme": "scheduling anomalies detection",
+  "entities": {
+    "people": [
+      {
+        "name": "Ava Thompson",
+        "email": "ava.thompson@example.com",
+        "relationship_type": "colleague"
+      },
+      {
+        "name": "Jordan Li",
+        "email": "jordan.li@startuphub.io",
+        "relationship_type": "business partner"
+      }
+    ],
+    "companies": [
+      "TechStartup Inc.",
+      "Global Innovations"
+    ],
+    "projects": [
+      "Project Phoenix",
+      "Quantum Leap"
+    ],
+    "merchants": [
+      "BizMeetings",
+      "ConferenceWorld"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_001",
+      "subject": "Last Minute Change for Project Phoenix",
+      "body_summary": "Hi Ava, The meeting originally set for April 14 needs to be rescheduled. Any slots next week?",
+      "occurred_at": "2026-04-13T09:30:06.915Z",
+      "email_category": "meeting coordination",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "jordan.li@startuphub.io",
+        "sender_name": "Jordan Li"
+      },
+      "embedding_null": false
+    },
+    {
+      "external_id": "email_002",
+      "subject": "April Financial Summary",
+      "body_summary": "Your April financials are ready for review.",
+      "occurred_at": "2026-05-01T10:00:00.000Z",
+      "email_category": "finance",
+      "requires_action": false,
+      "sentiment": "positive",
+      "channel_metadata": {
+        "sender": "finance@techstartup.com",
+        "sender_name": "Finance Team"
+      },
+      "embedding_null": true
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_001",
+      "title": "Project Phoenix Status Update",
+      "start_time": "2026-04-14T15:00:00.000Z",
+      "end_time": "2026-04-14T16:30:00.000Z",
+      "transcript_summary": "Discussion on current project status, risks, and next steps.",
+      "attendees": [
+        {
+          "email": "ava.thompson@example.com",
+          "name": "Ava Thompson"
+        },
+        {
+          "email": "jordan.li@startuphub.io",
+          "name": "Jordan Li"
+        }
+      ],
+      "description": "Monthly check-in for Project Phoenix."
+    },
+    {
+      "external_id": "meeting_002",
+      "title": "AdHoc Strategy Meeting",
+      "start_time": "2026-04-14T15:30:00.000Z",
+      "end_time": "2026-04-14T17:00:00.000Z",
+      "transcript_summary": "Strategic discussion on new client acquisition.",
+      "attendees": [
+        {
+          "email": "ava.thompson@example.com",
+          "name": "Ava Thompson"
+        },
+        {
+          "email": "jordan.li@startuphub.io",
+          "name": "Jordan Li"
+        }
+      ],
+      "description": "Critical strategy session overlapping previous meeting."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "BizMeetings",
+      "amount": 120,
+      "currency": "USD",
+      "category": "business_services",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-04-12T10:00:00.000Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Revise Project Phoenix Schedule",
+      "status": "in_progress",
+      "priority": "high",
+      "due_date": "2026-04-16T00:00:00.000Z",
+      "source_type": "manual_entry"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Submit strategic revision proposal",
+      "due_date": "2026-04-20T00:00:00.000Z",
+      "status": "pending",
+      "ai_confidence": 0.88
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "insight_001",
+      "category": "scheduling",
+      "insight_type": "anomaly",
+      "title": "Potential overlap in Phoenix meetings",
+      "summary": "The meeting on 2026-04-14T15:30 overlaps with a pre-existing meeting.",
+      "urgency": "high",
+      "priority_score": 8,
+      "recommended_action": "Reschedule one of the overlapping meetings.",
+      "explanation": "Detected due to conflicting start times and shared attendees.",
+      "status": "active"
+    },
+    {
+      "state_key": "insight_002",
+      "category": "financial",
+      "insight_type": "forecast",
+      "title": "April's budget underspend",
+      "summary": "Spending in April was 10% under budget, a contrast to transaction amounts.",
+      "urgency": "medium",
+      "priority_score": 5,
+      "recommended_action": "Review expense claims.",
+      "explanation": "Inconsistencies in transaction records versus budget forecast.",
+      "status": "stale"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": [
+      "colleague",
+      "business partner"
+    ],
+    "actual_intent": "scheduling",
+    "expected_answer_facts": [
+      "Meeting overlap on 2026-04-14 between 15:00 and 17:00 with Ava Thompson and Jordan Li attending."
+    ]
+  }
+}

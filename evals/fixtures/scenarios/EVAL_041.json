@@ -1,0 +1,148 @@
+{
+  "scenario_id": "SCN_041",
+  "eval_id": "EVAL_041",
+  "theme": "Unexpected Financial Trends",
+  "entities": {
+    "people": [
+      {
+        "name": "Jessica Wang",
+        "email": "jessica.wang@example.com",
+        "relationship_type": "finance_manager"
+      }
+    ],
+    "companies": [
+      "StartCo Global"
+    ],
+    "projects": [
+      "Q2 Growth Strategy"
+    ],
+    "merchants": [
+      "QuickGroceries",
+      "OfficeSuppliesDepot",
+      "QuickGroceries Express",
+      "CafeNoir"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_001",
+      "subject": "March Financial Summary Review",
+      "body_summary": "Attached is the financial summary for March. Let's discuss unexpected trends.",
+      "occurred_at": "2026-03-30T14:00:00.000Z",
+      "email_category": "finance",
+      "requires_action": "true",
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "jessica.wang@example.com",
+        "sender_name": "Jessica Wang"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_001",
+      "title": "Quarterly Financial Evaluations",
+      "start_time": "2026-04-10T09:00:00.000Z",
+      "end_time": "2026-04-10T10:00:00.000Z",
+      "transcript_summary": "Discussed potential unexpected trends in recent financial data.",
+      "attendees": [
+        {
+          "email": "jessica.wang@example.com",
+          "name": "Jessica Wang"
+        },
+        {
+          "email": "ceo@startcoglobal.com",
+          "name": "CEO"
+        }
+      ],
+      "description": "Focus on identifying and evaluating any irregularities in financial trends."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "QuickGroceries",
+      "amount": 150.75,
+      "currency": "USD",
+      "category": "supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-04-02T12:43:10.000Z"
+    },
+    {
+      "merchant_normalized": "OfficeSuppliesDepot",
+      "amount": 2000,
+      "currency": "USD",
+      "category": "office",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-04-05T09:15:00.000Z"
+    },
+    {
+      "merchant_normalized": "CafeNoir",
+      "amount": 45.2,
+      "currency": "USD",
+      "category": "expenses",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-04-08T08:20:00.000Z"
+    },
+    {
+      "merchant_normalized": "QuickGroceries Express",
+      "amount": 102.3,
+      "currency": "USD",
+      "category": "supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-04-15T11:00:00.000Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Review April Expense Report",
+      "status": "in_progress",
+      "priority": "high",
+      "due_date": "2026-05-05",
+      "source_type": "email"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Prepare detailed report on April's financial deviations",
+      "due_date": "2026-05-07",
+      "status": "not_started",
+      "ai_confidence": 0.95
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "supply_trend_mismatch",
+      "category": "finance",
+      "insight_type": "unexpected_trend",
+      "title": "Supply Spending Spike",
+      "summary": "Detected a spike in supply spending categorized under QuickGroceries in April.",
+      "urgency": "medium",
+      "priority_score": 7,
+      "recommended_action": "Investigate cause of increased spending at similar merchants.",
+      "explanation": "Anomaly detected in supply department linked to high volume purchases.",
+      "status": "observed"
+    },
+    {
+      "state_key": "stale_expense_alert",
+      "category": "finance",
+      "insight_type": "expense_anomaly",
+      "title": "Unresolved Expense Alert",
+      "summary": "Previous alerts suggested potential duplication across similar vendors; needs urgent review.",
+      "urgency": "critical",
+      "priority_score": 9,
+      "recommended_action": "Review and validate potential duplicate transactions.",
+      "explanation": "There have been transactions flagged that require further investigation, specifically between QuickGroceries and QuickGroceries Express.",
+      "status": "stale"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": [],
+    "actual_intent": "detect_unexpected_financial_trends",
+    "expected_answer_facts": [
+      "April's transactions revealed a spike in supply spending from QuickGroceries and its variant.",
+      "There are potential duplicate transactions flagged as a concern.",
+      "Notable increase in office supply spending compared to previous months."
+    ]
+  }
+}

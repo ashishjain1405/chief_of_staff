@@ -1,0 +1,172 @@
+{
+  "scenario_id": "SCENARIO_1023",
+  "eval_id": "EVAL_056",
+  "theme": "Operational Finance Integration",
+  "entities": {
+    "people": [
+      {
+        "name": "Sam Cook",
+        "email": "sam.cook@startupexample.com",
+        "relationship_type": "colleague"
+      },
+      {
+        "name": "Jordan Lee",
+        "email": "jordan.lee@vendorcorp.com",
+        "relationship_type": "vendor"
+      }
+    ],
+    "companies": [
+      "StartupExample Inc.",
+      "VendorCorp"
+    ],
+    "projects": [
+      "Project Sky",
+      "Finance Revamp"
+    ],
+    "merchants": [
+      "QuickBooks Online",
+      "Office Supplies Depot",
+      "Supplies Depot"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_7890",
+      "subject": "Re: Finance Meeting Follow-Up",
+      "body_summary": "Discuss further integration of insights from last quarter's review with current finance patterns.",
+      "occurred_at": "2026-05-02T08:30:00.000Z",
+      "email_category": "work",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "jordan.lee@vendorcorp.com",
+        "sender_name": "Jordan Lee"
+      },
+      "embedding_null": false
+    },
+    {
+      "external_id": "email_7891",
+      "subject": "Quarterly Expenses Review",
+      "body_summary": "Here are the consolidated transaction reports. Some discrepancies noted with the operational data.",
+      "occurred_at": "2026-04-28T14:15:45.000Z",
+      "email_category": "finance",
+      "requires_action": false,
+      "sentiment": "concerned",
+      "channel_metadata": {
+        "sender": "sam.cook@startupexample.com",
+        "sender_name": "Sam Cook"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_2345",
+      "title": "Operational Review Integration Meeting",
+      "start_time": "2026-05-03T09:00:00.000Z",
+      "end_time": "2026-05-03T10:00:00.000Z",
+      "transcript_summary": "Discussion on aligning the recent operational insights with existing finance strategies to minimize costs.",
+      "attendees": [
+        {
+          "email": "sam.cook@startupexample.com",
+          "name": "Sam Cook"
+        },
+        {
+          "email": "jordan.lee@vendorcorp.com",
+          "name": "Jordan Lee"
+        }
+      ],
+      "description": "Understanding how strategic insights can optimize budget management."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "QuickBooks Online",
+      "amount": 200.5,
+      "currency": "USD",
+      "category": "software",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-04-22T13:30:00.000Z"
+    },
+    {
+      "merchant_normalized": "Office Supplies Depot",
+      "amount": 75.2,
+      "currency": "USD",
+      "category": "office supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-04-30T16:45:00.000Z"
+    },
+    {
+      "merchant_normalized": "Supplies Depot",
+      "amount": 50,
+      "currency": "USD",
+      "category": "office supplies",
+      "transaction_type": "refund",
+      "transaction_datetime": "2026-05-01T11:20:00.000Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Finalize finance integration report",
+      "status": "in_progress",
+      "priority": "high",
+      "due_date": "2026-05-05T17:00:00.000Z",
+      "source_type": "email"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Integrate operational insights with finance patterns for board review.",
+      "due_date": "2026-05-06T12:00:00.000Z",
+      "status": "pending",
+      "ai_confidence": 0.85
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "insight_315",
+      "category": "finance",
+      "insight_type": "pattern analysis",
+      "title": "Cost Reduction Opportunities",
+      "summary": "Identify unnecessary recurring expenses aligned with lower-prioritized projects.",
+      "urgency": "high",
+      "priority_score": 0.9,
+      "recommended_action": "Review all software subscriptions for hidden overlaps with current needs.",
+      "explanation": "Insights suggest that overlapping services are costing the organization significant funds.",
+      "status": "active"
+    },
+    {
+      "state_key": "insight_320",
+      "category": "operations",
+      "insight_type": "discrepancy analysis",
+      "title": "Operational vs. Financial Data Misalignment",
+      "summary": "Discrepancies noted between operational insight metrics and actual transaction records.",
+      "urgency": "critical",
+      "priority_score": 0.95,
+      "recommended_action": "Reconcile records to ensure accurate reporting.",
+      "explanation": "Mismatches found in operational objectives and executed transactions.",
+      "status": "active"
+    },
+    {
+      "state_key": "insight_299",
+      "category": "operations",
+      "insight_type": "historical review",
+      "title": "Stale Insight Example",
+      "summary": "Operational reviews from last quarter suggesting cost-cutting measures remain unimplemented.",
+      "urgency": "medium",
+      "priority_score": 0.7,
+      "recommended_action": "Reassess last quarter's reviews against recent financial updates.",
+      "explanation": "Actions indicated have not yet aligned with fiscal adjustments.",
+      "status": "stale"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": [],
+    "actual_intent": "integrate_operational_financial_insights",
+    "expected_answer_facts": [
+      "Financial transactions align with current operational strategies.",
+      "Operational insights require updates to match recent financial patterns.",
+      "Discrepancies noted in complete transactions vs. operational objectives."
+    ]
+  }
+}

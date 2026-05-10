@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chief of Staff — Product Overview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --slate-50:  #f8fafc;
+    --slate-100: #f1f5f9;
+    --slate-200: #e2e8f0;
+    --slate-400: #94a3b8;
+    --slate-500: #64748b;
+    --slate-600: #475569;
+    --slate-700: #334155;
+    --slate-800: #1e293b;
+    --slate-900: #0f172a;
+    --indigo-50:  #eef2ff;
+    --indigo-100: #e0e7ff;
+    --indigo-200: #c7d2fe;
+    --indigo-500: #6366f1;
+    --indigo-600: #4f46e5;
+    --indigo-700: #4338ca;
+    --violet-500: #8b5cf6;
+    --violet-600: #7c3aed;
+    --emerald-50:  #ecfdf5;
+    --emerald-100: #d1fae5;
+    --emerald-500: #10b981;
+    --emerald-600: #059669;
+    --amber-50:  #fffbeb;
+    --amber-100: #fef3c7;
+    --amber-500: #f59e0b;
+    --amber-600: #d97706;
+    --rose-50:  #fff1f2;
+    --rose-100: #ffe4e6;
+    --rose-500: #f43f5e;
+    --sky-50:   #f0f9ff;
+    --sky-100:  #e0f2fe;
+    --sky-500:  #0ea5e9;
+  }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--slate-50);
+    color: var(--slate-800);
+    line-height: 1.6;
+    font-size: 15px;
+  }
+
+  /* ── PRINT ── */
+  @media print {
+    body { background: white; font-size: 13px; }
+    .page { box-shadow: none; margin: 0; border-radius: 0; page-break-after: always; min-height: auto; padding: 40px 48px; }
+    .page:last-child { page-break-after: avoid; }
+  }
+
+  /* ── PAGE SHELL ── */
+  .page {
+    max-width: 860px;
+    margin: 36px auto;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0,0,0,.08), 0 1px 4px rgba(0,0,0,.04);
+    padding: 56px 64px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* ── COVER PAGE ── */
+  .cover {
+    background: linear-gradient(135deg, var(--slate-900) 0%, #1a1040 60%, var(--indigo-700) 100%);
+    color: white;
+    min-height: 420px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 56px 64px;
+  }
+  .cover::before {
+    content: '';
+    position: absolute;
+    top: -80px; right: -80px;
+    width: 340px; height: 340px;
+    background: radial-gradient(circle, rgba(99,102,241,.35) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .cover::after {
+    content: '';
+    position: absolute;
+    bottom: -60px; left: -60px;
+    width: 260px; height: 260px;
+    background: radial-gradient(circle, rgba(139,92,246,.3) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .cover-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,.12);
+    border: 1px solid rgba(255,255,255,.2);
+    border-radius: 100px;
+    padding: 6px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    width: fit-content;
+    margin-bottom: 32px;
+  }
+  .cover-badge span { width: 6px; height: 6px; background: var(--emerald-500); border-radius: 50%; }
+  .cover h1 {
+    font-size: 52px;
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -.02em;
+    margin-bottom: 12px;
+    position: relative;
+  }
+  .cover h1 em {
+    font-style: normal;
+    background: linear-gradient(90deg, #a5b4fc, #c4b5fd);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .cover .tagline {
+    font-size: 18px;
+    font-weight: 400;
+    color: rgba(255,255,255,.7);
+    max-width: 520px;
+    line-height: 1.55;
+    margin-bottom: 40px;
+  }
+  .cover-meta {
+    display: flex;
+    gap: 40px;
+    font-size: 13px;
+    color: rgba(255,255,255,.5);
+    position: relative;
+  }
+  .cover-meta strong { display: block; color: rgba(255,255,255,.85); font-size: 15px; font-weight: 600; margin-bottom: 2px; }
+
+  /* ── SECTION HEADINGS ── */
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--indigo-500);
+    margin-bottom: 8px;
+  }
+  h2 {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -.02em;
+    color: var(--slate-900);
+    margin-bottom: 20px;
+    line-height: 1.2;
+  }
+  h3 {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--slate-800);
+    margin-bottom: 10px;
+  }
+  p { color: var(--slate-600); margin-bottom: 14px; }
+  p:last-child { margin-bottom: 0; }
+
+  /* ── DIVIDER ── */
+  .divider { height: 1px; background: var(--slate-100); margin: 36px 0; }
+
+  /* ── STAT GRID ── */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin: 24px 0;
+  }
+  .stat-card {
+    background: var(--slate-50);
+    border: 1px solid var(--slate-100);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .stat-number {
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -.02em;
+    color: var(--slate-900);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .stat-label { font-size: 13px; color: var(--slate-500); }
+
+  /* ── FEATURE GRID ── */
+  .feature-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 24px 0;
+  }
+  .feature-card {
+    border: 1px solid var(--slate-100);
+    border-radius: 12px;
+    padding: 20px;
+    background: white;
+  }
+  .feature-card .icon {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    margin-bottom: 12px;
+  }
+  .feature-card h4 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--slate-800);
+    margin-bottom: 6px;
+  }
+  .feature-card p { font-size: 13px; color: var(--slate-500); margin: 0; }
+
+  .icon-indigo { background: var(--indigo-50); }
+  .icon-violet { background: #f5f3ff; }
+  .icon-emerald { background: var(--emerald-50); }
+  .icon-amber   { background: var(--amber-50); }
+  .icon-rose    { background: var(--rose-50); }
+  .icon-sky     { background: var(--sky-50); }
+
+  /* ── USER SEGMENT CHIPS ── */
+  .segment-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 20px 0;
+  }
+  .segment-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 16px;
+    border-radius: 10px;
+    border: 1px solid var(--slate-100);
+  }
+  .segment-icon {
+    font-size: 22px;
+    line-height: 1;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .segment-row h4 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--slate-800);
+    margin-bottom: 3px;
+  }
+  .segment-row p { font-size: 13px; color: var(--slate-500); margin: 0; }
+
+  /* ── LAYER ARCHITECTURE ── */
+  .layer-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 24px 0;
+  }
+  .layer-row {
+    display: flex;
+    align-items: stretch;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--slate-100);
+  }
+  .layer-num {
+    width: 42px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 14px;
+    background: var(--slate-900);
+    color: white;
+  }
+  .layer-body {
+    flex: 1;
+    padding: 14px 18px;
+    background: var(--slate-50);
+  }
+  .layer-body h4 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--slate-800);
+    margin-bottom: 3px;
+  }
+  .layer-body p { font-size: 13px; color: var(--slate-500); margin: 0; }
+  .layer-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 100px;
+    background: var(--indigo-100);
+    color: var(--indigo-700);
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+
+  /* ── TECH STACK TABLE ── */
+  .tech-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin: 20px 0;
+  }
+  .tech-card {
+    background: var(--slate-50);
+    border: 1px solid var(--slate-100);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .tech-card .tech-category {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--slate-400);
+    margin-bottom: 6px;
+  }
+  .tech-card .tech-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--slate-800);
+    margin-bottom: 3px;
+  }
+  .tech-card .tech-note { font-size: 12px; color: var(--slate-500); }
+
+  /* ── POSITIONING TABLE ── */
+  .positioning-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin: 20px 0;
+  }
+  .pos-card {
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid transparent;
+  }
+  .pos-card.them { background: var(--rose-50); border-color: var(--rose-100); }
+  .pos-card.us   { background: var(--emerald-50); border-color: var(--emerald-100); }
+  .pos-card h4 { font-size: 13px; font-weight: 700; margin-bottom: 10px; }
+  .pos-card.them h4 { color: var(--rose-500); }
+  .pos-card.us   h4 { color: var(--emerald-600); }
+  .pos-card ul { list-style: none; padding: 0; font-size: 13px; color: var(--slate-600); }
+  .pos-card ul li { padding: 4px 0; }
+  .pos-card ul li::before { margin-right: 8px; }
+  .pos-card.them ul li::before { content: '✕'; color: var(--rose-500); }
+  .pos-card.us   ul li::before { content: '✓'; color: var(--emerald-600); }
+
+  /* ── PIPELINE FLOW ── */
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin: 20px 0;
+    flex-wrap: wrap;
+  }
+  .flow-step {
+    background: var(--indigo-50);
+    border: 1px solid var(--indigo-200);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--indigo-700);
+    white-space: nowrap;
+  }
+  .flow-arrow {
+    color: var(--slate-300);
+    font-size: 18px;
+    padding: 0 6px;
+    flex-shrink: 0;
+  }
+
+  /* ── CALLOUT ── */
+  .callout {
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin: 20px 0;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .callout-indigo { background: var(--indigo-50); border-left: 3px solid var(--indigo-500); color: var(--slate-700); }
+  .callout-emerald { background: var(--emerald-50); border-left: 3px solid var(--emerald-500); color: var(--slate-700); }
+
+  /* ── PAGE FOOTER ── */
+  .page-footer {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--slate-100);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: var(--slate-400);
+  }
+  .page-footer strong { color: var(--slate-600); }
+
+  /* ── DETAIL TABLE ── */
+  .detail-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 16px 0;
+  }
+  .detail-table th {
+    background: var(--slate-900);
+    color: white;
+    padding: 9px 14px;
+    text-align: left;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: .03em;
+  }
+  .detail-table th:first-child { border-radius: 8px 0 0 0; }
+  .detail-table th:last-child  { border-radius: 0 8px 0 0; }
+  .detail-table td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--slate-100);
+    vertical-align: top;
+    color: var(--slate-600);
+  }
+  .detail-table tr:last-child td { border-bottom: none; }
+  .detail-table tr:nth-child(even) td { background: var(--slate-50); }
+  .detail-table td:first-child { font-weight: 600; color: var(--slate-800); }
+  .detail-table code {
+    background: var(--indigo-50);
+    color: var(--indigo-700);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 11px;
+  }
+
+  /* ── WEIGHT TABLE ── */
+  .weight-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    margin: 16px 0;
+  }
+  .weight-table th {
+    background: var(--slate-800);
+    color: rgba(255,255,255,.7);
+    padding: 8px 12px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+  .weight-table th:first-child { text-align: left; background: var(--slate-900); border-radius: 8px 0 0 0; }
+  .weight-table th:last-child  { border-radius: 0 8px 0 0; }
+  .weight-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--slate-100);
+    text-align: center;
+    color: var(--slate-600);
+    font-variant-numeric: tabular-nums;
+  }
+  .weight-table td:first-child { text-align: left; font-weight: 700; color: var(--slate-800); background: var(--slate-50); }
+  .weight-table tr:last-child td { border-bottom: none; }
+  .w-hi { color: var(--indigo-700); font-weight: 700; }
+  .w-med { color: var(--slate-700); }
+  .w-lo { color: var(--slate-400); }
+
+  /* ── SOURCE TABLE ── */
+  .source-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    margin: 14px 0;
+  }
+  .source-table th {
+    background: var(--slate-100);
+    color: var(--slate-600);
+    padding: 7px 12px;
+    text-align: left;
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+  }
+  .source-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--slate-100);
+    font-size: 12px;
+    color: var(--slate-600);
+    vertical-align: top;
+  }
+  .source-table tr:last-child td { border-bottom: none; }
+  .source-table td:first-child { font-weight: 700; color: var(--slate-800); font-family: 'SF Mono', monospace; font-size: 11px; }
+  .source-table .num { font-variant-numeric: tabular-nums; text-align: right; }
+  .badge-sm {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 100px;
+    vertical-align: middle;
+  }
+  .badge-indigo { background: var(--indigo-100); color: var(--indigo-700); }
+  .badge-emerald { background: var(--emerald-100); color: var(--emerald-600); }
+  .badge-amber  { background: var(--amber-100); color: var(--amber-600); }
+  .badge-violet { background: #ede9fe; color: #6d28d9; }
+  .badge-slate  { background: var(--slate-100); color: var(--slate-600); }
+
+  /* ── FORMULA BOX ── */
+  .formula-box {
+    background: var(--slate-900);
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin: 12px 0;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 12px;
+    color: #a5b4fc;
+    line-height: 1.8;
+  }
+  .formula-box .comment { color: #475569; }
+  .formula-box .hl { color: #6ee7b7; }
+
+  /* ── INTENT GRID ── */
+  .intent-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    margin: 14px 0;
+  }
+  .intent-chip {
+    background: var(--slate-50);
+    border: 1px solid var(--slate-100);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+  .intent-chip .iname {
+    font-weight: 700;
+    color: var(--slate-800);
+    font-family: 'SF Mono', monospace;
+    font-size: 11px;
+    margin-bottom: 3px;
+  }
+  .intent-chip .idesc { color: var(--slate-500); font-size: 11px; }
+
+  /* ── PIPELINE STAGE ── */
+  .pipeline {
+    margin: 20px 0;
+    position: relative;
+  }
+  .pipeline::before {
+    content: '';
+    position: absolute;
+    left: 20px; top: 24px; bottom: 24px;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--indigo-200), var(--violet-500));
+  }
+  .pipe-step {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 14px;
+    align-items: flex-start;
+  }
+  .pipe-dot {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: white;
+    border: 2px solid var(--indigo-300);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 14px;
+    color: var(--indigo-600);
+    position: relative;
+    z-index: 1;
+  }
+  .pipe-content {
+    flex: 1;
+    background: var(--slate-50);
+    border: 1px solid var(--slate-100);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-top: 4px;
+  }
+  .pipe-content h4 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--slate-800);
+    margin-bottom: 4px;
+  }
+  .pipe-content p { font-size: 12.5px; color: var(--slate-500); margin: 0 0 6px; }
+  .pipe-content p:last-child { margin-bottom: 0; }
+  .pipe-content ul {
+    margin: 6px 0 0 0;
+    padding-left: 16px;
+    font-size: 12px;
+    color: var(--slate-500);
+  }
+  .pipe-content ul li { margin-bottom: 3px; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     PAGE 1 — COVER
+═══════════════════════════════════════════ -->
+<div class="page cover">
+  <div>
+    <div class="cover-badge"><span></span> Product Overview · Confidential</div>
+    <h1>Chief of<br><em>Staff</em></h1>
+    <p class="tagline">Your AI-powered executive assistant — integrated with Gmail, Calendar, and Zoom to surface what matters, track what you owe, and answer anything.</p>
+  </div>
+  <div class="cover-meta">
+    <div><strong>Category</strong>Personal AI Assistant</div>
+    <div><strong>Platform</strong>Web (Next.js · Supabase)</div>
+    <div><strong>Status</strong>Early Access</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PAGE 2 — PRODUCT + TARGET USER
+═══════════════════════════════════════════ -->
+<div class="page">
+  <div class="section-label">Product Overview</div>
+  <h2>Turn information overload into focused action</h2>
+
+  <p>Knowledge workers — founders, operators, senior executives — manage hundreds of emails a week, attend back-to-back meetings, and are expected to track every commitment made across both. The cognitive cost of staying on top of this is enormous.</p>
+
+  <p><strong style="color:var(--slate-800)">Chief of Staff</strong> connects to your Gmail, Google Calendar, and Zoom account and does the work for you. It triages every email with AI, extracts commitments and action items from meetings, categorises your transactions, and surfaces a prioritised view of what needs attention today — all accessible through a conversational Ask AI interface.</p>
+
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-number">22</div>
+      <div class="stat-label">Email categories automatically classified</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">5-layer</div>
+      <div class="stat-label">AI retrieval pipeline behind "Ask AI"</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">Real-time</div>
+      <div class="stat-label">Gmail webhook processing, not batch</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <div class="section-label">Target User Segment</div>
+  <h2>Who it's built for</h2>
+
+  <div class="segment-list">
+    <div class="segment-row">
+      <div class="segment-icon">🧑‍💼</div>
+      <div>
+        <h4>Startup founders &amp; early-stage CEOs</h4>
+        <p>Wearing every hat — investor comms, hiring, sales, product. No EA. Need to know what's urgent, what's overdue, and what they promised someone three weeks ago.</p>
+      </div>
+    </div>
+    <div class="segment-row">
+      <div class="segment-icon">🏢</div>
+      <div>
+        <h4>Senior executives and VPs at growth companies</h4>
+        <p>100+ emails a day, a shared assistant who covers scheduling but not analysis. Need a private layer that tracks commitments, spend, and relationship health.</p>
+      </div>
+    </div>
+    <div class="segment-row">
+      <div class="segment-icon">🔍</div>
+      <div>
+        <h4>Solo operators and consultants</h4>
+        <p>Managing multiple clients, tracking invoices, subscriptions, travel. Want the intelligence of an EA at a fraction of the cost, accessible through natural language.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <strong>Chief of Staff</strong>
+    <span>Product Overview — Page 1 of 6</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PAGE 3 — FEATURES + MARKET POSITIONING
+═══════════════════════════════════════════ -->
+<div class="page">
+  <div class="section-label">Core Features</div>
+  <h2>Six modules, one unified experience</h2>
+
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="icon icon-indigo">📥</div>
+      <h4>Smart Inbox</h4>
+      <p>Every email auto-classified into 22 categories. Importance scored 0–1. Financial transactions and bills surfaced with merchant and amount directly in the list view.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon icon-emerald">💰</div>
+      <h4>Finance Dashboard</h4>
+      <p>Transactions pulled from email, normalised across 100+ merchants, categorised and charted. Anomaly detection flags duplicate charges, spending spikes, and pending refunds.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon icon-violet">📋</div>
+      <h4>Commitments Tracker</h4>
+      <p>AI extracts every promise made in emails and meeting transcripts — who owes what, to whom, by when. Overdue commitments surface automatically.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon icon-amber">🗓️</div>
+      <h4>Meetings &amp; Calendar</h4>
+      <p>Google Calendar sync with Zoom transcript processing. Each meeting produces an AI summary with key decisions, action items, and follow-up recommendations.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon icon-sky">🤖</div>
+      <h4>Ask AI</h4>
+      <p>Conversational interface over all your data. Ask about spending, commitments, or relationships in natural language. Answers stream in real-time with source citations.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon icon-rose">📊</div>
+      <h4>Daily Brief</h4>
+      <p>Every morning: AI-generated priority list covering urgent emails, upcoming meetings, overdue commitments, and top spending anomalies. The one view to start your day.</p>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <div class="section-label">Market Positioning</div>
+  <h2>Where Chief of Staff sits in the landscape</h2>
+
+  <p>The executive assistant software market ranges from inbox tools (Superhuman, Spark) to meeting intelligence (Otter.ai, Fireflies), to AI chat (ChatGPT, Perplexity). None of them unify all three and ground answers in <em>your actual data</em>.</p>
+
+  <div class="positioning-grid">
+    <div class="pos-card them">
+      <h4>Email tools (Superhuman, Spark)</h4>
+      <ul>
+        <li>Inbox prioritisation only</li>
+        <li>No meeting intelligence</li>
+        <li>No financial visibility</li>
+        <li>No AI over your history</li>
+      </ul>
+    </div>
+    <div class="pos-card them">
+      <h4>Meeting AI (Otter, Fireflies)</h4>
+      <ul>
+        <li>Transcripts only</li>
+        <li>No email or finance data</li>
+        <li>No commitment tracking</li>
+        <li>No cross-channel Q&amp;A</li>
+      </ul>
+    </div>
+    <div class="pos-card us">
+      <h4>Chief of Staff</h4>
+      <ul>
+        <li>Email + meetings + finance</li>
+        <li>Commitment tracking across all</li>
+        <li>Natural language over all data</li>
+        <li>Daily brief synthesising everything</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout callout-indigo">
+    <strong>Core differentiator:</strong> Every other tool is a lens on one data source. Chief of Staff is the first layer that unifies email, calendar, and financial signals into a single operational view — and makes that view queryable in natural language.
+  </div>
+
+  <div class="page-footer">
+    <strong>Chief of Staff</strong>
+    <span>Product Overview — Page 2 of 6</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PAGE 4 — TECHNICAL DEEP DIVE: LAYERS 1–2
+═══════════════════════════════════════════ -->
+<div class="page">
+  <div class="section-label">Technical Deep Dive · Ask AI — Layers 1 &amp; 2</div>
+  <h2>From raw query to structured retrieval plan</h2>
+
+  <p>When a user types a question, Chief of Staff does not send that text directly to an LLM. It runs a deterministic, multi-stage pipeline that first understands intent, resolves entities, plans what data to fetch, retrieves it in parallel, then ranks and synthesises it. The full pipeline completes in under 2 seconds.</p>
+
+  <div class="divider" style="margin:20px 0"></div>
+
+  <!-- LAYER 1 -->
+  <h3 style="color:var(--indigo-600); display:flex; align-items:center; gap:10px; margin-bottom:14px">
+    <span style="background:var(--slate-900);color:white;width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0">1</span>
+    Intent Classification
+    <span class="badge-sm badge-indigo">gpt-4o-mini · temp 0</span>
+    <span class="badge-sm badge-slate">3 s timeout · regex fallback</span>
+  </h3>
+
+  <p style="font-size:13.5px">The classifier maps every query to one of <strong>13 named intents</strong>, extracts structured entities, infers a temporal anchor, and computes a two-dimensional retrieval weight that controls which downstream path activates.</p>
+
+  <div class="intent-grid">
+    <div class="intent-chip"><div class="iname">finance</div><div class="idesc">How much did I spend on…</div></div>
+    <div class="intent-chip"><div class="iname">spending_analysis</div><div class="idesc">Breakdown of last month</div></div>
+    <div class="intent-chip"><div class="iname">commitments</div><div class="idesc">What did I promise Sarah?</div></div>
+    <div class="intent-chip"><div class="iname">scheduling</div><div class="idesc">What meetings do I have today?</div></div>
+    <div class="intent-chip"><div class="iname">relationship</div><div class="idesc">When did I last talk to Bob?</div></div>
+    <div class="intent-chip"><div class="iname">search_lookup</div><div class="idesc">Find emails from Acme about…</div></div>
+    <div class="intent-chip"><div class="iname">operational_summary</div><div class="idesc">What should I focus on today?</div></div>
+    <div class="intent-chip"><div class="iname">productivity</div><div class="idesc">What tasks are overdue?</div></div>
+    <div class="intent-chip"><div class="iname">travel</div><div class="idesc">What travel do I have coming up?</div></div>
+    <div class="intent-chip"><div class="iname">subscriptions</div><div class="idesc">What SaaS am I paying for?</div></div>
+    <div class="intent-chip"><div class="iname">bills_payments</div><div class="idesc">Any overdue invoices?</div></div>
+    <div class="intent-chip"><div class="iname">reminders</div><div class="idesc">Remind me about the contract</div></div>
+  </div>
+
+  <p style="font-size:13px">Classification runs in two passes. <strong>Pass 1</strong> is pure regex — named entity triggers (merchant names, people triggers, spending keywords) fire deterministic overrides before any LLM call. <strong>Pass 2</strong> calls gpt-4o-mini with a 3-second hard timeout; if it times out, the system falls back to <code>operational_summary</code> at confidence 0.3 rather than blocking.</p>
+
+  <p style="font-size:13px">The classifier also computes a <strong>retrieval weight pair</strong> — <code>operational_weight</code> and <code>investigative_weight</code> — that governs layer 3. Deterministic overrides hard-set these weights based on intent:</p>
+
+  <table class="detail-table">
+    <thead><tr><th>Intent</th><th>operational_weight</th><th>investigative_weight</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td>operational_summary / daily brief</td><td>1.0</td><td>0.0</td><td>Precomputed insights only; no raw SQL needed</td></tr>
+      <tr><td>finance / spending_analysis</td><td>0.1</td><td>1.0</td><td>Requires exact transaction rows, not summaries</td></tr>
+      <tr><td>search_lookup</td><td>0.0</td><td>1.0</td><td>Pure data retrieval; insights add noise</td></tr>
+      <tr><td>scheduling / relationship / commitments</td><td>≥ 0.3</td><td>≥ 0.5</td><td>Needs both summaries and raw records</td></tr>
+    </tbody>
+  </table>
+
+  <div class="divider" style="margin:20px 0"></div>
+
+  <!-- LAYER 2 -->
+  <h3 style="color:var(--indigo-600); display:flex; align-items:center; gap:10px; margin-bottom:14px">
+    <span style="background:var(--slate-900);color:white;width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0">2</span>
+    Entity Resolution
+    <span class="badge-sm badge-emerald">deterministic · no LLM</span>
+  </h3>
+
+  <p style="font-size:13.5px">Named entities extracted by the classifier are still abstract strings — "Uber", "Sarah", "last month". Entity resolution converts them to concrete database identifiers and date ranges before any query runs.</p>
+
+  <table class="detail-table">
+    <thead><tr><th>Entity type</th><th>Resolution method</th><th>Output</th></tr></thead>
+    <tbody>
+      <tr><td>Person name</td><td><code>.ilike('%name%')</code> fuzzy match on <code>contacts.name</code> and <code>contacts.email</code>, top 3 results</td><td>Array of <code>contact_id</code> UUIDs</td></tr>
+      <tr><td>Merchant name</td><td>100+ alias dictionary with word-boundary matching — <em>"SWIGGY*", "Swiggy food"</em> → canonical <code>swiggy</code></td><td>Normalised merchant string</td></tr>
+      <tr><td>Relative period</td><td>date-fns conversion — <em>last_month</em> → start/end of prior calendar month in UTC</td><td><code>{from: ISO, to: ISO}</code></td></tr>
+      <tr><td>Event anchor</td><td>Special cases: <em>salary_credit</em> looks up last salary transaction; <em>named_contact_interaction</em> finds last email with that contact</td><td>Date range window around event</td></tr>
+    </tbody>
+  </table>
+
+  <p style="font-size:13px">Temporal resolution also emits a <code>temporalConfidence</code> score. If it falls below 0.6, the system appends a clarification note to the final LLM system prompt, telling GPT-4o to acknowledge ambiguity in its answer rather than hallucinate a date.</p>
+
+  <div class="page-footer">
+    <strong>Chief of Staff</strong>
+    <span>Technical Architecture — Page 3 of 6</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PAGE 5 — TECHNICAL DEEP DIVE: LAYERS 3–5
+═══════════════════════════════════════════ -->
+<div class="page">
+  <div class="section-label">Technical Deep Dive · Ask AI — Layers 3, 4 &amp; 5</div>
+  <h2>Retrieval planning, parallel execution, and ranking</h2>
+
+  <!-- LAYER 3 -->
+  <h3 style="color:var(--indigo-600); display:flex; align-items:center; gap:10px; margin-bottom:14px">
+    <span style="background:var(--slate-900);color:white;width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0">3</span>
+    Retrieval Plan Construction
+    <span class="badge-sm badge-violet">rule-based · budget-capped</span>
+  </h3>
+
+  <p style="font-size:13px">The planner maps intent → ordered list of retrieval steps. Each source has a known confidence score, estimated cost in milliseconds, and a maximum result count. Steps are accumulated until the <strong>1 200 ms budget</strong> is exhausted.</p>
+
+  <table class="source-table">
+    <thead><tr><th>Source</th><th>Confidence</th><th>Est. cost</th><th>Max results</th><th>Activated by</th></tr></thead>
+    <tbody>
+      <tr><td>aggregated_finance</td><td>0.95</td><td class="num">90 ms</td><td class="num">1</td><td>any finance / spending intent</td></tr>
+      <tr><td>sql_transactions</td><td>0.95</td><td class="num">80 ms</td><td class="num">20</td><td>finance, spending_analysis, bills</td></tr>
+      <tr><td>sql_commitments</td><td>0.90</td><td class="num">60 ms</td><td class="num">10</td><td>commitments, productivity</td></tr>
+      <tr><td>sql_tasks</td><td>0.90</td><td class="num">60 ms</td><td class="num">10</td><td>commitments, productivity, operational_summary</td></tr>
+      <tr><td>operational_insights</td><td>0.85</td><td class="num">50 ms</td><td class="num">15</td><td>operational_weight ≥ 0.3</td></tr>
+      <tr><td>sql_communications</td><td>0.85</td><td class="num">100 ms</td><td class="num">10</td><td>search_lookup, relationship, travel, bills</td></tr>
+      <tr><td>sql_meetings</td><td>0.80</td><td class="num">80 ms</td><td class="num">5</td><td>scheduling, relationship</td></tr>
+      <tr><td>vector_search</td><td>0.55</td><td class="num">200 ms</td><td class="num">8</td><td>investigative_weight &gt; 0.5 or semantic intents</td></tr>
+    </tbody>
+  </table>
+
+  <p style="font-size:13px">The planner uses two gate conditions: the <em>operational path</em> fires when <code>operational_weight ≥ 0.3</code> or the intent is a finance type; the <em>investigative path</em> fires when <code>investigative_weight &gt; 0.3</code> or keyword overrides are present. Both paths can be active simultaneously for mixed queries like "what did I spend on Uber and when did I last email them?"</p>
+
+  <div class="divider" style="margin:18px 0"></div>
+
+  <!-- LAYER 4 -->
+  <h3 style="color:var(--indigo-600); display:flex; align-items:center; gap:10px; margin-bottom:14px">
+    <span style="background:var(--slate-900);color:white;width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0">4</span>
+    Parallel Data Retrieval
+    <span class="badge-sm badge-slate">Promise.allSettled · partial failure tolerance</span>
+  </h3>
+
+  <p style="font-size:13px">All budgeted steps fire simultaneously. <code>Promise.allSettled</code> ensures a failed or slow source (e.g., vector search timing out) never blocks the others. Each result is tagged with its source type so the ranker and LLM know provenance. Notable query mechanics:</p>
+
+  <table class="detail-table" style="font-size:12px">
+    <thead><tr><th>Source</th><th>Key filters</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>sql_communications</td><td>contactIds (IN), emailCategory (IN), dateRange, topics (ILIKE across subject + body_summary)</td><td>Topic filter is OR-flattened across both columns</td></tr>
+      <tr><td>sql_transactions</td><td>merchants (IN), transactionTypes (IN), dateRange, amount (eq)</td><td>Category filter intentionally omitted at query level — applied in ranking</td></tr>
+      <tr><td>sql_commitments</td><td>contactIds (IN), due_date ≤ range, status ≠ done</td><td>Ordered ASC by due_date so overdue items come first</td></tr>
+      <tr><td>aggregated_finance</td><td>user_id, date range</td><td>Returns totals by category, merchant, currency, and weekly trend — one structured object</td></tr>
+      <tr><td>operational_insights</td><td>status = active, snoozed_until is null or past</td><td>Ordered by priority_score DESC; category filter applied if intent is specific</td></tr>
+      <tr><td>vector_search</td><td>query embedding vs pgvector HNSW index</td><td>90-day lookback window, matchCount = max_results</td></tr>
+    </tbody>
+  </table>
+
+  <div class="divider" style="margin:18px 0"></div>
+
+  <!-- LAYER 5 -->
+  <h3 style="color:var(--indigo-600); display:flex; align-items:center; gap:10px; margin-bottom:14px">
+    <span style="background:var(--slate-900);color:white;width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0">5</span>
+    Unified Ranking + LLM Response
+    <span class="badge-sm badge-indigo">gpt-4o · streaming · multi-turn</span>
+  </h3>
+
+  <p style="font-size:13px">All retrieved items — regardless of source type — are normalised into a common schema and scored by a <strong>profile-aware weighted ranker</strong>. The profile is chosen based on the primary intent. Component weights:</p>
+
+  <table class="weight-table">
+    <thead>
+      <tr>
+        <th>Profile → Intent</th>
+        <th>Keyword match</th>
+        <th>Semantic</th>
+        <th>Entity overlap</th>
+        <th>Recency</th>
+        <th>Src importance</th>
+        <th>Urgency</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>factual_finance — finance / spending</td><td class="w-hi">0.35</td><td class="w-lo">0.15</td><td class="w-lo">0.15</td><td class="w-hi">0.25</td><td class="w-lo">0.05</td><td class="w-lo">0.05</td></tr>
+      <tr><td>semantic_lookup — search_lookup</td><td class="w-lo">0.10</td><td class="w-hi">0.35</td><td class="w-med">0.25</td><td class="w-lo">0.15</td><td class="w-lo">0.05</td><td class="w-lo">0.10</td></tr>
+      <tr><td>relationship — contacts &amp; people</td><td class="w-lo">0.10</td><td class="w-med">0.25</td><td class="w-hi">0.35</td><td class="w-lo">0.15</td><td class="w-lo">0.05</td><td class="w-lo">0.10</td></tr>
+      <tr><td>operational — default / summary</td><td class="w-lo">0.05</td><td class="w-lo">0.10</td><td class="w-lo">0.10</td><td class="w-lo">0.15</td><td class="w-lo">0.10</td><td class="w-hi">0.50</td></tr>
+    </tbody>
+  </table>
+
+  <p style="font-size:13px">Per-item urgency is not uniform — it is assigned by source: commitments score 0.8 if overdue / 0.4 otherwise; emails with <code>requires_action=true</code> score 0.6; meetings and transactions score 0.3; vector results score 0.2. Recency decays linearly over 90 days: <code>score = max(0, 1 − daysOld / 90)</code>.</p>
+
+  <p style="font-size:13px">After scoring, <strong>diversity caps</strong> prevent any one source from dominating the context window: max 6 operational insights, 4 emails, 3 transactions, 3 commitments, 2 meetings, 2 vector results. The top 20 items are assembled into a structured evidence block tagged with <code>[TRANSACTION]</code>, <code>[EMAIL]</code>, <code>[MEETING]</code>, <code>[COMMITMENT]</code>, <code>[INSIGHT]</code>, and <code>[ANALYTICS]</code> markers.</p>
+
+  <p style="font-size:13px">This block, plus the system prompt (role: "proactive AI Chief of Staff"), is passed to <strong>GPT-4o with streaming</strong>. The response header <code>X-Assistant-Context</code> carries the conversation state — active entities, temporal anchor, sources used — back to the client for multi-turn continuity.</p>
+
+  <div class="callout callout-emerald">
+    <strong>Design rationale:</strong> Pure RAG over embeddings would conflate "how much did I spend on Uber?" with calendar events mentioning Uber. The intent + entity layers route each query to the correct table. The ranking layer then ensures SQL rows, vector matches, and precomputed insights are balanced — not whichever source returned the most rows.
+  </div>
+
+  <div class="page-footer">
+    <strong>Chief of Staff</strong>
+    <span>Technical Architecture — Page 4 of 6</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PAGE 6 — EMAIL & MEETING PROCESSING PIPELINE
+═══════════════════════════════════════════ -->
+<div class="page">
+  <div class="section-label">Technical Deep Dive · Inbound Data Pipeline</div>
+  <h2>How emails and meetings become structured intelligence</h2>
+
+  <p>Every piece of information in Chief of Staff flows through a background worker pipeline. Nothing is processed synchronously — webhooks enqueue BullMQ jobs, and workers run in a separate Railway process with their own env loading and service-role Supabase client (bypassing RLS).</p>
+
+  <div class="divider" style="margin:18px 0"></div>
+
+  <h3 style="margin-bottom:14px">Email processing — 5-stage worker pipeline</h3>
+
+  <div class="pipeline">
+    <div class="pipe-step">
+      <div class="pipe-dot">1</div>
+      <div class="pipe-content">
+        <h4>Fetch &amp; normalise <span class="badge-sm badge-slate" style="margin-left:6px">process-email.ts</span></h4>
+        <p>Gmail API fetches the full message. Headers extracted (from, to, subject, date, threadId, list-unsubscribe). Sender email and name parsed and upserted to the <code>contacts</code> table.</p>
+        <p><strong>Importance heuristic</strong> seeds an <code>importance_score</code> starting at 0.5: <code>+0.2</code> if Gmail IMPORTANT label and no list-unsubscribe; <code>+0.1</code> if not CC'd; <code>+0.15</code> for urgency keywords (urgent, asap, deadline, invoice, contract, term sheet); <code>−0.45</code> if unsubscribe present. Score clamped to [0, 1].</p>
+      </div>
+    </div>
+    <div class="pipe-step">
+      <div class="pipe-dot">2</div>
+      <div class="pipe-content">
+        <h4>AI triage <span class="badge-sm badge-indigo" style="margin-left:6px">gpt-4o-mini · max_tokens 700</span></h4>
+        <p>Calls <code>triageEmail()</code> with business context, sender info, and body. Returns a Zod-validated JSON object with: <code>summary</code>, <code>sentiment</code> (positive / neutral / negative / urgent), refined <code>importance_score</code>, <code>requires_action</code>, <code>action_description</code>, <code>email_category</code> (one of 22), <code>fallback_category</code>, and <code>confidence</code>.</p>
+        <p>Categories are prioritised in a fixed order: Travel &gt; Account Security &gt; Finance Bills &gt; Transactions &gt; Subscriptions &gt; Receipts &gt; Legal &gt; Calendar &gt; Shipping &gt; Productivity Tools &gt; Career &gt; Social &gt; … &gt; Other.</p>
+      </div>
+    </div>
+    <div class="pipe-step">
+      <div class="pipe-dot">3</div>
+      <div class="pipe-content">
+        <h4>Financial extraction <span class="badge-sm badge-emerald" style="margin-left:6px">conditional · gpt-4o-mini</span></h4>
+        <p>Gate: runs only if the email category is a finance type. Extracts <code>amount</code>, <code>currency</code>, <code>merchant</code>, <code>transaction_type</code>, and <code>confidence</code>. Sets a <code>needs_review</code> flag when the triage category disagrees with the extraction result or confidence is below 0.5.</p>
+        <p>If review is not needed, calls <code>runDedup()</code> to normalise against existing transactions (same merchant + similar amount ± 2% within 3 days = duplicate). The merchant name and category are normalised via the same 100+ alias dictionary used in entity resolution.</p>
+      </div>
+    </div>
+    <div class="pipe-step">
+      <div class="pipe-dot">4</div>
+      <div class="pipe-content">
+        <h4>Commitment &amp; task extraction <span class="badge-sm badge-violet" style="margin-left:6px">gpt-4o · if requires_action</span></h4>
+        <p>If <code>requires_action = true</code> and AI confidence ≥ 0.6, calls <code>extractCommitments()</code> to find promises in the email body — who committed, to whom, by when. Each commitment is stored with source_type = "email".</p>
+        <p>If the capped importance score ≥ 0.7, a task is also created (priority = "high" if score ≥ 0.85, else "medium") with the AI's action description as the title.</p>
+      </div>
+    </div>
+    <div class="pipe-step">
+      <div class="pipe-dot">5</div>
+      <div class="pipe-content">
+        <h4>Embed &amp; trigger operational state <span class="badge-sm badge-slate" style="margin-left:6px">Voyage AI · 30 s delay</span></h4>
+        <p>The email summary is chunked and embedded using Voyage AI voyage-3-lite (1 024-dim). The embedding is stored in the <code>communications.embedding</code> vector column and indexed via pgvector HNSW for sub-100 ms semantic search.</p>
+        <p>Finally, a <code>compute-operational-state</code> job is enqueued with a 30-second delay and a deduplication key — ensuring batch updates don't trigger redundant recomputes.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider" style="margin:18px 0"></div>
+
+  <h3 style="margin-bottom:14px">Meeting processing pipeline <span class="badge-sm badge-slate" style="margin-left:8px">summarize-meeting.ts</span></h3>
+
+  <p style="font-size:13px">Triggered when a Zoom meeting ends. The worker downloads the VTT transcript, parses speaker turns, and calls <code>summarizeMeeting()</code> with the title, attendee list, transcript, and business context. GPT-4o returns a structured JSON containing:</p>
+
+  <div class="feature-grid" style="grid-template-columns:1fr 1fr 1fr; gap:10px; margin:14px 0">
+    <div class="feature-card" style="padding:14px">
+      <h4 style="font-size:13px; margin-bottom:4px">Executive summary</h4>
+      <p style="font-size:12px">3–5 sentence narrative of what was discussed and decided</p>
+    </div>
+    <div class="feature-card" style="padding:14px">
+      <h4 style="font-size:13px; margin-bottom:4px">Key decisions</h4>
+      <p style="font-size:12px">Each decision with full context — not just the conclusion</p>
+    </div>
+    <div class="feature-card" style="padding:14px">
+      <h4 style="font-size:13px; margin-bottom:4px">Action items</h4>
+      <p style="font-size:12px">Owner, due date, and description per item. Items owned by the founder auto-create tasks.</p>
+    </div>
+    <div class="feature-card" style="padding:14px">
+      <h4 style="font-size:13px; margin-bottom:4px">Commitments</h4>
+      <p style="font-size:12px">Promises extracted with due date and confidence ≥ 0.6 threshold</p>
+    </div>
+    <div class="feature-card" style="padding:14px">
+      <h4 style="font-size:13px; margin-bottom:4px">Follow-up emails</h4>
+      <p style="font-size:12px">Suggested recipients and topics for post-meeting outreach</p>
+    </div>
+    <div class="feature-card" style="padding:14px">
+      <h4 style="font-size:13px; margin-bottom:4px">Sentiment</h4>
+      <p style="font-size:12px">productive / tense / unclear / routine — surfaced in the meetings list view</p>
+    </div>
+  </div>
+
+  <p style="font-size:13px">The summary, decisions, and action items are concatenated and embedded (Voyage AI) to memory — making meeting content searchable from Ask AI using semantic queries like "what was decided about pricing in Q1?"</p>
+
+  <div class="page-footer">
+    <strong>Chief of Staff</strong>
+    <span>Technical Architecture — Page 5 of 6</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PAGE 7 — SYSTEM ARCHITECTURE + STACK
+═══════════════════════════════════════════ -->
+<div class="page">
+  <div class="section-label">System Architecture</div>
+  <h2>How data flows through the platform</h2>
+
+  <p>Chief of Staff is a real-time event-driven system. Every email and meeting update arrives via webhook, is processed asynchronously by a background worker, and the results are immediately available in the UI.</p>
+
+  <div class="flow">
+    <div class="flow-step">Gmail / Calendar / Zoom webhook</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">Route handler enqueues job</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">BullMQ worker</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">AI triage (GPT-4o-mini)</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">Embed → pgvector</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">Operational insights</div>
+  </div>
+
+  <p>OAuth tokens for every integration are stored AES-256-GCM encrypted. Row-Level Security in Postgres ensures users never see each other's data — enforced at the database layer, not just in application code. The BullMQ worker runs as a <strong>separate Railway process</strong> using a service-role Supabase client (bypasses RLS) and lazy-initialises all Redis and Supabase connections to avoid module-evaluation errors before env vars load.</p>
+
+  <div class="divider"></div>
+  <div class="section-label">Technology Stack</div>
+  <h2>Built on proven, scalable primitives</h2>
+
+  <div class="tech-grid">
+    <div class="tech-card">
+      <div class="tech-category">Frontend</div>
+      <div class="tech-name">Next.js 16 · React 19</div>
+      <div class="tech-note">App Router, Server Components, TypeScript, Tailwind CSS 4</div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-category">Database &amp; Auth</div>
+      <div class="tech-name">Supabase (Postgres)</div>
+      <div class="tech-note">pgvector HNSW index, Row-Level Security, Supabase Auth</div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-category">Background Jobs</div>
+      <div class="tech-name">BullMQ + Redis</div>
+      <div class="tech-note">Upstash Redis via ioredis, priority queues, dedup keys, 30 s delayed jobs</div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-category">AI — Reasoning</div>
+      <div class="tech-name">OpenAI GPT-4o</div>
+      <div class="tech-note">Streaming Ask AI responses, meeting summaries, commitment extraction, daily brief</div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-category">AI — Triage</div>
+      <div class="tech-name">GPT-4o-mini</div>
+      <div class="tech-note">Email classification (700 token budget), intent classification (3 s timeout)</div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-category">Embeddings</div>
+      <div class="tech-name">Voyage AI voyage-3-lite</div>
+      <div class="tech-note">1 024-dim vectors, HNSW index, 90-day semantic search window</div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-category">Integrations</div>
+      <div class="tech-name">Google APIs · Zoom</div>
+      <div class="tech-note">Gmail (push watch), Google Calendar (incremental sync token), Zoom (recording + VTT transcript)</div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-category">Deployment</div>
+      <div class="tech-name">Railway</div>
+      <div class="tech-note">Two processes: Next.js web + standalone BullMQ worker with tsx --env-file</div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-category">Security</div>
+      <div class="tech-name">AES-256-GCM</div>
+      <div class="tech-note">All OAuth tokens encrypted at rest; ENCRYPTION_KEY is 32-byte hex env var</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <div class="section-label">Opportunity</div>
+  <h2>The path forward</h2>
+
+  <p>The executive assistant software market is large and fragmented. Chief of Staff occupies a defensible position: the only tool that combines email intelligence, meeting intelligence, and financial intelligence into a unified, queryable layer. As the platform accumulates longitudinal data per user, the Ask AI feature compounds in value — making it increasingly difficult for single-purpose tools to match the contextual depth of answers Chief of Staff can provide.</p>
+
+  <div class="callout callout-indigo">
+    <strong>The moat is data depth, not features.</strong> Every email processed, every commitment extracted, every transaction categorised makes future answers more accurate and more personal. The longer a user is on the platform, the better it understands their professional context — relationships, recurring obligations, spending patterns, communication style.
+  </div>
+
+  <div class="page-footer">
+    <strong>Chief of Staff</strong>
+    <span>Technical Architecture — Page 6 of 6</span>
+  </div>
+</div>
+
+</body>
+</html>

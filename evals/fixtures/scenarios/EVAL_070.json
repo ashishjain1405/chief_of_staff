@@ -1,0 +1,141 @@
+{
+  "scenario_id": "SCN_008",
+  "eval_id": "EVAL_070",
+  "theme": "Operational Shifts and Erroneous Transactions",
+  "entities": {
+    "people": [
+      {
+        "name": "Jamie Fernández",
+        "email": "j.fernandez@extech.com",
+        "relationship_type": "exec_assistant"
+      },
+      {
+        "name": "Jordan Kim",
+        "email": "jordan_kim@advisor.com",
+        "relationship_type": "financial_advisor"
+      }
+    ],
+    "companies": [
+      "ExTech Innovations Inc.",
+      "FinServe Analytics Corp."
+    ],
+    "projects": [
+      "Project Panther",
+      "Aurora Development"
+    ],
+    "merchants": [
+      "GlobalWork Supplies",
+      "Globalorks Supp",
+      "InterSpace Logistics"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "eml_001",
+      "subject": "Reassessment of last quarter's financials",
+      "body_summary": "Let's discuss the impact of unexpected errors in transaction data on our operational metrics.",
+      "occurred_at": "2026-04-30T08:45:00.000Z",
+      "email_category": "financial",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "jordan_kim@advisor.com",
+        "sender_name": "Jordan Kim"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "mtn_004",
+      "title": "Operational Metrics Review",
+      "start_time": "2026-05-02T14:00:00.000Z",
+      "end_time": "2026-05-02T15:30:00.000Z",
+      "transcript_summary": "Review of discrepancies in transaction records and implications on performance metrics.",
+      "attendees": [
+        {
+          "email": "j.fernandez@extech.com",
+          "name": "Jamie Fernández"
+        },
+        {
+          "email": "jordan_kim@advisor.com",
+          "name": "Jordan Kim"
+        }
+      ],
+      "description": "A critical discussion on the errors found in financial transactions and their correlation with operational data."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "GlobalWork Supplies",
+      "amount": 1500,
+      "currency": "USD",
+      "category": "office_supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-04-28T11:30:00.000Z"
+    },
+    {
+      "merchant_normalized": "InterSpace Logistics",
+      "amount": -200,
+      "currency": "USD",
+      "category": "shipping",
+      "transaction_type": "refund",
+      "transaction_datetime": "2026-04-28T12:15:00.000Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Analyze Operational Shift due to Transaction Anomalies",
+      "status": "in_progress",
+      "priority": "high",
+      "due_date": "2026-05-03T00:00:00.000Z",
+      "source_type": "manual"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Provide insights on how transaction errors impact operational goals by end of Q2.",
+      "due_date": "2026-06-30T00:00:00.000Z",
+      "status": "pending",
+      "ai_confidence": 0.85
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "shifts_in_metrics_0428",
+      "category": "operations",
+      "insight_type": "trend_analysis",
+      "title": "Shifts in Operational Metrics",
+      "summary": "Recent data suggests decreased performance metrics due to transaction discrepancies, conflicting with earlier positive trends.",
+      "urgency": "critical",
+      "priority_score": 0.95,
+      "recommended_action": "Immediately reassess operational strategies considering transaction errors.",
+      "explanation": "Data integrity issues found in recent transaction records have propagated errors into key operational indicators.",
+      "status": "open"
+    },
+    {
+      "state_key": "stale_performance_metrics",
+      "category": "operations",
+      "insight_type": "trend_analysis",
+      "title": "Stale Quarterly Performance Metrics",
+      "summary": "Operational performance was previously assumed steady based on outdated transactional data.",
+      "urgency": "medium",
+      "priority_score": 0.7,
+      "recommended_action": "Reevaluate last quarter metrics given current data inconsistencies.",
+      "explanation": "The reliance on stale and possibly incorrect data has masked true operational challenges.",
+      "status": "archived"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": {
+      "Jamie Fernández": "Executive Assistant",
+      "Jordan Kim": "Financial Advisor"
+    },
+    "actual_intent": "Evaluate and correct operational metrics influenced by erroneous transaction data",
+    "expected_answer_facts": [
+      "Operational metrics need reevaluation due to transaction errors",
+      "Recent insights indicate a negative shift due to data inconsistencies",
+      "Recommend immediate steps to address propagated errors"
+    ]
+  }
+}

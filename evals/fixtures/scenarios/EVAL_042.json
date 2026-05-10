@@ -1,0 +1,198 @@
+{
+  "scenario_id": "SCENARIO_042",
+  "eval_id": "EVAL_042",
+  "theme": "Strategic Meeting Issues Analysis",
+  "entities": {
+    "people": [
+      {
+        "name": "Alice Johnson",
+        "email": "alice.johnson@startupx.com",
+        "relationship_type": "colleague"
+      },
+      {
+        "name": "Bob Smith",
+        "email": "bob.smith@startupx.com",
+        "relationship_type": "colleague"
+      },
+      {
+        "name": "Charlie Brown",
+        "email": "charlie.brown@startupx.com",
+        "relationship_type": "colleague"
+      },
+      {
+        "name": "Dana Lee",
+        "email": "dana.lee@venturepartners.com",
+        "relationship_type": "investor"
+      }
+    ],
+    "companies": [
+      "StartupX",
+      "VenturePartners"
+    ],
+    "projects": [
+      "SkyHigh Expansion"
+    ],
+    "merchants": [
+      "StrategyPlus Rentals",
+      "Strategic Partnership Hub"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "mail_2026_001",
+      "subject": "Re: Follow-up on Last Strategy Session",
+      "body_summary": "Need clarification on action items and next phases from last discussion.",
+      "occurred_at": "2026-05-02T15:12:10.085Z",
+      "email_category": "internal",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "alice.johnson@startupx.com",
+        "sender_name": "Alice Johnson"
+      },
+      "embedding_null": false
+    },
+    {
+      "external_id": "mail_2026_002",
+      "subject": "Strategy Meeting Summary - March 2026",
+      "body_summary": "Attached are detailed notes. Major items: resource allocation challenges and partnership delays. More in the document.",
+      "occurred_at": "2026-03-28T09:50:00.085Z",
+      "email_category": "meeting_notes",
+      "requires_action": false,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "bob.smith@startupx.com",
+        "sender_name": "Bob Smith"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_2026_01",
+      "title": "Strategic Planning Q2",
+      "start_time": "2026-04-15T13:00:00.000Z",
+      "end_time": "2026-04-15T15:00:00.000Z",
+      "transcript_summary": "Discussed ongoing delays in SkyHigh Expansion. High costs and timeline issues emerged.",
+      "attendees": [
+        {
+          "email": "alice.johnson@startupx.com",
+          "name": "Alice Johnson"
+        },
+        {
+          "email": "bob.smith@startupx.com",
+          "name": "Bob Smith"
+        },
+        {
+          "email": "charlie.brown@startupx.com",
+          "name": "Charlie Brown"
+        }
+      ],
+      "description": "Quarterly meeting focusing on key strategic goals."
+    },
+    {
+      "external_id": "meeting_2026_02",
+      "title": "VenturePartners and StartupX Joint Strategy",
+      "start_time": "2026-04-22T10:00:00.000Z",
+      "end_time": "2026-04-22T12:00:00.000Z",
+      "transcript_summary": "Concerns over investor feedback and alignment with the expansion goals. Possible budget reconsideration.",
+      "attendees": [
+        {
+          "email": "dana.lee@venturepartners.com",
+          "name": "Dana Lee"
+        },
+        {
+          "email": "charlie.brown@startupx.com",
+          "name": "Charlie Brown"
+        }
+      ],
+      "description": "Strategic discussions on partnership operations."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "StrategyPlus Rentals",
+      "amount": 1500,
+      "currency": "USD",
+      "category": "office supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-04-05T11:30:00.123Z"
+    },
+    {
+      "merchant_normalized": "Strategic Partnership Hub",
+      "amount": 500,
+      "currency": "USD",
+      "category": "subscriptions",
+      "transaction_type": "credit",
+      "transaction_datetime": "2026-04-20T14:00:00.123Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Review Strategic Meeting Notes",
+      "status": "pending",
+      "priority": "high",
+      "due_date": "2026-05-06T00:00:00.000Z",
+      "source_type": "manual_entry"
+    },
+    {
+      "title": "Align on Expansion Budget",
+      "status": "in_progress",
+      "priority": "critical",
+      "due_date": "2026-05-10T00:00:00.000Z",
+      "source_type": "meeting_action"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Prepare strategy report for Q2",
+      "due_date": "2026-05-09T00:00:00.000Z",
+      "status": "not_started",
+      "ai_confidence": 0.85
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "skyhigh_expansion_cost_issues",
+      "category": "strategic_issues",
+      "insight_type": "summary",
+      "title": "SkyHigh Project Cost Overruns",
+      "summary": "Ongoing budget overruns detected; high staff costs and material prices. Check budgeting strategies.",
+      "urgency": "critical",
+      "priority_score": 9.5,
+      "recommended_action": "Re-evaluate project milestones and budget allocation.",
+      "explanation": "Costs exceeding planned budget due to market dynamics.",
+      "status": "active"
+    },
+    {
+      "state_key": "stale_budget_assumptions",
+      "category": "finance",
+      "insight_type": "analysis",
+      "title": "Stale Budget Assumptions",
+      "summary": "Previous 2026 Q1 budget models misalign with current costs. Please review immediate changes.",
+      "urgency": "high",
+      "priority_score": 7.3,
+      "recommended_action": "Immediate budget review required for realignment with actuals.",
+      "explanation": "Current market conditions have drastically shifted cost structures.",
+      "status": "archived"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": [
+      {
+        "primary": "StartupX",
+        "related": "VenturePartners",
+        "relationship_type": "investment"
+      }
+    ],
+    "actual_intent": {
+      "required": [
+        "operational_summary"
+      ]
+    },
+    "expected_answer_facts": [
+      "Major issues in strategic meetings included cost overruns in SkyHigh Expansion and resource allocation challenges.",
+      "Investor concerns about budget alignment were noted, requiring budget reconsideration and strategic realignment."
+    ]
+  }
+}

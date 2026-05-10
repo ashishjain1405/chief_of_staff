@@ -116,6 +116,8 @@ export const INTENT_RULES: IntentRule[] = [
       /who haven.t i/i,
       /who do i need to follow up with/i,
       /when did i last talk/i,
+      /\b(stakeholder|stakeholders)\b/i,
+      /\b(communication|communications)\b/i,
     ],
   },
   {
@@ -164,6 +166,9 @@ export const INTENT_RULES: IntentRule[] = [
       /\b(daily update)\b/i,
       /\b(weekly review)\b/i,
       /what (happened|changed)/i,
+      /\b(operational (goal|goals|target|targets|record|records|metric|metrics|review|reviews|report|reports|summary|summaries|insight|insights))\b/i,
+      /\b(operation (record|records|review|reviews))\b/i,
+      /\b(summaries)\b/i,
     ],
   },
   {

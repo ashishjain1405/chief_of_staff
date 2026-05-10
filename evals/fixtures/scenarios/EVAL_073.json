@@ -1,0 +1,128 @@
+{
+  "scenario_id": "SCENARIO_073",
+  "eval_id": "EVAL_073",
+  "theme": "Operational Insights Misalignment Investigation",
+  "entities": {
+    "people": [
+      {
+        "name": "Alex Rodriguez",
+        "email": "alex.rodriguez@startupinc.com",
+        "relationship_type": "colleague"
+      }
+    ],
+    "companies": [
+      "Startup XYZ",
+      "DataAnalytics Corp"
+    ],
+    "projects": [
+      "Project Phoenix",
+      "Financial Sync Initiative"
+    ],
+    "merchants": [
+      "Office Supplies Co",
+      "Tech Hardware Store"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_4321",
+      "subject": "Re: Monthly Financial Review Insights",
+      "body_summary": "Alex, please revisit the discrepancy in the financial report, especially concerning office supply purchases.",
+      "occurred_at": "2026-05-02T08:15:00.000Z",
+      "email_category": "finance",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "jordan_lee@startupinc.com",
+        "sender_name": "Jordan Lee"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_5678",
+      "title": "Operational Strategy Session",
+      "start_time": "2026-05-01T14:00:00.000Z",
+      "end_time": "2026-05-01T15:30:00.000Z",
+      "transcript_summary": "Discussed misalignments between operational insights and current financial transactions.",
+      "attendees": [
+        {
+          "email": "alex.rodriguez@startupinc.com",
+          "name": "Alex Rodriguez"
+        },
+        {
+          "email": "jordan_lee@startupinc.com",
+          "name": "Jordan Lee"
+        }
+      ],
+      "description": "Focused on synchronizing operations data with recent transaction records."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "Office Supplies Co",
+      "amount": 320,
+      "currency": "USD",
+      "category": "supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-01T10:00:00.000Z"
+    },
+    {
+      "merchant_normalized": "Tech Hardware Store",
+      "amount": 450,
+      "currency": "USD",
+      "category": "hardware",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-03T13:20:00.000Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Analyze financial report discrepancies",
+      "status": "in_progress",
+      "priority": "high",
+      "due_date": "2026-05-05",
+      "source_type": "email"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Prepare updated financial insights report",
+      "due_date": "2026-05-06",
+      "status": "not_started",
+      "ai_confidence": 0.9
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "insight_001",
+      "category": "finance",
+      "insight_type": "discrepancy",
+      "title": "Mismatched Transaction Records",
+      "summary": "Office Supplies Co. purchases are shown inaccurately by 10% in recent insights.",
+      "urgency": "medium",
+      "priority_score": 0.65,
+      "recommended_action": "Review and realign transaction logs with insights.",
+      "explanation": "An unexpected purchase volume from Office Supplies Co. was not captured.",
+      "status": "pending"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": [],
+    "actual_intent": {
+      "required": [
+        "operational_summary",
+        "spending_analysis"
+      ],
+      "forbidden": [
+        "relationship"
+      ],
+      "matchMode": "all"
+    },
+    "expected_answer_facts": [
+      "Stale insights regarding Office Supplies Co. causing 10% discrepancy.",
+      "Misalignment due to delay in transaction syncing with analytics dashboard."
+    ]
+  }
+}

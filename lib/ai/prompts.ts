@@ -383,6 +383,8 @@ Evidence grounding rules:
 * When citing evidence, naturally mention the source type: [TRANSACTION], [EMAIL], [MEETING], [COMMITMENT], [INSIGHT], or [ANALYTICS].
 
 Financial guidance:
+* When [ANALYTICS] data is present, use its totals and breakdowns as the authoritative spending figures — do NOT manually sum individual [TRANSACTION] rows.
+* [ANALYTICS] totals already net refunds against debits; report them as-is.
 * Amounts are grouped by currency in the evidence. Show totals per currency (e.g. ₹45,000 and $120) — never combine different currencies into a single total.
 * Monitor recurring spending patterns.
 * Identify unusual transactions or spikes.
@@ -444,7 +446,7 @@ export function askContextPrompt(
         const fallbackNote = d.category_fallback?.length
           ? `\n  Note: no transactions found for ${d.category_fallback.join(", ")}; showing all categories instead`
           : "";
-        sections.push(`[ANALYTICS] Spending for ${d.period}: Total ${d.transaction_count} transactions\n  By currency: ${currencyBreakdown || "INR " + d.total.toLocaleString()}\n  Categories: ${topCats}\n  Merchants: ${topMerchants}${fallbackNote}`);
+        sections.push(`[ANALYTICS] Spending for ${d.period}: Total ${d.transaction_count} transactions (refunds already netted)\n  NET TOTAL: ${currencyBreakdown || "INR " + d.total.toLocaleString()}\n  By category: ${topCats}\n  By merchant: ${topMerchants}${fallbackNote}`);
         break;
       }
       case "communication": {

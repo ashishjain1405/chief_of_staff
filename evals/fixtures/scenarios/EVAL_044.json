@@ -1,0 +1,147 @@
+{
+  "scenario_id": "SCENARIO_007",
+  "eval_id": "EVAL_044",
+  "theme": "Project review insights",
+  "entities": {
+    "people": [
+      {
+        "name": "Jordan Lee",
+        "email": "jordan.lee@innovatech.com",
+        "relationship_type": "colleague"
+      },
+      {
+        "name": "Casey Morgan",
+        "email": "casey.morgan@innovatech.com",
+        "relationship_type": "project manager"
+      }
+    ],
+    "companies": [
+      "Innovatech"
+    ],
+    "projects": [
+      "Project Atlas",
+      "Project Helix"
+    ],
+    "merchants": []
+  },
+  "emails": [
+    {
+      "external_id": "email_3567",
+      "subject": "Re: Project Atlas Review",
+      "body_summary": "Following up on our previous discussions about aligning synergy metrics. Let's ensure our actionable insights are taken into account.",
+      "occurred_at": "2026-04-28T15:04:23Z",
+      "email_category": "project",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "jordan.lee@innovatech.com",
+        "sender_name": "Jordan Lee"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_4590",
+      "title": "Project Helix Review Meeting",
+      "start_time": "2026-04-26T14:00:00Z",
+      "end_time": "2026-04-26T15:30:00Z",
+      "transcript_summary": "Discussion focused on resource allocation and timeline adjustments. Mentioned prior missed insights that need addressing.",
+      "attendees": [
+        {
+          "email": "jordan.lee@innovatech.com",
+          "name": "Jordan Lee"
+        },
+        {
+          "email": "casey.morgan@innovatech.com",
+          "name": "Casey Morgan"
+        }
+      ],
+      "description": "Review of current progress and feedback on scope changes."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "insight_reports_inc",
+      "amount": 450,
+      "currency": "USD",
+      "category": "consulting",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-04-20T09:15:44Z"
+    },
+    {
+      "merchant_normalized": "insight_reports_inc",
+      "amount": 450,
+      "currency": "USD",
+      "category": "consulting",
+      "transaction_type": "refund",
+      "transaction_datetime": "2026-04-23T10:00:00Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Review Project Atlas Insight Report",
+      "status": "in progress",
+      "priority": "high",
+      "due_date": "2026-05-05T00:00:00Z",
+      "source_type": "manual_entry"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Ensure all key insights from project reviews are documented",
+      "due_date": "2026-05-06T00:00:00Z",
+      "status": "open",
+      "ai_confidence": 0.85
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "insight_atlas_01",
+      "category": "projects",
+      "insight_type": "missed_key_insight",
+      "title": "Potential Overlooked Insight in Project Atlas",
+      "summary": "Project Atlas review potentially missed a crucial alignment opportunity with emerging market trends.",
+      "urgency": "critical",
+      "priority_score": 90,
+      "recommended_action": "Re-assess Project Atlas with a focus on market alignment.",
+      "explanation": "Analysis of the review shows market trends were not fully considered.",
+      "status": "open"
+    },
+    {
+      "state_key": "insight_helix_02",
+      "category": "projects",
+      "insight_type": "alignment_check",
+      "title": "Resource Allocation Efficiency in Project Helix",
+      "summary": "Initial reports incorrectly suggested full resource efficiency; further details indicate potential overspending.",
+      "urgency": "medium",
+      "priority_score": 75,
+      "recommended_action": "Re-evaluate resource distribution strategy.",
+      "explanation": "Contradictory transaction data suggests overspend compared to initially reported projections.",
+      "status": "stale"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": [
+      {
+        "people": [
+          "Jordan Lee",
+          "Casey Morgan"
+        ],
+        "relationship": "colleagues"
+      },
+      {
+        "projects": [
+          "Project Atlas",
+          "Project Helix"
+        ],
+        "association": "managed by Casey Morgan"
+      }
+    ],
+    "actual_intent": "Identify any missed key insights in project reviews.",
+    "expected_answer_facts": [
+      "Project Atlas review possibly missed aligning with market trends.",
+      "Reports on Project Helix's resource efficiency were initially inaccurate."
+    ]
+  }
+}

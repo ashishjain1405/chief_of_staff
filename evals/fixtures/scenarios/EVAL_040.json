@@ -1,0 +1,190 @@
+{
+  "scenario_id": "2026SCEN040",
+  "eval_id": "EVAL_040",
+  "theme": "Future Commitments from May Meetings",
+  "entities": {
+    "people": [
+      {
+        "name": "Sam Walters",
+        "email": "sam@clientdomain.com",
+        "relationship_type": "client"
+      },
+      {
+        "name": "Jamie Torres",
+        "email": "jamie.t@vendorco.com",
+        "relationship_type": "vendor"
+      },
+      {
+        "name": "Alexis Johnson",
+        "email": "alexis.j@ourcompany.com",
+        "relationship_type": "colleague"
+      }
+    ],
+    "companies": [
+      "OurCompany Inc.",
+      "ClientDomain LLC",
+      "VendorCo"
+    ],
+    "projects": [
+      "Project Phoenix",
+      "Blue Horizon Initiative"
+    ],
+    "merchants": [
+      "Office Supplies Co.",
+      "Coffee Cart LLC"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_102",
+      "subject": "Re: Next Steps on Project Phoenix",
+      "body_summary": "Let's align on the delivery dates from the last meeting.",
+      "occurred_at": "2026-05-08T15:45:23.456Z",
+      "email_category": "project",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "alexis.j@ourcompany.com",
+        "sender_name": "Alexis Johnson"
+      },
+      "embedding_null": false
+    },
+    {
+      "external_id": "email_203",
+      "subject": "Feedback on Vendor Proposal",
+      "body_summary": "Awaiting your feedback from the earlier meeting this month.",
+      "occurred_at": "2026-05-06T18:30:12.789Z",
+      "email_category": "vendor",
+      "requires_action": true,
+      "sentiment": "positive",
+      "channel_metadata": {
+        "sender": "jamie.t@vendorco.com",
+        "sender_name": "Jamie Torres"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_409",
+      "title": "Monthly Strategy Sync",
+      "start_time": "2026-05-02T14:00:00Z",
+      "end_time": "2026-05-02T15:30:00Z",
+      "transcript_summary": "Discussed quarterly targets; committed to a new KPI dashboard by June.",
+      "attendees": [
+        {
+          "email": "alexis.j@ourcompany.com",
+          "name": "Alexis Johnson"
+        },
+        {
+          "email": "sam@clientdomain.com",
+          "name": "Sam Walters"
+        }
+      ],
+      "description": "Quarterly overview and future planning."
+    },
+    {
+      "external_id": "meeting_512",
+      "title": "Vendor Partnership Review",
+      "start_time": "2026-05-07T10:00:00Z",
+      "end_time": "2026-05-07T11:00:00Z",
+      "transcript_summary": "Committed to trial run with VendorCo in early June.",
+      "attendees": [
+        {
+          "email": "jamie.t@vendorco.com",
+          "name": "Jamie Torres"
+        },
+        {
+          "email": "alexis.j@ourcompany.com",
+          "name": "Alexis Johnson"
+        }
+      ],
+      "description": "Review of upcoming partnership terms."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "Office Supplies Co.",
+      "amount": 215.89,
+      "currency": "USD",
+      "category": "supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-05T09:30:10Z"
+    },
+    {
+      "merchant_normalized": "Coffee Cart LLC",
+      "amount": 56.25,
+      "currency": "USD",
+      "category": "catering",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-09T08:15:45Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Finalize KPI Dashboard",
+      "status": "not started",
+      "priority": "high",
+      "due_date": "2026-05-31",
+      "source_type": "meeting"
+    },
+    {
+      "title": "Review VendorCo Trial Proposal",
+      "status": "in progress",
+      "priority": "medium",
+      "due_date": "2026-05-15",
+      "source_type": "meeting"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Launch new KPI dashboard by the end of May 2026.",
+      "due_date": "2026-05-31",
+      "status": "pending",
+      "ai_confidence": 0.85
+    },
+    {
+      "description": "Conduct trial run with VendorCo in early June.",
+      "due_date": "2026-06-10",
+      "status": "pending",
+      "ai_confidence": 0.9
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "insight_104_kpi_dashboard_delay",
+      "category": "projects",
+      "insight_type": "deadline_risk",
+      "title": "Potential Delay in KPI Dashboard Launch",
+      "summary": "Based on current progress, risk of delay identified.",
+      "urgency": "medium",
+      "priority_score": 7,
+      "recommended_action": "Increase resource allocation to meet deadlines.",
+      "explanation": "Current task completion rate is slower than expected.",
+      "status": "active"
+    },
+    {
+      "state_key": "insight_203_vendor_trial_agreement",
+      "category": "vendor",
+      "insight_type": "contract_terms",
+      "title": "VendorCo Trial Confirmation",
+      "summary": "Agreement finalized for a trial run in early June.",
+      "urgency": "low",
+      "priority_score": 4,
+      "recommended_action": "Proceed with preparation for trial.",
+      "explanation": "Terms were agreed upon in recent meeting.",
+      "status": "active"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": [],
+    "actual_intent": [
+      "commitments",
+      "scheduling"
+    ],
+    "expected_answer_facts": [
+      "New KPI dashboard committed to be launched by May 31, 2026.",
+      "VendorCo trial run is scheduled for early June 2026."
+    ]
+  }
+}

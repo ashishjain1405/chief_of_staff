@@ -1,0 +1,136 @@
+{
+  "scenario_id": "SCN_104",
+  "eval_id": "EVAL_068",
+  "theme": "Operational and Transactional Inconsistencies",
+  "entities": {
+    "people": [
+      {
+        "name": "Alex Bailey",
+        "email": "alex.bailey@startupco.com",
+        "relationship_type": "Executive"
+      },
+      {
+        "name": "Jordan Kim",
+        "email": "j.kim@startupco.com",
+        "relationship_type": "Finance Manager"
+      }
+    ],
+    "companies": [
+      "StartupCo"
+    ],
+    "projects": [
+      "FutureProof Initiative",
+      "Cost Efficiency Program"
+    ],
+    "merchants": [
+      "Tech Supplies",
+      "Tech Supplies & More",
+      "Stationery Central"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_001",
+      "subject": "Weekly Cost Savings Report",
+      "body_summary": "There seems to be a discrepancy in the transaction records for Tech Supplies this week.",
+      "occurred_at": "2026-04-30T14:23:10.015Z",
+      "email_category": "financial",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "j.kim@startupco.com",
+        "sender_name": "Jordan Kim"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_001",
+      "title": "Operational Review - May Start",
+      "start_time": "2026-05-02T09:00:00Z",
+      "end_time": "2026-05-02T10:00:00Z",
+      "transcript_summary": "Discussed operational priorities and flagged inconsistencies in transaction data.",
+      "attendees": [
+        {
+          "email": "alex.bailey@startupco.com",
+          "name": "Alex Bailey"
+        },
+        {
+          "email": "j.kim@startupco.com",
+          "name": "Jordan Kim"
+        }
+      ],
+      "description": "Operational insights and cost efficiency alignment."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "Tech Supplies",
+      "amount": 1500,
+      "currency": "USD",
+      "category": "office supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-04-29T12:45:00Z"
+    },
+    {
+      "merchant_normalized": "Tech Supplies & More",
+      "amount": 1500,
+      "currency": "USD",
+      "category": "office supplies",
+      "transaction_type": "credit",
+      "transaction_datetime": "2026-04-30T08:30:00Z"
+    },
+    {
+      "merchant_normalized": "Stationery Central",
+      "amount": 200,
+      "currency": "USD",
+      "category": "office supplies",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-01T14:50:00Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Verify Transaction Anomalies",
+      "status": "pending",
+      "priority": "high",
+      "due_date": "2026-05-05",
+      "source_type": "manual entry"
+    }
+  ],
+  "commitments": [],
+  "operational_insights": [
+    {
+      "state_key": "office_expense_review",
+      "category": "operations",
+      "insight_type": "anomaly_detection",
+      "title": "Tech Supplies Transaction Alert",
+      "summary": "Review flagged as discrepancies noted in recent transactions.",
+      "urgency": "medium",
+      "priority_score": 7,
+      "recommended_action": "Investigate the reasons behind the repeated and reversed transactions.",
+      "explanation": "Comparative records suggest possible double entry or incorrect refund.",
+      "status": "open"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": {
+      "merchant_discrepancy": {
+        "pattern": "reversal_and_duplicate",
+        "entities": [
+          "Tech Supplies",
+          "Tech Supplies & More"
+        ]
+      }
+    },
+    "actual_intent": [
+      "operational_summary",
+      "search_lookup"
+    ],
+    "expected_answer_facts": [
+      "A 1500 USD debit transaction with Tech Supplies on 2026-04-29 followed by an identical credit transaction with Tech Supplies & More on 2026-04-30 indicates a potential reversal or correction.",
+      "Operational insight flagged discrepancies and recommended investigating repetitive merchant entries."
+    ]
+  }
+}

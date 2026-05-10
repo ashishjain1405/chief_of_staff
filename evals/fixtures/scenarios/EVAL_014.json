@@ -1,0 +1,164 @@
+{
+  "scenario_id": "SCENARIO_014",
+  "eval_id": "EVAL_014",
+  "theme": "Proactive Financial Alignment",
+  "entities": {
+    "people": [
+      {
+        "name": "Jamie Chen",
+        "email": "jamie.chen@email.com",
+        "relationship_type": "CFO"
+      },
+      {
+        "name": "Alex Patel",
+        "email": "alex.patel@financeconsulting.com",
+        "relationship_type": "Financial Consultant"
+      },
+      {
+        "name": "Morgan Lee",
+        "email": "morgan.lee@startup.com",
+        "relationship_type": "COO"
+      }
+    ],
+    "companies": [
+      "Startup Co.",
+      "Finance Consulting Ltd."
+    ],
+    "projects": [
+      "Q3 Financial Alignment",
+      "Operations Streamlining"
+    ],
+    "merchants": [
+      "Meta Services",
+      "Metro Telecom"
+    ]
+  },
+  "emails": [
+    {
+      "external_id": "email_001",
+      "subject": "Re: Financial Strategy Session Follow-up",
+      "body_summary": "Discussed upcoming quarter's financial priorities. Need alignment on budget by next week.",
+      "occurred_at": "2026-04-12T09:30:00Z",
+      "email_category": "business",
+      "requires_action": true,
+      "sentiment": "neutral",
+      "channel_metadata": {
+        "sender": "jamie.chen@email.com",
+        "sender_name": "Jamie Chen"
+      },
+      "embedding_null": false
+    },
+    {
+      "external_id": "email_002",
+      "subject": "Budget Realignment Proposal",
+      "body_summary": "Alex proposes a shift in budget priorities after new data insights.",
+      "occurred_at": "2026-05-02T14:22:00Z",
+      "email_category": "proposal",
+      "requires_action": true,
+      "sentiment": "positive",
+      "channel_metadata": {
+        "sender": "alex.patel@financeconsulting.com",
+        "sender_name": "Alex Patel"
+      },
+      "embedding_null": false
+    }
+  ],
+  "meetings": [
+    {
+      "external_id": "meeting_001",
+      "title": "Quarter 3 Budget Planning",
+      "start_time": "2026-05-05T15:00:00Z",
+      "end_time": "2026-05-05T16:00:00Z",
+      "transcript_summary": "Focused on realigning budget strategies for optimal resource allocation in Q3.",
+      "attendees": [
+        {
+          "email": "jamie.chen@email.com",
+          "name": "Jamie Chen"
+        },
+        {
+          "email": "alex.patel@financeconsulting.com",
+          "name": "Alex Patel"
+        },
+        {
+          "email": "morgan.lee@startup.com",
+          "name": "Morgan Lee"
+        }
+      ],
+      "description": "Strategic meeting to discuss and align on financial priorities for the next quarter."
+    }
+  ],
+  "transactions": [
+    {
+      "merchant_normalized": "meta services",
+      "amount": 5000,
+      "currency": "USD",
+      "category": "cloud services",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-04-25T10:00:00Z"
+    },
+    {
+      "merchant_normalized": "metro telecom",
+      "amount": 200,
+      "currency": "USD",
+      "category": "communications",
+      "transaction_type": "debit",
+      "transaction_datetime": "2026-05-06T08:30:00Z"
+    }
+  ],
+  "tasks": [
+    {
+      "title": "Finalize Q3 Budget",
+      "status": "in progress",
+      "priority": "high",
+      "due_date": "2026-05-13",
+      "source_type": "manual"
+    }
+  ],
+  "commitments": [
+    {
+      "description": "Submit Q3 budget plan to board",
+      "due_date": "2026-05-20",
+      "status": "pending",
+      "ai_confidence": 0.9
+    }
+  ],
+  "operational_insights": [
+    {
+      "state_key": "insight_001",
+      "category": "finance",
+      "insight_type": "financial alignment",
+      "title": "Potential Over-budget Risk",
+      "summary": "April's cloud services expenses may lead to over-budget scenario for Q3.",
+      "urgency": "high",
+      "priority_score": 0.85,
+      "recommended_action": "Re-evaluate ongoing subscriptions and services.",
+      "explanation": "Cloud services spending increased significantly, impacting overall budget.",
+      "status": "open"
+    },
+    {
+      "state_key": "insight_002",
+      "category": "finance",
+      "insight_type": "budget planning",
+      "title": "Outdated Financial Projection",
+      "summary": "Previous projection for May did not account for recent increase in telecom expenses.",
+      "urgency": "medium",
+      "priority_score": 0.5,
+      "recommended_action": "Review and update expense projections for the month.",
+      "explanation": "New telecom charges not reflected in last projection.",
+      "status": "open"
+    }
+  ],
+  "hidden_ground_truth": {
+    "actual_relationships": {
+      "Jamie Chen": "CFO",
+      "Alex Patel": "Consultant",
+      "Morgan Lee": "COO"
+    },
+    "actual_intent": "align financial strategies and scheduling for Q3 planning",
+    "expected_answer_facts": [
+      "insights and recommendations on financial alignment for next quarter",
+      "budget realignment due to increased expenses",
+      "urgency in updating financial projections"
+    ]
+  }
+}
