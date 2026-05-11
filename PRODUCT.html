@@ -613,6 +613,104 @@
     color: var(--slate-500);
   }
   .pipe-content ul li { margin-bottom: 3px; }
+
+  /* ── LAYER H3 ── */
+  .layer-h3 {
+    color: var(--indigo-600);
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 14px;
+    font-size: 17px;
+    font-weight: 700;
+  }
+  .layer-dot {
+    background: var(--slate-900);
+    color: white;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+
+  /* ── TABLE SCROLL WRAPPER ── */
+  .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 16px 0; border-radius: 8px; }
+  .table-wrap .detail-table,
+  .table-wrap .weight-table,
+  .table-wrap .source-table { margin: 0; }
+
+  /* ══════════════════════════════════════
+     MOBILE — max 640 px
+  ══════════════════════════════════════ */
+  @media (max-width: 640px) {
+    body { font-size: 14px; }
+
+    .page {
+      margin: 10px;
+      padding: 28px 18px;
+      border-radius: 12px;
+    }
+
+    /* Cover */
+    .cover { padding: 32px 20px; min-height: auto; }
+    .cover h1 { font-size: 34px; }
+    .cover .tagline { font-size: 15px; margin-bottom: 24px; max-width: 100%; }
+    .cover-meta { flex-direction: column; gap: 12px; }
+    .cover-meta > div { display: flex; gap: 8px; align-items: baseline; }
+    .cover-meta strong { display: inline; font-size: 13px; }
+
+    /* Headings */
+    h2 { font-size: 21px; }
+    h3 { font-size: 15px; }
+
+    /* Layer h3 headings */
+    .layer-h3 { font-size: 15px; gap: 6px; }
+
+    /* Stat grid → single column */
+    .stat-grid { grid-template-columns: 1fr; gap: 10px; }
+
+    /* Feature grid → single column */
+    .feature-grid { grid-template-columns: 1fr !important; }
+
+    /* Tech grid → 2 cols (still fits) */
+    .tech-grid { grid-template-columns: 1fr 1fr; }
+
+    /* Positioning grid → single column */
+    .positioning-grid { grid-template-columns: 1fr; gap: 10px; }
+
+    /* Intent grid → 2 cols */
+    .intent-grid { grid-template-columns: 1fr 1fr; }
+
+    /* Tables — scroll horizontally */
+    .detail-table, .weight-table, .source-table { min-width: 480px; font-size: 11px; }
+    .detail-table th, .detail-table td,
+    .source-table th, .source-table td { padding: 7px 10px; }
+    .weight-table th, .weight-table td { padding: 7px 8px; }
+
+    /* Data flow pills wrap cleanly */
+    .flow { gap: 4px; }
+    .flow-step { white-space: normal; font-size: 12px; padding: 7px 10px; }
+
+    /* Pipeline connector stays aligned */
+    .pipeline::before { left: 19px; }
+
+    /* Page footer stacks on very small screens */
+    .page-footer { flex-direction: column; gap: 3px; align-items: flex-start; }
+
+    /* Callout smaller font */
+    .callout { font-size: 13px; }
+
+    /* Divider less vertical space */
+    .divider { margin: 22px 0; }
+
+    /* Pipe content badges wrap inside h4 */
+    .pipe-content h4 { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+  }
 </style>
 </head>
 <body>
@@ -791,8 +889,8 @@
   <div class="divider" style="margin:20px 0"></div>
 
   <!-- LAYER 1 -->
-  <h3 style="color:var(--indigo-600); display:flex; align-items:center; gap:10px; margin-bottom:14px">
-    <span style="background:var(--slate-900);color:white;width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0">1</span>
+  <h3 class="layer-h3">
+    <span class="layer-dot">1</span>
     Intent Classification
     <span class="badge-sm badge-indigo">gpt-4o-mini · temp 0</span>
     <span class="badge-sm badge-slate">3 s timeout · regex fallback</span>
@@ -819,7 +917,7 @@
 
   <p style="font-size:13px">The classifier also computes a <strong>retrieval weight pair</strong> — <code>operational_weight</code> and <code>investigative_weight</code> — that governs layer 3. Deterministic overrides hard-set these weights based on intent:</p>
 
-  <table class="detail-table">
+  <div class="table-wrap"><table class="detail-table">
     <thead><tr><th>Intent</th><th>operational_weight</th><th>investigative_weight</th><th>Why</th></tr></thead>
     <tbody>
       <tr><td>operational_summary / daily brief</td><td>1.0</td><td>0.0</td><td>Precomputed insights only; no raw SQL needed</td></tr>
@@ -827,20 +925,20 @@
       <tr><td>search_lookup</td><td>0.0</td><td>1.0</td><td>Pure data retrieval; insights add noise</td></tr>
       <tr><td>scheduling / relationship / commitments</td><td>≥ 0.3</td><td>≥ 0.5</td><td>Needs both summaries and raw records</td></tr>
     </tbody>
-  </table>
+  </table></div>
 
   <div class="divider" style="margin:20px 0"></div>
 
   <!-- LAYER 2 -->
-  <h3 style="color:var(--indigo-600); display:flex; align-items:center; gap:10px; margin-bottom:14px">
-    <span style="background:var(--slate-900);color:white;width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0">2</span>
+  <h3 class="layer-h3">
+    <span class="layer-dot">2</span>
     Entity Resolution
     <span class="badge-sm badge-emerald">deterministic · no LLM</span>
   </h3>
 
   <p style="font-size:13.5px">Named entities extracted by the classifier are still abstract strings — "Uber", "Sarah", "last month". Entity resolution converts them to concrete database identifiers and date ranges before any query runs.</p>
 
-  <table class="detail-table">
+  <div class="table-wrap"><table class="detail-table">
     <thead><tr><th>Entity type</th><th>Resolution method</th><th>Output</th></tr></thead>
     <tbody>
       <tr><td>Person name</td><td><code>.ilike('%name%')</code> fuzzy match on <code>contacts.name</code> and <code>contacts.email</code>, top 3 results</td><td>Array of <code>contact_id</code> UUIDs</td></tr>
@@ -848,7 +946,7 @@
       <tr><td>Relative period</td><td>date-fns conversion — <em>last_month</em> → start/end of prior calendar month in UTC</td><td><code>{from: ISO, to: ISO}</code></td></tr>
       <tr><td>Event anchor</td><td>Special cases: <em>salary_credit</em> looks up last salary transaction; <em>named_contact_interaction</em> finds last email with that contact</td><td>Date range window around event</td></tr>
     </tbody>
-  </table>
+  </table></div>
 
   <p style="font-size:13px">Temporal resolution also emits a <code>temporalConfidence</code> score. If it falls below 0.6, the system appends a clarification note to the final LLM system prompt, telling GPT-4o to acknowledge ambiguity in its answer rather than hallucinate a date.</p>
 
@@ -866,15 +964,15 @@
   <h2>Retrieval planning, parallel execution, and ranking</h2>
 
   <!-- LAYER 3 -->
-  <h3 style="color:var(--indigo-600); display:flex; align-items:center; gap:10px; margin-bottom:14px">
-    <span style="background:var(--slate-900);color:white;width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0">3</span>
+  <h3 class="layer-h3">
+    <span class="layer-dot">3</span>
     Retrieval Plan Construction
     <span class="badge-sm badge-violet">rule-based · budget-capped</span>
   </h3>
 
   <p style="font-size:13px">The planner maps intent → ordered list of retrieval steps. Each source has a known confidence score, estimated cost in milliseconds, and a maximum result count. Steps are accumulated until the <strong>1 200 ms budget</strong> is exhausted.</p>
 
-  <table class="source-table">
+  <div class="table-wrap"><table class="source-table">
     <thead><tr><th>Source</th><th>Confidence</th><th>Est. cost</th><th>Max results</th><th>Activated by</th></tr></thead>
     <tbody>
       <tr><td>aggregated_finance</td><td>0.95</td><td class="num">90 ms</td><td class="num">1</td><td>any finance / spending intent</td></tr>
@@ -886,22 +984,22 @@
       <tr><td>sql_meetings</td><td>0.80</td><td class="num">80 ms</td><td class="num">5</td><td>scheduling, relationship</td></tr>
       <tr><td>vector_search</td><td>0.55</td><td class="num">200 ms</td><td class="num">8</td><td>investigative_weight &gt; 0.5 or semantic intents</td></tr>
     </tbody>
-  </table>
+  </table></div>
 
   <p style="font-size:13px">The planner uses two gate conditions: the <em>operational path</em> fires when <code>operational_weight ≥ 0.3</code> or the intent is a finance type; the <em>investigative path</em> fires when <code>investigative_weight &gt; 0.3</code> or keyword overrides are present. Both paths can be active simultaneously for mixed queries like "what did I spend on Uber and when did I last email them?"</p>
 
   <div class="divider" style="margin:18px 0"></div>
 
   <!-- LAYER 4 -->
-  <h3 style="color:var(--indigo-600); display:flex; align-items:center; gap:10px; margin-bottom:14px">
-    <span style="background:var(--slate-900);color:white;width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0">4</span>
+  <h3 class="layer-h3">
+    <span class="layer-dot">4</span>
     Parallel Data Retrieval
     <span class="badge-sm badge-slate">Promise.allSettled · partial failure tolerance</span>
   </h3>
 
   <p style="font-size:13px">All budgeted steps fire simultaneously. <code>Promise.allSettled</code> ensures a failed or slow source (e.g., vector search timing out) never blocks the others. Each result is tagged with its source type so the ranker and LLM know provenance. Notable query mechanics:</p>
 
-  <table class="detail-table" style="font-size:12px">
+  <div class="table-wrap"><table class="detail-table" style="font-size:12px">
     <thead><tr><th>Source</th><th>Key filters</th><th>Notes</th></tr></thead>
     <tbody>
       <tr><td>sql_communications</td><td>contactIds (IN), emailCategory (IN), dateRange, topics (ILIKE across subject + body_summary)</td><td>Topic filter is OR-flattened across both columns</td></tr>
@@ -911,20 +1009,20 @@
       <tr><td>operational_insights</td><td>status = active, snoozed_until is null or past</td><td>Ordered by priority_score DESC; category filter applied if intent is specific</td></tr>
       <tr><td>vector_search</td><td>query embedding vs pgvector HNSW index</td><td>90-day lookback window, matchCount = max_results</td></tr>
     </tbody>
-  </table>
+  </table></div>
 
   <div class="divider" style="margin:18px 0"></div>
 
   <!-- LAYER 5 -->
-  <h3 style="color:var(--indigo-600); display:flex; align-items:center; gap:10px; margin-bottom:14px">
-    <span style="background:var(--slate-900);color:white;width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0">5</span>
+  <h3 class="layer-h3">
+    <span class="layer-dot">5</span>
     Unified Ranking + LLM Response
     <span class="badge-sm badge-indigo">gpt-4o · streaming · multi-turn</span>
   </h3>
 
   <p style="font-size:13px">All retrieved items — regardless of source type — are normalised into a common schema and scored by a <strong>profile-aware weighted ranker</strong>. The profile is chosen based on the primary intent. Component weights:</p>
 
-  <table class="weight-table">
+  <div class="table-wrap"><table class="weight-table">
     <thead>
       <tr>
         <th>Profile → Intent</th>
@@ -942,7 +1040,7 @@
       <tr><td>relationship — contacts &amp; people</td><td class="w-lo">0.10</td><td class="w-med">0.25</td><td class="w-hi">0.35</td><td class="w-lo">0.15</td><td class="w-lo">0.05</td><td class="w-lo">0.10</td></tr>
       <tr><td>operational — default / summary</td><td class="w-lo">0.05</td><td class="w-lo">0.10</td><td class="w-lo">0.10</td><td class="w-lo">0.15</td><td class="w-lo">0.10</td><td class="w-hi">0.50</td></tr>
     </tbody>
-  </table>
+  </table></div>
 
   <p style="font-size:13px">Per-item urgency is not uniform — it is assigned by source: commitments score 0.8 if overdue / 0.4 otherwise; emails with <code>requires_action=true</code> score 0.6; meetings and transactions score 0.3; vector results score 0.2. Recency decays linearly over 90 days: <code>score = max(0, 1 − daysOld / 90)</code>.</p>
 
