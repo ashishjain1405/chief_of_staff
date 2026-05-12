@@ -787,7 +787,7 @@
 
   <div class="page-footer">
     <strong>Chief of Staff</strong>
-    <span>Product Overview — Page 1 of 6</span>
+    <span>Product Overview — Page 1 of 7</span>
   </div>
 </div>
 
@@ -873,7 +873,73 @@
 
   <div class="page-footer">
     <strong>Chief of Staff</strong>
-    <span>Product Overview — Page 2 of 6</span>
+    <span>Product Overview — Page 2 of 7</span>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     PAGE 3b — NOT JUST AN AI WRAPPER
+═══════════════════════════════════════════ -->
+<div class="page">
+  <div class="section-label">Defensibility</div>
+  <h2>Why this is not just an AI wrapper</h2>
+
+  <p>The most common criticism of AI productivity tools is that they're thin wrappers — paste an API key, prompt an LLM, ship a product. Chief of Staff is architected differently at every layer. The intelligence is not in the prompt; it's in the data infrastructure built around it.</p>
+
+  <div class="divider" style="margin:20px 0"></div>
+
+  <!-- POINT 1 -->
+  <div class="segment-row" style="margin-bottom:12px; align-items:flex-start">
+    <div style="width:36px;height:36px;border-radius:8px;background:var(--indigo-50);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🏗️</div>
+    <div>
+      <h4 style="font-size:15px;font-weight:700;color:var(--slate-800);margin-bottom:5px">A purpose-built data pipeline, not a chat window over your inbox</h4>
+      <p style="font-size:13px;color:var(--slate-500);margin:0">Every email is parsed, normalised, importance-scored, and routed through a 5-stage worker pipeline before the LLM ever sees it. Contacts are upserted, financial transactions are extracted and deduped, commitments are structured and linked to people — all synchronously, in the background, before you ask a single question. A wrapper sends your raw inbox to GPT. Chief of Staff sends structured, pre-resolved facts.</p>
+    </div>
+  </div>
+
+  <!-- POINT 2 -->
+  <div class="segment-row" style="margin-bottom:12px; align-items:flex-start">
+    <div style="width:36px;height:36px;border-radius:8px;background:var(--emerald-50);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🧠</div>
+    <div>
+      <h4 style="font-size:15px;font-weight:700;color:var(--slate-800);margin-bottom:5px">The retrieval layer replaces hallucination guards with precision</h4>
+      <p style="font-size:13px;color:var(--slate-500);margin:0">AI wrappers ask GPT "what did I spend last month?" and hope the answer isn't invented. Chief of Staff classifies the intent, resolves the merchant and date range to DB identifiers, queries <code>transactions_normalized</code> directly, and only then passes verified rows to the LLM as grounded evidence. The model is forbidden from citing anything not in the retrieved context. Accuracy is structural, not prompt-engineered.</p>
+    </div>
+  </div>
+
+  <!-- POINT 3 -->
+  <div class="segment-row" style="margin-bottom:12px; align-items:flex-start">
+    <div style="width:36px;height:36px;border-radius:8px;background:var(--amber-50);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🔀</div>
+    <div>
+      <h4 style="font-size:15px;font-weight:700;color:var(--slate-800);margin-bottom:5px">Cross-source reasoning that no single-integration tool can replicate</h4>
+      <p style="font-size:13px;color:var(--slate-500);margin:0">A commitment extracted from a Zoom transcript is linked to the same contact record as an email thread and a transaction from that company. The ranking layer balances evidence across all three sources in a single response. No competitor can reproduce this without rebuilding the same multi-source ingestion, entity resolution, and unified schema — months of infrastructure work, not a prompt tweak.</p>
+    </div>
+  </div>
+
+  <!-- POINT 4 -->
+  <div class="segment-row" style="margin-bottom:12px; align-items:flex-start">
+    <div style="width:36px;height:36px;border-radius:8px;background:#f5f3ff;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📈</div>
+    <div>
+      <h4 style="font-size:15px;font-weight:700;color:var(--slate-800);margin-bottom:5px">Precomputed operational state, not real-time inference on every load</h4>
+      <p style="font-size:13px;color:var(--slate-500);margin:0">Spending anomalies, overdue commitments, relationship health scores, and subscription renewal alerts are computed by nine dedicated background processors — not inferred from raw text each time you open the dashboard. The <code>operational_insights</code> table is a pre-ranked, priority-scored feed that makes the dashboard instant and the Ask AI responses richer. A wrapper has no equivalent; it re-runs inference on every page load.</p>
+    </div>
+  </div>
+
+  <!-- POINT 5 -->
+  <div class="segment-row" style="align-items:flex-start">
+    <div style="width:36px;height:36px;border-radius:8px;background:var(--rose-50);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🔒</div>
+    <div>
+      <h4 style="font-size:15px;font-weight:700;color:var(--slate-800);margin-bottom:5px">User data never leaves a controlled, encrypted store</h4>
+      <p style="font-size:13px;color:var(--slate-500);margin:0">OAuth tokens are AES-256-GCM encrypted at rest. Row-Level Security in Postgres means the database itself enforces per-user isolation — not application-level guards that can be bypassed. The LLM receives only summaries and structured extracts, never raw email bodies or OAuth credentials. A wrapper that pipes your inbox directly to a third-party LLM API cannot make the same guarantee.</p>
+    </div>
+  </div>
+
+  <div class="callout callout-indigo" style="margin-top:20px">
+    <strong>The test:</strong> If you removed the LLM and replaced it with a different model tomorrow, the product would still work — because the value is in the pipeline, the schema, and the accumulated structured data. The LLM is the final rendering step, not the product.
+  </div>
+
+  <div class="page-footer">
+    <strong>Chief of Staff</strong>
+    <span>Product Overview — Page 3 of 7</span>
   </div>
 </div>
 
