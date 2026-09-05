@@ -81,11 +81,12 @@ function scoreItem(
   urgencyPriority: number,
   query: string,
   entities: EntityContext,
-  weights: (typeof PROFILE_WEIGHTS)[RankingProfile]
+  weights: (typeof PROFILE_WEIGHTS)[RankingProfile],
+  semanticScore?: number
 ): number {
   return (
     weights.exact_keyword * keywordScore(text, query, entities) +
-    weights.semantic * keywordScore(text, query, entities) +  // v1: keyword proxy for semantic
+    weights.semantic * (semanticScore ?? keywordScore(text, query, entities)) +
     weights.entity_overlap * entityOverlapScore(text, entities) +
     weights.recency * recencyScore(date) +
     weights.source_importance * sourceConfidence +
@@ -192,7 +193,7 @@ function normalizeVector(rows: any[], query: string, entities: EntityContext, we
       item_type: "vector" as const,
       source: "vector_search" as const,
       source_confidence: 0.55,
-      retrieval_score: scoreItem(text, row.metadata?.occurred_at ?? null, 0.55, 0.2, query, entities, weights),
+      retrieval_score: scoreItem(text, row.metadata?.occurred_at ?? null, 0.55, 0.2, query, entities, weights, row.similarity),
       data: {
         chunk_text: row.chunk_text,
         source_type: row.source_type,

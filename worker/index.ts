@@ -45,7 +45,7 @@ const scheduledQueue = getQueue("scheduled");
 scheduledQueue.add(
   "renew-gmail-watches",
   {},
-  { repeat: { pattern: "0 0 */6 * *" }, jobId: "renew-gmail-watches" }
+  { repeat: { pattern: "0 */6 * * *" }, jobId: "renew-gmail-watches" }
 );
 
 console.log("Worker process started. Listening for jobs...");
