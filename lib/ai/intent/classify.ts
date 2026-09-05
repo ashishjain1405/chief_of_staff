@@ -23,7 +23,9 @@ const FALLBACK_INTENT: IntentResult = {
   confidence: 0.3,
   entities: EMPTY_ENTITIES,
   temporal: null,
-  retrieval_weights: { operational_weight: 1.0, investigative_weight: 0.0 },
+  // Blended, not zeroed — this is a degraded-classification fallback, not a genuine
+  // catch-me-up intent, so it must not silently exclude communications/vector search.
+  retrieval_weights: { operational_weight: 0.5, investigative_weight: 0.5 },
 };
 
 let openaiClient: OpenAI | null = null;
@@ -457,6 +459,10 @@ IMPORTANT: "show X spending", "how much did I spend on X", "X expenses" → inve
   return { primary, secondary, confidence, entities, temporal, retrieval_weights };
 }
 
+// gpt-4o-mini classification calls occasionally exceed 3s under normal latency
+// variance; too tight a race here silently drops communications/vector retrieval.
+const CLASSIFY_TIMEOUT_MS = 6000;
+
 export async function classifyIntent(
   query: string,
   context?: ConversationContext | null
@@ -468,7 +474,7 @@ export async function classifyIntent(
       return await Promise.race([
         classifyWithLLM(query, [], context ?? null),
         new Promise<IntentResult>((resolve) =>
-          setTimeout(() => resolve(applyOverrides(query, FALLBACK_INTENT)), 3000)
+          setTimeout(() => resolve(applyOverrides(query, FALLBACK_INTENT)), CLASSIFY_TIMEOUT_MS)
         ),
       ]);
     }
@@ -490,7 +496,7 @@ export async function classifyIntent(
             temporal: null,
             retrieval_weights: { operational_weight: 0.8, investigative_weight: 0.2 },
           }));
-        }, 3000)
+        }, CLASSIFY_TIMEOUT_MS)
       ),
     ]);
 
