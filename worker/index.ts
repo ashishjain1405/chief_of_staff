@@ -14,6 +14,11 @@ function makeWorker(queueName: string, handler: (job: any) => Promise<void>) {
     stalledInterval: 60000,
     lockDuration: 60000,
     lockRenewTime: 30000,
+    // Upstash doesn't support blocking commands well, so BullMQ falls back to
+    // polling every drainDelay while idle. The 5s default burns through
+    // Upstash's daily command quota on idle polling alone; 5min keeps this
+    // workload well under quota at the cost of up-to-5min job pickup latency.
+    drainDelay: 300,
   });
 
   worker.on("failed", (job, err) => {
