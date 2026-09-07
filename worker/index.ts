@@ -29,6 +29,13 @@ function makeWorker(queueName: string, handler: (job: any) => Promise<void>) {
     console.log(`[${queueName}] Job ${job.id} completed`);
   });
 
+  // Without this, an EventEmitter "error" event with no listener (e.g. a
+  // transient Redis error) throws as an uncaught exception and crashes the
+  // whole process, taking every other queue's worker down with it.
+  worker.on("error", (err) => {
+    console.error(`[${queueName}] Worker error:`, err.message);
+  });
+
   return worker;
 }
 
@@ -45,13 +52,20 @@ makeWorker("scheduled", async (job) => {
   }
 });
 
-// Register repeating jobs (idempotent — BullMQ deduplicates by repeat key)
+// Register repeating jobs (idempotent — BullMQ deduplicates by repeat key).
+// This must not crash the process on failure (e.g. Redis temporarily
+// unavailable/over quota) - the workers above are still useful even if this
+// one bootstrap call fails, and BullMQ will just re-register it next boot.
 const scheduledQueue = getQueue("scheduled");
-scheduledQueue.add(
-  "renew-gmail-watches",
-  {},
-  { repeat: { pattern: "0 */6 * * *" }, jobId: "renew-gmail-watches" }
-);
+scheduledQueue
+  .add(
+    "renew-gmail-watches",
+    {},
+    { repeat: { pattern: "0 */6 * * *" }, jobId: "renew-gmail-watches" }
+  )
+  .catch((err) => {
+    console.error("Failed to register renew-gmail-watches repeat job:", err.message);
+  });
 
 console.log("Worker process started. Listening for jobs...");
 
