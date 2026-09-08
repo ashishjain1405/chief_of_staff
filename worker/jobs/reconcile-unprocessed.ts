@@ -15,12 +15,27 @@ export async function reconcileUnprocessed(limit = DEFAULT_BATCH): Promise<numbe
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
 
-  const { data, error } = await supabase
+  // Eval fixtures deliberately leave some embeddings null (see
+  // evals/scripts/seed.ts, case S4), so reconciling them would silently break
+  // eval expectations. Skip the seeded test users entirely.
+  const { data: testUsers } = await supabase
+    .from("users")
+    .select("id")
+    .like("email", "%@test.local");
+  const excludedIds = (testUsers ?? []).map((u) => u.id);
+
+  let query = supabase
     .from("communications")
     .select("id, user_id")
     .or("body_summary.is.null,embedding.is.null")
     .order("occurred_at", { ascending: false })
     .limit(limit);
+
+  if (excludedIds.length > 0) {
+    query = query.not("user_id", "in", `(${excludedIds.join(",")})`);
+  }
+
+  const { data, error } = await query;
 
   if (error) throw error;
   if (!data?.length) {
