@@ -84,7 +84,8 @@ export async function summarizeCommunication(job: Job) {
     await runFinancialExtraction(
       supabase, userId, communicationId, senderEmail,
       comm.subject ?? "", comm.body ?? "",
-      triage.email_category, (triage as any).fallback_category ?? null
+      triage.email_category, (triage as any).fallback_category ?? null,
+      comm.occurred_at
     );
   }
 
@@ -152,6 +153,20 @@ export async function summarizeCommunication(job: Job) {
   await operationalQueue.add("compute-operational-state", { userId }, { delay: 30000, jobId: `ops-${userId}`, deduplication: { id: `ops-${userId}` } });
 }
 
+// A transaction cannot have happened in the future, but extraction sometimes
+// picks up a due date, delivery date, or expiry instead. Those rows then skewed
+// the finance tab and sat permanently inside the dedup window. Falls back to when
+// the email actually arrived.
+function resolveTransactionDatetime(
+  extracted: string | null,
+  occurredAt: string | null
+): string | null {
+  if (!extracted) return null;
+  const parsed = new Date(extracted).getTime();
+  if (Number.isNaN(parsed)) return occurredAt;
+  return parsed > Date.now() ? occurredAt : extracted;
+}
+
 async function runFinancialExtraction(
   supabase: any,
   userId: string,
@@ -160,7 +175,8 @@ async function runFinancialExtraction(
   subject: string,
   body: string,
   emailCategory: string | null,
-  fallbackCategory: string | null
+  fallbackCategory: string | null,
+  occurredAt: string | null
 ) {
   const senderType = classifySender(senderEmail);
   const extraction = await extractFinancialTransaction(senderEmail, senderType, subject, body);
@@ -215,7 +231,10 @@ async function runFinancialExtraction(
       merchant_normalized: merchantNormalized,
       bank_name: raw?.bank_name ?? null,
       payment_method: paymentMethod,
-      transaction_datetime: raw?.transaction_datetime ?? null,
+      transaction_datetime: resolveTransactionDatetime(
+        raw?.transaction_datetime ?? null,
+        occurredAt
+      ),
       due_date: raw?.due_date ?? null,
       transaction_id: raw?.transaction_id ?? null,
       reference_id: raw?.reference_id ?? null,
