@@ -247,7 +247,8 @@ async function runFinancialExtraction(
 }
 
 async function runDedup(supabase: any, userId: string) {
-  const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  const now = new Date();
+  const since = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
 
   const db = supabase as any;
 
@@ -257,31 +258,55 @@ async function runDedup(supabase: any, userId: string) {
     .eq("user_id", userId)
     .eq("is_financial_email", true)
     .eq("needs_review", false)
-    .gte("transaction_datetime", since);
+    .gte("transaction_datetime", since)
+    // Upper bound matters: extraction sometimes picks up a due/delivery date, so
+    // rows land in the future and would otherwise satisfy the lower bound on
+    // every single dedup run, forever.
+    .lte("transaction_datetime", now.toISOString());
 
   if (!rawRows?.length) return;
 
   const normalized = deduplicateRawTransactions(rawRows as TransactionRaw[]);
 
   for (const norm of normalized) {
+    // Fetch every match rather than using maybeSingle(): maybeSingle errors when
+    // 2+ rows match and returns null, which this code previously read as "not
+    // found" and inserted another copy - each duplicate then guaranteed another
+    // on the next run. Collapse to the oldest row and delete the rest so the
+    // table self-heals as this runs.
     const { data: existing } = await db
       .from("transactions_normalized")
       .select("id")
       .eq("user_id", userId)
       .contains("communication_ids", norm.communication_ids)
-      .maybeSingle();
+      .order("created_at", { ascending: true });
 
-    if (existing) {
-      await db
-        .from("transactions_normalized")
-        .update({ ...norm, updated_at: new Date().toISOString() })
-        .eq("id", existing.id);
-    } else {
+    const matches = existing ?? [];
+
+    if (matches.length === 0) {
       await db.from("transactions_normalized").insert({
         ...norm,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
+        created_at: now.toISOString(),
+        updated_at: now.toISOString(),
       });
+      continue;
+    }
+
+    const [keep, ...redundant] = matches;
+
+    await db
+      .from("transactions_normalized")
+      .update({ ...norm, updated_at: now.toISOString() })
+      .eq("id", keep.id);
+
+    if (redundant.length > 0) {
+      await db
+        .from("transactions_normalized")
+        .delete()
+        .in("id", redundant.map((r: { id: string }) => r.id));
+      console.log(
+        `[dedup] Collapsed ${redundant.length} duplicate normalized rows into ${keep.id}`
+      );
     }
   }
 }
