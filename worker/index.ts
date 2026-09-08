@@ -6,6 +6,7 @@ import { processMeetingSummary } from "./jobs/summarize-meeting";
 import { generateAndDeliverDailyBrief } from "./jobs/generate-daily-brief";
 import { computeOperationalState } from "./jobs/compute-operational-state";
 import { renewGmailWatches } from "./jobs/renew-gmail-watches";
+import { reconcileUnprocessedJob } from "./jobs/reconcile-unprocessed";
 
 function makeWorker(queueName: string, handler: (job: any) => Promise<void>) {
   const worker = new Worker(queueName, handler, {
@@ -51,6 +52,9 @@ makeWorker("scheduled", async (job) => {
   if (job.name === "renew-gmail-watches") {
     await renewGmailWatches(job);
   }
+  if (job.name === "reconcile-unprocessed") {
+    await reconcileUnprocessedJob(job);
+  }
 });
 
 // Register repeating jobs (idempotent — BullMQ deduplicates by repeat key).
@@ -66,6 +70,17 @@ scheduledQueue
   )
   .catch((err) => {
     console.error("Failed to register renew-gmail-watches repeat job:", err.message);
+  });
+
+// Offset from the watch renewal above so the two don't fire together.
+scheduledQueue
+  .add(
+    "reconcile-unprocessed",
+    {},
+    { repeat: { pattern: "30 */6 * * *" }, jobId: "reconcile-unprocessed" }
+  )
+  .catch((err) => {
+    console.error("Failed to register reconcile-unprocessed repeat job:", err.message);
   });
 
 console.log("Worker process started. Listening for jobs...");

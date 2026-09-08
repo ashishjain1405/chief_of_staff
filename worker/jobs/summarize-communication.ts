@@ -21,7 +21,27 @@ export async function summarizeCommunication(job: Job) {
     .eq("id", communicationId)
     .single();
 
-  if (!comm || comm.body_summary) return;
+  if (!comm) return;
+
+  // Per-step idempotency: a row can have a summary but no embedding if an
+  // earlier run died between the two (worker crash, embedding API error).
+  // Returning early on body_summary alone left those permanently unsearchable,
+  // so heal just the embedding instead of redoing triage.
+  if (comm.body_summary) {
+    if (comm.embedding) return;
+    await embedAndStoreChunks({
+      userId,
+      sourceType: "communication",
+      sourceId: communicationId,
+      text: `${comm.subject}\n\n${comm.body_summary}`,
+      metadata: {
+        occurred_at: comm.occurred_at,
+        contact_email: (comm.contacts as any)?.email ?? "",
+      },
+    });
+    await updateCommunicationEmbedding(communicationId, comm.body_summary);
+    return;
+  }
 
   const { data: user } = await supabase
     .from("users")
