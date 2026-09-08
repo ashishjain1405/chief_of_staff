@@ -15,27 +15,33 @@ export async function reconcileUnprocessed(limit = DEFAULT_BATCH): Promise<numbe
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
 
-  // Eval fixtures deliberately leave some embeddings null (see
-  // evals/scripts/seed.ts, case S4), so reconciling them would silently break
-  // eval expectations. Skip the seeded test users entirely.
-  const { data: testUsers } = await supabase
-    .from("users")
-    .select("id")
-    .like("email", "%@test.local");
-  const excludedIds = (testUsers ?? []).map((u) => u.id);
+  // Only reconcile accounts whose Gmail watch is still live. A lapsed watch
+  // means the account isn't syncing (disconnected or dormant), so processing its
+  // backlog spends LLM budget on data that won't be kept current anyway.
+  // Reconnecting an account renews its watch, which brings it back into scope
+  // automatically. This also excludes eval fixture users - they have no Google
+  // integration, and evals/scripts/seed.ts nulls some embeddings deliberately
+  // (case S4), so reconciling them would break eval expectations.
+  const { data: liveIntegrations } = await supabase
+    .from("integrations")
+    .select("user_id")
+    .eq("provider", "google")
+    .eq("is_active", true)
+    .gt("metadata->>watch_expires_at", new Date().toISOString());
 
-  let query = supabase
+  const activeUserIds = (liveIntegrations ?? []).map((i) => i.user_id);
+  if (activeUserIds.length === 0) {
+    console.log("[reconcile] No accounts with a live Gmail watch - nothing to do.");
+    return 0;
+  }
+
+  const { data, error } = await supabase
     .from("communications")
     .select("id, user_id")
+    .in("user_id", activeUserIds)
     .or("body_summary.is.null,embedding.is.null")
     .order("occurred_at", { ascending: false })
     .limit(limit);
-
-  if (excludedIds.length > 0) {
-    query = query.not("user_id", "in", `(${excludedIds.join(",")})`);
-  }
-
-  const { data, error } = await query;
 
   if (error) throw error;
   if (!data?.length) {
