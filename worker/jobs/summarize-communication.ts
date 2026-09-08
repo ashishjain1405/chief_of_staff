@@ -164,7 +164,11 @@ function resolveTransactionDatetime(
   if (!extracted) return null;
   const parsed = new Date(extracted).getTime();
   if (Number.isNaN(parsed)) return occurredAt;
-  return parsed > Date.now() ? occurredAt : extracted;
+  // End of today rather than "now", so a same-day timestamp that's a few hours
+  // ahead from timezone handling isn't needlessly rewritten.
+  const endOfToday = new Date();
+  endOfToday.setUTCHours(23, 59, 59, 999);
+  return parsed > endOfToday.getTime() ? occurredAt : extracted;
 }
 
 async function runFinancialExtraction(
