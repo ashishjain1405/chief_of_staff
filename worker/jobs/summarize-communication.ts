@@ -307,29 +307,57 @@ async function runDedup(supabase: any, userId: string) {
     const matches = existing ?? [];
 
     if (matches.length === 0) {
-      await db.from("transactions_normalized").insert({
+      const { error: insertErr } = await db.from("transactions_normalized").insert({
         ...norm,
         created_at: now.toISOString(),
         updated_at: now.toISOString(),
       });
+
+      // A concurrent dedup run can win the race between the select above and
+      // this insert. The unique index on (user_id, communication_ids) rejects
+      // the loser with 23505; without this branch the transaction would be
+      // silently dropped, since supabase-js returns errors rather than throwing.
+      if (insertErr) {
+        if (insertErr.code !== "23505") {
+          console.error(`[dedup] Insert failed: ${insertErr.message}`);
+          continue;
+        }
+        const { data: raced } = await db
+          .from("transactions_normalized")
+          .select("id")
+          .eq("user_id", userId)
+          .contains("communication_ids", norm.communication_ids)
+          .order("created_at", { ascending: true });
+        if (raced?.length) {
+          await db
+            .from("transactions_normalized")
+            .update({ ...norm, updated_at: now.toISOString() })
+            .eq("id", raced[0].id);
+        }
+      }
       continue;
     }
 
     const [keep, ...redundant] = matches;
 
-    await db
+    const { error: updateErr } = await db
       .from("transactions_normalized")
       .update({ ...norm, updated_at: now.toISOString() })
       .eq("id", keep.id);
+    if (updateErr) console.error(`[dedup] Update failed for ${keep.id}: ${updateErr.message}`);
 
     if (redundant.length > 0) {
-      await db
+      const { error: deleteErr } = await db
         .from("transactions_normalized")
         .delete()
         .in("id", redundant.map((r: { id: string }) => r.id));
-      console.log(
-        `[dedup] Collapsed ${redundant.length} duplicate normalized rows into ${keep.id}`
-      );
+      if (deleteErr) {
+        console.error(`[dedup] Failed to delete duplicates: ${deleteErr.message}`);
+      } else {
+        console.log(
+          `[dedup] Collapsed ${redundant.length} duplicate normalized rows into ${keep.id}`
+        );
+      }
     }
   }
 }

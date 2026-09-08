@@ -139,8 +139,12 @@ export function deduplicateRawTransactions(rows: TransactionRaw[]): NormalizedTr
       is_recurring: primary.is_recurring,
       recurring_frequency: primary.recurring_frequency,
       status: primary.status,
-      raw_transaction_ids: group.map((r) => r.id),
-      communication_ids: group.map((r) => r.communication_id),
+      // Sorted and de-duplicated so these arrays are order-stable. The unique
+      // index on (user_id, communication_ids) compares uuid[] element by
+      // element, so {A,B} and {B,A} would otherwise count as different
+      // transactions and the index would miss the duplicate.
+      raw_transaction_ids: [...new Set(group.map((r) => r.id))].sort(),
+      communication_ids: [...new Set(group.map((r) => r.communication_id))].sort(),
       merchant_email_present: group.some(isMerchantSource),
       bank_email_present: group.some(isBankSource),
     };
