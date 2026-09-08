@@ -35,35 +35,52 @@ export async function reconcileUnprocessed(limit = DEFAULT_BATCH): Promise<numbe
     return 0;
   }
 
-  const { data, error } = await supabase
-    .from("communications")
-    .select("id, user_id")
-    .in("user_id", activeUserIds)
-    .or("body_summary.is.null,embedding.is.null")
-    .order("occurred_at", { ascending: false })
-    .limit(limit);
+  // PostgREST caps a single response at 1000 rows, so a larger limit has to be
+  // paged. Paging by occurred_at cursor rather than offset because rows drop out
+  // of the filter as the worker processes them, which would shift offsets. Ties
+  // on occurred_at can skip or repeat a row at a page boundary; a repeat is a
+  // cheap no-op and a skip gets picked up by the next scheduled run.
+  const PAGE_SIZE = 1000;
+  let cursor: string | null = null;
+  let queued = 0;
 
-  if (error) throw error;
-  if (!data?.length) {
+  while (queued < limit) {
+    let page = supabase
+      .from("communications")
+      .select("id, user_id, occurred_at")
+      .in("user_id", activeUserIds)
+      .or("body_summary.is.null,embedding.is.null")
+      .order("occurred_at", { ascending: false })
+      .limit(Math.min(PAGE_SIZE, limit - queued));
+
+    if (cursor) page = page.lt("occurred_at", cursor);
+
+    const { data, error } = await page;
+    if (error) throw error;
+    if (!data?.length) break;
+
+    for (const row of data) {
+      try {
+        await summarizeQueue.add(
+          "summarize",
+          { communicationId: row.id, userId: row.user_id },
+          { jobId: `resummarize-${row.id}` }
+        );
+        queued++;
+      } catch (err: any) {
+        console.error(`[reconcile] Failed to queue ${row.id}:`, err.message);
+      }
+    }
+
+    cursor = data[data.length - 1].occurred_at;
+  }
+
+  if (queued === 0) {
     console.log("[reconcile] Nothing to reconcile.");
     return 0;
   }
 
-  let queued = 0;
-  for (const row of data) {
-    try {
-      await summarizeQueue.add(
-        "summarize",
-        { communicationId: row.id, userId: row.user_id },
-        { jobId: `resummarize-${row.id}` }
-      );
-      queued++;
-    } catch (err: any) {
-      console.error(`[reconcile] Failed to queue ${row.id}:`, err.message);
-    }
-  }
-
-  console.log(`[reconcile] Queued ${queued}/${data.length} communications (newest first).`);
+  console.log(`[reconcile] Queued ${queued} communications (newest first).`);
   return queued;
 }
 
