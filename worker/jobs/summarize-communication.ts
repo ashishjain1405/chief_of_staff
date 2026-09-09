@@ -104,7 +104,18 @@ export async function summarizeCommunication(job: Job) {
 
   await updateCommunicationEmbedding(communicationId, triage.summary);
 
-  if (triage.requires_action && comm.body) {
+  // Reprocessing the same email must not create a second set of commitments or
+  // tasks. Both are plain inserts keyed only by source_id, so a re-run (body
+  // reparse, reconcile pass, retried job) would duplicate them. Skip rather
+  // than delete-and-replace, so anything already acted on is preserved.
+  const { count: existingCommitments } = await supabase
+    .from("commitments")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .eq("source_type", "email")
+    .eq("source_id", communicationId);
+
+  if (triage.requires_action && comm.body && !existingCommitments) {
     const commitments = await extractCommitments(
       comm.body,
       senderEmail
@@ -137,7 +148,14 @@ export async function summarizeCommunication(job: Job) {
     }
   }
 
-  if (triage.requires_action && cappedScore >= 0.7) {
+  const { count: existingTasks } = await supabase
+    .from("tasks")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .eq("source_type", "email")
+    .eq("source_id", communicationId);
+
+  if (triage.requires_action && cappedScore >= 0.7 && !existingTasks) {
     await supabase.from("tasks").insert({
       user_id: userId,
       title: triage.action_description ?? `Reply to: ${comm.subject}`,
