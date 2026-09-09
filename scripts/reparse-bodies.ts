@@ -87,6 +87,8 @@ async function main() {
   let failed = 0;
   let queued = 0;
   let deferred = 0;
+  let redisUsable = true;
+  let redisFailures = 0;
 
   for (const row of affected) {
     try {
@@ -123,17 +125,28 @@ async function main() {
       // queues them from Railway. Enqueuing here only makes it immediate, and
       // Redis isn't always reachable from a laptop (port 6379 egress), where a
       // maxRetriesPerRequest: null connection would otherwise hang forever.
-      try {
-        await Promise.race([
-          summarizeQueue.add(
-            "summarize",
-            { communicationId: row.id, userId: row.user_id },
-            { jobId: `reparse-${row.id}` }
-          ),
-          new Promise((_, rej) => setTimeout(() => rej(new Error("redis timeout")), 5000)),
-        ]);
-        queued++;
-      } catch {
+      if (redisUsable) {
+        try {
+          await Promise.race([
+            summarizeQueue.add(
+              "summarize",
+              { communicationId: row.id, userId: row.user_id },
+              { jobId: `reparse-${row.id}` }
+            ),
+            new Promise((_, rej) => setTimeout(() => rej(new Error("redis timeout")), 5000)),
+          ]);
+          queued++;
+          redisFailures = 0;
+        } catch {
+          deferred++;
+          // Stop paying the timeout on every remaining row once it's clear
+          // Redis isn't reachable - otherwise 2,500 rows cost 3.5h of waiting.
+          if (++redisFailures >= 3) {
+            redisUsable = false;
+            console.log("  Redis unreachable - deferring the rest to the reconcile job");
+          }
+        }
+      } else {
         deferred++;
       }
 
