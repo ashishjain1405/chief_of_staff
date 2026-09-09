@@ -38,6 +38,9 @@ function decodePart(part: any): string {
 function stripHtml(html: string): string {
   return (
     html
+      // Normalise line endings first: the collapse rules below match \n, so
+      // CRLF markup came out as long runs of "\r\n \r\n \r\n".
+      .replace(/\r\n?/g, "\n")
       // Contents as well as the tags. Stripping only tags left the CSS between
       // <style>...</style> behind as plain text, which is how 41% of stored
       // bodies ended up starting with "@media screen and ...".
@@ -59,6 +62,7 @@ function stripHtml(html: string): string {
       .replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(parseInt(n, 10)))
       .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCodePoint(parseInt(h, 16)))
       .replace(/[ \t]+/g, " ")
+      .replace(/\n[ \t]+/g, "\n")
       .replace(/\n{3,}/g, "\n\n")
       .trim()
   );

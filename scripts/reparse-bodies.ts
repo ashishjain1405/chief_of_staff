@@ -85,6 +85,8 @@ async function main() {
   let reparsed = 0;
   let improved = 0;
   let failed = 0;
+  let queued = 0;
+  let deferred = 0;
 
   for (const row of affected) {
     try {
@@ -116,13 +118,29 @@ async function main() {
         continue;
       }
 
-      await summarizeQueue.add(
-        "summarize",
-        { communicationId: row.id, userId: row.user_id },
-        { jobId: `reparse-${row.id}` }
-      );
+      // Best-effort: clearing body_summary above is what actually matters,
+      // because the 6-hourly reconcile job finds rows missing a summary and
+      // queues them from Railway. Enqueuing here only makes it immediate, and
+      // Redis isn't always reachable from a laptop (port 6379 egress), where a
+      // maxRetriesPerRequest: null connection would otherwise hang forever.
+      try {
+        await Promise.race([
+          summarizeQueue.add(
+            "summarize",
+            { communicationId: row.id, userId: row.user_id },
+            { jobId: `reparse-${row.id}` }
+          ),
+          new Promise((_, rej) => setTimeout(() => rej(new Error("redis timeout")), 5000)),
+        ]);
+        queued++;
+      } catch {
+        deferred++;
+      }
+
       reparsed++;
-      if (reparsed % 25 === 0) console.log(`  ${reparsed}/${affected.length} reparsed + queued`);
+      if (reparsed % 25 === 0) {
+        console.log(`  ${reparsed}/${affected.length} reparsed (queued=${queued}, deferred=${deferred})`);
+      }
     } catch (e: any) {
       failed++;
       console.error(`  fail ${row.external_id}: ${e.message}`);
@@ -131,9 +149,13 @@ async function main() {
   }
 
   console.log(
-    `\nDone. reparsed+queued=${reparsed}, now clean=${improved}, failed=${failed}`
+    `\nDone. reparsed=${reparsed}, now clean=${improved}, failed=${failed}`
   );
-  console.log("The worker will re-run triage, extraction and embeddings for each.");
+  console.log(`Queued immediately: ${queued} | left for the reconcile job: ${deferred}`);
+  console.log("Triage, extraction and embeddings re-run for each as they are picked up.");
+  // Explicit exit: the BullMQ/ioredis connection keeps the event loop alive,
+  // which previously left the process hanging with stdout unflushed.
+  process.exit(0);
 }
 
 main().catch((e) => {
