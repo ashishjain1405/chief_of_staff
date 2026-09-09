@@ -19,6 +19,7 @@
     "dedupe:normalized": "npx tsx --env-file=.env.local --tsconfig tsconfig.json scripts/dedupe-normalized.ts",
     "eval:extraction": "npx tsx --env-file=.env.local --tsconfig tsconfig.json evals/components/financial-extraction.ts",
     "eval:parsing": "npx tsx --env-file=.env.local --tsconfig tsconfig.json evals/components/email-parsing.ts",
+    "measure:parsing": "npx tsx --env-file=.env.local --tsconfig tsconfig.json scripts/measure-parse-impact.ts",
     "snapshot:payloads": "npx tsx --env-file=.env.local --tsconfig tsconfig.json scripts/snapshot-email-payloads.ts"
   },
   "dependencies": {

@@ -56,15 +56,26 @@ async function main() {
 
   console.log(`Snapshotting ${picks.length} payloads for user ${userId}\n`);
 
+  // Hand-written expectations and verified notes must survive a regeneration -
+  // an earlier run of this script silently discarded them.
+  const existing: Record<string, { why?: string; expect?: unknown }> = {};
+  if (fs.existsSync(OUT)) {
+    for (const f of JSON.parse(fs.readFileSync(OUT, "utf-8"))) {
+      existing[f.id] = { why: f.why, expect: f.expect };
+    }
+  }
+
   const out: unknown[] = [];
   for (const p of picks) {
     try {
       const msg = await fetchEmailById(userId, p.external_id!);
+      const prior = existing[p.external_id!];
       out.push({
         id: p.external_id,
         subject: p.subject,
-        why: p.why,
+        why: prior?.why ?? p.why,
         current_body_len: (p.body ?? "").length,
+        ...(prior?.expect ? { expect: prior.expect } : {}),
         payload: msg.payload,
       });
       console.log(
