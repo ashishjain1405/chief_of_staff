@@ -18,18 +18,21 @@ import { summarizeQueue } from "@/lib/queues";
 // lapsed watch means the payloads can't be fetched anyway.
 
 const CSS = /@media|font-family|!important|-webkit-|text-size-adjust/i;
-const FETCH_DELAY_MS = 120; // ~8/s, well inside Gmail's quota
+// Gmail round-trips dominate the runtime (~1s each), so fetch a few at a time.
+// messages.get costs 5 quota units against a 250/user/sec budget, leaving plenty
+// of headroom at this concurrency.
+const CONCURRENCY = 6;
 
 const APPLY = process.argv.includes("--apply");
 const LIMIT = parseInt(
   process.argv.find((a) => a.startsWith("--limit="))?.split("=")[1] ?? "50",
-  10
+  10,
 );
 
 async function main() {
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
   );
 
   const { data: integ } = await supabase
@@ -68,14 +71,18 @@ async function main() {
     for (const row of data) {
       if (affected.length >= LIMIT) break;
       if (row.body && CSS.test(row.body.slice(0, 300))) {
-        affected.push({ id: row.id, external_id: row.external_id!, user_id: row.user_id });
+        affected.push({
+          id: row.id,
+          external_id: row.external_id!,
+          user_id: row.user_id,
+        });
       }
     }
     cursor = data[data.length - 1].occurred_at;
   }
 
   console.log(
-    `${affected.length} email(s) queued for reparse${APPLY ? "" : "  (dry run - pass --apply)"}\n`
+    `${affected.length} email(s) queued for reparse${APPLY ? "" : "  (dry run - pass --apply)"}\n`,
   );
   if (!APPLY || affected.length === 0) {
     if (!APPLY) console.log("Nothing changed.");
@@ -90,82 +97,101 @@ async function main() {
   let redisUsable = true;
   let redisFailures = 0;
 
-  for (const row of affected) {
-    try {
-      const msg = await fetchEmailById(row.user_id, row.external_id);
-      const body = parseEmailBody(msg.payload);
-      const bodyHtml = parseEmailHtml(msg.payload);
+  // Worker pool: each slot pulls the next row, so a slow fetch doesn't stall
+  // the others.
+  let cursorIdx = 0;
+  const worker = async () => {
+    while (true) {
+      const idx = cursorIdx++;
+      if (idx >= affected.length) return;
+      const row = affected[idx];
+      try {
+        const msg = await fetchEmailById(row.user_id, row.external_id);
+        const body = parseEmailBody(msg.payload);
+        const bodyHtml = parseEmailHtml(msg.payload);
 
-      if (!body || body.trim().length === 0) {
-        console.log(`  skip ${row.external_id}: reparse produced nothing`);
-        continue;
-      }
-      if (!CSS.test(body.slice(0, 300))) improved++;
-
-      const { error: updErr } = await supabase
-        .from("communications")
-        .update({
-          body: body.substring(0, 10000),
-          body_html: bodyHtml.substring(0, 500000) || null,
-          // Cleared so summarizeCommunication runs the full path again rather
-          // than short-circuiting on an existing summary.
-          body_summary: null,
-          embedding: null,
-        })
-        .eq("id", row.id);
-
-      if (updErr) {
-        failed++;
-        console.error(`  fail ${row.external_id}: ${updErr.message}`);
-        continue;
-      }
-
-      // Best-effort: clearing body_summary above is what actually matters,
-      // because the 6-hourly reconcile job finds rows missing a summary and
-      // queues them from Railway. Enqueuing here only makes it immediate, and
-      // Redis isn't always reachable from a laptop (port 6379 egress), where a
-      // maxRetriesPerRequest: null connection would otherwise hang forever.
-      if (redisUsable) {
-        try {
-          await Promise.race([
-            summarizeQueue.add(
-              "summarize",
-              { communicationId: row.id, userId: row.user_id },
-              { jobId: `reparse-${row.id}` }
-            ),
-            new Promise((_, rej) => setTimeout(() => rej(new Error("redis timeout")), 5000)),
-          ]);
-          queued++;
-          redisFailures = 0;
-        } catch {
-          deferred++;
-          // Stop paying the timeout on every remaining row once it's clear
-          // Redis isn't reachable - otherwise 2,500 rows cost 3.5h of waiting.
-          if (++redisFailures >= 3) {
-            redisUsable = false;
-            console.log("  Redis unreachable - deferring the rest to the reconcile job");
-          }
+        if (!body || body.trim().length === 0) {
+          console.log(`  skip ${row.external_id}: reparse produced nothing`);
+          continue;
         }
-      } else {
-        deferred++;
-      }
+        if (!CSS.test(body.slice(0, 300))) improved++;
 
-      reparsed++;
-      if (reparsed % 25 === 0) {
-        console.log(`  ${reparsed}/${affected.length} reparsed (queued=${queued}, deferred=${deferred})`);
+        const { error: updErr } = await supabase
+          .from("communications")
+          .update({
+            body: body.substring(0, 10000),
+            body_html: bodyHtml.substring(0, 500000) || null,
+            // Cleared so summarizeCommunication runs the full path again rather
+            // than short-circuiting on an existing summary.
+            body_summary: null,
+            embedding: null,
+          })
+          .eq("id", row.id);
+
+        if (updErr) {
+          failed++;
+          console.error(`  fail ${row.external_id}: ${updErr.message}`);
+          continue;
+        }
+
+        // Best-effort: clearing body_summary above is what actually matters,
+        // because the 6-hourly reconcile job finds rows missing a summary and
+        // queues them from Railway. Enqueuing here only makes it immediate, and
+        // Redis isn't always reachable from a laptop (port 6379 egress), where a
+        // maxRetriesPerRequest: null connection would otherwise hang forever.
+        if (redisUsable) {
+          try {
+            await Promise.race([
+              summarizeQueue.add(
+                "summarize",
+                { communicationId: row.id, userId: row.user_id },
+                { jobId: `reparse-${row.id}` },
+              ),
+              new Promise((_, rej) =>
+                setTimeout(() => rej(new Error("redis timeout")), 5000),
+              ),
+            ]);
+            queued++;
+            redisFailures = 0;
+          } catch {
+            deferred++;
+            // Stop paying the timeout on every remaining row once it's clear
+            // Redis isn't reachable - otherwise 2,500 rows cost 3.5h of waiting.
+            if (++redisFailures >= 3) {
+              redisUsable = false;
+              console.log(
+                "  Redis unreachable - deferring the rest to the reconcile job",
+              );
+            }
+          }
+        } else {
+          deferred++;
+        }
+
+        reparsed++;
+        if (reparsed % 25 === 0) {
+          console.log(
+            `  ${reparsed}/${affected.length} reparsed (queued=${queued}, deferred=${deferred})`,
+          );
+        }
+      } catch (e: any) {
+        failed++;
+        console.error(`  fail ${row.external_id}: ${e.message}`);
       }
-    } catch (e: any) {
-      failed++;
-      console.error(`  fail ${row.external_id}: ${e.message}`);
     }
-    await new Promise((r) => setTimeout(r, FETCH_DELAY_MS));
-  }
+  };
+
+  await Promise.all(Array.from({ length: CONCURRENCY }, () => worker()));
 
   console.log(
-    `\nDone. reparsed=${reparsed}, now clean=${improved}, failed=${failed}`
+    `\nDone. reparsed=${reparsed}, now clean=${improved}, failed=${failed}`,
   );
-  console.log(`Queued immediately: ${queued} | left for the reconcile job: ${deferred}`);
-  console.log("Triage, extraction and embeddings re-run for each as they are picked up.");
+  console.log(
+    `Queued immediately: ${queued} | left for the reconcile job: ${deferred}`,
+  );
+  console.log(
+    "Triage, extraction and embeddings re-run for each as they are picked up.",
+  );
   // Explicit exit: the BullMQ/ioredis connection keeps the event loop alive,
   // which previously left the process hanging with stdout unflushed.
   process.exit(0);
