@@ -1,7 +1,7 @@
 [
   {
     "id": "1a0817acee449940",
-    "subject": "❗  You have done a UPI txn. Check details!",
+    "subject": "\u2757  You have done a UPI txn. Check details!",
     "why": "body begins with CSS boilerplate",
     "current_body_len": 793,
     "payload": {
@@ -79,7 +79,7 @@
         },
         {
           "name": "Subject",
-          "value": "❗  You have done a UPI txn. Check details!"
+          "value": "\u2757  You have done a UPI txn. Check details!"
         },
         {
           "name": "From",
@@ -126,7 +126,7 @@
   },
   {
     "id": "1a08174be777dd8f",
-    "subject": "❗  You have done a UPI txn. Check details!",
+    "subject": "\u2757  You have done a UPI txn. Check details!",
     "why": "body begins with CSS boilerplate",
     "current_body_len": 1712,
     "payload": {
@@ -212,7 +212,7 @@
         },
         {
           "name": "Subject",
-          "value": "❗  You have done a UPI txn. Check details!"
+          "value": "\u2757  You have done a UPI txn. Check details!"
         },
         {
           "name": "From",
@@ -412,8 +412,8 @@
   },
   {
     "id": "1a07f8ade2029a82",
-    "subject": "🚀 Launching, Mirae Asset BSE Information Technology Index Fund",
-    "why": "body parsed as effectively empty",
+    "subject": "\ud83d\ude80 Launching, Mirae Asset BSE Information Technology Index Fund",
+    "why": "image-only marketing send: 2 <img> tags (one a tracking pixel), no alt text, no text content anywhere. Verified - the parser is correct to return almost nothing here.",
     "current_body_len": 63,
     "payload": {
       "partId": "",
@@ -486,7 +486,7 @@
         },
         {
           "name": "Subject",
-          "value": "🚀 Launching, Mirae Asset BSE Information Technology Index Fund"
+          "value": "\ud83d\ude80 Launching, Mirae Asset BSE Information Technology Index Fund"
         },
         {
           "name": "Message-ID",
@@ -560,12 +560,15 @@
           }
         }
       ]
+    },
+    "expect": {
+      "min_content_chars": 0
     }
   },
   {
     "id": "1a07f3cf69ac5d8f",
-    "subject": "🎙️ Today’s Webinar: Investment in IT Sector",
-    "why": "body parsed as effectively empty",
+    "subject": "\ud83c\udf99\ufe0f Today\u2019s Webinar: Investment in IT Sector",
+    "why": "image-only marketing send: 2 <img> tags (one a tracking pixel), no alt text, no text content anywhere. Verified - the parser is correct to return almost nothing here.",
     "current_body_len": 63,
     "payload": {
       "partId": "",
@@ -638,7 +641,7 @@
         },
         {
           "name": "Subject",
-          "value": "🎙️ Today’s Webinar: Investment in IT Sector"
+          "value": "\ud83c\udf99\ufe0f Today\u2019s Webinar: Investment in IT Sector"
         },
         {
           "name": "Message-ID",
@@ -712,6 +715,9 @@
           }
         }
       ]
+    },
+    "expect": {
+      "min_content_chars": 0
     }
   },
   {
@@ -876,7 +882,7 @@
   },
   {
     "id": "1a08162ae6b694ff",
-    "subject": "More benefits with IndiGo UpFront 💺",
+    "subject": "More benefits with IndiGo UpFront \ud83d\udcba",
     "why": "control: currently parses cleanly",
     "current_body_len": 1047,
     "payload": {
@@ -934,7 +940,7 @@
         },
         {
           "name": "Subject",
-          "value": "More benefits with IndiGo UpFront 💺"
+          "value": "More benefits with IndiGo UpFront \ud83d\udcba"
         },
         {
           "name": "Received",

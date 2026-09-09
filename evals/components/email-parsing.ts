@@ -30,6 +30,9 @@ type Fixture = {
   why: string;
   current_body_len: number;
   payload: unknown;
+  // Some emails carry no text at all (image-only marketing sends), so a content
+  // floor would assert a failure that isn't one. Those set min_content_chars: 0.
+  expect?: { min_content_chars?: number };
 };
 
 function main() {
@@ -47,11 +50,13 @@ function main() {
     const body = parseEmailBody(f.payload);
     const head = body.slice(0, 300);
 
+    const minChars = f.expect?.min_content_chars ?? MIN_CONTENT_CHARS;
+
     const checks = [
       {
         name: "has_content",
-        pass: body.trim().length >= MIN_CONTENT_CHARS,
-        detail: `${body.trim().length} chars (want >= ${MIN_CONTENT_CHARS})`,
+        pass: body.trim().length >= minChars,
+        detail: `${body.trim().length} chars (want >= ${minChars})`,
       },
       {
         name: "no_style_or_script_text",

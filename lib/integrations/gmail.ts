@@ -26,29 +26,79 @@ export async function fetchHistorySince(userId: string, startHistoryId: string) 
   return data.history ?? [];
 }
 
+// Below this, a text/plain part is assumed to be boilerplate rather than
+// content - plenty of senders ship one holding only an unsubscribe line.
+const MIN_USEFUL_CHARS = 100;
+
+function decodePart(part: any): string {
+  const data = part?.body?.data;
+  return data ? Buffer.from(data, "base64").toString("utf-8") : "";
+}
+
+function stripHtml(html: string): string {
+  return (
+    html
+      // Contents as well as the tags. Stripping only tags left the CSS between
+      // <style>...</style> behind as plain text, which is how 41% of stored
+      // bodies ended up starting with "@media screen and ...".
+      .replace(/<(style|script)\b[^>]*>[\s\S]*?<\/\1>/gi, " ")
+      // <[^>]+> only matches a comment up to its first '>', so bodies and
+      // trailing '-->' leaked through.
+      .replace(/<!--[\s\S]*?-->/g, " ")
+      // Keep block structure: the model reads a receipt far better as lines
+      // than as one collapsed run of text.
+      .replace(/<br\s*\/?>/gi, "\n")
+      .replace(/<\/(p|div|tr|li|h[1-6])>/gi, "\n")
+      .replace(/<[^>]+>/g, " ")
+      .replace(/&nbsp;/gi, " ")
+      .replace(/&amp;/gi, "&")
+      .replace(/&lt;/gi, "<")
+      .replace(/&gt;/gi, ">")
+      .replace(/&quot;/gi, '"')
+      .replace(/&#39;|&apos;/gi, "'")
+      .replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(parseInt(n, 10)))
+      .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCodePoint(parseInt(h, 16)))
+      .replace(/[ \t]+/g, " ")
+      .replace(/\n{3,}/g, "\n\n")
+      .trim()
+  );
+}
+
+function collectTextParts(payload: any, out: { plain: string[]; html: string[] }) {
+  if (!payload) return;
+  const mime = payload.mimeType ?? "";
+
+  if (mime === "text/plain") {
+    const t = decodePart(payload);
+    if (t) out.plain.push(t);
+  } else if (mime === "text/html") {
+    const t = decodePart(payload);
+    if (t) out.html.push(t);
+  } else if (!payload.parts) {
+    // Single-part message with some other mime type - treat as markup.
+    const t = decodePart(payload);
+    if (t) out.html.push(t);
+  }
+
+  for (const p of payload.parts ?? []) collectTextParts(p, out);
+}
+
 export function parseEmailBody(payload: any): string {
-  if (!payload) return "";
+  // Gather every candidate across the tree rather than returning the first
+  // non-empty part found depth-first, which picked whichever branch happened to
+  // come first - including a near-empty text/plain sibling of the real content.
+  const found = { plain: [] as string[], html: [] as string[] };
+  collectTextParts(payload, found);
 
-  // text/plain preferred
-  if (payload.mimeType === "text/plain" && payload.body?.data) {
-    return Buffer.from(payload.body.data, "base64").toString("utf-8");
-  }
+  const byLength = (a: string, b: string) => b.length - a.length;
+  const plain = found.plain.map((t) => t.replace(/\r\n/g, "\n").trim()).sort(byLength)[0] ?? "";
 
-  // multipart: recurse
-  if (payload.parts) {
-    for (const part of payload.parts) {
-      const text = parseEmailBody(part);
-      if (text) return text;
-    }
-  }
+  if (plain.length >= MIN_USEFUL_CHARS) return plain;
 
-  // fallback to html body
-  if (payload.body?.data) {
-    const html = Buffer.from(payload.body.data, "base64").toString("utf-8");
-    return html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
-  }
-
-  return "";
+  const stripped = stripHtml(found.html.sort(byLength)[0] ?? "");
+  // Never return less than we already had: protects genuinely short
+  // transactional emails ("Your payment was successful", ~75 chars).
+  return stripped.length >= plain.length ? stripped : plain;
 }
 
 export function parseEmailHtml(payload: any): string {

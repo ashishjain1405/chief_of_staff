@@ -50,7 +50,7 @@ async function main() {
 
   const picks = [
     ...cssBad.slice(0, 3).map((r) => ({ ...r, why: "body begins with CSS boilerplate" })),
-    ...emptyBad.slice(0, 2).map((r) => ({ ...r, why: "body parsed as effectively empty" })),
+    ...emptyBad.slice(0, 2).map((r) => ({ ...r, why: "body parses very short - check whether the email has any text at all" })),
     ...clean.slice(0, 2).map((r) => ({ ...r, why: "control: currently parses cleanly" })),
   ];
 
