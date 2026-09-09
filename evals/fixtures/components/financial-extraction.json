@@ -1,0 +1,103 @@
+[
+  {
+    "id": "FX1-cdsl-quantity-not-amount",
+    "note": "Body lists only unit quantities (188.000 units), no rupee figure anywhere. Extractor returned amount=188, mistaking units for currency.",
+    "input": {
+      "sender": "services@cdslindia.co.in",
+      "subject": "Transactions In Your Demat Account",
+      "body": "Dear ASHISH, Following is/are the list of transactions for your Demat account ending with *01658658 Sr. No. Company Name ISIN Quantity Debit / Credit Date and Time 1 ICICI PRUDENTIAL AMC LTD#ICICI PRU MF-ICICI PRU BSE 500 ETF INF109KC1V59 188.000 Credit 27/04/2026 12:24:16 2 ICICI PRUDENTIAL AMC LTD#ICICI PRU MF-ICICI PRU BSE 500 ETF INF109KC1V59 2312.000 Credit 27/04/2026 12:20:25 3 HDFC AMC LTD#HDFC MF-HDFC NIFTY 50 EXCHANGE TRADED FUND INF179KC1965 373.000 Credit 27/04/2026 12:20:09 For further queries, please contact your Depository Participant [DP] with whom you hold your demat account. Yours Truly, Central Depository Services (India) Ltd Disclaimer: The information contained herein is confidential and is intended solely for the addressee(s). If you have erroneously received this message, please immediately delete it and notify at helpdesk@cdslindia.com. You must not directly or indirectly, use, disclose, distribute, print, or copy any part of this message. Note: This is an electronic message. Please do not reply to this email. To unsubscribe, click here"
+    },
+    "expect": {
+      "is_financial_email": true,
+      "amount": null,
+      "category": [
+        "investments"
+      ],
+      "transaction_type": [
+        "investment",
+        "unknown"
+      ]
+    }
+  },
+  {
+    "id": "FX2-expedia-empty-body-overconfident",
+    "note": "Body is 2 chars (empty). Only the subject names a refund. Extractor returned confidence 1.0 with no amount.",
+    "input": {
+      "sender": "expedia@eg.expedia.com",
+      "subject": "Refund status update for Span Resort and Spa (Itinerary #73416376627258)",
+      "body": "\r\n"
+    },
+    "expect": {
+      "amount": null,
+      "max_confidence": 0.9
+    }
+  },
+  {
+    "id": "FX3-newsletter-not-a-charge",
+    "note": "The Ken editorial newsletter. No transaction. Extractor called it a subscription charge at confidence 0.7.",
+    "input": {
+      "sender": "info@the-ken.com",
+      "subject": "Bengaluru doesn\u2019t have a \u2018water\u2019 problem",
+      "body": "As flooding and shortages coexist, the city keeps layering solutions with tankers, pipes, and now AI, without ever fixing the whole\r\n\r\nhttps://the-ken.com/\r\n\r\nThe Collection\r\n\r\nFri, 01 May 26\r\n\r\nMultiple stories, multiple perspectives, one theme worth your time\u2014every week.\r\n\r\nhttps://the-ken.com/\r\n\r\nMultiple stories, multiple perspectives, one theme worth your time\u2014every week.\r\n\r\nThe Collection\r\n\r\nFri, 01 May 26\r\n\r\nBengaluru doesn\u2019t have a \u2018water\u2019 problem. As flooding and shortages coexist, the city keeps layering solutions with tankers, pipes, and now AI, without ever fixing the whole \r\n By\u00a0Sumit Chakraborty https://the-ken.com/writers/sumit_368/\r\n\r\n7 min read\r\n https://the-ken.com/the-collection/bengaluru-doesnt-have-a-water-problem?utm_source=ro_hdr&utm_medium=email&utm_campaign=the_collection https://the-ken.com/the-collection/bengaluru-doesnt-have-a-water-problem?utm_source=ro_hdr&utm_medium=email&utm_campaign=the_collectionView in browser https://the-ken.com/the-collection/bengaluru-doesnt-have-a-water-problem?utm_source=ro_hdr&utm_medium=email&utm_campaign=the_collection\r\n\r\nGood Morning Ashish,\r\n\r\nYou are on a free plan. \r\n Your subscription has expired. \r\n\r\nUpgrade now https://the-ken.com/pricing/?utm_source=the_collection_email&utm_medium=email&utm_campaign=email_free_to_paid_top_nudge&utm_ref_email=ashish00jain@gmail.com to unlock premium newsletters, top feature stories, exclusive podcasts, and more.\r\n\r\nYou are reading our weekly newsletter The Collection \u2014multiple stories, multiple perspectives, one theme worth your time every edition \r\n\r\nBengaluru is building what it calls Asia\u2019s largest AI command centre for water. A system designed to track how drinking water moves through the city in real time and detect leaks before they spread. It will also predict demand across neighbourhoods before shortages bare their fangs.\r\n\r\nIt\u2019s an understandable plan to take a complex, physical network and make it a little more like software. Optimised and responsive. It\u2019s India\u2019s IT capital, after all.\r\n\r\nThe new centre will sit on top of a system that already stretches over 14,000 km of pipelines and supplies roughly 1,450 million litres a day. That sounds massive, until you consider that that the city needs closer to 2,100 million litres and makes up the shortfall through a mix of borewells and private tankers. In a place that has built its identity on solving problems with code, this kind of solution doesn\u2019t feel unusual; if anything, it feels inevitable.\r\n\r\nAnd then it rains.\r\n\r\nEarlier this week, a pre-monsoon storm brought over 100 mm of rain to parts of the city in a matter of hours. It was kind of a burst, I am told, that is not supposed to be catastrophic. And yet it is. Roads were soon flooded, underpasses filled up, power lines snapped, and in one part of the city, a compound wall collapsed, killing several people, including children. And it\u2019s not even the monsoon.\r\n\r\nSoon, what will follow will be similarly familiar. A few days or weeks late"
+    },
+    "expect": {
+      "is_financial_email": false
+    }
+  },
+  {
+    "id": "FX4-amazon-order-confirmation",
+    "note": "Email contains TWO separate orders (249 INR and 269 INR) and no combined total. The prompt says to keep only the primary transaction, so either line is defensible - but the stored extraction had 518, i.e. it summed them. Verified against the body.",
+    "input": {
+      "sender": "auto-confirm@amazon.in",
+      "subject": "Ordered: \u2018Hi Life Flow Easy Organic...\u2019 and \u20661\u2069 more item",
+      "body": "\r\n  \r\n\r\n\r\n    Thanks for your order, Ashish!\r\nOrdered\r\n\r\nShipped\r\n\r\nOut for delivery\r\n\r\nDelivered\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\nArriving tomorrow 8 am \u2013 12 pm\r\n\r\n\r\n\r\nMuskan \u2013 PANCHKULA, HARYANA\r\n\r\nOrder #\r\n404-8003828-5409957\r\n\r\n\r\n\r\nView or edit order\r\nhttps://www.amazon.in/your-orders/order-details?orderID=404-8003828-5409957&ref_=p_btn_fed_veo\r\n\r\n* Nua Cramp Comfort || 3 Heat Patches for Period Pain and Cramps || 100% Natural Ingredients and Portable || 8 Hours Pain Relief || Quick Relief from Menstrual Pain\r\n  Quantity: 1\r\n  249 INR\r\n\r\n\r\nTotal\r\n249 INR\r\n\r\n\r\n\r\nArriving tomorrow\r\n\r\n\r\n\r\nMuskan \u2013 PANCHKULA, HARYANA\r\n\r\nOrder #\r\n404-9768876-1645932\r\n\r\n\r\n\r\nView or edit order\r\nhttps://www.amazon.in/your-orders/order-details?orderID=404-9768876-1645932&ref_=p_btn_fed_veo\r\n\r\n* Hi Life Flow Easy Organic Sanitary Pads \u2013 100% Organic Cotton, Rash-Free, Leak-Proof X-Large Pads for Heavy Flow, Super-Absorbent & Biodegradable with Free Disposal Bags \u2013 Pack of 8\r\n  Quantity: 1\r\n  269 INR\r\n\r\n\r\nTotal\r\n269 INR\r\n\r\n\r\n\r\n\r\n\r\n\u00a92026 Amazon.com, Inc. or its affiliates. All rights reserved.\r\n\r\nAmazon.in"
+    },
+    "expect": {
+      "is_financial_email": true,
+      "currency": "INR",
+      "merchant_contains": "amazon",
+      "category": [
+        "ecommerce",
+        "shopping"
+      ],
+      "transaction_type": [
+        "purchase"
+      ],
+      "amount_in": [
+        249,
+        269
+      ]
+    }
+  },
+  {
+    "id": "FX5-amazonpay-wallet-payment",
+    "note": "Same real-world transaction as FX4, seen from the wallet side. Merchant-vs-payment-rail handling lives in post-processing, not the extractor.",
+    "input": {
+      "sender": "no-reply@amazonpay.in",
+      "subject": "\u20b9518.00 was paid on Amazon.in",
+      "body": "Hi Ashish,\r\nThanks for using Amazon Voucher. Your payment was successful.\r\n"
+    },
+    "expect": {
+      "is_financial_email": true,
+      "amount": 518,
+      "currency": "INR",
+      "transaction_type": [
+        "wallet_payment",
+        "purchase",
+        "upi_payment"
+      ]
+    }
+  },
+  {
+    "id": "FX6-hdfc-statement-css-body",
+    "note": "parseEmailBody returned CSS boilerplate instead of content. Extractor must not fabricate an amount from garbage input.",
+    "input": {
+      "sender": "Emailstatements.cards@hdfcbank.net",
+      "subject": "Your HDFC Bank - UPI RuPay Credit Card Statement - March-2026",
+      "body": "Common statement template body { width: 100% !important; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; margin: 0; font-family: \"Inter\", sans-serif; padding: 0; font-weight: 400; } :root { --verdana: verdana } /* @font-face { font-family: verdana; src: url(https://fci-sb-signature.s3.ap-south-1.amazonaws.com/emailer/liberty/verdana.ttf) format(\"truetype\"); font-weight: 400 } @font-face { font-family: verdana; src: url(https://fci-sb-signature.s3.ap-south-1.amazonaws.com/emailer/liberty/verdanab.ttf) format(\"truetype\"); font-weight: 700 } */ img { outline: 0; text-decoration: none; border: none; margin: 0; padding: 0; -ms-interpolation-mode: bicubic } a img { border: none } p { margin: 0 0 !important } table td { border-collapse: collapse; padding: 0 } table { border-collapse: collapse; mso-table-lspace: 0; mso-table-rspace: 0; border-spacing: 0; max-width: 100% } table[class=full] { width: 100%; clear: both } .wrapper { padding: 14px 0; margin: 0; table-layout: fixed } .main { width: 100%; max-width: 700px; border-spacing: 0; color: #000; font-size: 16px; margin: 0 auto } .radius-table td { color: #FFF; } .radius-table tr:first-child td:first-child { border-top-left-radius: 10px; } .radius-table tr:last-child td:first-child { border-bottom-left-radius: 10px; } .radius-table tr:first-child td:last-child { border-top-right-radius: 10px; } .radius-table tr:last-child td:last-child { border-bottom-right-radius: 10px; } @media only screen and (max-width: 600px) { .mb-css { background-color: #DFE6FF; border-radius: 10px; } .mb-ph, .rec-t{ width: 100%; } .l-h{ padding-top: 12px; } .l-hr{ padding-bottom: 12px; } } @media only screen and (max-width: 767px) { .mains { padding: 0 20px !important; } } .throught-td-font-darkmode, .manage-font-darkmode { font-size: 11px !important; } .manage-font-darkmode { text-align: left !important; padding-top: 6px !important; } .QR-img-darkmode { width: 50px !important; height: 50px !important; } @media screen and (prefers-color-scheme:dark) { .darkmode p { color: #fff !important; -webkit-text-fill-color: #fff !important } } @media (prefers-color-scheme:dark) { .darkmode p { color: #fff !important; -webkit-text-fill-color: #fff !important } } @media screen and (prefers-color-scheme:dark) { .text-color-dark { color: #3C3C3C !important; } .dark-mode-bg { border: 1px solid #EEE; color: #FFF !important; } .tagline { color: #ffffff !important; } .dotted-line { border-bottom-color: #F7C27B !important; } .throught-td-font-darkmode, .manage-font-darkmode { font-size: 11px !important; } .manage-font-darkmode { text-align: left !important; padding-top: 6px !important; } .QR-img-darkmode { width: 50px !important; height: 50px !important; } } Hey, ASHISH JAIN Here's the e-statement for your UPI RuPay Credit Card Your latest eStatement (or duplicate statement, as requested by you) is attached with this mail. Here's a smart and simple way to read your statement. Spend Analysis Reports, Personalised Offers, Discount & more "
+    },
+    "expect": {
+      "amount": null
+    }
+  }
+]
