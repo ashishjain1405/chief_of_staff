@@ -17,7 +17,9 @@
     "backfill:html": "npx tsx --env-file=.env.local --tsconfig tsconfig.json worker/jobs/backfill-html.ts",
     "reconcile:emails": "npx tsx --env-file=.env.local --tsconfig tsconfig.json scripts/reconcile-emails.ts",
     "dedupe:normalized": "npx tsx --env-file=.env.local --tsconfig tsconfig.json scripts/dedupe-normalized.ts",
-    "eval:extraction": "npx tsx --env-file=.env.local --tsconfig tsconfig.json evals/components/financial-extraction.ts"
+    "eval:extraction": "npx tsx --env-file=.env.local --tsconfig tsconfig.json evals/components/financial-extraction.ts",
+    "eval:parsing": "npx tsx --env-file=.env.local --tsconfig tsconfig.json evals/components/email-parsing.ts",
+    "snapshot:payloads": "npx tsx --env-file=.env.local --tsconfig tsconfig.json scripts/snapshot-email-payloads.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.72",
