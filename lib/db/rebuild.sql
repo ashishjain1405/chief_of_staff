@@ -426,10 +426,18 @@ END $$;
 -- ─────────────────────────────────────────
 -- Auto-create user profile on signup
 -- ─────────────────────────────────────────
-CREATE OR REPLACE FUNCTION handle_new_user()
-RETURNS TRIGGER AS $$
+-- SECURITY DEFINER inherits the caller's search_path, and GoTrue connects with
+-- `auth` in its path - so an unqualified `users` resolved to auth.users and the
+-- trigger tried to insert into the table it was firing on, failing signup with
+-- "Database error saving new user". Pin the path and qualify the table.
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
 BEGIN
-  INSERT INTO users (id, email, full_name, avatar_url)
+  INSERT INTO public.users (id, email, full_name, avatar_url)
   VALUES (
     NEW.id,
     NEW.email,
@@ -439,7 +447,7 @@ BEGIN
   ON CONFLICT (id) DO NOTHING;
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 DO $$ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'on_auth_user_created') THEN
