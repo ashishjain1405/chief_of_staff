@@ -2,8 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import {
   fetchEmailById,
   parseEmailBody,
-  parseEmailHtml,
-} from "@/lib/integrations/gmail";
+  } from "@/lib/integrations/gmail";
 import { summarizeQueue } from "@/lib/queues";
 
 // Re-fetches emails whose stored body was mangled by the old parser (stylesheet
@@ -108,7 +107,6 @@ async function main() {
       try {
         const msg = await fetchEmailById(row.user_id, row.external_id);
         const body = parseEmailBody(msg.payload);
-        const bodyHtml = parseEmailHtml(msg.payload);
 
         if (!body || body.trim().length === 0) {
           console.log(`  skip ${row.external_id}: reparse produced nothing`);
@@ -120,8 +118,7 @@ async function main() {
           .from("communications")
           .update({
             body: body.substring(0, 10000),
-            body_html: bodyHtml.substring(0, 500000) || null,
-            // Cleared so summarizeCommunication runs the full path again rather
+              // Cleared so summarizeCommunication runs the full path again rather
             // than short-circuiting on an existing summary.
             body_summary: null,
             embedding: null,

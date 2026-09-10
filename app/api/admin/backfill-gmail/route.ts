@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { getGmailClient, fetchEmailById, parseEmailBody, parseEmailHtml, extractHeader } from "@/lib/integrations/gmail";
+import { getGmailClient, fetchEmailById, parseEmailBody, extractHeader } from "@/lib/integrations/gmail";
 import { summarizeQueue } from "@/lib/queues";
 
 const ADMIN_SECRET = process.env.ADMIN_SECRET;
@@ -70,7 +70,6 @@ export async function POST(request: Request) {
             const date = extractHeader(headers, "date");
             const threadId = message.threadId ?? undefined;
             const body = parseEmailBody(message.payload);
-            const bodyHtml = parseEmailHtml(message.payload);
             const listUnsubscribe = extractHeader(headers, "list-unsubscribe");
             const emailMatch = from.match(/<(.+)>/) ?? from.match(/(\S+@\S+)/);
             const senderEmail = emailMatch?.[1] ?? from;
@@ -104,7 +103,6 @@ export async function POST(request: Request) {
                   contact_id: contact?.id,
                   subject,
                   body: body.substring(0, 10000),
-                  body_html: bodyHtml.substring(0, 500000) || null,
                   direction: "inbound",
                   channel_metadata: { from, to, labels, list_unsubscribe: listUnsubscribe || null },
                   occurred_at: date ? new Date(date).toISOString() : new Date().toISOString(),

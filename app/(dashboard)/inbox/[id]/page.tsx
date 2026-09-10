@@ -8,6 +8,7 @@ import Link from "next/link";
 import GenerateDraftButton from "./generate-draft-button";
 import EmailActions from "./email-actions";
 import EmailBody from "@/components/inbox/email-body";
+import { fetchEmailById, parseEmailHtml } from "@/lib/integrations/gmail";
 
 function formatEmailBody(body: string): string {
   // Strip trailing quoted reply lines (lines starting with ">")
@@ -29,7 +30,7 @@ export default async function EmailDetailPage({
 
   const { data: email } = await supabase
     .from("communications")
-    .select("*, body_html, contacts(name, email, organization)")
+    .select("*, contacts(name, email, organization)")
     .eq("id", id)
     .eq("user_id", user.id)
     .single();
@@ -47,7 +48,20 @@ export default async function EmailDetailPage({
   const fromRaw = metadata?.from ?? contact?.name ?? "Unknown";
   const toRaw = metadata?.to ?? "";
   const body = email.body ? formatEmailBody(email.body) : "";
-  const bodyHtml = (email as any).body_html as string | null ?? null;
+
+  // Fetched on open rather than stored. Keeping a copy per email came to ~160MB
+  // across the mailbox (avg 26KB each), which is what filled the database's
+  // disk; Gmail already holds the canonical version.
+  let bodyHtml: string | null = null;
+  if (email.source === "gmail" && email.external_id) {
+    try {
+      const message = await fetchEmailById(user.id, email.external_id);
+      bodyHtml = parseEmailHtml(message.payload) || null;
+    } catch {
+      // Fall back to the plain-text body below rather than failing the page.
+      bodyHtml = null;
+    }
+  }
 
   const isFinancial =
     email.email_category === "finance_bills" || email.email_category === "transactions";
