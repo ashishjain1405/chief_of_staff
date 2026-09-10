@@ -17,10 +17,12 @@ function makeWorker(queueName: string, handler: (job: any) => Promise<void>) {
     lockRenewTime: 30000,
     // Upstash doesn't support blocking commands well, so BullMQ falls back to
     // polling every drainDelay while idle. The 5s default burned through
-    // Upstash's monthly command quota (500k) in ~3 days on idle polling alone.
-    // 1hr while testing keeps that floor near-zero (~3.6k polls/month across
-    // 5 workers) - dial back down before this needs to feel responsive.
-    drainDelay: 3600,
+    // Upstash's 500k/month free-tier quota in ~3 days on idle polling alone,
+    // which is why this was parked at 1hr. On pay-as-you-go the tradeoff
+    // inverts: 60s costs roughly $0.40/month across the 5 workers (~216k
+    // commands) and a push-delivered email is picked up in a minute rather
+    // than sitting for an hour, which is the whole point of push.
+    drainDelay: 60,
   });
 
   worker.on("failed", (job, err) => {
