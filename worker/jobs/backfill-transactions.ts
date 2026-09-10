@@ -145,24 +145,38 @@ async function main() {
     const normalized = deduplicateRawTransactions(rawRows as TransactionRaw[]);
 
     for (const norm of normalized) {
-      const { data: existing } = await supabase
+      // Mirrors the fixed logic in summarize-communication.ts. maybeSingle()
+      // errors once 2+ rows match and returns null, which reads as "not found"
+      // and inserts another copy; with the unique index now in place that
+      // insert is rejected with 23505 and, since the error was unchecked, the
+      // transaction was silently dropped instead.
+      const now = new Date().toISOString();
+      const { data: matches } = await supabase
         .from("transactions_normalized")
         .select("id")
         .eq("user_id", userId)
         .contains("communication_ids", norm.communication_ids)
-        .maybeSingle();
+        .order("created_at", { ascending: true });
 
-      if (existing) {
+      if (!matches?.length) {
+        const { error: insertErr } = await supabase
+          .from("transactions_normalized")
+          .insert({ ...norm, created_at: now, updated_at: now });
+        if (insertErr && insertErr.code !== "23505") {
+          console.error(`  insert failed: ${insertErr.message}`);
+        }
+      } else {
+        const [keep, ...redundant] = matches;
         await supabase
           .from("transactions_normalized")
-          .update({ ...norm, updated_at: new Date().toISOString() })
-          .eq("id", existing.id);
-      } else {
-        await supabase.from("transactions_normalized").insert({
-          ...norm,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        });
+          .update({ ...norm, updated_at: now })
+          .eq("id", keep.id);
+        if (redundant.length > 0) {
+          await supabase
+            .from("transactions_normalized")
+            .delete()
+            .in("id", redundant.map((r) => r.id));
+        }
       }
     }
 
