@@ -115,7 +115,13 @@ export async function summarizeCommunication(job: Job) {
     .eq("source_type", "email")
     .eq("source_id", communicationId);
 
-  if (triage.requires_action && comm.body && !existingCommitments) {
+  // Newsletters, promotions and the like effectively never contain a real
+  // commitment, but a triage that flags one as requiring action still paid for
+  // an extraction call. Their importance is already capped at 0.3 above, which
+  // is what keeps them from creating tasks.
+  const worthExtractingCommitments = !LOW_SIGNAL_CATEGORIES.has(triage.email_category);
+
+  if (triage.requires_action && comm.body && !existingCommitments && worthExtractingCommitments) {
     const commitments = await extractCommitments(
       comm.body,
       senderEmail

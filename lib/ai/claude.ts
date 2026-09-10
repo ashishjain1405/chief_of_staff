@@ -59,7 +59,10 @@ export async function summarizeMeeting(
 export async function extractCommitments(body: string, senderEmail: string) {
   const client = getClient();
   const response = await client.chat.completions.create({
-    model: "gpt-4o",
+    // gpt-4o-mini: this ran on gpt-4o and was ~17x the cost per call, making it
+    // the single largest line item when reprocessing the mailbox despite
+    // firing on a minority of emails.
+    model: "gpt-4o-mini",
     max_tokens: 512,
     messages: [
       { role: "user", content: commitmentExtractionPrompt(body, senderEmail) },
