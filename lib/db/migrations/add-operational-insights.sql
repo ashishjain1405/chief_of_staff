@@ -45,19 +45,23 @@ CREATE TABLE IF NOT EXISTS operational_insights (
 
 ALTER TABLE operational_insights ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "operational_insights_own" ON operational_insights
-  USING (auth.uid() = user_id);
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'operational_insights' AND policyname = 'operational_insights_own') THEN
+    CREATE POLICY "operational_insights_own" ON operational_insights USING (auth.uid() = user_id);
+  END IF;
+END $$;
 
 -- Primary query path: active insights for a user sorted by priority
-CREATE INDEX operational_insights_active ON operational_insights
+CREATE INDEX IF NOT EXISTS operational_insights_active ON operational_insights
   (user_id, status, priority_score DESC)
   WHERE status = 'active';
 
 -- Category-filtered queries
-CREATE INDEX operational_insights_category ON operational_insights
+CREATE INDEX IF NOT EXISTS operational_insights_category ON operational_insights
   (user_id, category, status);
 
 -- Expiry/lifecycle queries
-CREATE INDEX operational_insights_expires ON operational_insights
+CREATE INDEX IF NOT EXISTS operational_insights_expires ON operational_insights
   (user_id, expires_at)
   WHERE expires_at IS NOT NULL;
