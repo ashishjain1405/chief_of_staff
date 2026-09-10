@@ -123,6 +123,10 @@ CREATE TABLE IF NOT EXISTS communications (
   subject text,
   body text,
   body_summary text,
+  -- Set by triage; drives the inbox sidebar and get_category_counts()
+  email_category text,
+  -- Guards re-triage: backfill-categories skips rows already processed
+  category_processed boolean DEFAULT false,
   direction text,
   channel_metadata jsonb DEFAULT '{}',
   occurred_at timestamptz NOT NULL,
@@ -136,6 +140,8 @@ CREATE TABLE IF NOT EXISTS communications (
   updated_at timestamptz DEFAULT now(),
   UNIQUE(user_id, source, external_id)
 );
+
+CREATE INDEX IF NOT EXISTS communications_category ON communications (user_id, email_category);
 
 ALTER TABLE communications ENABLE ROW LEVEL SECURITY;
 DO $$ BEGIN
@@ -226,6 +232,7 @@ CREATE TABLE IF NOT EXISTS relationships (
   health_score float DEFAULT 0.5,
   follow_up_cadence_days int DEFAULT 14,
   follow_up_due timestamptz,
+  last_interaction_at timestamptz,
   metadata jsonb DEFAULT '{}',
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now(),

@@ -107,6 +107,10 @@ CREATE TABLE communications (
   subject text,
   body text,
   body_summary text,
+  -- Set by triage; drives the inbox sidebar and get_category_counts()
+  email_category text,
+  -- Guards re-triage: backfill-categories skips rows already processed
+  category_processed boolean DEFAULT false,
   direction text, -- 'inbound' | 'outbound'
   channel_metadata jsonb DEFAULT '{}', -- sender, recipients, labels, slack channel
   occurred_at timestamptz NOT NULL,
@@ -198,6 +202,7 @@ CREATE TABLE relationships (
   health_score float DEFAULT 0.5, -- 0=cold, 1=very active, computed by AI
   follow_up_cadence_days int DEFAULT 14,
   follow_up_due timestamptz,
+  last_interaction_at timestamptz,
   metadata jsonb DEFAULT '{}',
   -- investor: {fund, check_size, stage, portfolio_companies}
   -- customer: {arr, health, renewal_date, csm}
