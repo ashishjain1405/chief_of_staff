@@ -99,8 +99,14 @@ $$;
 ALTER TABLE transactions_raw        ENABLE ROW LEVEL SECURITY;
 ALTER TABLE transactions_normalized ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "own transactions_raw" ON transactions_raw
-  FOR ALL USING (auth.uid() = user_id);
-
-CREATE POLICY "own transactions_normalized" ON transactions_normalized
-  FOR ALL USING (auth.uid() = user_id);
+-- Guarded the same way as schema-safe.sql: CREATE POLICY has no IF NOT EXISTS,
+-- so a re-run after a partial failure would otherwise abort here.
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'transactions_raw' AND policyname = 'transactions_raw_own') THEN
+    CREATE POLICY "transactions_raw_own" ON transactions_raw FOR ALL USING (auth.uid() = user_id);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'transactions_normalized' AND policyname = 'transactions_normalized_own') THEN
+    CREATE POLICY "transactions_normalized_own" ON transactions_normalized FOR ALL USING (auth.uid() = user_id);
+  END IF;
+END $$;
