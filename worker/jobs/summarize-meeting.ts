@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { summarizeMeeting } from "@/lib/ai/claude";
 import { embedAndStoreChunks, updateMeetingEmbedding } from "@/lib/memory/embed";
 import { operationalQueue } from "@/lib/queues";
+import { FEATURES } from "@/lib/features";
 
 export async function processMeetingSummary(job: Job) {
   const supabase = createClient(
@@ -67,8 +68,10 @@ export async function processMeetingSummary(job: Job) {
     });
   }
 
-  // Create commitments
-  for (const c of summary.commitments) {
+  // Create commitments. Meeting commitments are genuinely extractable (the user
+  // speaks in their own meetings), so this is gated on the flag alone, not on
+  // direction the way email commitments are.
+  for (const c of FEATURES.commitments ? summary.commitments : []) {
     if (c.confidence < 0.6) continue;
 
     await supabase.from("commitments").insert({

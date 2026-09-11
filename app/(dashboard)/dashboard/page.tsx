@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { FEATURES } from "@/lib/features";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -15,7 +16,7 @@ export default async function DashboardPage() {
   const in24h = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
   const in7d = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
 
-  const [briefRes, tasksRes, meetingsRes, actionEmailsRes, commitmentsRes] = await Promise.all([
+  const [briefRes, tasksRes, meetingsRes, actionEmailsRes] = await Promise.all([
     supabase
       .from("daily_briefs")
       .select("raw_markdown, brief_date")
@@ -49,22 +50,24 @@ export default async function DashboardPage() {
       .eq("action_taken", false)
       .order("importance_score", { ascending: false })
       .limit(5),
-
-    supabase
-      .from("commitments")
-      .select("id, description, due_date, status")
-      .eq("user_id", user.id)
-      .in("status", ["pending", "overdue"])
-      .lte("due_date", in7d)
-      .order("due_date")
-      .limit(5),
   ]);
 
   const brief = briefRes.data;
   const tasks = tasksRes.data ?? [];
   const meetings = meetingsRes.data ?? [];
   const actionEmails = actionEmailsRes.data ?? [];
-  const commitments = commitmentsRes.data ?? [];
+  const commitments = FEATURES.commitments
+    ? (
+        await supabase
+          .from("commitments")
+          .select("id, description, due_date, status")
+          .eq("user_id", user.id)
+          .in("status", ["pending", "overdue"])
+          .lte("due_date", in7d)
+          .order("due_date")
+          .limit(5)
+      ).data ?? []
+    : [];
 
   const priorityColor = (p: string) =>
     p === "high" ? "destructive" : p === "medium" ? "secondary" : "outline";
@@ -94,14 +97,16 @@ export default async function DashboardPage() {
       border: "border-l-blue-400",
       dot: "bg-blue-400",
     },
-    {
-      label: "Pending commitments",
-      value: commitments.length,
-      href: "/commitments",
-      cta: "Check commitments",
-      border: "border-l-violet-400",
-      dot: "bg-violet-400",
-    },
+    ...(FEATURES.commitments
+      ? [{
+          label: "Pending commitments",
+          value: commitments.length,
+          href: "/commitments",
+          cta: "Check commitments",
+          border: "border-l-violet-400",
+          dot: "bg-violet-400",
+        }]
+      : []),
   ];
 
   return (
@@ -123,7 +128,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Stats row */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div className={`grid grid-cols-2 gap-4 ${FEATURES.commitments ? "sm:grid-cols-4" : "sm:grid-cols-3"}`}>
         {stats.map((stat) => (
           <Link key={stat.label} href={stat.href}>
             <div className={`border ${stat.border} border-l-4 rounded-lg p-4 bg-white hover:bg-gray-50 transition-colors cursor-pointer space-y-2`}>
@@ -135,7 +140,7 @@ export default async function DashboardPage() {
         ))}
       </div>
 
-      <div className="grid grid-cols-2 gap-6">
+      <div className={`grid gap-6 ${FEATURES.commitments ? "grid-cols-2" : "grid-cols-1"}`}>
         {/* Top Tasks */}
         <Card>
           <CardHeader className="pb-3">
@@ -241,6 +246,7 @@ export default async function DashboardPage() {
         </Card>
 
         {/* Upcoming Commitments */}
+        {FEATURES.commitments && (
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
@@ -269,6 +275,7 @@ export default async function DashboardPage() {
             )}
           </CardContent>
         </Card>
+        )}
       </div>
 
       {/* Daily Brief */}

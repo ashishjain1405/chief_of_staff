@@ -1,7 +1,8 @@
 export const dynamic = "force-dynamic";
 
 import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { FEATURES } from "@/lib/features";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
@@ -14,6 +15,10 @@ async function markDone(formData: FormData) {
 }
 
 export default async function CommitmentsPage() {
+  // Unlinked from the nav while the feature is off, so this only catches a
+  // stale bookmark or a back-button hit landing on an empty feature.
+  if (!FEATURES.commitments) notFound();
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/auth/login");

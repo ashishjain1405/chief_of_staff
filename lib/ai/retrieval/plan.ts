@@ -1,6 +1,7 @@
 import type { IntentResult } from "../intent/classify";
 import type { RetrievalStep } from "./types";
 import type { ResolvedEntities } from "./resolve";
+import { FEATURES } from "@/lib/features";
 
 // Source confidence + cost reference table
 const SOURCE_META: Record<string, { source_confidence: number; estimated_cost_ms: number; max_results: number }> = {
@@ -94,10 +95,15 @@ export function buildRetrievalPlan(
 
   // Commitment / productivity lookups — also fires when query mentions task/follow-up keywords
   if (primary === "commitments" || primary === "productivity" || queryMentionsTask) {
-    steps.push(step("sql_commitments", "find commitments", {
-      ...(resolved.contactIds.length > 0 ? { contactIds: resolved.contactIds } : {}),
-      dateRange,
-    }, 2));
+    // Skipped while the feature is off: the table is guaranteed empty, and the
+    // step still consumed 60ms of the query budget plus a plan slot, which can
+    // push a source that does have data past the budget cap.
+    if (FEATURES.commitments) {
+      steps.push(step("sql_commitments", "find commitments", {
+        ...(resolved.contactIds.length > 0 ? { contactIds: resolved.contactIds } : {}),
+        dateRange,
+      }, 2));
+    }
     steps.push(step("sql_tasks", "find tasks", {
       dateRange,
     }, 2));

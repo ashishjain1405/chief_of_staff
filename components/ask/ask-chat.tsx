@@ -6,10 +6,12 @@ import type { UIMessage } from "ai";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useRef, useEffect, useState } from "react";
+import { FEATURES } from "@/lib/features";
 
 const SUGGESTED_PROMPTS = [
   "What should I focus on today?",
-  "What commitments are overdue?",
+  ...(FEATURES.commitments ? ["What commitments are overdue?"] : []),
+  "How much did I spend last month?",
   "Summarize my meetings from this week",
   "Which investors haven't I followed up with?",
   "What's the status of my top customer?",

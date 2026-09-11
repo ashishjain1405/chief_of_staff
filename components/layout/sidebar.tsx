@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
+import { FEATURES } from "@/lib/features";
 import { useRouter } from "next/navigation";
 import {
   Zap,
@@ -23,7 +24,9 @@ const navItems = [
   { href: "/inbox",          label: "Inbox",         icon: Inbox },
   { href: "/meetings",       label: "Meetings",      icon: Calendar },
   { href: "/relationships",  label: "Relationships", icon: Users },
-  { href: "/commitments",    label: "Commitments",   icon: ClipboardList },
+  ...(FEATURES.commitments
+    ? [{ href: "/commitments", label: "Commitments", icon: ClipboardList }]
+    : []),
   { href: "/tasks",          label: "Tasks",         icon: CheckSquare },
   { href: "/ask",            label: "Ask AI",        icon: Sparkles },
   { href: "/finance",        label: "Finance",       icon: BarChart2 },

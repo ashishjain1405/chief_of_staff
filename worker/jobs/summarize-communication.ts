@@ -7,6 +7,7 @@ import { operationalQueue } from "@/lib/queues";
 import { extractFinancialTransaction } from "@/lib/ai/extractors/financial";
 import { normalizeMerchant, getCategoryForMerchant, getWalletPaymentModeLabel } from "@/lib/finance/normalize";
 import { deduplicateRawTransactions, type TransactionRaw } from "@/lib/finance/dedup";
+import { FEATURES } from "@/lib/features";
 
 export async function summarizeCommunication(job: Job) {
   const supabase = createClient(
@@ -119,7 +120,16 @@ export async function summarizeCommunication(job: Job) {
   // commitment, but a triage that flags one as requiring action still paid for
   // an extraction call. Their importance is already capped at 0.3 above, which
   // is what keeps them from creating tasks.
-  const worthExtractingCommitments = !LOW_SIGNAL_CATEGORIES.has(triage.email_category);
+  //
+  // A commitment is something the user promised, so it can only appear in mail
+  // the user sent. Every ingested message is inbound today, which is why 317
+  // eligible emails produced zero commitments: the extraction was running on
+  // other people's words. Gate on direction regardless of FEATURES.commitments
+  // - this is the right condition even once sent mail is ingested.
+  const worthExtractingCommitments =
+    FEATURES.commitments &&
+    comm.direction === "outbound" &&
+    !LOW_SIGNAL_CATEGORIES.has(triage.email_category);
 
   if (triage.requires_action && comm.body && !existingCommitments && worthExtractingCommitments) {
     const commitments = await extractCommitments(
