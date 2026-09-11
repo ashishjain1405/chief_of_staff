@@ -147,11 +147,24 @@ export interface VectorRetrievalItem extends BaseRetrievalItem {
   };
 }
 
+export interface TaskRetrievalItem extends BaseRetrievalItem {
+  item_type: "task";
+  source: "sql_tasks";
+  data: {
+    id: string;
+    title: string;
+    status: string | null;
+    priority: string | null;
+    due_date: string | null;
+  };
+}
+
 export type RetrievalItem =
   | TransactionRetrievalItem
   | CommunicationRetrievalItem
   | MeetingRetrievalItem
   | CommitmentRetrievalItem
+  | TaskRetrievalItem
   | AggregatedFinanceRetrievalItem
   | InsightRetrievalItem
   | VectorRetrievalItem;

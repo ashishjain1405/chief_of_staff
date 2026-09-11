@@ -1,7 +1,7 @@
 import type {
   RetrievalItem, RankingProfile, AggregatedFinance, EntityContext, TemporalAnchor,
   TransactionRetrievalItem, CommunicationRetrievalItem, MeetingRetrievalItem,
-  CommitmentRetrievalItem, InsightRetrievalItem, VectorRetrievalItem,
+  CommitmentRetrievalItem, TaskRetrievalItem, InsightRetrievalItem, VectorRetrievalItem,
   AggregatedFinanceRetrievalItem,
 } from "./types";
 import type { RawResults } from "./execute";
@@ -26,7 +26,7 @@ export const DEFAULT_DIVERSITY_CAPS: Record<string, number> = {
   sql_transactions:     3,
   sql_meetings:         2,
   sql_commitments:      3,
-  sql_tasks:            2,
+  sql_tasks:            4,
   vector_search:        2,
   operational_insights: 6,
   aggregated_finance:   1,
@@ -42,7 +42,10 @@ export function getRankingProfile(primary: string): RankingProfile {
 function recencyScore(dateStr: string | null): number {
   if (!dateStr) return 0.3;
   const daysOld = (Date.now() - new Date(dateStr).getTime()) / 864e5;
-  return Math.max(0, 1 - daysOld / 90);
+  // Upper clamp matters now that due dates feed this: a negative daysOld
+  // (due in the future) would otherwise score above 1 and grow without bound,
+  // so a task due in two years would outrank one due tomorrow.
+  return Math.min(1, Math.max(0, 1 - daysOld / 90));
 }
 
 function keywordScore(text: string, query: string, entities: EntityContext): number {
@@ -186,6 +189,28 @@ function normalizeCommitments(rows: any[], query: string, entities: EntityContex
   });
 }
 
+const TASK_PRIORITY_URGENCY: Record<string, number> = { high: 0.9, medium: 0.6, low: 0.35 };
+
+function normalizeTasks(rows: any[], query: string, entities: EntityContext, weights: (typeof PROFILE_WEIGHTS)[RankingProfile]): TaskRetrievalItem[] {
+  return rows.map((row) => {
+    const text = row.title ?? "";
+    const base = TASK_PRIORITY_URGENCY[row.priority ?? "medium"] ?? 0.6;
+    const isOverdue = row.due_date && new Date(row.due_date) < new Date();
+    // Undated tasks fall back to created_at so an ancient one doesn't get the
+    // neutral 0.3 that recencyScore gives a null date.
+    return {
+      item_type: "task" as const,
+      source: "sql_tasks" as const,
+      source_confidence: 0.90,
+      retrieval_score: scoreItem(text, row.due_date ?? row.created_at ?? null, 0.90, Math.min(1, isOverdue ? base + 0.1 : base), query, entities, weights),
+      data: {
+        id: row.id, title: row.title, status: row.status,
+        priority: row.priority, due_date: row.due_date,
+      },
+    };
+  });
+}
+
 function normalizeVector(rows: any[], query: string, entities: EntityContext, weights: (typeof PROFILE_WEIGHTS)[RankingProfile]): VectorRetrievalItem[] {
   return rows.map((row) => {
     const text = row.chunk_text ?? "";
@@ -239,6 +264,8 @@ export function unifiedRank(
     all.push(...normalizeMeetings(rawResults.sql_meetings, query, entities, weights));
   if (rawResults.sql_commitments?.length)
     all.push(...normalizeCommitments(rawResults.sql_commitments, query, entities, weights));
+  if (rawResults.sql_tasks?.length)
+    all.push(...normalizeTasks(rawResults.sql_tasks, query, entities, weights));
   if (rawResults.vector_search?.length)
     all.push(...normalizeVector(rawResults.vector_search, query, entities, weights));
   if (aggregated)

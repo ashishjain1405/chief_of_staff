@@ -464,6 +464,13 @@ export function askContextPrompt(
         sections.push(`[COMMITMENT] ${d.description}${d.to_contact_name ? ` (to ${d.to_contact_name})` : ""}${d.due_date ? ` — due ${d.due_date.slice(0, 10)}` : ""}`);
         break;
       }
+      case "task": {
+        const d = item.data;
+        const overdue = d.due_date && new Date(d.due_date) < new Date();
+        const due = d.due_date ? ` — due ${d.due_date.slice(0, 10)}${overdue ? " (OVERDUE)" : ""}` : " — no due date";
+        sections.push(`[TASK][${(d.priority ?? "medium").toUpperCase()}] ${d.title}${due}`);
+        break;
+      }
       case "vector": {
         const d = item.data;
         sections.push(`[${d.source_type?.toUpperCase() ?? "MEMORY"}] ${d.chunk_text}`);

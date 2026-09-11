@@ -65,6 +65,15 @@ export async function executeRetrievalPlan(
   return { rawResults, sourceStatuses, budgetExhausted };
 }
 
+// Tasks and commitments were fetched oldest-due-first, so a backlog of very
+// old items consumed the whole budget and anything due this week never reached
+// the ranker. Reserve slots per bucket instead: mostly what's coming up, plus
+// the most recently missed rather than the most stale.
+function splitBuckets(maxResults: number): { upcoming: number; overdue: number } {
+  const upcoming = Math.max(1, Math.round(maxResults * 0.6));
+  return { upcoming, overdue: Math.max(1, maxResults - upcoming) };
+}
+
 async function executeStep(
   step: RetrievalStep,
   userId: string,
@@ -141,41 +150,52 @@ async function executeStep(
     }
 
     case "sql_commitments": {
-      let q = supabase
-        .from("commitments")
-        .select("id, description, due_date, status, to_contact_id, contacts(name)")
-        .eq("user_id", userId)
-        .not("status", "eq", "done")
-        .order("due_date", { ascending: true })
-        .limit(step.max_results);
+      const now = new Date().toISOString();
+      const { upcoming, overdue } = splitBuckets(step.max_results);
 
-      if (f.contactIds?.length) q = q.in("to_contact_id", f.contactIds);
-      if (f.dateRange) {
-        q = q.lte("due_date", f.dateRange.to);
-      }
+      const base = () => {
+        let q = supabase
+          .from("commitments")
+          .select("id, description, due_date, status, to_contact_id, contacts(name)")
+          .eq("user_id", userId)
+          .not("status", "eq", "done");
+        if (f.contactIds?.length) q = q.in("to_contact_id", f.contactIds);
+        if (f.dateRange) q = q.lte("due_date", f.dateRange.to);
+        return q;
+      };
 
-      const { data } = await q;
-      return (data ?? []).map((row: any) => ({
+      const [soonest, recentlyOverdue] = await Promise.all([
+        base().gte("due_date", now).order("due_date", { ascending: true }).limit(upcoming),
+        base().lt("due_date", now).order("due_date", { ascending: false }).limit(overdue),
+      ]);
+
+      return [...(soonest.data ?? []), ...(recentlyOverdue.data ?? [])].map((row: any) => ({
         ...row,
         to_contact_name: row.contacts?.name ?? null,
       }));
     }
 
     case "sql_tasks": {
-      let q = supabase
-        .from("tasks")
-        .select("id, title, status, priority, due_date, created_at")
-        .eq("user_id", userId)
-        .not("status", "eq", "done")
-        .order("due_date", { ascending: true })
-        .limit(step.max_results);
+      const now = new Date().toISOString();
+      const { upcoming, overdue } = splitBuckets(step.max_results);
 
-      if (f.dateRange) {
-        q = q.lte("due_date", f.dateRange.to);
-      }
+      const base = () => {
+        let q = supabase
+          .from("tasks")
+          .select("id, title, status, priority, due_date, created_at")
+          .eq("user_id", userId)
+          .not("status", "eq", "done");
+        if (f.dateRange) q = q.lte("due_date", f.dateRange.to);
+        return q;
+      };
 
-      const { data } = await q;
-      return data ?? [];
+      const [soonest, recentlyOverdue, undated] = await Promise.all([
+        base().gte("due_date", now).order("due_date", { ascending: true }).limit(upcoming),
+        base().lt("due_date", now).order("due_date", { ascending: false }).limit(overdue),
+        base().is("due_date", null).order("created_at", { ascending: false }).limit(2),
+      ]);
+
+      return [...(soonest.data ?? []), ...(recentlyOverdue.data ?? []), ...(undated.data ?? [])];
     }
 
     case "vector_search": {
