@@ -959,7 +959,7 @@
     <span class="layer-dot">1</span>
     Intent Classification
     <span class="badge-sm badge-indigo">gpt-4o-mini · temp 0</span>
-    <span class="badge-sm badge-slate">3 s timeout · regex fallback</span>
+    <span class="badge-sm badge-slate">6 s timeout · blended fallback</span>
   </h3>
 
   <p style="font-size:13.5px">The classifier maps every query to one of <strong>13 named intents</strong>, extracts structured entities, infers a temporal anchor, and computes a two-dimensional retrieval weight that controls which downstream path activates.</p>
@@ -979,7 +979,7 @@
     <div class="intent-chip"><div class="iname">reminders</div><div class="idesc">Remind me about the contract</div></div>
   </div>
 
-  <p style="font-size:13px">Classification runs in two passes. <strong>Pass 1</strong> is pure regex — named entity triggers (merchant names, people triggers, spending keywords) fire deterministic overrides before any LLM call. <strong>Pass 2</strong> calls gpt-4o-mini with a 3-second hard timeout; if it times out, the system falls back to <code>operational_summary</code> at confidence 0.3 rather than blocking.</p>
+  <p style="font-size:13px">Classification runs in two passes. <strong>Pass 1</strong> is pure regex — named entity triggers (merchant names, people triggers, spending keywords) fire deterministic overrides before any LLM call. <strong>Pass 2</strong> calls gpt-4o-mini with a 6-second hard timeout; if it times out, the system falls back to a blended retrieval weight (0.5 / 0.5) at confidence 0.3 rather than blocking. That fallback previously resolved to <code>operational_summary</code> with <code>investigative_weight = 0.0</code>, which skipped the communications and vector sources entirely — so a slow classification call made existing data invisible to the answer, with no error surfaced anywhere. A degraded classification now searches broadly rather than not at all.</p>
 
   <p style="font-size:13px">The classifier also computes a <strong>retrieval weight pair</strong> — <code>operational_weight</code> and <code>investigative_weight</code> — that governs layer 3. Deterministic overrides hard-set these weights based on intent:</p>
 
@@ -1073,7 +1073,7 @@
       <tr><td>sql_commitments</td><td>contactIds (IN), due_date ≤ range, status ≠ done</td><td>Ordered ASC by due_date so overdue items come first</td></tr>
       <tr><td>aggregated_finance</td><td>user_id, date range</td><td>Returns totals by category, merchant, currency, and weekly trend — one structured object</td></tr>
       <tr><td>operational_insights</td><td>status = active, snoozed_until is null or past</td><td>Ordered by priority_score DESC; category filter applied if intent is specific</td></tr>
-      <tr><td>vector_search</td><td>query embedding vs pgvector HNSW index</td><td>90-day lookback window, matchCount = max_results</td></tr>
+      <tr><td>vector_search</td><td>query embedding vs pgvector (exact KNN)</td><td>90-day lookback window, matchCount = max_results</td></tr>
     </tbody>
   </table></div>
 
@@ -1159,22 +1159,24 @@
       <div class="pipe-content">
         <h4>Financial extraction <span class="badge-sm badge-emerald" style="margin-left:6px">conditional · gpt-4o-mini</span></h4>
         <p>Gate: runs only if the email category is a finance type. Extracts <code>amount</code>, <code>currency</code>, <code>merchant</code>, <code>transaction_type</code>, and <code>confidence</code>. Sets a <code>needs_review</code> flag when the triage category disagrees with the extraction result or confidence is below 0.5.</p>
-        <p>If review is not needed, calls <code>runDedup()</code> to normalise against existing transactions (same merchant + similar amount ± 2% within 3 days = duplicate). The merchant name and category are normalised via the same 100+ alias dictionary used in entity resolution.</p>
+        <p>If review is not needed, calls <code>runDedup()</code>, which groups raw rows describing the same real-world event: amounts within 2%, timestamps within 15 minutes, then matching on transaction ID, reference ID, masked account, or merchant similarity. Refunds never merge with non-refunds, and recurring charges only merge inside the 15-minute window so billing cycles stay distinct. Each group elects a primary by sender priority (BANK &gt; CREDIT_CARD &gt; UPI &gt; WALLET &gt; MERCHANT). The merchant name and category are normalised via the same 100+ alias dictionary used in entity resolution.</p>
+        <p>Extracted dates are clamped on both sides. A date after today falls back to the email's arrival time — extraction sometimes picks up a delivery or due date. So does a date more than 90 days before arrival: Indian bank alerts write <code>DD-MM-YY</code>, which extraction can read as <code>YY-MM-DD</code>, landing a transaction years in the past.</p>
       </div>
     </div>
     <div class="pipe-step">
       <div class="pipe-dot">4</div>
       <div class="pipe-content">
-        <h4>Commitment &amp; task extraction <span class="badge-sm badge-violet" style="margin-left:6px">gpt-4o · if requires_action</span></h4>
-        <p>If <code>requires_action = true</code> and AI confidence ≥ 0.6, calls <code>extractCommitments()</code> to find promises in the email body — who committed, to whom, by when. Each commitment is stored with source_type = "email".</p>
+        <h4>Commitment &amp; task extraction <span class="badge-sm badge-violet" style="margin-left:6px">gpt-4o-mini · gated</span></h4>
+        <p>If <code>requires_action = true</code> and AI confidence ≥ 0.6, calls <code>extractCommitments()</code> to find promises in the email body — who committed, to whom, by when. Each commitment is stored with source_type = "email". The call is skipped entirely for low-signal categories (newsletters, promotions, news, entertainment, social, system notifications), which effectively never contain a real commitment and previously accounted for the single largest line item when reprocessing a mailbox.</p>
+        <p>Both commitment and task creation are keyed on <code>source_id</code> and skip when a row already exists, so reprocessing an email — after a body reparse, a reconcile pass, or a retried job — cannot create a second copy.</p>
         <p>If the capped importance score ≥ 0.7, a task is also created (priority = "high" if score ≥ 0.85, else "medium") with the AI's action description as the title.</p>
       </div>
     </div>
     <div class="pipe-step">
       <div class="pipe-dot">5</div>
       <div class="pipe-content">
-        <h4>Embed &amp; trigger operational state <span class="badge-sm badge-slate" style="margin-left:6px">Voyage AI · 30 s delay</span></h4>
-        <p>The email summary is chunked and embedded using Voyage AI voyage-3-lite (1 024-dim). The embedding is stored in the <code>communications.embedding</code> vector column and indexed via pgvector HNSW for sub-100 ms semantic search.</p>
+        <h4>Embed &amp; trigger operational state <span class="badge-sm badge-slate" style="margin-left:6px">text-embedding-3-small · 30 s delay</span></h4>
+        <p>The email summary is chunked (2 048 chars, 200 overlap) and embedded with OpenAI <code>text-embedding-3-small</code> at 1 024 dimensions. The vector is stored on <code>communications.embedding</code> and in <code>memory_chunks</code>. Search runs as exact KNN rather than through an HNSW index: at the current corpus size (~2 000 emails) exact search returns in milliseconds, while an HNSW index over 1 024-dim vectors would consume an estimated 50–100 MB and has to stay memory-resident. The index definitions remain in the schema, commented out, for when the corpus outgrows exact search.</p>
         <p>Finally, a <code>compute-operational-state</code> job is enqueued with a 30-second delay and a deduplication key — ensuring batch updates don't trigger redundant recomputes.</p>
       </div>
     </div>
@@ -1213,7 +1215,7 @@
     </div>
   </div>
 
-  <p style="font-size:13px">The summary, decisions, and action items are concatenated and embedded (Voyage AI) to memory — making meeting content searchable from Ask AI using semantic queries like "what was decided about pricing in Q1?"</p>
+  <p style="font-size:13px">The summary, decisions, and action items are concatenated and embedded (text-embedding-3-small) to memory — making meeting content searchable from Ask AI using semantic queries like "what was decided about pricing in Q1?"</p>
 
   <div class="page-footer">
     <strong>Chief of Staff</strong>
@@ -1259,7 +1261,7 @@
     <div class="tech-card">
       <div class="tech-category">Database &amp; Auth</div>
       <div class="tech-name">Supabase (Postgres)</div>
-      <div class="tech-note">pgvector HNSW index, Row-Level Security, Supabase Auth</div>
+      <div class="tech-note">pgvector exact KNN, Row-Level Security, Supabase Auth</div>
     </div>
     <div class="tech-card">
       <div class="tech-category">Background Jobs</div>
@@ -1274,12 +1276,12 @@
     <div class="tech-card">
       <div class="tech-category">AI — Triage</div>
       <div class="tech-name">GPT-4o-mini</div>
-      <div class="tech-note">Email classification (700 token budget), intent classification (3 s timeout)</div>
+      <div class="tech-note">Email classification (700 token budget), intent classification (6 s timeout, blended fallback)</div>
     </div>
     <div class="tech-card">
       <div class="tech-category">Embeddings</div>
-      <div class="tech-name">Voyage AI voyage-3-lite</div>
-      <div class="tech-note">1 024-dim vectors, HNSW index, 90-day semantic search window</div>
+      <div class="tech-name">OpenAI text-embedding-3-small</div>
+      <div class="tech-note">1 024-dim vectors, exact KNN, 90-day semantic search window</div>
     </div>
     <div class="tech-card">
       <div class="tech-category">Integrations</div>
@@ -1300,6 +1302,49 @@
 
   <div class="divider"></div>
   <div class="section-label">Opportunity</div>
+  <h2>Correctness is the product</h2>
+
+  <p>An assistant that quietly gets the numbers wrong is worse than no assistant, because the user cannot tell. Every failure below was found in production on real data, and each one was silent — no error, no alert, no crash. They are documented here because the engineering response to them is a larger part of the product's value than any individual feature.</p>
+
+  <table class="detail-table">
+    <thead>
+      <tr><th>Failure</th><th>Effect</th><th>Response</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>HTML body parsing kept stylesheet text</td>
+        <td>41% of stored email bodies began with CSS, rising to 47% of finance email. The extractor was reading <code>@media screen and…</code> instead of the receipt.</td>
+        <td>Strip <code>&lt;style&gt;</code> and <code>&lt;script&gt;</code> blocks with their contents before removing tags; prefer <code>text/plain</code> only when it carries real content, since some senders ship a part holding nothing but an unsubscribe line.</td>
+      </tr>
+      <tr>
+        <td>Check-then-insert race on normalised transactions</td>
+        <td>One transaction reached 294 duplicate rows, inflating dashboard totals roughly 20&times;. <code>maybeSingle()</code> errors once two rows match and returns null, which read as "not found".</td>
+        <td>Fetch all matches, update the oldest, delete the rest — the table now self-heals. A partial unique index on <code>(user_id, communication_ids)</code> makes recurrence impossible at the database level.</td>
+      </tr>
+      <tr>
+        <td>Slow intent classification degraded silently</td>
+        <td>A classification call exceeding its timeout fell back to weights that skipped the communications and vector sources, so emails that existed were invisible to the answer.</td>
+        <td>Longer timeout, and a fallback that searches broadly rather than narrowly. Degradation should widen the net, never close it.</td>
+      </tr>
+      <tr>
+        <td>Extracted dates trusted blindly</td>
+        <td>Delivery and due dates landed as transaction dates in the future; <code>DD-MM-YY</code> bank alerts parsed as <code>YY-MM-DD</code> put 9% of transactions years in the past.</td>
+        <td>Clamp both sides against the email's arrival time, which for a transactional alert is within hours of the event.</td>
+      </tr>
+      <tr>
+        <td>Work lost when a queue write failed</td>
+        <td>Rows were written to the database before their processing job was enqueued. When the enqueue failed, the row was committed with nothing recording that it still needed work — 2,112 emails sat unprocessed indefinitely.</td>
+        <td>A reconcile job runs every six hours, finds rows missing a summary or embedding, and re-enqueues them. A failed enqueue now costs a delay, not the data.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout callout-indigo">
+    <strong>The pattern worth naming.</strong> Every one of these failed silently, and several were invisible precisely because the system caught the error and moved on. Swallowed errors and permissive fallbacks are how a pipeline reports success while producing wrong answers. The safeguards that matter are the ones that make bad state impossible (a unique index), self-correcting (a reconcile pass), or loud (a checked error) — in that order.
+  </div>
+
+  <p style="font-size:13px">Quality is now tested at two levels. End-to-end cases drive the full <code>/api/ask</code> pipeline and assert on intent, entities, temporal resolution, retrieval plan, and grounding. Component evals call the individual model steps directly — no server, no database — because a wrong amount from the extractor is invisible to any end-to-end assertion but lands straight in the finance dashboard. Both suites treat the failures above as regression cases.</p>
+
   <h2>The path forward</h2>
 
   <p>The executive assistant software market is large and fragmented. Chief of Staff occupies a defensible position: the only tool that combines email intelligence, meeting intelligence, and financial intelligence into a unified, queryable layer. As the platform accumulates longitudinal data per user, the Ask AI feature compounds in value — making it increasingly difficult for single-purpose tools to match the contextual depth of answers Chief of Staff can provide.</p>

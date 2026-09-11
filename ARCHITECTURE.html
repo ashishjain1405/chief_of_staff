@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chief of Staff — Architecture &amp; Flows</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --slate-50:  #f8fafc;
+    --slate-100: #f1f5f9;
+    --slate-200: #e2e8f0;
+    --slate-400: #94a3b8;
+    --slate-500: #64748b;
+    --slate-600: #475569;
+    --slate-700: #334155;
+    --slate-800: #1e293b;
+    --slate-900: #0f172a;
+    --indigo-50:  #eef2ff;
+    --indigo-100: #e0e7ff;
+    --indigo-200: #c7d2fe;
+    --indigo-500: #6366f1;
+    --indigo-600: #4f46e5;
+    --indigo-700: #4338ca;
+    --violet-500: #8b5cf6;
+    --violet-600: #7c3aed;
+    --emerald-50:  #ecfdf5;
+    --emerald-100: #d1fae5;
+    --emerald-500: #10b981;
+    --emerald-600: #059669;
+    --amber-50:  #fffbeb;
+    --amber-100: #fef3c7;
+    --amber-500: #f59e0b;
+    --amber-600: #d97706;
+    --rose-50:  #fff1f2;
+    --rose-100: #ffe4e6;
+    --rose-500: #f43f5e;
+    --sky-50:   #f0f9ff;
+    --sky-100:  #e0f2fe;
+    --sky-500:  #0ea5e9;
+  }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--slate-50);
+    color: var(--slate-800);
+    line-height: 1.6;
+    font-size: 15px;
+  }
+
+  /* ── PRINT ── */
+  @media print {
+    body { background: white; font-size: 13px; }
+    .page { box-shadow: none; margin: 0; border-radius: 0; page-break-after: always; min-height: auto; padding: 40px 48px; }
+    .page:last-child { page-break-after: avoid; }
+  }
+
+  /* ── PAGE SHELL ── */
+  .page {
+    max-width: 860px;
+    margin: 36px auto;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0,0,0,.08), 0 1px 4px rgba(0,0,0,.04);
+    padding: 56px 64px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* ── COVER PAGE ── */
+  .cover {
+    background: linear-gradient(135deg, var(--slate-900) 0%, #1a1040 60%, var(--indigo-700) 100%);
+    color: white;
+    min-height: 420px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 56px 64px;
+  }
+  .cover::before {
+    content: '';
+    position: absolute;
+    top: -80px; right: -80px;
+    width: 340px; height: 340px;
+    background: radial-gradient(circle, rgba(99,102,241,.35) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .cover::after {
+    content: '';
+    position: absolute;
+    bottom: -60px; left: -60px;
+    width: 260px; height: 260px;
+    background: radial-gradient(circle, rgba(139,92,246,.3) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .cover-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,.12);
+    border: 1px solid rgba(255,255,255,.2);
+    border-radius: 100px;
+    padding: 6px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    width: fit-content;
+    margin-bottom: 32px;
+  }
+  .cover-badge span { width: 6px; height: 6px; background: var(--emerald-500); border-radius: 50%; }
+  .cover h1 {
+    font-size: 52px;
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -.02em;
+    margin-bottom: 12px;
+    position: relative;
+  }
+  .cover h1 em {
+    font-style: normal;
+    background: linear-gradient(90deg, #a5b4fc, #c4b5fd);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .cover .tagline {
+    font-size: 18px;
+    font-weight: 400;
+    color: rgba(255,255,255,.7);
+    max-width: 520px;
+    line-height: 1.55;
+    margin-bottom: 40px;
+  }
+  .cover-meta {
+    display: flex;
+    gap: 40px;
+    font-size: 13px;
+    color: rgba(255,255,255,.5);
+    position: relative;
+  }
+  .cover-meta strong { display: block; color: rgba(255,255,255,.85); font-size: 15px; font-weight: 600; margin-bottom: 2px; }
+
+  /* ── SECTION HEADINGS ── */
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--indigo-500);
+    margin-bottom: 8px;
+  }
+  h2 {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -.02em;
+    color: var(--slate-900);
+    margin-bottom: 20px;
+    line-height: 1.2;
+  }
+  h3 {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--slate-800);
+    margin-bottom: 10px;
+  }
+  p { color: var(--slate-600); margin-bottom: 14px; }
+  p:last-child { margin-bottom: 0; }
+
+  /* ── DIVIDER ── */
+  .divider { height: 1px; background: var(--slate-100); margin: 36px 0; }
+
+  /* ── STAT GRID ── */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin: 24px 0;
+  }
+  .stat-card {
+    background: var(--slate-50);
+    border: 1px solid var(--slate-100);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .stat-number {
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -.02em;
+    color: var(--slate-900);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .stat-label { font-size: 13px; color: var(--slate-500); }
+
+  /* ── FEATURE GRID ── */
+  .feature-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 24px 0;
+  }
+  .feature-card {
+    border: 1px solid var(--slate-100);
+    border-radius: 12px;
+    padding: 20px;
+    background: white;
+  }
+  .feature-card .icon {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    margin-bottom: 12px;
+  }
+  .feature-card h4 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--slate-800);
+    margin-bottom: 6px;
+  }
+  .feature-card p { font-size: 13px; color: var(--slate-500); margin: 0; }
+
+  .icon-indigo { background: var(--indigo-50); }
+  .icon-violet { background: #f5f3ff; }
+  .icon-emerald { background: var(--emerald-50); }
+  .icon-amber   { background: var(--amber-50); }
+  .icon-rose    { background: var(--rose-50); }
+  .icon-sky     { background: var(--sky-50); }
+
+  /* ── USER SEGMENT CHIPS ── */
+  .segment-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 20px 0;
+  }
+  .segment-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 16px;
+    border-radius: 10px;
+    border: 1px solid var(--slate-100);
+  }
+  .segment-icon {
+    font-size: 22px;
+    line-height: 1;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .segment-row h4 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--slate-800);
+    margin-bottom: 3px;
+  }
+  .segment-row p { font-size: 13px; color: var(--slate-500); margin: 0; }
+
+  /* ── LAYER ARCHITECTURE ── */
+  .layer-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 24px 0;
+  }
+  .layer-row {
+    display: flex;
+    align-items: stretch;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--slate-100);
+  }
+  .layer-num {
+    width: 42px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 14px;
+    background: var(--slate-900);
+    color: white;
+  }
+  .layer-body {
+    flex: 1;
+    padding: 14px 18px;
+    background: var(--slate-50);
+  }
+  .layer-body h4 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--slate-800);
+    margin-bottom: 3px;
+  }
+  .layer-body p { font-size: 13px; color: var(--slate-500); margin: 0; }
+  .layer-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 100px;
+    background: var(--indigo-100);
+    color: var(--indigo-700);
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+
+  /* ── TECH STACK TABLE ── */
+  .tech-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin: 20px 0;
+  }
+  .tech-card {
+    background: var(--slate-50);
+    border: 1px solid var(--slate-100);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .tech-card .tech-category {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--slate-400);
+    margin-bottom: 6px;
+  }
+  .tech-card .tech-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--slate-800);
+    margin-bottom: 3px;
+  }
+  .tech-card .tech-note { font-size: 12px; color: var(--slate-500); }
+
+  /* ── POSITIONING TABLE ── */
+  .positioning-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin: 20px 0;
+  }
+  .pos-card {
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid transparent;
+  }
+  .pos-card.them { background: var(--rose-50); border-color: var(--rose-100); }
+  .pos-card.us   { background: var(--emerald-50); border-color: var(--emerald-100); }
+  .pos-card h4 { font-size: 13px; font-weight: 700; margin-bottom: 10px; }
+  .pos-card.them h4 { color: var(--rose-500); }
+  .pos-card.us   h4 { color: var(--emerald-600); }
+  .pos-card ul { list-style: none; padding: 0; font-size: 13px; color: var(--slate-600); }
+  .pos-card ul li { padding: 4px 0; }
+  .pos-card ul li::before { margin-right: 8px; }
+  .pos-card.them ul li::before { content: '✕'; color: var(--rose-500); }
+  .pos-card.us   ul li::before { content: '✓'; color: var(--emerald-600); }
+
+  /* ── PIPELINE FLOW ── */
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin: 20px 0;
+    flex-wrap: wrap;
+  }
+  .flow-step {
+    background: var(--indigo-50);
+    border: 1px solid var(--indigo-200);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--indigo-700);
+    white-space: nowrap;
+  }
+  .flow-arrow {
+    color: var(--slate-300);
+    font-size: 18px;
+    padding: 0 6px;
+    flex-shrink: 0;
+  }
+
+  /* ── CALLOUT ── */
+  .callout {
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin: 20px 0;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .callout-indigo { background: var(--indigo-50); border-left: 3px solid var(--indigo-500); color: var(--slate-700); }
+  .callout-emerald { background: var(--emerald-50); border-left: 3px solid var(--emerald-500); color: var(--slate-700); }
+
+  /* ── PAGE FOOTER ── */
+  .page-footer {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--slate-100);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: var(--slate-400);
+  }
+  .page-footer strong { color: var(--slate-600); }
+
+  /* ── DETAIL TABLE ── */
+  .detail-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 16px 0;
+  }
+  .detail-table th {
+    background: var(--slate-900);
+    color: white;
+    padding: 9px 14px;
+    text-align: left;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: .03em;
+  }
+  .detail-table th:first-child { border-radius: 8px 0 0 0; }
+  .detail-table th:last-child  { border-radius: 0 8px 0 0; }
+  .detail-table td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--slate-100);
+    vertical-align: top;
+    color: var(--slate-600);
+  }
+  .detail-table tr:last-child td { border-bottom: none; }
+  .detail-table tr:nth-child(even) td { background: var(--slate-50); }
+  .detail-table td:first-child { font-weight: 600; color: var(--slate-800); }
+  .detail-table code {
+    background: var(--indigo-50);
+    color: var(--indigo-700);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 11px;
+  }
+
+  /* ── WEIGHT TABLE ── */
+  .weight-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    margin: 16px 0;
+  }
+  .weight-table th {
+    background: var(--slate-800);
+    color: rgba(255,255,255,.7);
+    padding: 8px 12px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+  .weight-table th:first-child { text-align: left; background: var(--slate-900); border-radius: 8px 0 0 0; }
+  .weight-table th:last-child  { border-radius: 0 8px 0 0; }
+  .weight-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--slate-100);
+    text-align: center;
+    color: var(--slate-600);
+    font-variant-numeric: tabular-nums;
+  }
+  .weight-table td:first-child { text-align: left; font-weight: 700; color: var(--slate-800); background: var(--slate-50); }
+  .weight-table tr:last-child td { border-bottom: none; }
+  .w-hi { color: var(--indigo-700); font-weight: 700; }
+  .w-med { color: var(--slate-700); }
+  .w-lo { color: var(--slate-400); }
+
+  /* ── SOURCE TABLE ── */
+  .source-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    margin: 14px 0;
+  }
+  .source-table th {
+    background: var(--slate-100);
+    color: var(--slate-600);
+    padding: 7px 12px;
+    text-align: left;
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+  }
+  .source-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--slate-100);
+    font-size: 12px;
+    color: var(--slate-600);
+    vertical-align: top;
+  }
+  .source-table tr:last-child td { border-bottom: none; }
+  .source-table td:first-child { font-weight: 700; color: var(--slate-800); font-family: 'SF Mono', monospace; font-size: 11px; }
+  .source-table .num { font-variant-numeric: tabular-nums; text-align: right; }
+  .badge-sm {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 100px;
+    vertical-align: middle;
+  }
+  .badge-indigo { background: var(--indigo-100); color: var(--indigo-700); }
+  .badge-emerald { background: var(--emerald-100); color: var(--emerald-600); }
+  .badge-amber  { background: var(--amber-100); color: var(--amber-600); }
+  .badge-violet { background: #ede9fe; color: #6d28d9; }
+  .badge-slate  { background: var(--slate-100); color: var(--slate-600); }
+
+  /* ── FORMULA BOX ── */
+  .formula-box {
+    background: var(--slate-900);
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin: 12px 0;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 12px;
+    color: #a5b4fc;
+    line-height: 1.8;
+  }
+  .formula-box .comment { color: #475569; }
+  .formula-box .hl { color: #6ee7b7; }
+
+  /* ── INTENT GRID ── */
+  .intent-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    margin: 14px 0;
+  }
+  .intent-chip {
+    background: var(--slate-50);
+    border: 1px solid var(--slate-100);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+  .intent-chip .iname {
+    font-weight: 700;
+    color: var(--slate-800);
+    font-family: 'SF Mono', monospace;
+    font-size: 11px;
+    margin-bottom: 3px;
+  }
+  .intent-chip .idesc { color: var(--slate-500); font-size: 11px; }
+
+  /* ── PIPELINE STAGE ── */
+  .pipeline {
+    margin: 20px 0;
+    position: relative;
+  }
+  .pipeline::before {
+    content: '';
+    position: absolute;
+    left: 20px; top: 24px; bottom: 24px;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--indigo-200), var(--violet-500));
+  }
+  .pipe-step {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 14px;
+    align-items: flex-start;
+  }
+  .pipe-dot {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: white;
+    border: 2px solid var(--indigo-300);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 14px;
+    color: var(--indigo-600);
+    position: relative;
+    z-index: 1;
+  }
+  .pipe-content {
+    flex: 1;
+    background: var(--slate-50);
+    border: 1px solid var(--slate-100);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-top: 4px;
+  }
+  .pipe-content h4 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--slate-800);
+    margin-bottom: 4px;
+  }
+  .pipe-content p { font-size: 12.5px; color: var(--slate-500); margin: 0 0 6px; }
+  .pipe-content p:last-child { margin-bottom: 0; }
+  .pipe-content ul {
+    margin: 6px 0 0 0;
+    padding-left: 16px;
+    font-size: 12px;
+    color: var(--slate-500);
+  }
+  .pipe-content ul li { margin-bottom: 3px; }
+
+  /* ── LAYER H3 ── */
+  .layer-h3 {
+    color: var(--indigo-600);
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 14px;
+    font-size: 17px;
+    font-weight: 700;
+  }
+  .layer-dot {
+    background: var(--slate-900);
+    color: white;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+
+  /* ── TABLE SCROLL WRAPPER ── */
+  .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 16px 0; border-radius: 8px; }
+  .table-wrap .detail-table,
+  .table-wrap .weight-table,
+  .table-wrap .source-table { margin: 0; }
+
+  /* ══════════════════════════════════════
+     MOBILE — max 640 px
+  ══════════════════════════════════════ */
+  @media (max-width: 640px) {
+    body { font-size: 14px; }
+
+    .page {
+      margin: 10px;
+      padding: 28px 18px;
+      border-radius: 12px;
+    }
+
+    /* Cover */
+    .cover { padding: 32px 20px; min-height: auto; }
+    .cover h1 { font-size: 34px; }
+    .cover .tagline { font-size: 15px; margin-bottom: 24px; max-width: 100%; }
+    .cover-meta { flex-direction: column; gap: 12px; }
+    .cover-meta > div { display: flex; gap: 8px; align-items: baseline; }
+    .cover-meta strong { display: inline; font-size: 13px; }
+
+    /* Headings */
+    h2 { font-size: 21px; }
+    h3 { font-size: 15px; }
+
+    /* Layer h3 headings */
+    .layer-h3 { font-size: 15px; gap: 6px; }
+
+    /* Stat grid → single column */
+    .stat-grid { grid-template-columns: 1fr; gap: 10px; }
+
+    /* Feature grid → single column */
+    .feature-grid { grid-template-columns: 1fr !important; }
+
+    /* Tech grid → 2 cols (still fits) */
+    .tech-grid { grid-template-columns: 1fr 1fr; }
+
+    /* Positioning grid → single column */
+    .positioning-grid { grid-template-columns: 1fr; gap: 10px; }
+
+    /* Intent grid → 2 cols */
+    .intent-grid { grid-template-columns: 1fr 1fr; }
+
+    /* Tables — scroll horizontally */
+    .detail-table, .weight-table, .source-table { min-width: 480px; font-size: 11px; }
+    .detail-table th, .detail-table td,
+    .source-table th, .source-table td { padding: 7px 10px; }
+    .weight-table th, .weight-table td { padding: 7px 8px; }
+
+    /* Data flow pills wrap cleanly */
+    .flow { gap: 4px; }
+    .flow-step { white-space: normal; font-size: 12px; padding: 7px 10px; }
+
+    /* Pipeline connector stays aligned */
+    .pipeline::before { left: 19px; }
+
+    /* Page footer stacks on very small screens */
+    .page-footer { flex-direction: column; gap: 3px; align-items: flex-start; }
+
+    /* Callout smaller font */
+    .callout { font-size: 13px; }
+
+    /* Divider less vertical space */
+    .divider { margin: 22px 0; }
+
+    /* Pipe content badges wrap inside h4 */
+    .pipe-content h4 { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ PAGE 1 — SYSTEM MAP ═══════════ -->
+<div class="page">
+  <div class="section-label">Architecture · Page 1 of 5</div>
+  <h2>What this system actually is</h2>
+
+  <p>Chief of Staff is an ingestion and retrieval pipeline with a chat surface on top — not a chat application with tools attached. That distinction drives every design decision below: the expensive, error-prone work happens asynchronously against raw source data, and by the time a user asks a question the hard problems are already solved and stored.</p>
+
+  <p>There are four distinct subsystems, and they fail independently:</p>
+
+  <div class="table-wrap">
+  <table class="detail-table">
+    <thead><tr><th>Subsystem</th><th>Runs on</th><th>Trigger</th><th>If it stops</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Ingestion</strong> — get raw email/calendar in</td><td>Vercel (webhook) + local scripts (backfill)</td><td>Gmail push via Pub/Sub; manual backfill</td><td>New email stops arriving. Silent — this went unnoticed for three months.</td></tr>
+      <tr><td><strong>Processing</strong> — turn raw into structured</td><td>Railway worker (BullMQ)</td><td>Queue jobs</td><td>Email arrives but has no summary, category, or embedding. Visible as blank rows.</td></tr>
+      <tr><td><strong>Retrieval</strong> — answer questions</td><td>Vercel (<code>/api/ask</code>)</td><td>User query</td><td>Ask AI fails loudly. The only subsystem whose failure is obvious.</td></tr>
+      <tr><td><strong>Reconciliation</strong> — repair the above</td><td>Railway worker (cron)</td><td>Every 6 hours</td><td>Transient failures become permanent data loss.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="callout callout-indigo">
+    <strong>Why the split matters.</strong> Three of the four subsystems fail silently. A user cannot distinguish "no financial emails this week" from "financial extraction has been broken since Tuesday". Reconciliation exists because the other three will fail, and the cost of a missed failure is wrong answers delivered confidently.
+  </div>
+
+  <h3 style="margin-top:28px">Data path, end to end</h3>
+  <p style="font-size:13px">Gmail &rarr; Pub/Sub topic &rarr; push subscription &rarr; <code>/api/webhooks/gmail</code> &rarr; <code>raw_events</code> + queue job &rarr; worker fetches full message &rarr; <code>contacts</code> + <code>communications</code> &rarr; triage &rarr; conditional financial extraction &rarr; <code>transactions_raw</code> &rarr; dedup &rarr; <code>transactions_normalized</code> &rarr; embeddings &rarr; <code>memory_chunks</code> &rarr; operational state recompute &rarr; surfaced in Inbox, Finance, Commitments, Daily Brief, and Ask AI.</p>
+
+  <p style="font-size:13px">Every arrow is a place where work can be lost. The ones that proved fragile in practice are marked in the flow pages that follow.</p>
+
+  <div class="page-footer"><span>Chief of Staff</span><span>Architecture &amp; Flows — Page 1 of 5</span></div>
+</div>
+
+<!-- ═══════════ PAGE 2 — INGESTION ═══════════ -->
+<div class="page">
+  <div class="section-label">Flow 1 · Inbound</div>
+  <h2>How email gets in</h2>
+
+  <p>Two paths write to <code>communications</code>, and they are not equivalent. Understanding which one is running explains most operational surprises.</p>
+
+  <div class="pipe-step">
+    <div class="pipe-dot">A</div>
+    <div class="pipe-content">
+      <h4>Live path — Gmail push <span class="badge-sm badge-emerald" style="margin-left:6px">near real-time</span></h4>
+      <p>A registered Gmail <code>watch</code> publishes mailbox changes to a Pub/Sub topic; a push subscription forwards them to <code>/api/webhooks/gmail</code>. The route resolves the account, walks Gmail history since the stored cursor, filters to messages with <code>INBOX</code> and without <code>SENT</code>, writes <code>raw_events</code>, and enqueues one job per message.</p>
+      <p><strong>Four independent things must all hold:</strong> the watch must be current (it expires after 7 days and is renewed 4&times;/day); the topic must live in the same Google Cloud project as the OAuth client that minted the token; that topic must grant publish rights to <code>gmail-api-push@system.gserviceaccount.com</code>; and a <em>push</em> subscription must point at the live webhook URL. Any one missing produces total silence with no error anywhere — three of the four were wrong simultaneously in production.</p>
+      <p>Because the message is self-sent mail is excluded by design, a self-addressed test email will never produce a <code>raw_event</code>. Testing this path requires genuinely external mail.</p>
+    </div>
+  </div>
+
+  <div class="pipe-step">
+    <div class="pipe-dot">B</div>
+    <div class="pipe-content">
+      <h4>Bulk path — backfill script <span class="badge-sm badge-slate" style="margin-left:6px">historical</span></h4>
+      <p>Lists messages over a day window, skips anything already stored by <code>external_id</code>, writes <code>communications</code> directly, and enqueues a summarize job. It bypasses <code>raw_events</code> entirely — so the two paths have different failure signatures, and reconciliation has to cover both.</p>
+      <p>Fetches run six at a time: Gmail round-trips dominate at roughly one second each, making a serial pass over a few thousand messages take the better part of an hour.</p>
+    </div>
+  </div>
+
+  <div class="callout callout-indigo">
+    <strong>Trade-off: write-then-enqueue.</strong> Both paths commit the database row before enqueueing its job, which means a Redis failure leaves a committed row with no pending work and nothing recording that fact — <code>communications</code> has no status column. The alternative, enqueue-then-write, trades silent data loss for jobs referencing rows that do not exist yet. We kept write-first and added the reconcile pass, because a delayed row is recoverable and a lost one is not.
+  </div>
+
+  <div class="page-footer"><span>Chief of Staff</span><span>Architecture &amp; Flows — Page 2 of 5</span></div>
+</div>
+
+<!-- ═══════════ PAGE 3 — PROCESSING & MODELS ═══════════ -->
+<div class="page">
+  <div class="section-label">Flow 2 · Processing</div>
+  <h2>What each model does, and why that one</h2>
+
+  <p>Five model calls exist in the system. Four are <code>gpt-4o-mini</code>; the deliberate choice is which work is given to a model at all, versus solved deterministically in code.</p>
+
+  <div class="table-wrap">
+  <table class="detail-table">
+    <thead><tr><th>Step</th><th>Model</th><th>Runs on</th><th>Why this model</th></tr></thead>
+    <tbody>
+      <tr><td>Email triage — summary, category, sentiment, importance, requires_action</td><td><code>gpt-4o-mini</code><br>max 700 tok</td><td>Every email</td><td>Highest-volume call in the system. A frontier model here would dominate cost with no measurable gain on a classification task with 22 fixed categories.</td></tr>
+      <tr><td>Financial extraction — amount, merchant, type, dates, IDs</td><td><code>gpt-4o-mini</code><br>strict JSON schema</td><td>Finance-gated subset</td><td>Schema-constrained extraction with an explicit "never infer" instruction. Correctness here is enforced by schema and post-validation, not model size.</td></tr>
+      <tr><td>Commitment extraction</td><td><code>gpt-4o-mini</code></td><td><code>requires_action</code>, excluding low-signal categories</td><td>Was <code>gpt-4o</code> — roughly 17&times; the cost per call and the largest single line item when reprocessing a mailbox, despite firing on a minority of email. Moved down with an eval in place to catch regression.</td></tr>
+      <tr><td>Intent classification</td><td><code>gpt-4o-mini</code><br>temp 0</td><td>Every Ask query</td><td>Sits in the user's latency path, hence a hard timeout and a regex pre-pass that handles the common cases without a network call.</td></tr>
+      <tr><td>Answer synthesis</td><td><code>gpt-4o</code><br>streaming</td><td>Every Ask query</td><td>The one place output quality is directly user-visible and the reasoning is genuinely open-ended. Worth the cost.</td></tr>
+      <tr><td>Embeddings</td><td><code>text-embedding-3-small</code><br>1 024 dim</td><td>Every summary + chunk</td><td>1 024 rather than the default 1 536 to cut storage and index cost by a third on a tier where storage is the binding constraint.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3 style="margin-top:24px">What deliberately does not use a model</h3>
+  <p style="font-size:13px">Merchant normalisation (a ~100-entry alias dictionary), sender classification, the finance gate, transaction grouping, retrieval planning, ranking, and all operational-insight generation are pure functions. They are deterministic, free, instant, and unit-testable — and they are where a model would introduce non-determinism for no benefit. When the deterministic normaliser and the model disagree on a merchant, the deterministic answer wins.</p>
+
+  <div class="callout callout-emerald">
+    <strong>Trade-off: gating over capability.</strong> The cheapest way to improve an LLM pipeline's cost profile is usually to stop calling it, not to change models. Skipping commitment extraction for newsletters and promotions cut more cost than any model swap, and cost nothing in quality, because those categories do not contain commitments.
+  </div>
+
+  <div class="page-footer"><span>Chief of Staff</span><span>Architecture &amp; Flows — Page 3 of 5</span></div>
+</div>
+
+<!-- ═══════════ PAGE 4 — RETRIEVAL ═══════════ -->
+<div class="page">
+  <div class="section-label">Flow 3 · Retrieval</div>
+  <h2>How a question becomes an answer</h2>
+
+  <p>The design premise: pure vector RAG over an inbox conflates "how much did I spend on Uber?" with a calendar invite mentioning Uber. Structured questions deserve structured retrieval, so intent routing happens before any search.</p>
+
+  <div class="pipe-step">
+    <div class="pipe-dot">1</div>
+    <div class="pipe-content">
+      <h4>Classify</h4>
+      <p>Regex pre-pass scores candidate intents; a <code>gpt-4o-mini</code> call refines intent, entities, temporal anchor, and a two-dimensional retrieval weight. Deterministic overrides then hard-set weights for query shapes we know the model gets wrong.</p>
+    </div>
+  </div>
+  <div class="pipe-step">
+    <div class="pipe-dot">2</div>
+    <div class="pipe-content">
+      <h4>Resolve</h4>
+      <p>Entity strings become IDs: people &rarr; contact rows via fuzzy match, merchants &rarr; canonical names, temporal anchors &rarr; absolute date ranges — including event-relative anchors such as "since my last salary credit", resolved by querying for that event first.</p>
+    </div>
+  </div>
+  <div class="pipe-step">
+    <div class="pipe-dot">3</div>
+    <div class="pipe-content">
+      <h4>Plan &amp; execute</h4>
+      <p>A pure function emits a list of retrieval steps with priorities and cost estimates, trimmed to a latency budget, then run in parallel under <code>Promise.allSettled</code> so one slow source cannot block an answer.</p>
+    </div>
+  </div>
+  <div class="pipe-step">
+    <div class="pipe-dot">4</div>
+    <div class="pipe-content">
+      <h4>Rank &amp; synthesise</h4>
+      <p>Heterogeneous results are normalised to a common shape and scored by a profile-aware weighted ranker (keyword, semantic, entity overlap, recency, source confidence, urgency), with per-source diversity caps so no single source floods the context. The top items become a provenance-tagged evidence block for <code>gpt-4o</code>.</p>
+    </div>
+  </div>
+
+  <div class="callout callout-indigo">
+    <strong>Trade-off: fail open, not narrow.</strong> Degraded classification now widens retrieval rather than restricting it. The earlier fallback chose a single intent with zero investigative weight, which meant a slow model call silently excluded the very tables holding the answer. When a system is uncertain, searching too much costs latency; searching too little costs correctness invisibly.
+  </div>
+
+  <p style="font-size:13px"><strong>Known limitation.</strong> Vector results are scored by true pgvector similarity, but the "semantic" component for SQL-sourced rows is still a keyword proxy. Ranking across sources is therefore not strictly comparable, and this is the most likely place for retrieval quality to be lost today.</p>
+
+  <div class="page-footer"><span>Chief of Staff</span><span>Architecture &amp; Flows — Page 4 of 5</span></div>
+</div>
+
+<!-- ═══════════ PAGE 5 — TRADE-OFFS ═══════════ -->
+<div class="page">
+  <div class="section-label">Decisions · Page 5 of 5</div>
+  <h2>Trade-offs taken, and what they cost</h2>
+
+  <div class="table-wrap">
+  <table class="detail-table">
+    <thead><tr><th>Decision</th><th>Chosen because</th><th>Accepted cost</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Exact KNN, no HNSW index</strong></td><td>At ~2 000 emails exact search is milliseconds. An HNSW index over 1 024-dim vectors costs an estimated 50–100 MB of a 500 MB budget and must stay memory-resident; its maintenance on bulk embedding writes is what exhausted a database's disk.</td><td>Search cost grows linearly. Revisit past roughly 50 000 rows — the definitions are in the schema, commented out.</td></tr>
+      <tr><td><strong>Do not store rendered HTML</strong></td><td>At ~26 KB average it was the largest thing in the database — ~160 MB across a mailbox, against a 500 MB ceiling, and the single largest contributor to running out of disk.</td><td>Opening an email costs a Gmail round-trip. Gmail is the canonical copy, so nothing is lost but latency.</td></tr>
+      <tr><td><strong>60-second queue poll</strong></td><td>Upstash does not support blocking commands well, so BullMQ polls. The 5-second default consumed a 500 k/month quota in three days on idle polling alone; one hour made push-delivered email arrive an hour late, defeating the point of push.</td><td>Roughly $0.40/month in polling, and up to a minute of pickup latency.</td></tr>
+      <tr><td><strong>Reconcile rather than transact</strong></td><td>Database writes and queue enqueues cannot share a transaction across Supabase and Redis. A periodic sweep that re-enqueues anything missing a summary or embedding is simple and covers every ingestion path.</td><td>Up to six hours before a dropped job is retried.</td></tr>
+      <tr><td><strong>Skip, not replace, on reprocessing</strong></td><td>Commitments and tasks accumulate user state — completions, snoozes, edits. Re-deriving them would silently discard that.</td><td>An email reprocessed after a parser fix keeps commitments derived from the worse input.</td></tr>
+      <tr><td><strong>Clamp extracted dates to email arrival</strong></td><td>Extraction confuses delivery dates, due dates, and <code>DD-MM-YY</code> ordering. A transactional alert arrives within hours of the event, making arrival time a reliable anchor.</td><td>A genuinely old transaction referenced in a new email is dated wrongly. Bounded at 90 days to make that rare.</td></tr>
+      <tr><td><strong>Free-tier Postgres, local <code>pg_dump</code></strong></td><td>Single-user product; managed backups are a paid tier.</td><td>Backups live on one laptop, and the ceiling is a real operational constraint rather than a theoretical one.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3 style="margin-top:24px">Open gaps, stated plainly</h3>
+  <div class="table-wrap">
+  <table class="detail-table">
+    <thead><tr><th>Gap</th><th>Consequence</th></tr></thead>
+    <tbody>
+      <tr><td>Dedup scans a trailing 24-hour window anchored on <em>now</em>, not on the transaction being processed</td><td>Backfilled transactions older than a day are never normalised until a separate script is run manually. This has silently stranded historical transactions twice.</td></tr>
+      <tr><td>The Gmail webhook is unauthenticated and trusts its payload</td><td>Anyone with the URL can advance the sync cursor and stall ingestion. Validating the Pub/Sub OIDC token would close it.</td></tr>
+      <tr><td>Normalisation logic is duplicated between the live worker and the backfill script</td><td>The same dedup defect had to be fixed twice, in two places, weeks apart.</td></tr>
+      <tr><td>~16% of transactions carry no merchant</td><td>UPI payments where an amount was found but no payee. They render as blank rows in the finance dashboard.</td></tr>
+      <tr><td>Eval suites are not wired into CI</td><td>Roughly 75 end-to-end cases and two component suites exist, but nothing runs them automatically — which is why a classification regression reached production.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="callout callout-emerald">
+    <strong>The through-line.</strong> Almost every defect documented here shares one shape: an error was caught, handled, and discarded, so the pipeline reported success while producing wrong or missing data. The durable fixes were not smarter prompts or bigger models — they were a unique index, a reconcile pass, checked error returns, and clamps on values a model is known to get wrong.
+  </div>
+
+  <div class="page-footer"><span>Chief of Staff</span><span>Architecture &amp; Flows — Page 5 of 5</span></div>
+</div>
+
+</body>
+</html>
