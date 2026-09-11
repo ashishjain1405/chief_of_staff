@@ -177,6 +177,11 @@ export async function summarizeCommunication(job: Job) {
   await operationalQueue.add("compute-operational-state", { userId }, { delay: 30000, jobId: `ops-${userId}`, deduplication: { id: `ops-${userId}` } });
 }
 
+// A statement or receipt can legitimately reference a transaction from a prior
+// billing cycle, so this is deliberately generous - it only catches dates that
+// are wrong by years, not by weeks.
+const MAX_BACKDATE_MS = 90 * 24 * 60 * 60 * 1000;
+
 // A transaction cannot have happened in the future, but extraction sometimes
 // picks up a due date, delivery date, or expiry instead. Those rows then skewed
 // the finance tab and sat permanently inside the dedup window. Falls back to when
@@ -188,11 +193,26 @@ function resolveTransactionDatetime(
   if (!extracted) return null;
   const parsed = new Date(extracted).getTime();
   if (Number.isNaN(parsed)) return occurredAt;
+
   // End of today rather than "now", so a same-day timestamp that's a few hours
   // ahead from timezone handling isn't needlessly rewritten.
   const endOfToday = new Date();
   endOfToday.setUTCHours(23, 59, 59, 999);
-  return parsed > endOfToday.getTime() ? occurredAt : extracted;
+  if (parsed > endOfToday.getTime()) return occurredAt;
+
+  // Indian bank alerts write dates as DD-MM-YY ("22-08-26" = 22 Aug 2026), and
+  // extraction sometimes reads that as YY-MM-DD, landing the transaction years
+  // in the past - 16 of 180 rows on first ingestion. A transactional alert
+  // arrives within hours of the event, so a date long before the email is
+  // wrong; fall back to when the email actually arrived.
+  if (occurredAt) {
+    const arrived = new Date(occurredAt).getTime();
+    if (!Number.isNaN(arrived) && parsed < arrived - MAX_BACKDATE_MS) {
+      return occurredAt;
+    }
+  }
+
+  return extracted;
 }
 
 async function runFinancialExtraction(
