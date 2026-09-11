@@ -1,0 +1,242 @@
+[
+  {
+    "id": "Q001-specific",
+    "chunk_id": "7ad2c50c-e2bd-44b1-a197-b9eb0699fdd0",
+    "difficulty": "specific",
+    "query": "Is Flipkart really expanding into food delivery and microdramas, or is it just following trends?"
+  },
+  {
+    "id": "Q001-vague",
+    "chunk_id": "7ad2c50c-e2bd-44b1-a197-b9eb0699fdd0",
+    "difficulty": "vague",
+    "query": "What was that thing about Flipkart doing new stuff?"
+  },
+  {
+    "id": "Q002-specific",
+    "chunk_id": "208c81f3-7ea2-4e06-a9fd-034beab40f5e",
+    "difficulty": "specific",
+    "query": "What’s the latest on Vodafone Idea and their new strategy?"
+  },
+  {
+    "id": "Q002-vague",
+    "chunk_id": "208c81f3-7ea2-4e06-a9fd-034beab40f5e",
+    "difficulty": "vague",
+    "query": "What was that thing about Vodafone and the network changes?"
+  },
+  {
+    "id": "Q003-specific",
+    "chunk_id": "f24fbb5c-147a-4d7e-9baf-6a6a025656bd",
+    "difficulty": "specific",
+    "query": "What are the latest updates on HDFC Mutual Fund portfolios for August 2026?"
+  },
+  {
+    "id": "Q003-vague",
+    "chunk_id": "f24fbb5c-147a-4d7e-9baf-6a6a025656bd",
+    "difficulty": "vague",
+    "query": "What was that update on the fund stuff from August?"
+  },
+  {
+    "id": "Q004-specific",
+    "chunk_id": "50310442-f1a3-4bf6-85aa-03f2ca4cfa3c",
+    "difficulty": "specific",
+    "query": "What holiday options does Four Seasons have for gatherings this year?"
+  },
+  {
+    "id": "Q004-vague",
+    "chunk_id": "50310442-f1a3-4bf6-85aa-03f2ca4cfa3c",
+    "difficulty": "vague",
+    "query": "What was that thing about the holiday offerings from Four Seasons?"
+  },
+  {
+    "id": "Q005-specific",
+    "chunk_id": "71a8d6a9-ab26-4593-bc00-4f0b66b8a87a",
+    "difficulty": "specific",
+    "query": "What are the top mid-cap stocks to consider for investment today?"
+  },
+  {
+    "id": "Q005-vague",
+    "chunk_id": "71a8d6a9-ab26-4593-bc00-4f0b66b8a87a",
+    "difficulty": "vague",
+    "query": "What was that email about stocks and buying something?"
+  },
+  {
+    "id": "Q006-specific",
+    "chunk_id": "4f19ce25-3ab5-4cc8-84a1-b5ff109d2f28",
+    "difficulty": "specific",
+    "query": "What are some banking stocks with good upside potential right now?"
+  },
+  {
+    "id": "Q006-vague",
+    "chunk_id": "4f19ce25-3ab5-4cc8-84a1-b5ff109d2f28",
+    "difficulty": "vague",
+    "query": "What was that thing about the banking stocks and potential?"
+  },
+  {
+    "id": "Q007-specific",
+    "chunk_id": "61682f3c-4d02-41da-8f6c-f15c8eb1abd4",
+    "difficulty": "specific",
+    "query": "What were the key business stories from last week?"
+  },
+  {
+    "id": "Q007-vague",
+    "chunk_id": "61682f3c-4d02-41da-8f6c-f15c8eb1abd4",
+    "difficulty": "vague",
+    "query": "What was that thing about the company issues and markets?"
+  },
+  {
+    "id": "Q008-specific",
+    "chunk_id": "b5f73dcd-a752-4b85-80f0-0162e1bc6a06",
+    "difficulty": "specific",
+    "query": "Did I receive my dividend payment from Jio Financial Services?"
+  },
+  {
+    "id": "Q008-vague",
+    "chunk_id": "b5f73dcd-a752-4b85-80f0-0162e1bc6a06",
+    "difficulty": "vague",
+    "query": "What was that thing about the payment for shares?"
+  },
+  {
+    "id": "Q009-specific",
+    "chunk_id": "91745bfc-2a97-4c9e-8dbc-70f0f591aaeb",
+    "difficulty": "specific",
+    "query": "What are the key highlights from ETHRWorld's September newsletter?"
+  },
+  {
+    "id": "Q009-vague",
+    "chunk_id": "91745bfc-2a97-4c9e-8dbc-70f0f591aaeb",
+    "difficulty": "vague",
+    "query": "What was that thing about the newsletter and hiring trends?"
+  },
+  {
+    "id": "Q010-specific",
+    "chunk_id": "2397b282-051c-42f6-b492-bd233dff79f3",
+    "difficulty": "specific",
+    "query": "What's the latest news on Udaan's acquisition of Lynk Logistics?"
+  },
+  {
+    "id": "Q010-vague",
+    "chunk_id": "2397b282-051c-42f6-b492-bd233dff79f3",
+    "difficulty": "vague",
+    "query": "What was that news about the logistics thing and Udaan?"
+  },
+  {
+    "id": "Q011-specific",
+    "chunk_id": "d399467f-6a8e-4e11-b103-16410eb5b2c6",
+    "difficulty": "specific",
+    "query": "What's the latest news from YS Buzz?"
+  },
+  {
+    "id": "Q011-vague",
+    "chunk_id": "d399467f-6a8e-4e11-b103-16410eb5b2c6",
+    "difficulty": "vague",
+    "query": "What was that update about the brain thing from Zomato?"
+  },
+  {
+    "id": "Q012-specific",
+    "chunk_id": "d6c8e773-5f7c-4fa6-a9a0-0eb4ae1d3848",
+    "difficulty": "specific",
+    "query": "Who really discovered America?"
+  },
+  {
+    "id": "Q012-vague",
+    "chunk_id": "d6c8e773-5f7c-4fa6-a9a0-0eb4ae1d3848",
+    "difficulty": "vague",
+    "query": "What was that email about America’s discovery or something?"
+  },
+  {
+    "id": "Q013-specific",
+    "chunk_id": "ce61db6b-bc0c-4537-a26d-44f30512ea76",
+    "difficulty": "specific",
+    "query": "What's the latest news on Tazapay and its acquisition by Circle?"
+  },
+  {
+    "id": "Q013-vague",
+    "chunk_id": "ce61db6b-bc0c-4537-a26d-44f30512ea76",
+    "difficulty": "vague",
+    "query": "What was that news about the payment thing and acquisitions?"
+  },
+  {
+    "id": "Q014-specific",
+    "chunk_id": "917c8f27-bfd3-48a4-bc02-b3004e4e028f",
+    "difficulty": "specific",
+    "query": "What are the latest business developments mentioned in the newsletter?"
+  },
+  {
+    "id": "Q014-vague",
+    "chunk_id": "917c8f27-bfd3-48a4-bc02-b3004e4e028f",
+    "difficulty": "vague",
+    "query": "What was that thing about Nikhil's investment in data centers?"
+  },
+  {
+    "id": "Q015-specific",
+    "chunk_id": "48f7ef12-ad92-4d32-b19d-bf8acd01bfc1",
+    "difficulty": "specific",
+    "query": "What's the latest update on the stock market and any upcoming IPOs?"
+  },
+  {
+    "id": "Q015-vague",
+    "chunk_id": "48f7ef12-ad92-4d32-b19d-bf8acd01bfc1",
+    "difficulty": "vague",
+    "query": "What was that market thing with the indices and updates?"
+  },
+  {
+    "id": "Q016-specific",
+    "chunk_id": "829e336b-807b-4b0b-9f07-a875b36dafc6",
+    "difficulty": "specific",
+    "query": "What was the payment Jatin confirmed from Ashish, and what ideas are they discussing for learning tools?"
+  },
+  {
+    "id": "Q016-vague",
+    "chunk_id": "829e336b-807b-4b0b-9f07-a875b36dafc6",
+    "difficulty": "vague",
+    "query": "What was that thing about the payment and learning tools?"
+  },
+  {
+    "id": "Q017-specific",
+    "chunk_id": "580e9286-832d-44c3-848f-865bbca7896e",
+    "difficulty": "specific",
+    "query": "What’s the deal with the new article about supplements and brain health?"
+  },
+  {
+    "id": "Q017-vague",
+    "chunk_id": "580e9286-832d-44c3-848f-865bbca7896e",
+    "difficulty": "vague",
+    "query": "What was that thing about the supplements and brain stuff?"
+  },
+  {
+    "id": "Q018-specific",
+    "chunk_id": "8c153b80-b10c-4043-abbe-7ee19878b918",
+    "difficulty": "specific",
+    "query": "What are the latest trends in white-collar hiring and managerial skills?"
+  },
+  {
+    "id": "Q018-vague",
+    "chunk_id": "8c153b80-b10c-4043-abbe-7ee19878b918",
+    "difficulty": "vague",
+    "query": "What was that newsletter about hiring trends and management stuff?"
+  },
+  {
+    "id": "Q019-specific",
+    "chunk_id": "eb63291e-0321-42af-844e-dc3fe2605721",
+    "difficulty": "specific",
+    "query": "Did I just get charged Rs. 275.60 by TATA 1MG HEALTHCARE on my credit card?"
+  },
+  {
+    "id": "Q019-vague",
+    "chunk_id": "eb63291e-0321-42af-844e-dc3fe2605721",
+    "difficulty": "vague",
+    "query": "What was that charge from the healthcare thing last week?"
+  },
+  {
+    "id": "Q020-specific",
+    "chunk_id": "93048e78-8e52-470a-86e1-a612e20795fd",
+    "difficulty": "specific",
+    "query": "What’s the latest on Shiprocket’s use of AI and their IPO performance?"
+  },
+  {
+    "id": "Q020-vague",
+    "chunk_id": "93048e78-8e52-470a-86e1-a612e20795fd",
+    "difficulty": "vague",
+    "query": "What was the thing about Shiprocket and that AI stuff?"
+  }
+]

@@ -18,6 +18,7 @@
     "dedupe:normalized": "npx tsx --env-file=.env.local --tsconfig tsconfig.json scripts/dedupe-normalized.ts",
     "eval:extraction": "npx tsx --env-file=.env.local --tsconfig tsconfig.json evals/components/financial-extraction.ts",
     "eval:parsing": "npx tsx --env-file=.env.local --tsconfig tsconfig.json evals/components/email-parsing.ts",
+    "eval:retrieval": "npx tsx --env-file=.env.local --tsconfig tsconfig.json evals/components/vector-retrieval.ts",
     "backup:db": "./scripts/backup-db.sh",
     "reparse:bodies": "npx tsx --env-file=.env.local --tsconfig tsconfig.json scripts/reparse-bodies.ts",
     "measure:parsing": "npx tsx --env-file=.env.local --tsconfig tsconfig.json scripts/measure-parse-impact.ts",

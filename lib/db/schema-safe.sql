@@ -468,7 +468,17 @@ AS $$
     1 - (mc.embedding <=> query_embedding) AS similarity
   FROM memory_chunks mc
   WHERE mc.user_id = p_user_id
-    AND mc.created_at > now() - (days_back || ' days')::interval
+    -- The email's own timestamp, not when the chunk was inserted. See
+    -- migrations/fix-memory-chunk-date-filter.sql. The regex guard keeps one
+    -- malformed date from failing every semantic search; such rows fall back
+    -- to created_at instead of vanishing.
+    AND COALESCE(
+          CASE
+            WHEN mc.metadata->>'occurred_at' ~ '^\d{4}-\d{2}-\d{2}'
+              THEN (mc.metadata->>'occurred_at')::timestamptz
+          END,
+          mc.created_at
+        ) > now() - (days_back || ' days')::interval
     AND 1 - (mc.embedding <=> query_embedding) > match_threshold
   ORDER BY mc.embedding <=> query_embedding
   LIMIT match_count;
