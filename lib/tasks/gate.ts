@@ -9,8 +9,18 @@ const normalize = (email: string) => email.trim().toLowerCase();
 // apart. The inbox grouping and the worker's block list already did drift once,
 // which is how "other" ended up producing a "Book your pass for TechSparks"
 // task, and an eval that reimplements the rule would hide exactly that.
+// Only consulted for AUTOMATED_ONLY_NO_TASK_CATEGORIES, so a false positive
+// costs nothing outside "transactions" and "account_security" - categories a
+// human almost never sends. The narrow no-reply/alerts pattern let
+// info@account.netflix.com through, and "change your password if the new
+// device access was not authorized" is the same conditional disclaimer as a
+// bank alert.
+const AUTOMATED_LOCAL_PARTS =
+  /^(no-?reply|donotreply|do-?not-?reply|alerts?|notifications?|info|support|service|accounts?|updates?|hello|team|care|admin|mailer|bounce|news)([.+-]|$)/i;
+
 export function isAutomatedSender(senderEmail: string): boolean {
-  return /no-?reply|alerts?@|notification|donotreply/i.test(senderEmail);
+  const local = senderEmail.split("@")[0] ?? "";
+  return AUTOMATED_LOCAL_PARTS.test(local.trim());
 }
 
 export function taskCategoryAllowed(category: string, senderEmail: string): boolean {
