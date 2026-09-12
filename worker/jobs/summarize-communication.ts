@@ -181,12 +181,53 @@ export async function summarizeCommunication(job: Job) {
     }
   }
 
-  const { count: existingTasks } = await supabase
+  // Two distinct checks, which the single source_id count used to conflate.
+  //
+  // Same email, any status: idempotency. A reprocess (body reparse, reconcile
+  // pass, retried job) must not add a second copy even if the first was
+  // already completed.
+  const { count: sameEmailTasks } = await supabase
     .from("tasks")
     .select("id", { count: "exact", head: true })
     .eq("user_id", userId)
     .eq("source_type", "email")
     .eq("source_id", communicationId);
+
+  // Same thread, still open: grouping. Tasks were keyed on a single
+  // communication, so every reply in a thread produced its own - one
+  // Investment Memo thread yielded 8 tasks ("Follow up with Jatin",
+  // "Response required regarding differentiation", "Consider investing in the
+  // proposed products") for what is one conversation restated.
+  //
+  // Only open tasks block: once the founder has completed or dismissed the
+  // thread's task, a genuinely new ask later in the same thread should be able
+  // to create another. Skipping rather than updating the existing task keeps
+  // anything already acted on intact, matching how commitments behave.
+  //
+  // Threads are short, so resolving sibling ids avoids adding thread_id to
+  // tasks and backfilling it.
+  let openThreadTasks = 0;
+  if (comm.thread_id) {
+    const { data: siblings } = await supabase
+      .from("communications")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("thread_id", comm.thread_id);
+
+    const siblingIds = (siblings ?? []).map((r: { id: string }) => r.id).filter((id) => id !== communicationId);
+    if (siblingIds.length > 0) {
+      const { count } = await supabase
+        .from("tasks")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", userId)
+        .eq("source_type", "email")
+        .in("source_id", siblingIds)
+        .in("status", ["pending", "snoozed"]);
+      openThreadTasks = count ?? 0;
+    }
+  }
+
+  const alreadyTracked = (sameEmailTasks ?? 0) > 0 || openThreadTasks > 0;
 
   // Whether something is a task is a semantic question - is there an
   // outstanding action the founder owns - so it is gated on requires_action
@@ -206,7 +247,7 @@ export async function summarizeCommunication(job: Job) {
     !NO_TASK_CATEGORIES.has(triage.email_category) &&
     !(AUTOMATED_ONLY_NO_TASK_CATEGORIES.has(triage.email_category) && senderIsAutomated);
 
-  if (triage.requires_action && !existingTasks && categoryAllowsTask) {
+  if (triage.requires_action && !alreadyTracked && categoryAllowsTask) {
     await supabase.from("tasks").insert({
       user_id: userId,
       title: triage.action_description ?? `Reply to: ${comm.subject}`,
