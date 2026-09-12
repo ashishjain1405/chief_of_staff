@@ -7,6 +7,7 @@ import { operationalQueue } from "@/lib/queues";
 import { extractFinancialTransaction } from "@/lib/ai/extractors/financial";
 import { normalizeMerchant, getCategoryForMerchant, getWalletPaymentModeLabel } from "@/lib/finance/normalize";
 import { deduplicateRawTransactions, type TransactionRaw } from "@/lib/finance/dedup";
+import { resolveFollowUpDeadline } from "@/lib/tasks/deadline";
 import { FEATURES } from "@/lib/features";
 
 export async function summarizeCommunication(job: Job) {
@@ -178,7 +179,7 @@ export async function summarizeCommunication(job: Job) {
       source_type: "email",
       source_id: communicationId,
       contact_id: comm.contact_id,
-      due_date: triage.follow_up_deadline,
+      due_date: resolveFollowUpDeadline(triage.follow_up_deadline, comm.occurred_at),
       priority: cappedScore >= 0.85 ? "high" : "medium",
       ai_reasoning: `Importance: ${cappedScore.toFixed(2)}. ${triage.summary}`,
     });

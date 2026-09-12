@@ -4,6 +4,7 @@ import { summarizeMeeting } from "@/lib/ai/claude";
 import { embedAndStoreChunks, updateMeetingEmbedding } from "@/lib/memory/embed";
 import { operationalQueue } from "@/lib/queues";
 import { FEATURES } from "@/lib/features";
+import { resolveFollowUpDeadline } from "@/lib/tasks/deadline";
 
 export async function processMeetingSummary(job: Job) {
   const supabase = createClient(
@@ -62,7 +63,7 @@ export async function processMeetingSummary(job: Job) {
       title: item.description,
       source_type: "meeting",
       source_id: meetingId,
-      due_date: item.due_date,
+      due_date: resolveFollowUpDeadline(item.due_date, meeting.start_time),
       priority: "medium",
       ai_reasoning: `Extracted from meeting: ${meeting.title}`,
     });

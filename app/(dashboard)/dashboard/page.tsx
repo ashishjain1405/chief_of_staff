@@ -7,6 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FEATURES } from "@/lib/features";
 
+// Slots in the Top Priorities card.
+const TASK_SLOTS = 5;
+
 export default async function DashboardPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -16,7 +19,20 @@ export default async function DashboardPage() {
   const in24h = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
   const in7d = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
 
-  const [briefRes, tasksRes, meetingsRes, actionEmailsRes] = await Promise.all([
+  // "Top Priorities" was a single due_date ASC query, which is oldest-first, so
+  // the stalest item held slot 1 permanently - a task due 2024-06-30 sat above
+  // everything due this week, and with every task at priority "medium" the
+  // badge broke no ties. Reserve slots by bucket instead, the same way Ask
+  // retrieval does: the most recently missed first, then what is due soonest,
+  // then undated tasks only to fill the remaining space.
+  const pendingTasks = () =>
+    supabase
+      .from("tasks")
+      .select("id, title, priority, due_date")
+      .eq("user_id", user.id)
+      .eq("status", "pending");
+
+  const [briefRes, overdueRes, upcomingRes, undatedRes, meetingsRes, actionEmailsRes] = await Promise.all([
     supabase
       .from("daily_briefs")
       .select("raw_markdown, brief_date")
@@ -25,13 +41,9 @@ export default async function DashboardPage() {
       .limit(1)
       .single(),
 
-    supabase
-      .from("tasks")
-      .select("id, title, priority, due_date")
-      .eq("user_id", user.id)
-      .eq("status", "pending")
-      .order("due_date", { ascending: true })
-      .limit(5),
+    pendingTasks().lt("due_date", now).order("due_date", { ascending: false }).limit(TASK_SLOTS),
+    pendingTasks().gte("due_date", now).order("due_date", { ascending: true }).limit(TASK_SLOTS),
+    pendingTasks().is("due_date", null).order("created_at", { ascending: false }).limit(TASK_SLOTS),
 
     supabase
       .from("meetings")
@@ -53,7 +65,31 @@ export default async function DashboardPage() {
   ]);
 
   const brief = briefRes.data;
-  const tasks = tasksRes.data ?? [];
+  // Which five to show: reserve two slots for the most recently missed so a
+  // long backlog cannot crowd out the week ahead, fill the rest with what is
+  // due soonest, then fall back to older overdue items and undated tasks.
+  const recentlyOverdue = overdueRes.data ?? [];
+  const selected = [
+    ...recentlyOverdue.slice(0, 2),
+    ...(upcomingRes.data ?? []),
+    ...recentlyOverdue.slice(2),
+    ...(undatedRes.data ?? []),
+  ].slice(0, TASK_SLOTS);
+
+  // What order to show them in, which is a separate question from selection:
+  // everything overdue first (most recently missed at the top), then upcoming
+  // soonest-first, then undated. Without this the card interleaved overdue and
+  // future items and read as unsorted.
+  const bucketOf = (due: string | null) =>
+    due === null ? 2 : new Date(due) < new Date(now) ? 0 : 1;
+
+  const tasks = [...selected].sort((a, b) => {
+    const bucketDiff = bucketOf(a.due_date) - bucketOf(b.due_date);
+    if (bucketDiff !== 0) return bucketDiff;
+    if (a.due_date === null || b.due_date === null) return 0;
+    const diff = new Date(a.due_date).getTime() - new Date(b.due_date).getTime();
+    return bucketOf(a.due_date) === 0 ? -diff : diff;
+  });
   const meetings = meetingsRes.data ?? [];
   const actionEmails = actionEmailsRes.data ?? [];
   const commitments = FEATURES.commitments
