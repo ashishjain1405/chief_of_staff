@@ -8,11 +8,8 @@ import { extractFinancialTransaction } from "@/lib/ai/extractors/financial";
 import { normalizeMerchant, getCategoryForMerchant, getWalletPaymentModeLabel } from "@/lib/finance/normalize";
 import { deduplicateRawTransactions, type TransactionRaw } from "@/lib/finance/dedup";
 import { resolveFollowUpDeadline } from "@/lib/tasks/deadline";
-import {
-  LOW_SIGNAL_CATEGORIES,
-  NO_TASK_CATEGORIES,
-  AUTOMATED_ONLY_NO_TASK_CATEGORIES,
-} from "@/lib/inbox/categories";
+import { LOW_SIGNAL_CATEGORIES } from "@/lib/inbox/categories";
+import { shouldCreateTask } from "@/lib/tasks/gate";
 import { FEATURES } from "@/lib/features";
 
 export async function summarizeCommunication(job: Job) {
@@ -240,14 +237,15 @@ export async function summarizeCommunication(job: Job) {
   // 0.60 - dropping 6 of 8 real tasks while the intended noise was already
   // handled by category. importance_score still sets priority below, which is
   // what a magnitude is actually good for.
-  const senderIsAutomated =
-    isKnownFinancialDomain(senderEmail) || /no-?reply|alerts?@|notification/i.test(senderEmail);
+  const categoryAllowsTask = shouldCreateTask({
+    category: triage.email_category,
+    requiresAction: triage.requires_action,
+    senderEmail,
+    founderEmail: user?.email ?? null,
+    isFinancialDomain: isKnownFinancialDomain(senderEmail),
+  });
 
-  const categoryAllowsTask =
-    !NO_TASK_CATEGORIES.has(triage.email_category) &&
-    !(AUTOMATED_ONLY_NO_TASK_CATEGORIES.has(triage.email_category) && senderIsAutomated);
-
-  if (triage.requires_action && !alreadyTracked && categoryAllowsTask) {
+  if (categoryAllowsTask && !alreadyTracked) {
     await supabase.from("tasks").insert({
       user_id: userId,
       title: triage.action_description ?? `Reply to: ${comm.subject}`,
