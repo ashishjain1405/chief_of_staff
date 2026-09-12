@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { CATEGORIES, CATEGORY_GROUPS } from "./categories";
+import { CATEGORIES, CATEGORY_GROUPS } from "@/lib/inbox/categories";
 
 export { CATEGORIES };
 

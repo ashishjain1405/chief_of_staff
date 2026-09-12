@@ -2,12 +2,17 @@ import { Job } from "bullmq";
 import { createClient } from "@supabase/supabase-js";
 import { triageEmail, extractCommitments } from "@/lib/ai/claude";
 import { embedAndStoreChunks, updateCommunicationEmbedding } from "@/lib/memory/embed";
-import { classifySender, getSenderHint, shouldRunStage1 } from "@/lib/finance/senders";
+import { classifySender, getSenderHint, shouldRunStage1, isKnownFinancialDomain } from "@/lib/finance/senders";
 import { operationalQueue } from "@/lib/queues";
 import { extractFinancialTransaction } from "@/lib/ai/extractors/financial";
 import { normalizeMerchant, getCategoryForMerchant, getWalletPaymentModeLabel } from "@/lib/finance/normalize";
 import { deduplicateRawTransactions, type TransactionRaw } from "@/lib/finance/dedup";
 import { resolveFollowUpDeadline } from "@/lib/tasks/deadline";
+import {
+  LOW_SIGNAL_CATEGORIES,
+  NO_TASK_CATEGORIES,
+  AUTOMATED_ONLY_NO_TASK_CATEGORIES,
+} from "@/lib/inbox/categories";
 import { FEATURES } from "@/lib/features";
 
 export async function summarizeCommunication(job: Job) {
@@ -47,7 +52,7 @@ export async function summarizeCommunication(job: Job) {
 
   const { data: user } = await supabase
     .from("users")
-    .select("business_context")
+    .select("business_context, email")
     .eq("id", userId)
     .single();
 
@@ -55,13 +60,24 @@ export async function summarizeCommunication(job: Job) {
   const senderEmail = (comm.contacts as any)?.email ?? "";
   const senderInfo = `${(comm.contacts as any)?.name ?? ""} <${senderEmail}>${getSenderHint(senderEmail)}`;
 
-  // Stage 0: General email triage
-  const triage = await triageEmail(businessContext, senderInfo, comm.body ?? "");
+  // Triage saw only the sender and the body, never who the mail was addressed
+  // to, so it could not tell whether the founder was the one being asked to
+  // act. It wrote third-person chores for other people - "Ensure Kamal
+  // understands...", "The receiver needs to verify..." - and those became
+  // tasks. channel_metadata.to is already captured at ingest; cc is not, so
+  // "directly addressed" versus "merely copied" stays unanswerable until
+  // ingest stores it.
+  const recipients = String((comm.channel_metadata as any)?.to ?? "").trim();
+  const recipientInfo = [
+    user?.email ? `the founder's own address is ${user.email}` : null,
+    recipients ? `this email's To: ${recipients}` : "no recipient recorded",
+  ]
+    .filter(Boolean)
+    .join("; ");
 
-  const LOW_SIGNAL_CATEGORIES = new Set([
-    "news", "newsletters", "promotions", "entertainment",
-    "social", "system_notifications",
-  ]);
+  // Stage 0: General email triage
+  const triage = await triageEmail(businessContext, senderInfo, comm.body ?? "", recipientInfo);
+
   const cappedScore = LOW_SIGNAL_CATEGORIES.has(triage.email_category)
     ? Math.min(triage.importance_score, 0.3)
     : triage.importance_score;
@@ -172,7 +188,25 @@ export async function summarizeCommunication(job: Job) {
     .eq("source_type", "email")
     .eq("source_id", communicationId);
 
-  if (triage.requires_action && cappedScore >= 0.7 && !existingTasks) {
+  // Whether something is a task is a semantic question - is there an
+  // outstanding action the founder owns - so it is gated on requires_action
+  // and the category, not on importance_score.
+  //
+  // The old gate was `requires_action && cappedScore >= 0.7`, which made task
+  // creation hostage to a noisy magnitude. Tightening the action guidance in
+  // the prompt pulled importance down a notch as a side effect, and genuine
+  // "reply to Kamal about the marketing plan" emails came back action=true at
+  // 0.60 - dropping 6 of 8 real tasks while the intended noise was already
+  // handled by category. importance_score still sets priority below, which is
+  // what a magnitude is actually good for.
+  const senderIsAutomated =
+    isKnownFinancialDomain(senderEmail) || /no-?reply|alerts?@|notification/i.test(senderEmail);
+
+  const categoryAllowsTask =
+    !NO_TASK_CATEGORIES.has(triage.email_category) &&
+    !(AUTOMATED_ONLY_NO_TASK_CATEGORIES.has(triage.email_category) && senderIsAutomated);
+
+  if (triage.requires_action && !existingTasks && categoryAllowsTask) {
     await supabase.from("tasks").insert({
       user_id: userId,
       title: triage.action_description ?? `Reply to: ${comm.subject}`,

@@ -32,12 +32,18 @@ export default async function TasksPage() {
   const now = new Date();
   const in3d = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
 
-  const today = all.filter(
-    (t) => t.status === "pending" && t.due_date && new Date(t.due_date) <= in3d
+  // "Due Soon" used to mean due_date <= in3d with no lower bound, so a task
+  // overdue by months was filed under it, and "This Week & Later" caught
+  // !due_date, so 40 undated tasks were labelled as due this week. Something
+  // overdue, something due tomorrow and something with no date at all are
+  // three different states and each gets its own section.
+  const pending = all.filter((t) => t.status === "pending");
+  const overdue = pending.filter((t) => t.due_date && new Date(t.due_date) < now);
+  const dueSoon = pending.filter(
+    (t) => t.due_date && new Date(t.due_date) >= now && new Date(t.due_date) <= in3d
   );
-  const thisWeek = all.filter(
-    (t) => t.status === "pending" && (!t.due_date || new Date(t.due_date) > in3d)
-  );
+  const later = pending.filter((t) => t.due_date && new Date(t.due_date) > in3d);
+  const undated = pending.filter((t) => !t.due_date);
   const done = all.filter((t) => t.status === "done");
 
   const priorityColor = (p: string) =>
@@ -90,22 +96,20 @@ export default async function TasksPage() {
     <div className="p-6 max-w-4xl space-y-6">
       <h1 className="text-2xl font-bold">Tasks</h1>
 
-      {today.length > 0 && (
-        <div>
-          <h2 className="text-sm font-semibold mb-2">Due Soon ({today.length})</h2>
-          <div className="rounded-lg border overflow-hidden">
-            {today.map((t) => <TaskRow key={t.id} task={t} />)}
+      {([
+        { label: "Overdue", rows: overdue },
+        { label: "Due Soon", rows: dueSoon },
+        { label: "Later", rows: later },
+        { label: "No Due Date", rows: undated },
+      ] as const).map(({ label, rows }) =>
+        rows.length === 0 ? null : (
+          <div key={label}>
+            <h2 className="text-sm font-semibold mb-2">{label} ({rows.length})</h2>
+            <div className="rounded-lg border overflow-hidden">
+              {rows.map((t) => <TaskRow key={t.id} task={t} />)}
+            </div>
           </div>
-        </div>
-      )}
-
-      {thisWeek.length > 0 && (
-        <div>
-          <h2 className="text-sm font-semibold mb-2">This Week & Later ({thisWeek.length})</h2>
-          <div className="rounded-lg border overflow-hidden">
-            {thisWeek.map((t) => <TaskRow key={t.id} task={t} />)}
-          </div>
-        </div>
+        )
       )}
 
       {done.length > 0 && (

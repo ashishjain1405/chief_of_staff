@@ -13,14 +13,21 @@ const triageJsonSchema = z.toJSONSchema(emailTriageSchema);
 export async function triageEmail(
   businessContext: any,
   senderInfo: string,
-  body: string
+  body: string,
+  recipientInfo?: string
 ): Promise<EmailTriage> {
   const client = getClient();
   const response = await client.chat.completions.create({
     model: "gpt-4o-mini",
     max_tokens: 700,
+    // Triage is classification, not generation, and this call had no
+    // temperature at all - so it ran at the default 1.0. The same email came
+    // back "important", "other" and "transactions" across runs, and since
+    // task creation is gated on category, identical mail produced a task or
+    // not depending on the sample. classifyIntent already pins this to 0.
+    temperature: 0,
     messages: [
-      { role: "user", content: emailTriagePrompt(businessContext, senderInfo, body) },
+      { role: "user", content: emailTriagePrompt(businessContext, senderInfo, body, recipientInfo) },
     ],
     response_format: {
       type: "json_schema",

@@ -18,6 +18,7 @@ export default async function DashboardPage() {
   const now = new Date().toISOString();
   const in24h = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
   const in7d = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+  const in3d = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString();
 
   // "Top Priorities" was a single due_date ASC query, which is oldest-first, so
   // the stalest item held slot 1 permanently - a task due 2024-06-30 sat above
@@ -32,7 +33,7 @@ export default async function DashboardPage() {
       .eq("user_id", user.id)
       .eq("status", "pending");
 
-  const [briefRes, overdueRes, upcomingRes, undatedRes, meetingsRes, actionEmailsRes] = await Promise.all([
+  const [briefRes, overdueRes, upcomingRes, undatedRes, dueSoonCountRes, meetingsRes, actionEmailsRes] = await Promise.all([
     supabase
       .from("daily_briefs")
       .select("raw_markdown, brief_date")
@@ -44,6 +45,17 @@ export default async function DashboardPage() {
     pendingTasks().lt("due_date", now).order("due_date", { ascending: false }).limit(TASK_SLOTS),
     pendingTasks().gte("due_date", now).order("due_date", { ascending: true }).limit(TASK_SLOTS),
     pendingTasks().is("due_date", null).order("created_at", { ascending: false }).limit(TASK_SLOTS),
+
+    // The stat below read tasks.length - the card's own row count, capped at
+    // TASK_SLOTS - so it showed "5" while 46 tasks were pending, and counted
+    // undated ones as "due soon". This is the real number.
+    supabase
+      .from("tasks")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .eq("status", "pending")
+      .not("due_date", "is", null)
+      .lte("due_date", in3d),
 
     supabase
       .from("meetings")
@@ -118,8 +130,8 @@ export default async function DashboardPage() {
       dot: "bg-red-400",
     },
     {
-      label: "Tasks due soon",
-      value: tasks.length,
+      label: "Due soon or overdue",
+      value: dueSoonCountRes.count ?? 0,
       href: "/tasks",
       cta: "View tasks",
       border: "border-l-amber-400",

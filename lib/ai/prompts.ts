@@ -61,11 +61,17 @@ export const emailTriageSchema = z.object({
 
 export type EmailTriage = z.infer<typeof emailTriageSchema>;
 
-export function emailTriagePrompt(businessContext: any, senderInfo: string, body: string): string {
+export function emailTriagePrompt(
+  businessContext: any,
+  senderInfo: string,
+  body: string,
+  recipientInfo = "unknown"
+): string {
   return `You are an AI chief of staff for a founder. Analyze this email and return a JSON object.
 
 Business context: ${JSON.stringify(businessContext)}
 Sender: ${senderInfo}
+Recipients: ${recipientInfo}
 
 Email body:
 ${body.substring(0, 3000)}
@@ -195,6 +201,21 @@ PRIORITY ORDER (resolve conflicts by checking top-down):
 20. Personal human emails needing attention → "important"
 21. Sender awaiting a reply → "pending_reply"
 22. Everything else → "other"
+
+ACTION GUIDANCE:
+requires_action, action_description and follow_up_deadline drive task creation, so a false positive puts a chore on the founder's list that nobody asked for.
+
+Set requires_action = true ONLY when the recipient must personally do something that is not already done, and the matter stays unresolved until they do it.
+
+Set requires_action = false for:
+- Confirmations of something that already happened: a debit that went through, a UPI payment that completed, an order that shipped, a refund that was issued. Nothing is pending.
+- Conditional safety disclaimers. "If you did not authorize this transaction, report it immediately", "If this wasn't you, reset your password", "Contact us if you did not make this payment" appear in EVERY alert of that kind. They are boilerplate, not a request directed at this recipient. Never treat them as an action.
+- Purely informational mail: statements, receipts, newsletters, market updates, notifications to read and move on from.
+- Work that belongs to somebody else on the thread. Use the Recipients line above: the founder is the person whose own address is named there. If the email asks a different named person to act, or asks "the customer" / "the receiver" / "the user" generically, the founder has nothing to do and requires_action is false.
+
+action_description: an imperative the recipient themselves can carry out - "Reply to Kamal with the marketing plan", "Send the signed contract to Piyush". Never third person ("the customer should verify...", "the receiver needs to..."); if the only action you can describe is in third person, requires_action is false. Null whenever requires_action is false.
+
+follow_up_deadline: only a deadline for the recipient's OWN action, stated in or clearly implied by the email. It can never fall before the date this email was sent. Do not reuse an unrelated date from the body - a compliance cutoff, a statement period, a policy effective date, a past due date from a prior cycle. Null when there is no deadline for this recipient.
 
 IMPORTANCE SCORE GUIDANCE:
 - "news", "newsletters", "promotions", "entertainment", "social": importance_score <= 0.3
