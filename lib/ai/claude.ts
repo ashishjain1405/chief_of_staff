@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import { stripQuotedReply } from "@/lib/email/quoted";
+import { withAiRetry } from "@/lib/ai/retry";
 import { z } from "zod";
 import { emailTriagePrompt, emailTriageSchema, type EmailTriage } from "./prompts";
 import { meetingSummaryPrompt, meetingSummarySchema, type MeetingSummary } from "./prompts";
@@ -26,7 +27,7 @@ export async function triageEmail(
   // extraction all still need the full thread.
   const newContent = stripQuotedReply(body);
 
-  const response = await client.chat.completions.create({
+  const response = await withAiRetry(() => client.chat.completions.create({
     model: "gpt-4o-mini",
     max_tokens: 700,
     // Triage is classification, not generation, and this call had no
@@ -46,7 +47,7 @@ export async function triageEmail(
         schema: triageJsonSchema as Record<string, unknown>,
       },
     },
-  });
+  }), "triageEmail");
 
   const text = response.choices[0].message.content ?? "{}";
   return JSON.parse(text) as EmailTriage;
