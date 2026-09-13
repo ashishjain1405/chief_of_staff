@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { stripQuotedReply } from "@/lib/email/quoted";
 import { z } from "zod";
 import { emailTriagePrompt, emailTriageSchema, type EmailTriage } from "./prompts";
 import { meetingSummaryPrompt, meetingSummarySchema, type MeetingSummary } from "./prompts";
@@ -17,6 +18,14 @@ export async function triageEmail(
   recipientInfo?: string
 ): Promise<EmailTriage> {
   const client = getClient();
+
+  // Strip the quoted thread here, at the triage boundary, rather than in the
+  // caller: every consumer of triage wants the new message, and doing it in
+  // one place keeps the worker and the task-extraction eval from diverging.
+  // The stored body is untouched, since summaries, embeddings and financial
+  // extraction all still need the full thread.
+  const newContent = stripQuotedReply(body);
+
   const response = await client.chat.completions.create({
     model: "gpt-4o-mini",
     max_tokens: 700,
@@ -27,7 +36,7 @@ export async function triageEmail(
     // not depending on the sample. classifyIntent already pins this to 0.
     temperature: 0,
     messages: [
-      { role: "user", content: emailTriagePrompt(businessContext, senderInfo, body, recipientInfo) },
+      { role: "user", content: emailTriagePrompt(businessContext, senderInfo, newContent, recipientInfo) },
     ],
     response_format: {
       type: "json_schema",

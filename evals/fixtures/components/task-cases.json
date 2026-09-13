@@ -141,8 +141,7 @@
     "expect": {
       "creates_task": true
     },
-    "why": "Kamal asks a direct question the founder must answer. Borderline: the quoted wire-transfer history below sometimes pulls the category to 'transactions'.",
-    "known_gap": "Kamal's question sits above 4000 chars of quoted wire-transfer history, which pulls the category to 'transactions' and requires_action to false. Observed passing once and failing on repeat runs, so it sits right on the boundary. Stripping quoted text before triage is the fix."
+    "why": "Kamal asks a direct question the founder must answer."
   },
   {
     "id": "00896649-537b-453f-8932-52fe0126cd6c",
@@ -154,8 +153,7 @@
     "expect": {
       "creates_task": false
     },
-    "why": "One-line viewing note appended to the thread. No distinct ask beyond the thread's existing one.",
-    "known_gap": "Triage sees the whole quoted reply chain, so a one-line note inherits the thread's ask and triggers a task. Stripping quoted text before triage is the fix; thread grouping already stops it becoming a duplicate in production."
+    "why": "One-line viewing note appended to the thread. No distinct ask beyond the thread's existing one."
   },
   {
     "id": "3bb47997-5844-4575-be7f-b2e4adbf36ad",
