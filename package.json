@@ -15,6 +15,7 @@
     "backfill:gmail:railway": "npx tsx --tsconfig tsconfig.json worker/jobs/backfill-gmail.ts",
     "backfill:embeddings": "npx tsx --env-file=.env.local --tsconfig tsconfig.json worker/jobs/backfill-embeddings.ts",
     "reconcile:emails": "npx tsx --env-file=.env.local --tsconfig tsconfig.json scripts/reconcile-emails.ts",
+    "retriage:emails": "npx tsx --env-file=.env.local --tsconfig tsconfig.json scripts/retriage-emails.ts",
     "dedupe:normalized": "npx tsx --env-file=.env.local --tsconfig tsconfig.json scripts/dedupe-normalized.ts",
     "eval:extraction": "npx tsx --env-file=.env.local --tsconfig tsconfig.json evals/components/financial-extraction.ts",
     "eval:parsing": "npx tsx --env-file=.env.local --tsconfig tsconfig.json evals/components/email-parsing.ts",

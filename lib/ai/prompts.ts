@@ -100,6 +100,7 @@ NOT for: shipping notifications — use "shipping_orders". NOT for: travel booki
 Renewal reminders, membership expiry notices, subscription confirmation emails, plan upgrade/downgrade notices — when the charge has NOT yet occurred (upcoming or pending).
 Examples: "Your Netflix subscription renews in 3 days", "Spotify Premium expires on...", "Your Notion plan will auto-renew".
 Disambiguation: If the charge is already confirmed (bank debit alert) → "transactions". If it's a reminder or upcoming renewal notice → "subscriptions_memberships".
+Disambiguation: if the substance of the email is editorial - an article, a story, market analysis, a digest - it is "newsletters" even when it also pitches a subscription or an upgrade. Publications append "upgrade to premium" to their content; that footer does not make the email about a membership.
 Applies to: netflix.com, spotify.com, notion.so, adobe.com, openai.com, canva.com, grammarly.com, primevideo.com, hotstar.com.
 
 "receipts_documents"
@@ -211,6 +212,8 @@ Set requires_action = false for:
 - Confirmations of something that already happened: a debit that went through, a UPI payment that completed, an order that shipped, a refund that was issued. Nothing is pending.
 - Conditional safety disclaimers. "If you did not authorize this transaction, report it immediately", "If this wasn't you, reset your password", "Contact us if you did not make this payment" appear in EVERY alert of that kind. They are boilerplate, not a request directed at this recipient. Never treat them as an action.
 - Purely informational mail: statements, receipts, newsletters, market updates, notifications to read and move on from.
+- A call to action that belongs to the SENDER's marketing: "register for our free live session", "join the webinar", "upgrade to premium", "book now", "claim your offer", "invest in this fund before it closes", "apply before the deadline", "shop the sale", "read more". The sender wants the recipient to do this; the recipient never agreed to it and nothing goes wrong if they ignore it. An invitation or an offer is not an obligation, even when it carries a deadline - the deadline belongs to the promotion.
+  Contrast with a real obligation the recipient ALREADY holds: a policy they own coming up for renewal, a membership expiring, store credit about to lapse, a bill due, a compliance step on their own account. Those are actions. The test is whether the recipient already has the thing, not whether the email has a date.
 - Work that belongs to somebody else on the thread. Use the Recipients line above: the founder is the person whose own address is named there. If the email asks a different named person to act, or asks "the customer" / "the receiver" / "the user" generically, the founder has nothing to do and requires_action is false.
 
 action_description: an imperative the recipient themselves can carry out - "Reply to Kamal with the marketing plan", "Send the signed contract to Piyush". Never third person ("the customer should verify...", "the receiver needs to..."); if the only action you can describe is in third person, requires_action is false. Null whenever requires_action is false.
