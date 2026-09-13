@@ -34,7 +34,15 @@ const APPLY = process.argv.includes("--apply");
 const LIMIT = Number(process.argv[process.argv.indexOf("--limit") + 1]) || Infinity;
 
 const PAGE = 200;
-const CONCURRENCY = 5;
+
+// gpt-4o-mini is capped at 200k tokens/min on this account and each triage call
+// costs ~3.5k, so the ceiling is roughly 57 emails/min. Concurrency 5 pushed
+// ~150/min and 64 of 200 emails came back 429 - silently skipped, because the
+// loop below only logged them. Two in flight lands under the cap with room for
+// the retries to breathe.
+const CONCURRENCY = 2;
+const MAX_ATTEMPTS = 6;
+const BACKOFF_CAP_MS = 30_000;
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -53,6 +61,30 @@ type Comm = {
   channel_metadata: Record<string, unknown> | null;
   contacts: { name?: string; email?: string } | null;
 };
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+// A 429 is not a failure, it is backpressure. Retries honour the "try again in
+// 1.24s" hint when the error carries one, but never wait less than exponential
+// backoff, since a hint of ~1s while the whole minute's budget is spent just
+// buys another rejection.
+async function withRetry<T>(fn: () => Promise<T>, label: string): Promise<T> {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await fn();
+    } catch (err: any) {
+      const message = String(err?.message ?? err);
+      const rateLimited = err?.status === 429 || /\b429\b|rate limit/i.test(message);
+      if (!rateLimited || attempt >= MAX_ATTEMPTS - 1) throw err;
+
+      const hinted = Number(/try again in ([\d.]+)\s*s/i.exec(message)?.[1]);
+      const backoff = Math.min(2 ** attempt * 1000, BACKOFF_CAP_MS);
+      const waitMs = Math.min(Math.max(Number.isFinite(hinted) ? hinted * 1000 + 250 : 0, backoff), BACKOFF_CAP_MS);
+      console.log(`  rate limited on ${label}, retrying in ${(waitMs / 1000).toFixed(1)}s (attempt ${attempt + 1}/${MAX_ATTEMPTS})`);
+      await sleep(waitMs);
+    }
+  }
+}
 
 async function mapLimit<T, R>(items: T[], limit: number, fn: (item: T) => Promise<R>): Promise<R[]> {
   const out: R[] = new Array(items.length);
@@ -106,6 +138,7 @@ async function main() {
   const newTasks: string[] = [];
   let scanned = 0;
   let categoryChanged = 0;
+  let failed = 0;
   let cursor = "9999-12-31T00:00:00Z";
 
   while (scanned < LIMIT) {
@@ -131,7 +164,10 @@ async function main() {
 
       try {
         // triageEmail strips the quoted thread internally.
-        const triage = await triageEmail(user.business_context ?? {}, senderInfo, comm.body ?? "", recipientInfo);
+        const triage = await withRetry(
+          () => triageEmail(user.business_context ?? {}, senderInfo, comm.body ?? "", recipientInfo),
+          comm.id
+        );
         return { comm, senderEmail, triage, error: null as string | null };
       } catch (err: any) {
         return { comm, senderEmail, triage: null, error: err.message as string };
@@ -141,6 +177,7 @@ async function main() {
     for (const { comm, senderEmail, triage, error } of results) {
       scanned++;
       if (error || !triage) {
+        failed++;
         console.error(`  failed ${comm.id}: ${error}`);
         continue;
       }
@@ -215,8 +252,16 @@ async function main() {
   console.log(`\n=== TASKS ${APPLY ? "CREATED" : "THAT WOULD BE CREATED"} (${newTasks.length}) ===`);
   for (const t of newTasks) console.log(`  ${t.slice(0, 96)}`);
 
+  if (failed > 0) {
+    // Loud on purpose. A partially applied run leaves rows carrying stale
+    // categories from the old triage, and the totals above would otherwise
+    // read as a clean pass.
+    console.error(`\n${failed} of ${scanned} email(s) could not be triaged and were left untouched.`);
+    console.error(`Re-run to pick them up - already-updated rows simply get the same answer again.`);
+  }
+
   if (!APPLY) console.log(`\nDRY RUN - nothing written. Re-run with --apply.`);
-  process.exit(0);
+  process.exit(failed > 0 ? 1 : 0);
 }
 
 main();
