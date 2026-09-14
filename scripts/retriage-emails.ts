@@ -114,22 +114,35 @@ async function main() {
   let scanned = 0;
   let categoryChanged = 0;
   let failed = 0;
-  let cursor = "9999-12-31T00:00:00Z";
+  let writeFailed = 0;
 
+  // Driven off the retriaged_at marker rather than an occurred_at cursor. The
+  // cursor version lost rows two ways: a strict "<" skips every row sharing the
+  // boundary timestamp, and - far worse - an unchecked query error returned
+  // data: null, which read as "no rows left" and ended the walk silently after
+  // 600 of 2105 emails while reporting success.
+  //
+  // Selecting unmarked rows makes the loop resumable, tie-safe and idempotent:
+  // a re-run picks up exactly what is left.
   while (scanned < LIMIT) {
-    // Cursor paginated: range() past 1000 rows silently truncates in PostgREST.
-    const { data: page } = await supabase
+    const { data: page, error: pageError } = await supabase
       .from("communications")
       .select("id, user_id, subject, body, occurred_at, thread_id, contact_id, email_category, channel_metadata, contacts(name, email)")
       .eq("user_id", user.id)
       .not("body", "is", null)
-      .lt("occurred_at", cursor)
+      .is("channel_metadata->>retriaged_at", null)
       .order("occurred_at", { ascending: false })
       .limit(Math.min(PAGE, LIMIT - scanned));
 
+    // An error here used to be indistinguishable from "done".
+    if (pageError) {
+      console.error(`\nquery failed while fetching the next page: ${pageError.message}`);
+      console.error(`stopping with ${scanned} email(s) processed - re-run to continue.`);
+      process.exit(1);
+    }
+
     const rows = (page ?? []) as unknown as Comm[];
     if (rows.length === 0) break;
-    cursor = rows[rows.length - 1].occurred_at;
 
     const results = await mapLimit(rows, CONCURRENCY, async (comm) => {
       const senderEmail = comm.contacts?.email ?? "";
@@ -166,7 +179,7 @@ async function main() {
       }
 
       if (APPLY) {
-        await supabase
+        const { error: updateError } = await supabase
           .from("communications")
           .update({
             email_category: triage.email_category,
@@ -183,6 +196,14 @@ async function main() {
             },
           })
           .eq("id", comm.id);
+
+        // Unchecked, this lost 174 of 600 rows on the first run: triaged at full
+        // API cost, then never written, with the summary still reading clean.
+        if (updateError) {
+          writeFailed++;
+          console.error(`  write failed ${comm.id}: ${updateError.message}`);
+          continue;
+        }
       }
 
       const allowed = shouldCreateTask({
@@ -214,7 +235,14 @@ async function main() {
       }
     }
 
-    console.log(`  ${scanned} scanned, ${categoryChanged} recategorised, ${newTasks.length} task(s) to add`);
+    console.log(`  ${scanned} scanned, ${categoryChanged} recategorised, ${newTasks.length} task(s) to add${writeFailed ? `, ${writeFailed} write failure(s)` : ""}`);
+
+    // The loop advances by marking rows, so a page where nothing could be
+    // marked would be fetched again forever.
+    if (APPLY && writeFailed >= rows.length) {
+      console.error(`\nno row in the last page could be written - aborting rather than looping.`);
+      process.exit(1);
+    }
   }
 
   console.log(`\n=== CATEGORY CHANGES (${categoryChanged} of ${scanned}) ===`);
@@ -225,6 +253,10 @@ async function main() {
   console.log(`\n=== TASKS ${APPLY ? "CREATED" : "THAT WOULD BE CREATED"} (${newTasks.length}) ===`);
   for (const t of newTasks) console.log(`  ${t.slice(0, 96)}`);
 
+  if (writeFailed > 0) {
+    console.error(`\n${writeFailed} row(s) were triaged but could not be written.`);
+  }
+
   if (failed > 0) {
     // Loud on purpose. A partially applied run leaves rows carrying stale
     // categories from the old triage, and the totals above would otherwise
@@ -234,7 +266,7 @@ async function main() {
   }
 
   if (!APPLY) console.log(`\nDRY RUN - nothing written. Re-run with --apply.`);
-  process.exit(failed > 0 ? 1 : 0);
+  process.exit(failed > 0 || writeFailed > 0 ? 1 : 0);
 }
 
 main();

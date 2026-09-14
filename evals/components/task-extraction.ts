@@ -42,6 +42,7 @@ const FIXTURES = path.join(__dirname, "../fixtures/components/task-cases.json");
 // Sampled for the stability check. Every case would triple the cost for little
 // extra signal, since a temperature regression shows up immediately.
 const STABILITY_SAMPLE = 4;
+const MAX_UNSTABLE = 1;
 
 // Third-person phrasing means the action was written for somebody else.
 const THIRD_PERSON =
@@ -150,12 +151,16 @@ async function main() {
   if (fixedGaps > 0) console.log(`known gaps now passing: ${fixedGaps} - remove their markers`);
   console.log(`third-person actions:  ${thirdPerson} (gate 0)`);
   console.log(`impossible deadlines:  ${badDeadline} (reported, not gated - the resolver nulls them)`);
-  console.log(`unstable categories:   ${unstable}/${STABILITY_SAMPLE} (gate 0)`);
+  console.log(`unstable categories:   ${unstable}/${STABILITY_SAMPLE} (gate <=${MAX_UNSTABLE})`);
 
   const failures = [
     wrongDecision > 0 && `${wrongDecision} wrong task decision(s)`,
     thirdPerson > 0 && `${thirdPerson} action(s) written in third person`,
-    unstable > 0 && `${unstable} category flip(s) - check that triage still sets temperature 0`,
+    // temperature 0 lowers variance but is not a determinism guarantee - the
+    // API still batches - so a single borderline case flipping is expected and
+    // gating on zero makes this eval flake. A real temperature regression moves
+    // most of the sample, which this still catches.
+    unstable > MAX_UNSTABLE && `${unstable} category flip(s) of ${STABILITY_SAMPLE} - check that triage still sets temperature 0`,
   ].filter(Boolean) as string[];
 
   if (failures.length > 0) {
