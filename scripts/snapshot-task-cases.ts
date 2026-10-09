@@ -28,6 +28,7 @@ type Case = {
   to: string;
   body: string;
   stored_category: string;
+  bulk: boolean;
   expect: { creates_task: boolean };
   why: string;
 };
@@ -109,6 +110,7 @@ async function main() {
         to: String((r.channel_metadata as any)?.to ?? ""),
         body: (r.body ?? "").slice(0, 4000),
         stored_category: r.email_category ?? "",
+        bulk: !!(r.channel_metadata as any)?.list_unsubscribe,
         // A hand-corrected label wins over the class default.
         expect: prior?.expect ?? { creates_task: cls.creates_task },
         why: prior?.why ?? cls.why,

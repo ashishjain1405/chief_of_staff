@@ -10,6 +10,7 @@ import { deduplicateRawTransactions, type TransactionRaw } from "@/lib/finance/d
 import { resolveFollowUpDeadline } from "@/lib/tasks/deadline";
 import { LOW_SIGNAL_CATEGORIES } from "@/lib/inbox/categories";
 import { shouldCreateTask } from "@/lib/tasks/gate";
+import { isSimilarTaskTitle } from "@/lib/tasks/similar";
 import { FEATURES } from "@/lib/features";
 
 export async function summarizeCommunication(job: Job) {
@@ -73,7 +74,8 @@ export async function summarizeCommunication(job: Job) {
     .join("; ");
 
   // Stage 0: General email triage
-  const triage = await triageEmail(businessContext, senderInfo, comm.body ?? "", recipientInfo);
+  const isBulk = !!(comm.channel_metadata as any)?.list_unsubscribe;
+  const triage = await triageEmail(businessContext, senderInfo, comm.body ?? "", recipientInfo, isBulk);
 
   const cappedScore = LOW_SIGNAL_CATEGORIES.has(triage.email_category)
     ? Math.min(triage.importance_score, 0.3)
@@ -224,7 +226,22 @@ export async function summarizeCommunication(job: Job) {
     }
   }
 
-  const alreadyTracked = (sameEmailTasks ?? 0) > 0 || openThreadTasks > 0;
+  // Same sender, still open, same ask: separate threads restating one thing.
+  // PolicyBazaar sent nine "renew your i20 insurance" countdowns, each its own
+  // thread, and every one became a task. Skips rather than updates, as above.
+  const taskTitle = triage.action_description ?? `Reply to: ${comm.subject}`;
+  let openSenderDuplicate = false;
+  if (comm.contact_id) {
+    const { data: senderTasks } = await supabase
+      .from("tasks")
+      .select("title")
+      .eq("user_id", userId)
+      .eq("contact_id", comm.contact_id)
+      .in("status", ["pending", "snoozed"]);
+    openSenderDuplicate = (senderTasks ?? []).some((t: { title: string }) => isSimilarTaskTitle(t.title, taskTitle));
+  }
+
+  const alreadyTracked = (sameEmailTasks ?? 0) > 0 || openThreadTasks > 0 || openSenderDuplicate;
 
   // Whether something is a task is a semantic question - is there an
   // outstanding action the founder owns - so it is gated on requires_action
@@ -248,7 +265,7 @@ export async function summarizeCommunication(job: Job) {
   if (categoryAllowsTask && !alreadyTracked) {
     await supabase.from("tasks").insert({
       user_id: userId,
-      title: triage.action_description ?? `Reply to: ${comm.subject}`,
+      title: taskTitle,
       source_type: "email",
       source_id: communicationId,
       contact_id: comm.contact_id,

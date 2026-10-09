@@ -55,6 +55,7 @@ type Case = {
   to: string;
   body: string;
   stored_category: string;
+  bulk?: boolean;
   expect: { creates_task: boolean };
   why: string;
   // Set when a case is a documented pipeline limitation rather than a
@@ -87,7 +88,7 @@ async function main() {
   for (const c of cases) {
     const senderInfo = `<${c.sender}>`;
     const recipientInfo = `the founder's own address is ${founderAddress}; this email's To: ${c.to || "unknown"}`;
-    const triage = await triageEmail({}, senderInfo, c.body, recipientInfo);
+    const triage = await triageEmail({}, senderInfo, c.body, recipientInfo, c.bulk);
     firstPass.set(c.id, triage.email_category);
 
     const creates = shouldCreateTask({
@@ -136,7 +137,8 @@ async function main() {
       {},
       `<${c.sender}>`,
       c.body,
-      `the founder's own address is ${founderAddress}; this email's To: ${c.to || "unknown"}`
+      `the founder's own address is ${founderAddress}; this email's To: ${c.to || "unknown"}`,
+      c.bulk
     );
     const same = again.email_category === firstPass.get(c.id);
     if (!same) unstable++;

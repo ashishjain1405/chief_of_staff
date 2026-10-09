@@ -65,13 +65,18 @@ export function emailTriagePrompt(
   businessContext: any,
   senderInfo: string,
   body: string,
-  recipientInfo = "unknown"
+  recipientInfo = "unknown",
+  isBulk?: boolean
 ): string {
+  const bulkLine = isBulk === undefined ? "unknown" : isBulk ? "yes (List-Unsubscribe header present)" : "no";
   return `You are an AI chief of staff for a founder. Analyze this email and return a JSON object.
 
 Business context: ${JSON.stringify(businessContext)}
 Sender: ${senderInfo}
 Recipients: ${recipientInfo}
+Bulk mail: ${bulkLine}
+
+"Bulk mail: yes" means the email went to a mailing list. It is evidence of a mass send, not a category - bank alerts, bills, order updates and renewal notices are bulk-sent too. A bulk email is "important" or "pending_reply" only when a real person clearly wrote it, such as a reply on a group thread. Bulk mail does not decide requires_action in either direction - judge that only by the ACTION GUIDANCE below.
 
 Email body:
 ${body.substring(0, 3000)}
@@ -85,6 +90,7 @@ Examples: IndiGo boarding pass, MakeMyTrip hotel confirmation, IRCTC PNR, Airbnb
 "account_security"
 OTPs, login alerts, password reset links, suspicious activity warnings, 2FA codes, device authorization, account verification emails.
 Examples: "Your OTP is 123456", "New login to your account", "Password changed", "Verify your email".
+NOT for: pushes to adopt a new security or login feature ("set up our new two-step login", "try passwordless login") - those are "promotions".
 
 "finance_bills"
 Invoices, bills due, payment reminders, EMI reminders, utility bills, rent due, credit card statements, loan due notices, insurance premium notices, tax notices, SaaS invoices — i.e. money owed or upcoming charges.
@@ -162,8 +168,9 @@ Automated system alerts from cloud/infra: AWS billing/usage alerts, storage warn
 Examples: "AWS billing alert", "Vercel deployment failed", "Google Drive storage 90% full", "Sentry: new error".
 
 "promotions"
-Purchase-intent marketing: sale announcements, discount coupons, promotional campaigns, product launch emails, flash sale alerts — mass-sent marketing emails.
-Examples: "50% off today only", "Exclusive offer for you", "New collection launched", "Use code SAVE20".
+Marketing, judged by the sender's intent rather than the topic: sales, discounts, coupons, launches, upsells, cross-sells, bonus or points offers, "complete your booking" nudges, feature-adoption pushes, webinar and event pitches. This applies whatever the product is - banking, insurance, credit cards, loyalty points, travel, courses, subscriptions.
+Examples: "50% off today only", "Use code SAVE20", "Last chance! 10% bonus on miles-to-points transfer", "Not ready to book? Let's keep looking for your stay", "Activate our new secure login feature", "Missed it yesterday? Join our live session".
+NOT for: a renewal, expiry or payment notice about something the recipient already holds - their own insurance policy, subscription, membership or card - even when it uses urgency or a discount. That stays in its own category ("subscriptions_memberships" or "finance_bills").
 NOT for: newsletters (editorial content) or social notifications.
 
 "important"
@@ -182,23 +189,23 @@ Use ONLY if none of the 21 categories above apply.
 PRIORITY ORDER (resolve conflicts by checking top-down):
 1. Travel booking confirmations → always "travel"
 2. OTPs and login/security alerts → always "account_security"
-3. Bills/invoices/upcoming charges → always "finance_bills"
-4. Confirmed money movement (bank alerts, UPI, salary, SIP) → always "transactions"
-5. Subscription renewal reminders (not yet charged) → "subscriptions_memberships"
-6. PDF receipts and official documents → "receipts_documents"
-7. Government/legal notices → "legal_government"
-8. Calendar invites and meeting reminders → "meetings_calendar"
-9. Order/shipping/delivery status → "shipping_orders"
-10. Work tool notifications (GitHub, Jira, Vercel) → "productivity_tools"
-11. Recruiter/job emails → "career"
-12. Social network notifications → "social"
-13. Editorial newsletters → "newsletters"
-14. Breaking news/market alerts → "news"
-15. Course/learning platform updates → "learning"
-16. Content/gaming recommendations → "entertainment"
-17. Health/fitness notifications → "fitness"
-18. Cloud/infra system alerts → "system_notifications"
-19. Mass marketing and discount campaigns → "promotions"
+3. Marketing, upsell and offers (see "promotions") → "promotions", even when the topic is banking, insurance, travel, points or a course. A notice about something the recipient already holds is not marketing - go on to the rules below.
+4. Bills/invoices/upcoming charges → always "finance_bills"
+5. Confirmed money movement (bank alerts, UPI, salary, SIP) → always "transactions"
+6. Subscription renewal reminders (not yet charged) → "subscriptions_memberships"
+7. PDF receipts and official documents → "receipts_documents"
+8. Government/legal notices → "legal_government"
+9. Calendar invites and meeting reminders → "meetings_calendar"
+10. Order/shipping/delivery status → "shipping_orders"
+11. Work tool notifications (GitHub, Jira, Vercel) → "productivity_tools"
+12. Recruiter/job emails → "career"
+13. Social network notifications → "social"
+14. Editorial newsletters → "newsletters"
+15. Breaking news/market alerts → "news"
+16. Course/learning platform updates → "learning"
+17. Content/gaming recommendations → "entertainment"
+18. Health/fitness notifications → "fitness"
+19. Cloud/infra system alerts → "system_notifications"
 20. Personal human emails needing attention → "important"
 21. Sender awaiting a reply → "pending_reply"
 22. Everything else → "other"
@@ -213,7 +220,7 @@ Set requires_action = false for:
 - Conditional safety disclaimers. "If you did not authorize this transaction, report it immediately", "If this wasn't you, reset your password", "Contact us if you did not make this payment" appear in EVERY alert of that kind. They are boilerplate, not a request directed at this recipient. Never treat them as an action.
 - Purely informational mail: statements, receipts, newsletters, market updates, notifications to read and move on from.
 - A call to action that belongs to the SENDER's marketing: "register for our free live session", "join the webinar", "upgrade to premium", "book now", "claim your offer", "invest in this fund before it closes", "apply before the deadline", "shop the sale", "read more". The sender wants the recipient to do this; the recipient never agreed to it and nothing goes wrong if they ignore it. An invitation or an offer is not an obligation, even when it carries a deadline - the deadline belongs to the promotion.
-  Contrast with a real obligation the recipient ALREADY holds: a policy they own coming up for renewal, a membership expiring, store credit about to lapse, a bill due, a compliance step on their own account. Those are actions. The test is whether the recipient already has the thing, not whether the email has a date.
+  Contrast with a real obligation the recipient ALREADY holds: a policy they own coming up for renewal, a membership expiring, store credit about to lapse, a bill due, a compliance step on their own account. Those are actions, even when a broker or aggregator sends the reminder with urgency or a discount. The test is whether the recipient already has the thing, not whether the email has a date. An offer to buy something new, add on, upgrade, transfer points or switch provider is not an obligation.
 - Instructions for reading the email itself: "click the attachment", "the password is your PAN in upper case", "follow the procedure below to open the file", "log in to view the statement", "view this in your browser". These describe how to consume the message, not work to be tracked afterwards.
 - A regulatory or account disclosure sent to every customer: a statement of holdings, a monthly portfolio publication, a credit-score update, a settlement-holiday notice, a policy-change intimation. Standing instructions inside them - "compare these balances with your broker's statement", "open the attachment using your PAN", "contact us if you find a discrepancy" - are printed in every copy and are not a personal instruction. Only flag an action if the email states something specific to this recipient that they must do by a date: a KYC step their own account actually failed, a mandate to re-authorise, a document they alone must submit.
 - A request for feedback on something already finished: "rate your delivery", "share feedback on your order", "how was your experience", "review this product", "we'd love your feedback". The transaction is complete and the recipient owes nothing.

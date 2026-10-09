@@ -27,7 +27,8 @@ async function main() {
       try {
         const senderEmail = (comm.contacts as any)?.email ?? "";
         const senderInfo = `${(comm.contacts as any)?.name ?? ""} <${senderEmail}>${getSenderHint(senderEmail)}`;
-        const triage = await triageEmail({}, senderInfo, comm.body_summary ?? comm.body ?? "");
+        const isBulk = !!(comm.channel_metadata as any)?.list_unsubscribe;
+        const triage = await triageEmail({}, senderInfo, comm.body_summary ?? comm.body ?? "", undefined, isBulk);
 
         await supabase
           .from("communications")

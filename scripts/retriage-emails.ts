@@ -153,7 +153,8 @@ async function main() {
       try {
         // triageEmail strips the quoted thread internally.
         // triageEmail retries 429s internally via withAiRetry.
-        const triage = await triageEmail(user.business_context ?? {}, senderInfo, comm.body ?? "", recipientInfo);
+        const isBulk = !!(comm.channel_metadata as any)?.list_unsubscribe;
+        const triage = await triageEmail(user.business_context ?? {}, senderInfo, comm.body ?? "", recipientInfo, isBulk);
         return { comm, senderEmail, triage, error: null as string | null };
       } catch (err: any) {
         return { comm, senderEmail, triage: null, error: err.message as string };
