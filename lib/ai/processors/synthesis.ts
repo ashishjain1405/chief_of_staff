@@ -4,6 +4,11 @@ function clamp(v: number): number {
   return Math.min(1, Math.max(0, v));
 }
 
+function sharesEntity(a: string[], b: string[]): boolean {
+  const lower = new Set(b.map((e) => e.toLowerCase()));
+  return a.some((e) => lower.has(e.toLowerCase()));
+}
+
 // Cross-processor compound insight rules
 export function synthesizeInsights(allInsights: ProcessorInsight[]): ProcessorInsight[] {
   const compound: ProcessorInsight[] = [];
@@ -31,9 +36,7 @@ export function synthesizeInsights(allInsights: ProcessorInsight[]): ProcessorIn
   for (const commitment of overdueCommitments) {
     const entityId = commitment.metadata?.contactName as string | undefined;
     if (!entityId) continue;
-    const relatedWaiting = waitingForReply.find((w) =>
-      w.entities.some((e) => commitment.entities.includes(e))
-    );
+    const relatedWaiting = waitingForReply.find((w) => sharesEntity(w.entities, commitment.entities));
     if (relatedWaiting) {
       compound.push({
         state_key: `compound:execution_risk:${commitment.source_refs[0] ?? entityId}`,
@@ -109,9 +112,7 @@ export function synthesizeInsights(allInsights: ProcessorInsight[]): ProcessorIn
 
   // Relationship deteriorating: cold VIP + negative trend for same contact
   for (const vip of coldVip) {
-    const neg = negativeTrend.find((n) =>
-      n.entities.some((e) => vip.entities.includes(e))
-    );
+    const neg = negativeTrend.find((n) => sharesEntity(n.entities, vip.entities));
     if (neg) {
       compound.push({
         state_key: `compound:rel_deteriorating:${vip.source_refs[0]}`,

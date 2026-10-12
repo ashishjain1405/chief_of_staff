@@ -48,7 +48,9 @@ export function updateConversationContext(
   const newEntities: TrackedEntity[] = [];
   const add = (values: string[], type: TrackedEntity["entity_type"]) => {
     for (const v of values) {
-      if (!existing.some((e) => e.value === v && e.entity_type === type)) {
+      const key = v.toLowerCase();
+      const seen = (e: TrackedEntity) => e.entity_type === type && e.value.toLowerCase() === key;
+      if (!existing.some(seen) && !newEntities.some(seen)) {
         newEntities.push({ value: v, introduced_at_turn: turn, entity_type: type });
       }
     }
