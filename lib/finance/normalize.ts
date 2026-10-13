@@ -116,13 +116,43 @@ for (const [canonical, data] of Object.entries(MERCHANT_DATA)) {
   DOMAIN_LOOKUP[data.domain] = canonical;
 }
 
-export function normalizeMerchant(raw: string): string {
+// Longest first, so "AMAZON PRIME VIDEO" resolves via "AMAZON PRIME" before "AMAZON".
+const PREFIX_ALIASES = Object.keys(ALIAS_LOOKUP).sort((a, b) => b.length - a.length);
+
+export function findKnownMerchant(raw: string): string | null {
   const upper = raw.toUpperCase().trim();
   if (ALIAS_LOOKUP[upper]) return ALIAS_LOOKUP[upper];
-  for (const alias of Object.keys(ALIAS_LOOKUP)) {
-    if (upper.startsWith(alias)) return ALIAS_LOOKUP[alias];
+  // Aliases under 4 characters must end at a word boundary: a bare startsWith
+  // let "VI" claim "Vijay Das" and "MI" claim "Micron Technology". Longer
+  // aliases may still match glued forms such as "AMAZONIN" or "paytmqr5jb@ptys",
+  // which is how card and UPI descriptors usually arrive.
+  for (const alias of PREFIX_ALIASES) {
+    if (!upper.startsWith(alias)) continue;
+    if (alias.length >= 4 || !/[\p{L}\p{N}]/u.test(upper.charAt(alias.length))) return ALIAS_LOOKUP[alias];
   }
-  return raw.trim().replace(/\w\S*/g, (w) => w[0].toUpperCase() + w.slice(1).toLowerCase());
+  return null;
+}
+
+export function normalizeMerchant(raw: string): string {
+  return findKnownMerchant(raw) ?? raw.trim().replace(/\w\S*/g, (w) => w[0].toUpperCase() + w.slice(1).toLowerCase());
+}
+
+// Identity for grouping and comparing merchants, ignoring case and separators:
+// "ZOMATO", "zomato" and "washington_post" / "Washington Post" each collapse.
+export function merchantKey(name: string): string {
+  const key = name.toLowerCase().replace(/[^\p{L}\p{N}]/gu, "");
+  return key || name.trim().toLowerCase();
+}
+
+// PostgREST `or` filter matching any of `names` regardless of case or the
+// separators between words. `*` is PostgREST's ilike wildcard and may match
+// nothing, so "Washington Post" also matches "washingtonpost".
+export function merchantMatchFilter(column: string, names: string[]): string {
+  return names
+    .map((n) => n.split(/[^\p{L}\p{N}]+/u).filter(Boolean).join("*"))
+    .filter(Boolean)
+    .map((pattern) => `${column}.ilike."${pattern}"`)
+    .join(",");
 }
 
 export function getCategoryForMerchant(normalized: string): string | null {

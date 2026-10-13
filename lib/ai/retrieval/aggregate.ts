@@ -1,4 +1,5 @@
 import type { AggregatedFinance } from "./types";
+import { merchantMatchFilter } from "@/lib/finance/normalize";
 
 export async function aggregateTransactions(
   userId: string,
@@ -30,7 +31,7 @@ export async function aggregateTransactions(
   }
 
   if (filters.merchantNames?.length) {
-    query = query.in("merchant_normalized", filters.merchantNames);
+    query = query.or(merchantMatchFilter("merchant_normalized", filters.merchantNames));
   }
 
   let { data, error } = await query.limit(500);
@@ -52,7 +53,7 @@ export async function aggregateTransactions(
       retryQuery = retryQuery.gte("transaction_datetime", since);
     }
     if (filters.merchantNames?.length) {
-      retryQuery = retryQuery.in("merchant_normalized", filters.merchantNames);
+      retryQuery = retryQuery.or(merchantMatchFilter("merchant_normalized", filters.merchantNames));
     }
     const { data: retryData, error: retryError } = await retryQuery.limit(500);
     if (!retryError && retryData?.length) {

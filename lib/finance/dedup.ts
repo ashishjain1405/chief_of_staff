@@ -1,3 +1,5 @@
+import { merchantKey } from "@/lib/finance/normalize";
+
 export type TransactionRaw = {
   id: string;
   user_id: string;
@@ -57,8 +59,8 @@ function isSameAmount(a: number, b: number): boolean {
 
 function merchantSimilarity(a: string | null, b: string | null): number {
   if (!a || !b) return 0;
-  if (a === b) return 1;
-  const al = a.toLowerCase(), bl = b.toLowerCase();
+  const al = merchantKey(a), bl = merchantKey(b);
+  if (al === bl) return 1;
   if (al.includes(bl) || bl.includes(al)) return 0.9;
   return 0;
 }

@@ -1,4 +1,5 @@
 import { ProcessorInsight, RawTransaction } from "./types";
+import { merchantKey } from "@/lib/finance/normalize";
 
 function clamp(v: number): number {
   return Math.min(1, Math.max(0, v));
@@ -11,15 +12,25 @@ function p95(values: number[]): number {
   return sorted[idx];
 }
 
-function spendByMerchant(txns: RawTransaction[]): Map<string, number[]> {
-  const map = new Map<string, number[]>();
+// Keyed by merchantKey so "ZOMATO" and "Zomato" are one merchant; the display
+// name is the group's most common spelling.
+function spendByMerchant(txns: RawTransaction[]): Map<string, { name: string; amounts: number[] }> {
+  const groups = new Map<string, { amounts: number[]; spellings: Map<string, number> }>();
+  const empty = () => ({ amounts: [] as number[], spellings: new Map<string, number>() });
   for (const t of txns) {
-    const key = t.merchant_normalized ?? "Unknown";
-    const arr = map.get(key) ?? [];
-    arr.push(t.amount);
-    map.set(key, arr);
+    const name = t.merchant_normalized ?? "Unknown";
+    const key = merchantKey(name);
+    const g = groups.get(key) ?? empty();
+    g.amounts.push(t.amount);
+    g.spellings.set(name, (g.spellings.get(name) ?? 0) + 1);
+    groups.set(key, g);
   }
-  return map;
+  const result = new Map<string, { name: string; amounts: number[] }>();
+  for (const [key, g] of groups) {
+    const name = [...g.spellings.entries()].sort((a, b) => b[1] - a[1])[0][0];
+    result.set(key, { name, amounts: g.amounts });
+  }
+  return result;
 }
 
 function spendByCategory(txns: RawTransaction[]): Record<string, number> {
@@ -48,9 +59,9 @@ export function processFinance(
   const priorCategorySpend = spendByCategory(priorTransactions);
 
   // Spending spike detection (per merchant)
-  for (const [merchant, amounts] of currentMerchantSpend) {
+  for (const [key, { name: merchant, amounts }] of currentMerchantSpend) {
     const currentTotal = amounts.reduce((a, b) => a + b, 0);
-    const priorAmounts = priorMerchantSpend.get(merchant);
+    const priorAmounts = priorMerchantSpend.get(key)?.amounts;
     const priorAvg = priorAmounts
       ? priorAmounts.reduce((a, b) => a + b, 0) / priorAmounts.length
       : null;
@@ -67,7 +78,7 @@ export function processFinance(
       const priority = clamp(financialImpact * 0.4 + 0.3 + anomalyStrength * 0.3);
 
       insights.push({
-        state_key: `finance:spending_spike:${merchant.toLowerCase().replace(/\s+/g, "_")}`,
+        state_key: `finance:spending_spike:${key}`,
         category: "finance",
         insight_type: "spending_spike",
         priority_score: priority,
@@ -78,7 +89,7 @@ export function processFinance(
           : `${merchant} spending (${currentTotal.toFixed(0)}) is unusually high compared to your recent pattern.`,
         recommended_action: "Review recent transactions for this merchant.",
         entities: [merchant],
-        source_refs: transactions.filter((t) => t.merchant_normalized === merchant).map((t) => t.id ?? "").filter(Boolean),
+        source_refs: transactions.filter((t) => merchantKey(t.merchant_normalized ?? "Unknown") === key).map((t) => t.id ?? "").filter(Boolean),
         confidence: priorAmounts ? 0.85 : 0.65,
         source_count: amounts.length,
         generated_by: "finance_processor",
@@ -222,7 +233,7 @@ export function processFinance(
     const catSpend = spendByCategory(monthTxns);
     const merchantMap = spendByMerchant(monthTxns);
     const merchantSpend: Record<string, number> = {};
-    for (const [m, amounts] of merchantMap) merchantSpend[m] = amounts.reduce((a, b) => a + b, 0);
+    for (const { name, amounts } of merchantMap.values()) merchantSpend[name] = amounts.reduce((a, b) => a + b, 0);
     const topCats = Object.entries(catSpend).sort((a, b) => b[1] - a[1]).slice(0, 3)
       .map(([cat, amt]) => `${cat} ${amt.toLocaleString()}`).join(", ");
     const topMerchants = Object.entries(merchantSpend).sort((a, b) => b[1] - a[1]).slice(0, 3)

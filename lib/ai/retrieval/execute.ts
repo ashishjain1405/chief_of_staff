@@ -1,5 +1,6 @@
 import { searchMemory } from "@/lib/memory/search";
 import type { RetrievalStep } from "./types";
+import { merchantMatchFilter } from "@/lib/finance/normalize";
 
 const MAX_QUERY_BUDGET_MS = 1200;
 
@@ -91,7 +92,7 @@ async function executeStep(
         .order("transaction_datetime", { ascending: false })
         .limit(step.max_results);
 
-      if (f.merchants?.length) q = q.in("merchant_normalized", f.merchants);
+      if (f.merchants?.length) q = q.or(merchantMatchFilter("merchant_normalized", f.merchants));
       if (f.transactionTypes?.length) q = q.in("transaction_type", f.transactionTypes);
       if (f.dateRange) {
         q = q.gte("transaction_datetime", f.dateRange.from).lte("transaction_datetime", f.dateRange.to);

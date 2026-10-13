@@ -5,7 +5,7 @@ import { embedAndStoreChunks, updateCommunicationEmbedding } from "@/lib/memory/
 import { classifySender, getSenderHint, shouldRunStage1, isKnownFinancialDomain } from "@/lib/finance/senders";
 import { operationalQueue } from "@/lib/queues";
 import { extractFinancialTransaction } from "@/lib/ai/extractors/financial";
-import { normalizeMerchant, getCategoryForMerchant, getWalletPaymentModeLabel } from "@/lib/finance/normalize";
+import { normalizeMerchant, findKnownMerchant, getCategoryForMerchant, getWalletPaymentModeLabel } from "@/lib/finance/normalize";
 import { deduplicateRawTransactions, type TransactionRaw } from "@/lib/finance/dedup";
 import { resolveFollowUpDeadline } from "@/lib/tasks/deadline";
 import { LOW_SIGNAL_CATEGORIES } from "@/lib/inbox/categories";
@@ -348,13 +348,14 @@ async function runFinancialExtraction(
 
   // If the email is from a wallet/payment-mode sender, don't record it as a merchant
   const merchantRaw = walletLabel ? null : (raw?.merchant_name ?? null);
-  const deterministicNormalized = merchantRaw ? normalizeMerchant(merchantRaw) : null;
-  // Prefer deterministic normalization; fall back to LLM's suggestion for unknown merchants
-  const isKnownMerchant = deterministicNormalized !== null &&
-    deterministicNormalized !== merchantRaw?.trim().replace(/\w\S*/g, (w) => w[0].toUpperCase() + w.slice(1).toLowerCase());
-  const merchantNormalized = walletLabel
+  // A known alias always wins. The old check treated a merchant as unknown when
+  // its canonical name equalled its title-case ("ZOMATO" -> "Zomato"), so the
+  // LLM's own casing was stored and one merchant split three ways. Unknown
+  // merchants keep the LLM's spelling; grouping compares them by merchantKey.
+  const nameSource = raw?.merchant_normalized?.trim() || merchantRaw?.trim() || null;
+  const merchantNormalized = walletLabel || !nameSource
     ? null
-    : (isKnownMerchant ? deterministicNormalized : (raw?.merchant_normalized ?? deterministicNormalized));
+    : (merchantRaw ? findKnownMerchant(merchantRaw) : null) ?? findKnownMerchant(nameSource) ?? nameSource;
   const paymentMethod = walletLabel ?? raw?.payment_method ?? null;
   const category = merchantNormalized
     ? (getCategoryForMerchant(merchantNormalized) ?? raw?.category ?? null)
