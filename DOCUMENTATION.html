@@ -1,0 +1,1973 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chief of Staff — Product &amp; Technical Reference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --slate-50:  #f8fafc;
+    --slate-100: #f1f5f9;
+    --slate-200: #e2e8f0;
+    --slate-400: #94a3b8;
+    --slate-500: #64748b;
+    --slate-600: #475569;
+    --slate-700: #334155;
+    --slate-800: #1e293b;
+    --slate-900: #0f172a;
+    --indigo-50:  #eef2ff;
+    --indigo-100: #e0e7ff;
+    --indigo-200: #c7d2fe;
+    --indigo-500: #6366f1;
+    --indigo-600: #4f46e5;
+    --indigo-700: #4338ca;
+    --violet-500: #8b5cf6;
+    --violet-600: #7c3aed;
+    --emerald-50:  #ecfdf5;
+    --emerald-100: #d1fae5;
+    --emerald-500: #10b981;
+    --emerald-600: #059669;
+    --amber-50:  #fffbeb;
+    --amber-100: #fef3c7;
+    --amber-500: #f59e0b;
+    --amber-600: #d97706;
+    --rose-50:  #fff1f2;
+    --rose-100: #ffe4e6;
+    --rose-500: #f43f5e;
+    --sky-50:   #f0f9ff;
+    --sky-100:  #e0f2fe;
+    --sky-500:  #0ea5e9;
+  }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--slate-50);
+    color: var(--slate-800);
+    line-height: 1.6;
+    font-size: 15px;
+  }
+
+  /* ── PRINT ── */
+  @media print {
+    body { background: white; font-size: 13px; }
+    .page { box-shadow: none; margin: 0; border-radius: 0; page-break-after: always; min-height: auto; padding: 40px 48px; }
+    .page:last-child { page-break-after: avoid; }
+  }
+
+  /* ── PAGE SHELL ── */
+  .page {
+    max-width: 860px;
+    margin: 36px auto;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0,0,0,.08), 0 1px 4px rgba(0,0,0,.04);
+    padding: 56px 64px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* ── COVER PAGE ── */
+  .cover {
+    background: linear-gradient(135deg, var(--slate-900) 0%, #1a1040 60%, var(--indigo-700) 100%);
+    color: white;
+    min-height: 420px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 56px 64px;
+  }
+  .cover::before {
+    content: '';
+    position: absolute;
+    top: -80px; right: -80px;
+    width: 340px; height: 340px;
+    background: radial-gradient(circle, rgba(99,102,241,.35) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .cover::after {
+    content: '';
+    position: absolute;
+    bottom: -60px; left: -60px;
+    width: 260px; height: 260px;
+    background: radial-gradient(circle, rgba(139,92,246,.3) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .cover-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,.12);
+    border: 1px solid rgba(255,255,255,.2);
+    border-radius: 100px;
+    padding: 6px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    width: fit-content;
+    margin-bottom: 32px;
+  }
+  .cover-badge span { width: 6px; height: 6px; background: var(--emerald-500); border-radius: 50%; }
+  .cover h1 {
+    font-size: 52px;
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -.02em;
+    margin-bottom: 12px;
+    position: relative;
+  }
+  .cover h1 em {
+    font-style: normal;
+    background: linear-gradient(90deg, #a5b4fc, #c4b5fd);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .cover .tagline {
+    font-size: 18px;
+    font-weight: 400;
+    color: rgba(255,255,255,.7);
+    max-width: 520px;
+    line-height: 1.55;
+    margin-bottom: 40px;
+  }
+  .cover-meta {
+    display: flex;
+    gap: 40px;
+    font-size: 13px;
+    color: rgba(255,255,255,.5);
+    position: relative;
+  }
+  .cover-meta strong { display: block; color: rgba(255,255,255,.85); font-size: 15px; font-weight: 600; margin-bottom: 2px; }
+
+  /* ── SECTION HEADINGS ── */
+  .section-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--indigo-500);
+    margin-bottom: 8px;
+  }
+  h2 {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -.02em;
+    color: var(--slate-900);
+    margin-bottom: 20px;
+    line-height: 1.2;
+  }
+  h3 {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--slate-800);
+    margin-bottom: 10px;
+  }
+  p { color: var(--slate-600); margin-bottom: 14px; }
+  p:last-child { margin-bottom: 0; }
+
+  /* ── DIVIDER ── */
+  .divider { height: 1px; background: var(--slate-100); margin: 36px 0; }
+
+  /* ── STAT GRID ── */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin: 24px 0;
+  }
+  .stat-card {
+    background: var(--slate-50);
+    border: 1px solid var(--slate-100);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .stat-number {
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -.02em;
+    color: var(--slate-900);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .stat-label { font-size: 13px; color: var(--slate-500); }
+
+  /* ── FEATURE GRID ── */
+  .feature-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 24px 0;
+  }
+  .feature-card {
+    border: 1px solid var(--slate-100);
+    border-radius: 12px;
+    padding: 20px;
+    background: white;
+  }
+  .feature-card .icon {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    margin-bottom: 12px;
+  }
+  .feature-card h4 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--slate-800);
+    margin-bottom: 6px;
+  }
+  .feature-card p { font-size: 13px; color: var(--slate-500); margin: 0; }
+
+  .icon-indigo { background: var(--indigo-50); }
+  .icon-violet { background: #f5f3ff; }
+  .icon-emerald { background: var(--emerald-50); }
+  .icon-amber   { background: var(--amber-50); }
+  .icon-rose    { background: var(--rose-50); }
+  .icon-sky     { background: var(--sky-50); }
+
+  /* ── USER SEGMENT CHIPS ── */
+  .segment-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 20px 0;
+  }
+  .segment-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 16px;
+    border-radius: 10px;
+    border: 1px solid var(--slate-100);
+  }
+  .segment-icon {
+    font-size: 22px;
+    line-height: 1;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .segment-row h4 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--slate-800);
+    margin-bottom: 3px;
+  }
+  .segment-row p { font-size: 13px; color: var(--slate-500); margin: 0; }
+
+  /* ── LAYER ARCHITECTURE ── */
+  .layer-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 24px 0;
+  }
+  .layer-row {
+    display: flex;
+    align-items: stretch;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--slate-100);
+  }
+  .layer-num {
+    width: 42px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 14px;
+    background: var(--slate-900);
+    color: white;
+  }
+  .layer-body {
+    flex: 1;
+    padding: 14px 18px;
+    background: var(--slate-50);
+  }
+  .layer-body h4 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--slate-800);
+    margin-bottom: 3px;
+  }
+  .layer-body p { font-size: 13px; color: var(--slate-500); margin: 0; }
+  .layer-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 100px;
+    background: var(--indigo-100);
+    color: var(--indigo-700);
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+
+  /* ── TECH STACK TABLE ── */
+  .tech-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin: 20px 0;
+  }
+  .tech-card {
+    background: var(--slate-50);
+    border: 1px solid var(--slate-100);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .tech-card .tech-category {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--slate-400);
+    margin-bottom: 6px;
+  }
+  .tech-card .tech-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--slate-800);
+    margin-bottom: 3px;
+  }
+  .tech-card .tech-note { font-size: 12px; color: var(--slate-500); }
+
+  /* ── POSITIONING TABLE ── */
+  .positioning-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin: 20px 0;
+  }
+  .pos-card {
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid transparent;
+  }
+  .pos-card.them { background: var(--rose-50); border-color: var(--rose-100); }
+  .pos-card.us   { background: var(--emerald-50); border-color: var(--emerald-100); }
+  .pos-card h4 { font-size: 13px; font-weight: 700; margin-bottom: 10px; }
+  .pos-card.them h4 { color: var(--rose-500); }
+  .pos-card.us   h4 { color: var(--emerald-600); }
+  .pos-card ul { list-style: none; padding: 0; font-size: 13px; color: var(--slate-600); }
+  .pos-card ul li { padding: 4px 0; }
+  .pos-card ul li::before { margin-right: 8px; }
+  .pos-card.them ul li::before { content: '✕'; color: var(--rose-500); }
+  .pos-card.us   ul li::before { content: '✓'; color: var(--emerald-600); }
+
+  /* ── PIPELINE FLOW ── */
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin: 20px 0;
+    flex-wrap: wrap;
+  }
+  .flow-step {
+    background: var(--indigo-50);
+    border: 1px solid var(--indigo-200);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--indigo-700);
+    white-space: nowrap;
+  }
+  .flow-arrow {
+    color: var(--slate-300);
+    font-size: 18px;
+    padding: 0 6px;
+    flex-shrink: 0;
+  }
+
+  /* ── CALLOUT ── */
+  .callout {
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin: 20px 0;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .callout-indigo { background: var(--indigo-50); border-left: 3px solid var(--indigo-500); color: var(--slate-700); }
+  .callout-emerald { background: var(--emerald-50); border-left: 3px solid var(--emerald-500); color: var(--slate-700); }
+
+  /* ── PAGE FOOTER ── */
+  .page-footer {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--slate-100);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: var(--slate-400);
+  }
+  .page-footer strong { color: var(--slate-600); }
+
+  /* ── DETAIL TABLE ── */
+  .detail-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin: 16px 0;
+  }
+  .detail-table th {
+    background: var(--slate-900);
+    color: white;
+    padding: 9px 14px;
+    text-align: left;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: .03em;
+  }
+  .detail-table th:first-child { border-radius: 8px 0 0 0; }
+  .detail-table th:last-child  { border-radius: 0 8px 0 0; }
+  .detail-table td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--slate-100);
+    vertical-align: top;
+    color: var(--slate-600);
+  }
+  .detail-table tr:last-child td { border-bottom: none; }
+  .detail-table tr:nth-child(even) td { background: var(--slate-50); }
+  .detail-table td:first-child { font-weight: 600; color: var(--slate-800); }
+  .detail-table code {
+    background: var(--indigo-50);
+    color: var(--indigo-700);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 11px;
+  }
+
+  /* ── WEIGHT TABLE ── */
+  .weight-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    margin: 16px 0;
+  }
+  .weight-table th {
+    background: var(--slate-800);
+    color: rgba(255,255,255,.7);
+    padding: 8px 12px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+  .weight-table th:first-child { text-align: left; background: var(--slate-900); border-radius: 8px 0 0 0; }
+  .weight-table th:last-child  { border-radius: 0 8px 0 0; }
+  .weight-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--slate-100);
+    text-align: center;
+    color: var(--slate-600);
+    font-variant-numeric: tabular-nums;
+  }
+  .weight-table td:first-child { text-align: left; font-weight: 700; color: var(--slate-800); background: var(--slate-50); }
+  .weight-table tr:last-child td { border-bottom: none; }
+  .w-hi { color: var(--indigo-700); font-weight: 700; }
+  .w-med { color: var(--slate-700); }
+  .w-lo { color: var(--slate-400); }
+
+  /* ── SOURCE TABLE ── */
+  .source-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    margin: 14px 0;
+  }
+  .source-table th {
+    background: var(--slate-100);
+    color: var(--slate-600);
+    padding: 7px 12px;
+    text-align: left;
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+  }
+  .source-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--slate-100);
+    font-size: 12px;
+    color: var(--slate-600);
+    vertical-align: top;
+  }
+  .source-table tr:last-child td { border-bottom: none; }
+  .source-table td:first-child { font-weight: 700; color: var(--slate-800); font-family: 'SF Mono', monospace; font-size: 11px; }
+  .source-table .num { font-variant-numeric: tabular-nums; text-align: right; }
+  .badge-sm {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 100px;
+    vertical-align: middle;
+  }
+  .badge-indigo { background: var(--indigo-100); color: var(--indigo-700); }
+  .badge-emerald { background: var(--emerald-100); color: var(--emerald-600); }
+  .badge-amber  { background: var(--amber-100); color: var(--amber-600); }
+  .badge-violet { background: #ede9fe; color: #6d28d9; }
+  .badge-slate  { background: var(--slate-100); color: var(--slate-600); }
+
+  /* ── FORMULA BOX ── */
+  .formula-box {
+    background: var(--slate-900);
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin: 12px 0;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 12px;
+    color: #a5b4fc;
+    line-height: 1.8;
+  }
+  .formula-box .comment { color: #475569; }
+  .formula-box .hl { color: #6ee7b7; }
+
+  /* ── INTENT GRID ── */
+  .intent-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    margin: 14px 0;
+  }
+  .intent-chip {
+    background: var(--slate-50);
+    border: 1px solid var(--slate-100);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+  .intent-chip .iname {
+    font-weight: 700;
+    color: var(--slate-800);
+    font-family: 'SF Mono', monospace;
+    font-size: 11px;
+    margin-bottom: 3px;
+  }
+  .intent-chip .idesc { color: var(--slate-500); font-size: 11px; }
+
+  /* ── PIPELINE STAGE ── */
+  .pipeline {
+    margin: 20px 0;
+    position: relative;
+  }
+  .pipeline::before {
+    content: '';
+    position: absolute;
+    left: 20px; top: 24px; bottom: 24px;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--indigo-200), var(--violet-500));
+  }
+  .pipe-step {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 14px;
+    align-items: flex-start;
+  }
+  .pipe-dot {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: white;
+    border: 2px solid var(--indigo-300);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 14px;
+    color: var(--indigo-600);
+    position: relative;
+    z-index: 1;
+  }
+  .pipe-content {
+    flex: 1;
+    background: var(--slate-50);
+    border: 1px solid var(--slate-100);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-top: 4px;
+  }
+  .pipe-content h4 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--slate-800);
+    margin-bottom: 4px;
+  }
+  .pipe-content p { font-size: 12.5px; color: var(--slate-500); margin: 0 0 6px; }
+  .pipe-content p:last-child { margin-bottom: 0; }
+  .pipe-content ul {
+    margin: 6px 0 0 0;
+    padding-left: 16px;
+    font-size: 12px;
+    color: var(--slate-500);
+  }
+  .pipe-content ul li { margin-bottom: 3px; }
+
+  /* ── LAYER H3 ── */
+  .layer-h3 {
+    color: var(--indigo-600);
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 14px;
+    font-size: 17px;
+    font-weight: 700;
+  }
+  .layer-dot {
+    background: var(--slate-900);
+    color: white;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+
+  /* ── TABLE SCROLL WRAPPER ── */
+  .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 16px 0; border-radius: 8px; }
+  .table-wrap .detail-table,
+  .table-wrap .weight-table,
+  .table-wrap .source-table { margin: 0; }
+
+  /* ══════════════════════════════════════
+     MOBILE — max 640 px
+  ══════════════════════════════════════ */
+  @media (max-width: 640px) {
+    body { font-size: 14px; }
+
+    .page {
+      margin: 10px;
+      padding: 28px 18px;
+      border-radius: 12px;
+    }
+
+    /* Cover */
+    .cover { padding: 32px 20px; min-height: auto; }
+    .cover h1 { font-size: 34px; }
+    .cover .tagline { font-size: 15px; margin-bottom: 24px; max-width: 100%; }
+    .cover-meta { flex-direction: column; gap: 12px; }
+    .cover-meta > div { display: flex; gap: 8px; align-items: baseline; }
+    .cover-meta strong { display: inline; font-size: 13px; }
+
+    /* Headings */
+    h2 { font-size: 21px; }
+    h3 { font-size: 15px; }
+
+    /* Layer h3 headings */
+    .layer-h3 { font-size: 15px; gap: 6px; }
+
+    /* Stat grid → single column */
+    .stat-grid { grid-template-columns: 1fr; gap: 10px; }
+
+    /* Feature grid → single column */
+    .feature-grid { grid-template-columns: 1fr !important; }
+
+    /* Tech grid → 2 cols (still fits) */
+    .tech-grid { grid-template-columns: 1fr 1fr; }
+
+    /* Positioning grid → single column */
+    .positioning-grid { grid-template-columns: 1fr; gap: 10px; }
+
+    /* Intent grid → 2 cols */
+    .intent-grid { grid-template-columns: 1fr 1fr; }
+
+    /* Tables — scroll horizontally */
+    .detail-table, .weight-table, .source-table { min-width: 480px; font-size: 11px; }
+    .detail-table th, .detail-table td,
+    .source-table th, .source-table td { padding: 7px 10px; }
+    .weight-table th, .weight-table td { padding: 7px 8px; }
+
+    /* Data flow pills wrap cleanly */
+    .flow { gap: 4px; }
+    .flow-step { white-space: normal; font-size: 12px; padding: 7px 10px; }
+
+    /* Pipeline connector stays aligned */
+    .pipeline::before { left: 19px; }
+
+    /* Page footer stacks on very small screens */
+    .page-footer { flex-direction: column; gap: 3px; align-items: flex-start; }
+
+    /* Callout smaller font */
+    .callout { font-size: 13px; }
+
+    /* Divider less vertical space */
+    .divider { margin: 22px 0; }
+
+    /* Pipe content badges wrap inside h4 */
+    .pipe-content h4 { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+  }
+
+  /* ── REFERENCE ADDITIONS ── */
+  .badge-rose { background: var(--rose-50); color: var(--rose-500); }
+  .toc { columns: 2; column-gap: 40px; margin-top: 22px; font-size: 13.5px; }
+  .toc-part { font-weight: 700; color: var(--indigo-700); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; margin: 14px 0 6px; break-after: avoid; }
+  .toc ol { margin: 0 0 6px 18px; padding: 0; color: var(--slate-600); }
+  .toc li { margin: 3px 0; break-inside: avoid; }
+  .schema-map { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 10.5px; line-height: 1.6; white-space: pre; background: var(--slate-50); border: 1px solid var(--slate-200); border-radius: 10px; padding: 16px 18px; color: var(--slate-700); overflow-x: auto; }
+  .schema-table { table-layout: fixed; width: 100%; }
+  .schema-table th:nth-child(1), .schema-table td:nth-child(1) { width: 19%; overflow-wrap: anywhere; }
+  .schema-table th:nth-child(2), .schema-table td:nth-child(2) { width: 41%; }
+  .schema-table th:nth-child(3), .schema-table td:nth-child(3) { width: 22%; }
+  .schema-table code { overflow-wrap: anywhere; }
+  .api-table tr.group td { background: var(--slate-50); font-weight: 700; color: var(--slate-600); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; }
+  .detail-table td code { white-space: normal; overflow-wrap: anywhere; }
+  .api-table small { color: var(--slate-500); }
+  .api-table { table-layout: fixed; width: 100%; }
+  .api-table th:nth-child(1), .api-table td:nth-child(1) { width: 30%; }
+  .api-table th:nth-child(2), .api-table td:nth-child(2) { width: 17%; }
+  .api-table th:nth-child(3), .api-table td:nth-child(3) { width: 19%; }
+  .api-table code { overflow-wrap: anywhere; white-space: normal; }
+  .api-table tr.group td { width: auto; }
+</style>
+</head>
+<body>
+
+<div class="page cover">
+  <div>
+    <div class="cover-badge"><span></span> Product &amp; Technical Reference · Confidential</div>
+    <h1>Chief of<br><em>Staff</em></h1>
+    <p class="tagline">An AI executive assistant over Gmail, Google Calendar and email-borne finance data — it triages what arrives, tracks what you owe, and answers questions grounded in your own records.</p>
+  </div>
+  <div class="cover-meta">
+    <div><strong>Category</strong>Personal AI assistant</div>
+    <div><strong>Platform</strong>Next.js · Supabase · BullMQ</div>
+    <div><strong>Status</strong>Early access · single user</div>
+    <div><strong>Reflects code at</strong><code style="color:inherit;background:none">main @ 76d7df5</code> · 18 Oct 2026</div>
+  </div>
+</div>
+
+<div class="page">
+  <div class="section-label">About this document</div>
+  <h2>One source of truth, product and technical</h2>
+
+  <p>This document replaces the earlier <em>Product Overview</em> and <em>Architecture &amp; Flows</em> write-ups, which overlapped and had begun to disagree. Every technical claim below was checked against the source on <code>main</code> and, where it matters, against the live database. Where the product intent and the running system differ, the document says so instead of describing the intent as fact.</p>
+
+  <div class="callout callout-indigo">
+    <strong>How to read status.</strong> Features are marked <span class="badge-sm badge-emerald">Live</span> when they run in production today, <span class="badge-sm badge-amber">Partial</span> when they run with a known defect, and <span class="badge-sm badge-rose">Not live</span> when the code exists but nothing triggers it. Row counts are from the production database on 18 October 2026.
+  </div>
+
+  <div class="toc">
+    <div class="toc-part">Part I — Product</div>
+    <ol>
+      <li>The problem, and who it is for</li>
+      <li>Modules and market position</li>
+      <li>Why this is not an AI wrapper</li>
+      <li>Feature status at a glance</li>
+    </ol>
+    <div class="toc-part">Part II — Architecture</div>
+    <ol start="5">
+      <li>System map</li>
+      <li>Ingestion: how data gets in</li>
+      <li>Processing: how email becomes structured data</li>
+      <li>Models: what each one does, and why</li>
+      <li>Ask AI, layers 1–2: classification and resolution</li>
+      <li>Ask AI, layers 3–5: planning, retrieval, ranking, answer</li>
+      <li>The operational-insights engine</li>
+    </ol>
+    <div class="toc-part">Part III — Reference</div>
+    <ol start="12">
+      <li>Data model: overview and ingestion tables</li>
+      <li>Data model: derived tables, functions and security</li>
+      <li>HTTP API and pages</li>
+      <li>External services, OAuth and tokens</li>
+      <li>Background worker and queues</li>
+      <li>Configuration, deployment and operations</li>
+    </ol>
+    <div class="toc-part">Part IV — Quality and risk</div>
+    <ol start="18">
+      <li>Correctness log</li>
+      <li>Security review</li>
+      <li>Trade-offs taken</li>
+      <li>Known issues and the path forward</li>
+    </ol>
+  </div>
+  <div class="page-footer"><strong>Chief of Staff</strong><span>About this document — page 2 of 26</span></div>
+</div>
+
+<div class="page">
+  <div class="section-label">Part I · Product</div>
+  <h2>Turn information overload into focused action</h2>
+
+  <p>Knowledge workers — founders, operators, senior executives — manage hundreds of emails a week, attend back-to-back meetings, and are expected to track every commitment made across both. The cognitive cost of staying on top of this is enormous.</p>
+
+  <p><strong style="color:var(--slate-800)">Chief of Staff</strong> connects to your Gmail and Google Calendar and does the work for you. It triages every email with AI, turns the ones that need you into tasks, extracts and de-duplicates the transactions buried in bank alerts and receipts, and answers questions about all of it through a conversational Ask AI interface grounded in your own records. Zoom transcripts, commitment tracking and a daily brief are built but not yet switched on — see the status page.</p>
+
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-number">22</div>
+      <div class="stat-label">Email categories automatically classified</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">5-layer</div>
+      <div class="stat-label">AI retrieval pipeline behind "Ask AI"</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">Real-time</div>
+      <div class="stat-label">Gmail push via Pub/Sub, not polling</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <div class="section-label">Target User Segment</div>
+  <h2>Who it's built for</h2>
+
+  <div class="segment-list">
+    <div class="segment-row">
+      <div class="segment-icon">🧑‍💼</div>
+      <div>
+        <h4>Startup founders &amp; early-stage CEOs</h4>
+        <p>Wearing every hat — investor comms, hiring, sales, product. No EA. Need to know what's urgent, what's overdue, and what they promised someone three weeks ago.</p>
+      </div>
+    </div>
+    <div class="segment-row">
+      <div class="segment-icon">🏢</div>
+      <div>
+        <h4>Senior executives and VPs at growth companies</h4>
+        <p>100+ emails a day, a shared assistant who covers scheduling but not analysis. Need a private layer that tracks commitments, spend, and relationship health.</p>
+      </div>
+    </div>
+    <div class="segment-row">
+      <div class="segment-icon">🔍</div>
+      <div>
+        <h4>Solo operators and consultants</h4>
+        <p>Managing multiple clients, tracking invoices, subscriptions, travel. Want the intelligence of an EA at a fraction of the cost, accessible through natural language.</p>
+      </div>
+    </div>
+  </div>
+  <div class="page-footer"><strong>Chief of Staff</strong><span>Part I · Product — page 3 of 26</span></div>
+</div>
+
+<div class="page">
+  <div class="section-label">Part I · Product</div>
+  <h2>Modules: what the user sees</h2>
+
+  <p>Each module is a page under <code>app/(dashboard)/</code>. Status reflects whether the data behind it is actually being produced, not whether the page renders.</p>
+
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="icon icon-indigo">📥</div>
+      <h4>Smart Inbox <span class="badge-sm badge-emerald">Live</span></h4>
+      <p>Every email classified into one of 22 categories with a sidebar of counts. Per-email actions: mark done, move to spam, one-click unsubscribe, and an AI-drafted reply that is sent through Gmail on the original thread.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon icon-violet">✅</div>
+      <h4>Tasks <span class="badge-sm badge-emerald">Live</span></h4>
+      <p>Emails that need the user become tasks, with a due date taken from the email and a priority from its importance. Marketing, alerts and repeat nudges are filtered out; one task per thread and per sender's ask.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon icon-emerald">💰</div>
+      <h4>Finance <span class="badge-sm badge-emerald">Live</span></h4>
+      <p>Transactions extracted from bank alerts, card and UPI notifications and receipts; the bank alert and the merchant receipt for one purchase are merged into one row. Totals by category and month, across 100+ normalised merchants.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon icon-sky">🤖</div>
+      <h4>Ask AI <span class="badge-sm badge-emerald">Live</span></h4>
+      <p>Questions in natural language — "how much did I spend on Zomato last month", then "and in August?" — answered from retrieved rows, streamed. Follow-ups carry the previous turn's people, merchants and dates; unrelated questions start fresh.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon icon-amber">🗓️</div>
+      <h4>Meetings <span class="badge-sm badge-amber">Partial</span></h4>
+      <p>Google Calendar events sync on change via a push channel. Zoom transcript summaries — decisions, action items, follow-ups — are built but do not run: the job is put on the wrong queue.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon icon-rose">📈</div>
+      <h4>Dashboard insights <span class="badge-sm badge-emerald">Live</span></h4>
+      <p>Precomputed alerts: spending spikes, duplicate charges, bills due, overdue tasks, meeting overload — recomputed 30 seconds after each burst of processed email.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon icon-rose">📊</div>
+      <h4>Daily Brief <span class="badge-sm badge-rose">Not live</span></h4>
+      <p>A morning summary written by GPT-4o and emailed via Resend. The generator exists; nothing schedules it, so no brief has ever been produced.</p>
+    </div>
+    <div class="feature-card">
+      <div class="icon icon-violet">🤝</div>
+      <h4>Commitments &amp; Relationships <span class="badge-sm badge-rose">Not live</span></h4>
+      <p>Commitments are behind a feature flag until sent mail is ingested — a commitment is something you wrote. The Relationships page reads a table nothing yet writes to.</p>
+    </div>
+  </div>
+  <div class="page-footer"><strong>Chief of Staff</strong><span>Part I · Product — page 4 of 26</span></div>
+</div>
+
+<div class="page">
+  <div class="section-label">Part I · Product · Market position</div>
+  <h2>Where Chief of Staff sits in the landscape</h2>
+
+  <p>The executive assistant software market ranges from inbox tools (Superhuman, Spark) to meeting intelligence (Otter.ai, Fireflies), to AI chat (ChatGPT, Perplexity). None of them unify all three and ground answers in <em>your actual data</em>.</p>
+
+  <div class="positioning-grid">
+    <div class="pos-card them">
+      <h4>Email tools (Superhuman, Spark)</h4>
+      <ul>
+        <li>Inbox prioritisation only</li>
+        <li>No meeting intelligence</li>
+        <li>No financial visibility</li>
+        <li>No AI over your history</li>
+      </ul>
+    </div>
+    <div class="pos-card them">
+      <h4>Meeting AI (Otter, Fireflies)</h4>
+      <ul>
+        <li>Transcripts only</li>
+        <li>No email or finance data</li>
+        <li>No commitment tracking</li>
+        <li>No cross-channel Q&amp;A</li>
+      </ul>
+    </div>
+    <div class="pos-card us">
+      <h4>Chief of Staff</h4>
+      <ul>
+        <li>Email + meetings + finance</li>
+        <li>Tasks extracted across sources</li>
+        <li>Natural language over all data</li>
+        <li>Precomputed alerts across domains</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout callout-indigo">
+    <strong>Core differentiator:</strong> Every other tool is a lens on one data source. Chief of Staff is the first layer that unifies email, calendar, and financial signals into a single operational view — and makes that view queryable in natural language.
+  </div>
+  <div class="page-footer"><strong>Chief of Staff</strong><span>Part I · Product · Market position — page 5 of 26</span></div>
+</div>
+
+<div class="page">
+  <div class="section-label">Part I · Product · Defensibility</div>
+  <h2>Why this is not just an AI wrapper</h2>
+
+  <p>The most common criticism of AI productivity tools is that they're thin wrappers — paste an API key, prompt an LLM, ship a product. Chief of Staff is architected differently at every layer. The intelligence is not in the prompt; it's in the data infrastructure built around it.</p>
+
+  <div class="divider" style="margin:20px 0"></div>
+
+  <!-- POINT 1 -->
+  <div class="segment-row" style="margin-bottom:12px; align-items:flex-start">
+    <div style="width:36px;height:36px;border-radius:8px;background:var(--indigo-50);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🏗️</div>
+    <div>
+      <h4 style="font-size:15px;font-weight:700;color:var(--slate-800);margin-bottom:5px">A purpose-built data pipeline, not a chat window over your inbox</h4>
+      <p style="font-size:13px;color:var(--slate-500);margin:0">Every email is parsed, normalised, importance-scored, and routed through a 5-stage worker pipeline long before Ask AI is asked anything about it. Contacts are upserted, financial transactions are extracted and deduplicated, and actionable mail becomes tasks linked to the sender — all asynchronously in a background worker, before you ask a single question. A wrapper sends your raw inbox to GPT. Chief of Staff sends structured, pre-resolved facts.</p>
+    </div>
+  </div>
+
+  <!-- POINT 2 -->
+  <div class="segment-row" style="margin-bottom:12px; align-items:flex-start">
+    <div style="width:36px;height:36px;border-radius:8px;background:var(--emerald-50);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🧠</div>
+    <div>
+      <h4 style="font-size:15px;font-weight:700;color:var(--slate-800);margin-bottom:5px">The retrieval layer replaces hallucination guards with precision</h4>
+      <p style="font-size:13px;color:var(--slate-500);margin:0">AI wrappers ask GPT "what did I spend last month?" and hope the answer isn't invented. Chief of Staff classifies the intent, resolves the merchant and date range to DB identifiers, queries <code>transactions_normalized</code> directly, and only then passes verified rows to the LLM as grounded evidence. The model is instructed to answer only from that evidence, but the larger safeguard is upstream: the totals it reports were computed in SQL, not by the model.</p>
+    </div>
+  </div>
+
+  <!-- POINT 3 -->
+  <div class="segment-row" style="margin-bottom:12px; align-items:flex-start">
+    <div style="width:36px;height:36px;border-radius:8px;background:var(--amber-50);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🔀</div>
+    <div>
+      <h4 style="font-size:15px;font-weight:700;color:var(--slate-800);margin-bottom:5px">Cross-source reasoning that no single-integration tool can replicate</h4>
+      <p style="font-size:13px;color:var(--slate-500);margin:0">An email thread with a person, the calendar events they attend and the transactions with a merchant are retrieved by separate, purpose-built queries and ranked against each other in a single answer. People resolve to <code>contacts</code> rows and merchants to canonical names before any query runs. No competitor can reproduce this without rebuilding the same multi-source ingestion, entity resolution, and unified schema — months of infrastructure work, not a prompt tweak.</p>
+    </div>
+  </div>
+
+  <!-- POINT 4 -->
+  <div class="segment-row" style="margin-bottom:12px; align-items:flex-start">
+    <div style="width:36px;height:36px;border-radius:8px;background:#f5f3ff;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📈</div>
+    <div>
+      <h4 style="font-size:15px;font-weight:700;color:var(--slate-800);margin-bottom:5px">Precomputed operational state, not real-time inference on every load</h4>
+      <p style="font-size:13px;color:var(--slate-500);margin:0">Spending spikes, duplicate charges, bills due, overdue tasks, meeting overload and subscription renewals are computed by eight deterministic processors and a synthesis pass that combines their signals — no model call, and not re-inferred from raw text each time you open the dashboard. The <code>operational_insights</code> table is a priority-scored feed that makes the dashboard instant and the Ask AI responses richer. A wrapper has no equivalent; it re-runs inference on every page load.</p>
+    </div>
+  </div>
+
+  <!-- POINT 5 -->
+  <div class="segment-row" style="align-items:flex-start">
+    <div style="width:36px;height:36px;border-radius:8px;background:var(--rose-50);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🔒</div>
+    <div>
+      <h4 style="font-size:15px;font-weight:700;color:var(--slate-800);margin-bottom:5px">Encrypted credentials and database-enforced isolation</h4>
+      <p style="font-size:13px;color:var(--slate-500);margin:0">OAuth tokens are AES-256-GCM encrypted at rest. Every table carries a Postgres Row-Level Security policy, so a signed-in session can only ever read its own rows. Background work runs with a service-role key that bypasses RLS, so ownership checks in that code carry the isolation instead. Email text is sent to OpenAI for triage and extraction, with quoted replies stripped and the body capped at 3,000 characters; OAuth credentials never leave the server.</p>
+    </div>
+  </div>
+
+  <div class="callout callout-indigo" style="margin-top:20px">
+    <strong>The test:</strong> If you removed the LLM and replaced it with a different model tomorrow, the product would still work — because the value is in the pipeline, the schema, and the accumulated structured data. The LLM is the final rendering step, not the product.
+  </div>
+  <div class="page-footer"><strong>Chief of Staff</strong><span>Part I · Product · Defensibility — page 6 of 26</span></div>
+</div>
+
+<div class="page">
+  <div class="section-label">Part I · Product</div>
+  <h2>Feature status at a glance</h2>
+
+  <p>What runs in production today, with the evidence from the live database. "Not live" means the code is present and reviewed here, but no trigger, schedule or flag currently causes it to run.</p>
+
+  <div class="table-wrap">
+  <table class="detail-table">
+    <thead><tr><th>Capability</th><th>Status</th><th>Evidence (18 Oct 2026)</th><th>What is missing</th></tr></thead>
+    <tbody>
+      <tr><td>Gmail ingestion (push + backfill)</td><td><span class="badge-sm badge-emerald">Live</span></td><td>3 893 emails in <code>communications</code>; 870 <code>raw_events</code></td><td>Depends on the Google token staying alive — two silent outages so far</td></tr>
+      <tr><td>AI triage &amp; categories</td><td><span class="badge-sm badge-emerald">Live</span></td><td>Every stored email has a category and summary; 3 887 memory chunks</td><td>—</td></tr>
+      <tr><td>Task creation</td><td><span class="badge-sm badge-emerald">Live</span></td><td>143 tasks: 80 pending, 2 done, 61 dismissed</td><td>—</td></tr>
+      <tr><td>Financial extraction &amp; dedup</td><td><span class="badge-sm badge-emerald">Live</span></td><td>672 raw → 363 normalised transactions</td><td>Dedup window anchored on "now"; old backfilled rows need a manual pass</td></tr>
+      <tr><td>Ask AI (single turn)</td><td><span class="badge-sm badge-emerald">Live</span></td><td>Streaming answers over 8 retrieval sources</td><td>—</td></tr>
+      <tr><td>Ask AI follow-ups</td><td><span class="badge-sm badge-emerald">Live</span></td><td>Context round-trips on message metadata; 7 live two-turn scenarios verified</td><td>Follow-up detection is rule-based; phrasings outside the rules start fresh</td></tr>
+      <tr><td>Calendar sync</td><td><span class="badge-sm badge-emerald">Live</span></td><td>22 meetings from Google Calendar</td><td>No paging past 50 events; no recovery from an expired sync token</td></tr>
+      <tr><td>Inbox actions (spam, unsubscribe, done)</td><td><span class="badge-sm badge-emerald">Live</span></td><td>Routes under <code>/api/actions/*</code></td><td>Unsubscribe fetches sender-supplied URLs server-side</td></tr>
+      <tr><td>AI reply drafts &amp; send</td><td><span class="badge-sm badge-emerald">Live</span></td><td><code>/api/drafts</code>, <code>/api/actions/send-reply</code>; 0 drafts stored to date</td><td>Unused so far</td></tr>
+      <tr><td>Operational insights</td><td><span class="badge-sm badge-emerald">Live</span></td><td>174 active insights after the 18 Oct recompute</td><td>Was frozen 10 Sep – 18 Oct by a stuck queue key; fixed</td></tr>
+      <tr><td>Zoom transcripts &amp; meeting summaries</td><td><span class="badge-sm badge-rose">Not live</span></td><td>0 meetings with <code>source = 'zoom'</code></td><td>Job is enqueued on <code>summarize</code>, whose handler expects an email</td></tr>
+      <tr><td>Daily brief</td><td><span class="badge-sm badge-rose">Not live</span></td><td>0 rows in <code>daily_briefs</code></td><td>No schedule registers the job</td></tr>
+      <tr><td>Commitments</td><td><span class="badge-sm badge-rose">Not live</span></td><td>0 rows; <code>FEATURES.commitments = false</code></td><td>Sent-mail ingestion</td></tr>
+      <tr><td>Relationships &amp; follow-up cadence</td><td><span class="badge-sm badge-rose">Not live</span></td><td>0 rows in <code>relationships</code></td><td>No code writes the table</td></tr>
+      <tr><td>Slack</td><td><span class="badge-sm badge-rose">Not live</span></td><td>Webhook verifies and stores events</td><td>No worker consumes <code>slack-raw</code>; Settings card links to <code>#</code></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="callout callout-indigo">
+    <strong>The pattern.</strong> Every gap in this table is silent. Nothing errors when the daily brief is never scheduled or when meeting jobs land on the wrong queue — the worker reports healthy throughout. Part IV lists the fixes and their order.
+  </div>
+  <div class="page-footer"><strong>Chief of Staff</strong><span>Part I · Product — page 7 of 26</span></div>
+</div>
+
+<div class="page">
+  <div class="section-label">Part II · Architecture</div>
+  <h2>System map</h2>
+
+  <p>Chief of Staff is an ingestion and retrieval pipeline with a chat surface on top — not a chat application with tools attached. The expensive, error-prone work happens asynchronously against raw source data, so by the time a user asks a question the hard problems are already solved and stored.</p>
+
+  <div class="flow">
+    <div class="flow-step">Gmail · Calendar push</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">Vercel webhook</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">Redis / BullMQ</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">Railway worker</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">Supabase Postgres + pgvector</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-step">Next.js UI · Ask AI</div>
+  </div>
+
+  <p>There are four subsystems, and they fail independently:</p>
+
+  <div class="table-wrap">
+  <table class="detail-table">
+    <thead><tr><th>Subsystem</th><th>Runs on</th><th>Trigger</th><th>If it stops</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Ingestion</strong> — get raw email and calendar in</td><td>Vercel (webhooks) + local scripts (backfill)</td><td>Gmail push via Pub/Sub; Calendar push channel; manual backfill</td><td>New email stops arriving. Silent — it has gone unnoticed for three months, then 18 days, then 2 days.</td></tr>
+      <tr><td><strong>Processing</strong> — turn raw into structured</td><td>Railway worker (BullMQ)</td><td>Queue jobs</td><td>Email arrives with no summary, category or embedding. Visible as blank rows.</td></tr>
+      <tr><td><strong>Retrieval</strong> — answer questions</td><td>Vercel (<code>POST /api/ask</code>)</td><td>User query</td><td>Ask AI fails loudly. The only subsystem whose failure is obvious.</td></tr>
+      <tr><td><strong>Reconciliation</strong> — repair the above</td><td>Railway worker (repeat jobs)</td><td>Every 6 hours</td><td>Transient failures become permanent data loss.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3 style="margin-top:24px">Data path, end to end</h3>
+  <p style="font-size:13px">Gmail &rarr; Pub/Sub topic <code>gmail-push</code> &rarr; push subscription &rarr; <code>POST /api/webhooks/gmail</code> &rarr; <code>raw_events</code> + <code>email-raw</code> job &rarr; worker fetches the full message &rarr; <code>contacts</code> + <code>communications</code> &rarr; <code>summarize</code> job: triage &rarr; conditional financial extraction &rarr; <code>transactions_raw</code> &rarr; dedup &rarr; <code>transactions_normalized</code> &rarr; embeddings &rarr; <code>memory_chunks</code> &rarr; task gate &rarr; <code>tasks</code> &rarr; <code>compute-operational-state</code> job &rarr; <code>operational_insights</code> &rarr; surfaced in Inbox, Tasks, Finance, Dashboard and Ask AI.</p>
+
+  <div class="divider"></div>
+  <div class="section-label">Technology stack</div>
+
+  <div class="tech-grid">
+    <div class="tech-card"><div class="tech-category">Frontend</div><div class="tech-name">Next.js 16.2 · React 19.2</div><div class="tech-note">App Router, Server Components, TypeScript, Tailwind CSS 4, shadcn/ui. <code>proxy.ts</code> replaces middleware.</div></div>
+    <div class="tech-card"><div class="tech-category">Database &amp; auth</div><div class="tech-name">Supabase Postgres</div><div class="tech-note">pgvector (exact KNN), Row-Level Security on every table, Supabase Auth (Google OAuth + magic link)</div></div>
+    <div class="tech-card"><div class="tech-category">Background jobs</div><div class="tech-name">BullMQ 5 · ioredis</div><div class="tech-note">Redis via <code>REDIS_URL</code>; delayed and repeat jobs, dedup keys, 3 attempts with exponential backoff</div></div>
+    <div class="tech-card"><div class="tech-category">AI — reasoning</div><div class="tech-name">OpenAI GPT-4o</div><div class="tech-note">Ask AI answers (Vercel AI SDK 6, streaming), reply drafts, meeting summaries, daily brief</div></div>
+    <div class="tech-card"><div class="tech-category">AI — classification</div><div class="tech-name">GPT-4o-mini</div><div class="tech-note">Email triage, financial and commitment extraction, intent classification</div></div>
+    <div class="tech-card"><div class="tech-category">Embeddings</div><div class="tech-name">text-embedding-3-small</div><div class="tech-note">1 024 dimensions, 2 048-character chunks with 200 overlap</div></div>
+    <div class="tech-card"><div class="tech-category">Integrations</div><div class="tech-name">googleapis 171 · Zoom · Resend</div><div class="tech-note">Gmail (push watch, history, send), Calendar (push channel, sync token), Zoom S2S OAuth, Resend email</div></div>
+    <div class="tech-card"><div class="tech-category">Hosting</div><div class="tech-name">Vercel · Railway</div><div class="tech-note">Web on Vercel; worker on Railway (Nixpacks, built from <code>main</code>); Node 24 pinned via <code>engines</code></div></div>
+    <div class="tech-card"><div class="tech-category">Security</div><div class="tech-name">AES-256-GCM</div><div class="tech-note">OAuth tokens encrypted at rest with a 32-byte key; random 12-byte IV per value</div></div>
+  </div>
+  <div class="page-footer"><strong>Chief of Staff</strong><span>Part II · Architecture — page 8 of 26</span></div>
+</div>
+
+<div class="page">
+  <div class="section-label">Part II · Architecture · Ingestion</div>
+  <h2>Ingestion: how data gets in</h2>
+
+  <p>Two paths write email to <code>communications</code>, and they are not equivalent. Understanding which one is running explains most operational surprises.</p>
+
+  <div class="pipe-step">
+    <div class="pipe-dot">A</div>
+    <div class="pipe-content">
+      <h4>Live path — Gmail push <span class="badge-sm badge-emerald" style="margin-left:6px">near real-time</span></h4>
+      <p>A registered Gmail <code>watch</code> publishes mailbox changes to a Pub/Sub topic; a push subscription forwards them to <code>/api/webhooks/gmail</code>. The route resolves the account, walks Gmail history since the stored cursor, filters to messages with <code>INBOX</code> and without <code>SENT</code>, writes <code>raw_events</code>, and enqueues one job per message.</p>
+      <p><strong>Five independent things must all hold:</strong> the watch must be current (it expires after 7 days and is renewed 4&times;/day); the refresh token behind that renewal must be alive; the topic must live in the same Google Cloud project as the OAuth client that minted the token; that topic must grant publish rights to <code>gmail-api-push@system.gserviceaccount.com</code>; and a <em>push</em> subscription must point at the live webhook URL. Any one missing produces total silence with no error anywhere — three of these were wrong simultaneously in production.</p>
+      <p>The refresh token is the one that failed most recently, twice. While the OAuth consent screen sits in Google's <strong>Testing</strong> status, refresh tokens expire 7 days after issue. Renewal then fails with <code>invalid_grant</code>, the watch lapses, and reconcile correctly reports "no accounts with a live Gmail watch" — every job completes, nothing alerts, and email simply stops. The first occurrence went unnoticed for 18 days. The app is now published to production; reconnecting alone does not fix it, because a token minted under Testing keeps its 7-day life.</p>
+      <p>Because self-sent mail is excluded by design, a self-addressed test email will never produce a <code>raw_event</code>. Testing this path requires genuinely external mail.</p>
+    </div>
+  </div>
+
+  <div class="pipe-step">
+    <div class="pipe-dot">B</div>
+    <div class="pipe-content">
+      <h4>Bulk path — backfill script <span class="badge-sm badge-slate" style="margin-left:6px">historical</span></h4>
+      <p><code>npm run backfill:gmail -- --days=N</code> lists messages over a day window (<code>after:N -in:spam -in:trash</code>, so it also picks up sent mail, all stored as <code>inbound</code>), skips anything already stored by <code>external_id</code>, writes <code>communications</code> directly, and enqueues a <code>summarize</code> job. It bypasses <code>raw_events</code> entirely — so the two paths have different failure signatures, and reconciliation has to cover both.</p>
+      <p>Fetches are serial with a 200 ms pause between messages. In practice a 20-day window of about 1 300 messages took most of a day end to end, because each message is a separate Gmail round-trip plus several database writes. An admin route, <code>POST /api/admin/backfill-gmail</code>, does the same for 90 days across all users, but runs fire-and-forget inside a serverless request, which the platform does not guarantee to finish.</p>
+    </div>
+  </div>
+
+
+  <div class="pipe-step">
+    <div class="pipe-dot">C</div>
+    <div class="pipe-content">
+      <h4>Calendar — push channel <span class="badge-sm badge-emerald" style="margin-left:6px">live</span></h4>
+      <p>On connect and every 6 hours, <code>events.watch</code> registers a channel on the primary calendar pointing at <code>POST /api/webhooks/calendar</code>. Each notification triggers <code>events.list</code> with the stored sync token (first sync: 30 days back to 90 ahead) and upserts <code>meetings</code> directly in the request — no queue. Limitations: one page of 50 events, no handling of an expired sync token (HTTP 410), and old channels are never stopped when a new one is registered.</p>
+    </div>
+  </div>
+
+  <div class="pipe-step">
+    <div class="pipe-dot">D</div>
+    <div class="pipe-content">
+      <h4>Zoom and Slack <span class="badge-sm badge-rose" style="margin-left:6px">not live</span></h4>
+      <p><strong>Zoom:</strong> <code>POST /api/webhooks/zoom</code> verifies the signature, downloads the VTT transcript on <code>recording.completed</code> and stores it on a meeting row with <code>source = 'zoom'</code> — but nothing creates such rows (Calendar writes <code>google_calendar</code>), and the summary job is enqueued on <code>summarize</code>, whose email handler ignores it. <strong>Slack:</strong> the webhook verifies requests and writes <code>raw_events</code> to the <code>slack-raw</code> queue, which has no worker.</p>
+    </div>
+  </div>
+
+  <div class="callout callout-indigo">
+    <strong>Trade-off: write-then-enqueue.</strong> Both paths commit the database row before enqueueing its job, which means a Redis failure leaves a committed row with no pending work and nothing recording that fact — <code>communications</code> has no status column. The alternative, enqueue-then-write, trades silent data loss for jobs referencing rows that do not exist yet. We kept write-first and added the reconcile pass, because a delayed row is recoverable and a lost one is not.
+  </div>
+  <div class="page-footer"><strong>Chief of Staff</strong><span>Part II · Architecture · Ingestion — page 9 of 26</span></div>
+</div>
+
+<div class="page">
+  <div class="section-label">Part II · Architecture · Processing</div>
+  <h2>Processing: how email becomes structured data</h2>
+
+  <p>Email is processed by a background worker, never in the request that delivered it: webhooks enqueue BullMQ jobs, and workers run in a separate Railway process with a service-role Supabase client (bypassing RLS). Two jobs carry each email — <code>process-email</code> (stage 1, queue <code>email-raw</code>) and <code>summarize-communication</code> (stages 2–5, queue <code>summarize</code>). Calendar events are the exception: they are written inside the webhook request.</p>
+
+  <div class="divider" style="margin:18px 0"></div>
+
+  <h3 style="margin-bottom:14px">Email processing — 5-stage worker pipeline</h3>
+
+  <div class="pipeline">
+    <div class="pipe-step">
+      <div class="pipe-dot">1</div>
+      <div class="pipe-content">
+        <h4>Fetch &amp; normalise <span class="badge-sm badge-slate" style="margin-left:6px">process-email.ts</span></h4>
+        <p>Gmail API fetches the full message. Headers extracted (from, to, subject, date, threadId, list-unsubscribe). Sender email and name parsed and upserted to the <code>contacts</code> table.</p>
+        <p><strong>Importance heuristic</strong> seeds an <code>importance_score</code> starting at 0.5: <code>+0.2</code> for Gmail's IMPORTANT label; <code>+0.1</code> if the To line has a single recipient; <code>+0.15</code> for urgency keywords (urgent, asap, deadline, invoice, contract, term sheet); and a flat <code>0.05</code> if the body mentions "unsubscribe". Clamped to 1. Triage replaces this score in stage 2. The body is stored capped at 10 000 characters, with HTML stripped of <code>&lt;style&gt;</code> and <code>&lt;script&gt;</code> blocks; rendered HTML is never stored.</p>
+      </div>
+    </div>
+    <div class="pipe-step">
+      <div class="pipe-dot">2</div>
+      <div class="pipe-content">
+        <h4>AI triage <span class="badge-sm badge-indigo" style="margin-left:6px">gpt-4o-mini · max_tokens 700</span></h4>
+        <p>Calls <code>triageEmail()</code> at temperature 0 with business context, sender, recipients, the new message (quoted reply chain stripped), and a <strong>bulk-mail signal</strong> — whether the email carries a <code>List-Unsubscribe</code> header. Returns a schema-constrained JSON object with: <code>summary</code>, <code>sentiment</code> (positive / neutral / negative / urgent), refined <code>importance_score</code>, <code>requires_action</code>, <code>action_description</code>, <code>follow_up_deadline</code>, <code>email_category</code> (one of 22), and <code>fallback_category</code>.</p>
+        <p>Categories are prioritised in a fixed order: Travel &gt; Account Security &gt; Promotions &gt; Finance Bills &gt; Transactions &gt; Subscriptions &gt; Receipts &gt; Legal &gt; Calendar &gt; Shipping &gt; Productivity Tools &gt; Career &gt; Social &gt; … &gt; Other. Promotions is judged by the sender's intent, not the topic: a points-transfer bonus from a hotel chain, a "complete your booking" nudge, or a push to adopt a bank's new login feature is a promotion even though it reads as finance, travel, or security. A renewal or payment notice for something the user already holds — their own insurance policy, subscription, or card — stays in its own category.</p>
+      </div>
+    </div>
+    <div class="pipe-step">
+      <div class="pipe-dot">3</div>
+      <div class="pipe-content">
+        <h4>Financial extraction <span class="badge-sm badge-emerald" style="margin-left:6px">conditional · gpt-4o-mini</span></h4>
+        <p>Gate: runs only if the email category is a finance type. Extracts <code>amount</code>, <code>currency</code>, <code>merchant</code>, <code>transaction_type</code>, and <code>confidence</code>. Sets a <code>needs_review</code> flag when the triage category disagrees with the extraction result or confidence is below 0.5.</p>
+        <p>If review is not needed, calls <code>runDedup()</code>, which groups raw rows describing the same real-world event: amounts within 2%, timestamps within 15 minutes, then matching on transaction ID, reference ID, masked account, or merchant similarity. Refunds never merge with non-refunds, and recurring charges only merge inside the 15-minute window so billing cycles stay distinct. Each group elects a primary by sender priority (BANK &gt; CREDIT_CARD &gt; UPI &gt; WALLET &gt; MERCHANT). The merchant name and category are normalised via the same 100+ alias dictionary used in entity resolution; a known alias always wins over the model's spelling. Aliases shorter than four characters must end at a word boundary, so "VI" no longer claims "Vijay Das". Everywhere merchants are grouped or compared — dedup, spend analysis, Ask AI lookups — they are matched on a key that ignores case and separators, so "washington_post" and "Washington Post" are one merchant.</p>
+        <p>Extracted dates are clamped on both sides. A date after today falls back to the email's arrival time — extraction sometimes picks up a delivery or due date. So does a date more than 90 days before arrival: Indian bank alerts write <code>DD-MM-YY</code>, which extraction can read as <code>YY-MM-DD</code>, landing a transaction years in the past.</p>
+      </div>
+    </div>
+    <div class="pipe-step">
+      <div class="pipe-dot">4</div>
+      <div class="pipe-content">
+        <h4>Commitment &amp; task extraction <span class="badge-sm badge-violet" style="margin-left:6px">gpt-4o-mini · gated</span></h4>
+        <p><strong>Commitments.</strong> <code>extractCommitments()</code> runs only on mail the user sent, never on low-signal categories, and only when <code>requires_action</code> is set; extracted commitments below 0.6 confidence are dropped. A commitment is a promise the user made, so running it on inbound mail extracted other people's words — 317 eligible emails produced zero real commitments. Since sent mail is not yet ingested, email commitment extraction is currently switched off behind a feature flag.</p>
+        <p><strong>Tasks.</strong> Whether an email is a task is a semantic decision, not a score threshold. A task is created when triage sets <code>requires_action</code> and the category allows it: low-signal categories (promotions, newsletters, news, entertainment, social, system notifications, other) never create tasks; transactions and account-security alerts create one only from a human sender, since an automated alert's only "action" is an "if this wasn't you" disclaimer; and the user's own mail never does. Importance only sets priority ("high" at ≥ 0.85, else "medium").</p>
+        <p>A new task is skipped when the same email already has one, when another email in the same thread has an open task, or when the same sender has an open task with a similar title — so nine "renew your car insurance" countdowns from one broker become one task. Skipping rather than replacing preserves anything the user has already acted on.</p>
+      </div>
+    </div>
+    <div class="pipe-step">
+      <div class="pipe-dot">5</div>
+      <div class="pipe-content">
+        <h4>Embed &amp; trigger operational state <span class="badge-sm badge-slate" style="margin-left:6px">text-embedding-3-small · 30 s delay</span></h4>
+        <p>The email summary is chunked (2 048 chars, 200 overlap) and embedded with OpenAI <code>text-embedding-3-small</code> at 1 024 dimensions. The vector is stored on <code>communications.embedding</code> and in <code>memory_chunks</code>. Search runs as exact KNN rather than through an HNSW index: at the current corpus size (~2 000 emails) exact search returns in milliseconds, while an HNSW index over 1 024-dim vectors would consume an estimated 50–100 MB and has to stay memory-resident. The index definitions remain in the schema, commented out, for when the corpus outgrows exact search.</p>
+        <p>Finally, a <code>compute-operational-state</code> job is enqueued with a 30-second delay and a deduplication key — ensuring batch updates don't trigger redundant recomputes.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider" style="margin:18px 0"></div>
+
+  <h3 style="margin-bottom:14px">Meeting processing pipeline <span class="badge-sm badge-slate" style="margin-left:8px">summarize-meeting.ts</span> <span class="badge-sm badge-rose" style="margin-left:4px">Not live</span></h3>
+
+  <p style="font-size:13px">Designed to run when a Zoom recording completes; today it never runs, because the job is enqueued on <code>summarize</code> instead of <code>meetings-summarize</code> (see Ingestion). When it runs, the worker parses the stored VTT transcript into speaker turns and calls <code>summarizeMeeting()</code> with the title, attendee list, transcript, and business context. GPT-4o returns a structured JSON containing:</p>
+
+  <div class="feature-grid" style="grid-template-columns:1fr 1fr 1fr; gap:10px; margin:14px 0">
+    <div class="feature-card" style="padding:14px">
+      <h4 style="font-size:13px; margin-bottom:4px">Executive summary</h4>
+      <p style="font-size:12px">3–5 sentence narrative of what was discussed and decided</p>
+    </div>
+    <div class="feature-card" style="padding:14px">
+      <h4 style="font-size:13px; margin-bottom:4px">Key decisions</h4>
+      <p style="font-size:12px">Each decision with full context — not just the conclusion</p>
+    </div>
+    <div class="feature-card" style="padding:14px">
+      <h4 style="font-size:13px; margin-bottom:4px">Action items</h4>
+      <p style="font-size:12px">Owner, due date, and description per item. Items owned by the founder auto-create tasks.</p>
+    </div>
+    <div class="feature-card" style="padding:14px">
+      <h4 style="font-size:13px; margin-bottom:4px">Commitments</h4>
+      <p style="font-size:12px">Promises extracted with due date and confidence ≥ 0.6 threshold</p>
+    </div>
+    <div class="feature-card" style="padding:14px">
+      <h4 style="font-size:13px; margin-bottom:4px">Follow-up emails</h4>
+      <p style="font-size:12px">Suggested recipients and topics for post-meeting outreach</p>
+    </div>
+    <div class="feature-card" style="padding:14px">
+      <h4 style="font-size:13px; margin-bottom:4px">Sentiment</h4>
+      <p style="font-size:12px">productive / tense / unclear / routine — surfaced in the meetings list view</p>
+    </div>
+  </div>
+
+  <p style="font-size:13px">The summary, decisions, and action items are concatenated and embedded (text-embedding-3-small) to memory — making meeting content searchable from Ask AI using semantic queries like "what was decided about pricing in Q1?"</p>
+  <div class="page-footer"><strong>Chief of Staff</strong><span>Part II · Architecture · Processing — page 10 of 26</span></div>
+</div>
+
+<div class="page">
+  <div class="section-label">Part II · Architecture · Models</div>
+  <h2>Models: what each one does, and why</h2>
+
+  <p>Nine model calls exist in the system: four on <code>gpt-4o-mini</code>, four on <code>gpt-4o</code>, and embeddings. The deliberate choice is less which model, and more which work is given to a model at all versus solved deterministically in code.</p>
+
+  <div class="table-wrap">
+  <table class="detail-table">
+    <thead><tr><th>Call (function)</th><th>Model · settings</th><th>Runs on</th><th>Why this model</th></tr></thead>
+    <tbody>
+      <tr><td>Email triage<br><code>triageEmail</code></td><td><code>gpt-4o-mini</code><br>temp 0 · 700 tok · strict JSON schema</td><td>Every email</td><td>Highest-volume call in the system; a classification task with 22 fixed categories. Given the <code>List-Unsubscribe</code> signal as evidence of a mass send, and told explicitly that bulk-sent says nothing about whether action is needed. Temperature 0 because category drives task creation, and at the default 1.0 identical mail flipped categories between runs. The only call wrapped in the rate-limit retry.</td></tr>
+      <tr><td>Financial extraction<br><code>extractFinancialTransaction</code></td><td><code>gpt-4o-mini</code><br>800 tok · strict JSON schema</td><td>Finance-gated subset; body capped at 3 000 chars</td><td>Schema-constrained extraction with an explicit "never infer" instruction. Correctness is enforced by schema and post-validation — date clamps, merchant normalisation — not model size.</td></tr>
+      <tr><td>Commitment extraction<br><code>extractCommitments</code></td><td><code>gpt-4o-mini</code><br>512 tok · JSON</td><td>Sent mail with <code>requires_action</code> — currently off behind a feature flag</td><td>Was <code>gpt-4o</code>: roughly 17&times; the cost per call and the largest single line item when reprocessing a mailbox. A commitment is something the user promised, so it can only appear in mail they sent; sent mail is not yet ingested.</td></tr>
+      <tr><td>Intent classification<br><code>classifyIntent</code></td><td><code>gpt-4o-mini</code><br>temp 0 · 400 tok · JSON</td><td>Every Ask query</td><td>In the user's latency path, hence a 6 s race against a deterministic fallback and a regex pre-pass.</td></tr>
+      <tr><td>Answer synthesis<br><code>/api/ask</code></td><td><code>gpt-4o</code><br>1 024 tok · streaming (AI SDK)</td><td>Every Ask query</td><td>The one place output quality is directly user-visible and the reasoning is open-ended. Worth the cost.</td></tr>
+      <tr><td>Reply draft<br><code>generateDraft</code></td><td><code>gpt-4o</code><br>1 024 tok · text</td><td>On request from the email view</td><td>User-visible prose sent under the user's name.</td></tr>
+      <tr><td>Meeting summary<br><code>summarizeMeeting</code></td><td><code>gpt-4o</code><br>2 048 tok · JSON</td><td>Not live (see Processing)</td><td>Long-transcript synthesis. Not yet evaluated against a smaller model — a candidate for the same downgrade commitment extraction got.</td></tr>
+      <tr><td>Daily brief<br><code>generateDailyBrief</code></td><td><code>gpt-4o</code><br>2 048 tok · text</td><td>Not live (no schedule)</td><td>Cross-domain synthesis into prose.</td></tr>
+      <tr><td>Embeddings<br><code>embedAndStoreChunks</code></td><td><code>text-embedding-3-small</code><br>1 024 dim</td><td>Every summary and chunk; every Ask query</td><td>1 024 rather than the default 1 536 to cut storage and index cost by a third on a tier where storage is the binding constraint.</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p style="font-size:12.5px;color:var(--slate-500)">OpenAI is the only model provider. <code>lib/ai/claude.ts</code> is a historical name — it contains no Anthropic calls, and the Anthropic and Voyage SDKs in <code>package.json</code> are not imported. Rate-limit retry (<code>lib/ai/retry.ts</code>): HTTP 429 only, up to 6 attempts, waiting the larger of the server's "try again in" hint and 2<sup>n</sup>&nbsp;s, capped at 30 s. No other call retries or sets an explicit timeout.</p>
+
+  <h3 style="margin-top:24px">What deliberately does not use a model</h3>
+  <p style="font-size:13px">Merchant normalisation (a ~100-entry alias dictionary), sender classification, the finance gate, the task gate and its dedup, transaction grouping, retrieval planning, ranking, and all operational-insight generation are pure functions. They are deterministic, free, instant, and unit-testable — and they are where a model would introduce non-determinism for no benefit. When the deterministic normaliser and the model disagree on a merchant, the deterministic answer wins.</p>
+  <p style="font-size:13px"><strong>Merchant identity.</strong> A stored merchant name is a display string, not an identity. Grouping, dedup, spend analysis and Ask AI lookups all compare on <code>merchantKey()</code> — lowercase with separators stripped — so "ZOMATO", "zomato" and "washington_post" / "Washington Post" each resolve to one merchant without rewriting what the model wrote. Alias prefixes under four characters must end at a word boundary; longer ones may still match glued descriptors such as <code>AMAZONIN</code> or <code>paytmqr…@ptys</code>, which is how card and UPI strings usually arrive.</p>
+
+  <div class="callout callout-emerald">
+    <strong>Trade-off: gating over capability.</strong> The cheapest way to improve an LLM pipeline's cost profile is usually to stop calling it, not to change models. Skipping commitment extraction for newsletters and promotions cut more cost than any model swap, and cost nothing in quality, because those categories do not contain commitments.
+  </div>
+  <div class="page-footer"><strong>Chief of Staff</strong><span>Part II · Architecture · Models — page 11 of 26</span></div>
+</div>
+
+<div class="page">
+  <div class="section-label">Part II · Architecture · Ask AI, layers 1 &amp; 2</div>
+  <h2>Ask AI: from raw query to resolved entities</h2>
+
+  <p>When a user types a question, Chief of Staff does not send that text directly to an LLM. <code>POST /api/ask</code> runs a multi-stage pipeline that first understands intent, resolves entities, plans what data to fetch, retrieves it in parallel, then ranks it and asks GPT-4o to answer from the ranked evidence. Every request logs an <code>[ask-trace]</code> line with the intent, plan and sources used. Latency is not currently measured end to end.</p>
+
+  <div class="divider" style="margin:20px 0"></div>
+
+  <!-- LAYER 1 -->
+  <h3 class="layer-h3">
+    <span class="layer-dot">1</span>
+    Intent Classification
+    <span class="badge-sm badge-indigo">gpt-4o-mini · temp 0</span>
+    <span class="badge-sm badge-slate">6 s timeout · blended fallback</span>
+  </h3>
+
+  <p style="font-size:13.5px">The classifier maps every query to one of <strong>12 named intents</strong>, extracts structured entities, infers a temporal anchor, and computes a two-dimensional retrieval weight that controls which downstream path activates.</p>
+
+  <div class="intent-grid">
+    <div class="intent-chip"><div class="iname">finance</div><div class="idesc">How much did I spend on…</div></div>
+    <div class="intent-chip"><div class="iname">spending_analysis</div><div class="idesc">Breakdown of last month</div></div>
+    <div class="intent-chip"><div class="iname">commitments</div><div class="idesc">What did I promise Sarah?</div></div>
+    <div class="intent-chip"><div class="iname">scheduling</div><div class="idesc">What meetings do I have today?</div></div>
+    <div class="intent-chip"><div class="iname">relationship</div><div class="idesc">When did I last talk to Bob?</div></div>
+    <div class="intent-chip"><div class="iname">search_lookup</div><div class="idesc">Find emails from Acme about…</div></div>
+    <div class="intent-chip"><div class="iname">operational_summary</div><div class="idesc">What should I focus on today?</div></div>
+    <div class="intent-chip"><div class="iname">productivity</div><div class="idesc">What tasks are overdue?</div></div>
+    <div class="intent-chip"><div class="iname">travel</div><div class="idesc">What travel do I have coming up?</div></div>
+    <div class="intent-chip"><div class="iname">subscriptions</div><div class="idesc">What SaaS am I paying for?</div></div>
+    <div class="intent-chip"><div class="iname">bills_payments</div><div class="idesc">Any overdue invoices?</div></div>
+    <div class="intent-chip"><div class="iname">reminders</div><div class="idesc">Remind me about the contract</div></div>
+  </div>
+
+  <p style="font-size:13px">Classification runs in two passes. <strong>Pass 1</strong> is pure regex — intent rules score up to two candidate intents before any LLM call. <strong>Pass 2</strong> calls gpt-4o-mini (temperature 0, JSON output), racing a 6-second timer. On timeout there are two fallbacks: if regex found no candidates, a blended retrieval weight (0.5 / 0.5) at confidence 0.3; if it did, the top regex intent with an operational-leaning weight (0.8 / 0.2). Either result then passes through the deterministic overrides below, so a spending or lookup query still gets the weights it needs. That fallback previously resolved to <code>operational_summary</code> with <code>investigative_weight = 0.0</code>, which skipped the communications and vector sources entirely — so a slow classification call made existing data invisible to the answer, with no error surfaced anywhere. A degraded classification now searches broadly rather than not at all.</p>
+
+  <p style="font-size:13px">The classifier also computes a <strong>retrieval weight pair</strong> — <code>operational_weight</code> and <code>investigative_weight</code> — that governs layer 3. Deterministic overrides hard-set these weights based on intent:</p>
+
+  <div class="table-wrap"><table class="detail-table">
+    <thead><tr><th>Intent</th><th>operational_weight</th><th>investigative_weight</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td>operational_summary / daily brief</td><td>1.0</td><td>0.0</td><td>Precomputed insights only; no raw SQL needed</td></tr>
+      <tr><td>finance / spending_analysis</td><td>0.1</td><td>1.0</td><td>Requires exact transaction rows, not summaries</td></tr>
+      <tr><td>search_lookup</td><td>0.0</td><td>1.0</td><td>Pure data retrieval; insights add noise</td></tr>
+      <tr><td>scheduling / relationship / commitments / productivity, and analytical "why…" queries</td><td>≥ 0.3</td><td>≥ 0.5</td><td>Needs both summaries and raw records</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="divider" style="margin:20px 0"></div>
+
+  <!-- LAYER 2 -->
+  <h3 class="layer-h3">
+    <span class="layer-dot">2</span>
+    Entity Resolution
+    <span class="badge-sm badge-emerald">deterministic · no LLM</span>
+  </h3>
+
+  <p style="font-size:13.5px">Named entities extracted by the classifier are still abstract strings — "Uber", "Sarah", "last month". Entity resolution converts them to concrete database identifiers and date ranges before any query runs.</p>
+
+  <div class="table-wrap"><table class="detail-table">
+    <thead><tr><th>Entity type</th><th>Resolution method</th><th>Output</th></tr></thead>
+    <tbody>
+      <tr><td>Person name</td><td>Case-insensitive <code>ilike '%name%'</code> on <code>contacts.name</code> and <code>contacts.email</code>, up to 3 contacts per name</td><td>Array of <code>contact_id</code> UUIDs</td></tr>
+      <tr><td>Merchant name</td><td>100+ alias dictionary; aliases under 4 characters must end at a word boundary — <em>"SWIGGY INSTAMART", "swiggy"</em> → <code>Swiggy</code>. The SQL filter then matches every stored spelling regardless of case or separators</td><td>Canonical merchant name</td></tr>
+      <tr><td>Relative period</td><td>date-fns conversion — <em>last_month</em> → start/end of prior calendar month in UTC</td><td><code>{from: ISO, to: ISO}</code></td></tr>
+      <tr><td>Event anchor</td><td>Resolved by querying for the event first: last salary credit (<code>transactions_normalized</code>), a travel booking (<code>communications</code>), or the last interaction with a contact</td><td>Date range window around event</td></tr>
+    </tbody>
+  </table></div>
+
+  <p style="font-size:13px">Temporal resolution also emits a <code>temporalConfidence</code> score. If it falls below 0.6, the system appends a clarification note to the final LLM system prompt, telling GPT-4o to acknowledge ambiguity in its answer rather than hallucinate a date.</p>
+  <div class="page-footer"><strong>Chief of Staff</strong><span>Part II · Architecture · Ask AI, layers 1 &amp; 2 — page 12 of 26</span></div>
+</div>
+
+<div class="page">
+  <div class="section-label">Part II · Architecture · Ask AI, layers 3–5</div>
+  <h2>Ask AI: planning, retrieval, ranking and the answer</h2>
+
+  <!-- LAYER 3 -->
+  <h3 class="layer-h3">
+    <span class="layer-dot">3</span>
+    Retrieval Plan Construction
+    <span class="badge-sm badge-violet">rule-based · budget-capped</span>
+  </h3>
+
+  <p style="font-size:13px">The planner maps intent → ordered list of retrieval steps. Each source has a known confidence score, estimated cost in milliseconds, and a maximum result count. Steps are sorted by priority and accumulated until their <em>estimated</em> cost reaches <strong>1 200 ms</strong> (<code>MAX_QUERY_BUDGET_MS</code>). This is a planning budget, not a timer — nothing cancels a step that runs long.</p>
+
+  <div class="table-wrap"><table class="source-table">
+    <thead><tr><th>Source</th><th>Confidence</th><th>Est. cost</th><th>Max results</th><th>Activated by</th></tr></thead>
+    <tbody>
+      <tr><td>aggregated_finance</td><td>0.95</td><td class="num">90 ms</td><td class="num">1</td><td>any finance / spending intent</td></tr>
+      <tr><td>sql_transactions</td><td>0.95</td><td class="num">80 ms</td><td class="num">20</td><td>finance, spending_analysis, bills</td></tr>
+      <tr><td>sql_commitments</td><td>0.90</td><td class="num">60 ms</td><td class="num">10</td><td>commitments, productivity — only when <code>FEATURES.commitments</code> is on</td></tr>
+      <tr><td>sql_tasks</td><td>0.90</td><td class="num">60 ms</td><td class="num">10</td><td>commitments, productivity, operational_summary</td></tr>
+      <tr><td>operational_insights</td><td>0.85</td><td class="num">50 ms</td><td class="num">15</td><td>operational_weight ≥ 0.3</td></tr>
+      <tr><td>sql_communications</td><td>0.85</td><td class="num">100 ms</td><td class="num">10</td><td>search_lookup, relationship, travel, bills</td></tr>
+      <tr><td>sql_meetings</td><td>0.80</td><td class="num">80 ms</td><td class="num">5</td><td>scheduling, relationship</td></tr>
+      <tr><td>vector_search</td><td>0.55</td><td class="num">200 ms</td><td class="num">8</td><td>investigative_weight &gt; 0.5 or semantic intents</td></tr>
+    </tbody>
+  </table></div>
+
+  <p style="font-size:13px">The planner uses two gate conditions: the <em>operational path</em> fires when <code>operational_weight ≥ 0.3</code> or the intent is a finance type; the <em>investigative path</em> fires when <code>investigative_weight &gt; 0.3</code> or keyword overrides are present. Both paths can be active simultaneously for mixed queries like "what did I spend on Uber and when did I last email them?"</p>
+
+  <div class="divider" style="margin:18px 0"></div>
+
+  <!-- LAYER 4 -->
+  <h3 class="layer-h3">
+    <span class="layer-dot">4</span>
+    Parallel Data Retrieval
+    <span class="badge-sm badge-slate">Promise.allSettled · partial failure tolerance</span>
+  </h3>
+
+  <p style="font-size:13px">All budgeted steps fire simultaneously. <code>Promise.allSettled</code> ensures a failed or slow source (e.g., vector search timing out) never blocks the others. Each result is tagged with its source type so the ranker and LLM know provenance. Notable query mechanics:</p>
+
+  <div class="table-wrap"><table class="detail-table" style="font-size:12px">
+    <thead><tr><th>Source</th><th>Key filters</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>sql_communications</td><td>contactIds (IN), emailCategory (IN), dateRange, topics (ILIKE across subject + body_summary)</td><td>Topic filter is OR-flattened across both columns</td></tr>
+      <tr><td>sql_transactions</td><td>merchants (case- and separator-insensitive <code>ilike</code>), transactionTypes (IN), dateRange, amount (eq)</td><td>Category filter intentionally omitted at query level — applied in ranking</td></tr>
+      <tr><td>sql_commitments</td><td>contactIds (IN), due_date ≤ range, status ≠ done</td><td>Ordered ASC by due_date so overdue items come first</td></tr>
+      <tr><td>aggregated_finance</td><td>user_id, date range</td><td>Returns totals by category, merchant, currency, and weekly trend — one structured object</td></tr>
+      <tr><td>operational_insights</td><td>status = active, snoozed_until is null or past</td><td>Ordered by priority_score DESC; category filter applied if intent is specific</td></tr>
+      <tr><td>vector_search</td><td>query embedding vs pgvector (exact KNN)</td><td>RPC <code>match_memory_chunks</code>; cosine similarity &gt; 0.4, 90-day window on the email's own date, service-role client scoped by <code>p_user_id</code></td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="divider" style="margin:18px 0"></div>
+
+  <!-- LAYER 5 -->
+  <h3 class="layer-h3">
+    <span class="layer-dot">5</span>
+    Unified Ranking + LLM Response
+    <span class="badge-sm badge-indigo">gpt-4o · streaming · multi-turn</span>
+  </h3>
+
+  <p style="font-size:13px">All retrieved items — regardless of source type — are normalised into a common schema and scored by a <strong>profile-aware weighted ranker</strong>. The profile is chosen based on the primary intent. Component weights:</p>
+
+  <div class="table-wrap"><table class="weight-table">
+    <thead>
+      <tr>
+        <th>Profile → Intent</th>
+        <th>Keyword match</th>
+        <th>Semantic</th>
+        <th>Entity overlap</th>
+        <th>Recency</th>
+        <th>Src importance</th>
+        <th>Urgency</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>factual_finance — finance / spending</td><td class="w-hi">0.35</td><td class="w-lo">0.15</td><td class="w-lo">0.15</td><td class="w-hi">0.25</td><td class="w-lo">0.05</td><td class="w-lo">0.05</td></tr>
+      <tr><td>semantic_lookup — search_lookup</td><td class="w-lo">0.10</td><td class="w-hi">0.35</td><td class="w-med">0.25</td><td class="w-lo">0.15</td><td class="w-lo">0.05</td><td class="w-lo">0.10</td></tr>
+      <tr><td>relationship — contacts &amp; people</td><td class="w-lo">0.10</td><td class="w-med">0.25</td><td class="w-hi">0.35</td><td class="w-lo">0.15</td><td class="w-lo">0.05</td><td class="w-lo">0.10</td></tr>
+      <tr><td>operational — default / summary</td><td class="w-lo">0.05</td><td class="w-lo">0.10</td><td class="w-lo">0.10</td><td class="w-lo">0.15</td><td class="w-lo">0.10</td><td class="w-hi">0.50</td></tr>
+    </tbody>
+  </table></div>
+
+  <p style="font-size:13px">Per-item urgency is assigned by source: insights use their own <code>priority_score</code>; commitments score 0.8 if overdue, 0.4 otherwise; tasks take a base from their priority, +0.1 if overdue; emails score 0.6 with <code>requires_action</code>, 0.2 without; meetings and transactions 0.3; vector results 0.2. Recency decays linearly over 90 days, <code>clamp(1 − daysOld / 90, 0, 1)</code> — the upper clamp stops a far-future due date outranking tomorrow's — and a missing date scores a neutral 0.3.</p>
+
+  <p style="font-size:13px">After scoring, <strong>diversity caps</strong> prevent any one source from dominating the context window: max 6 operational insights, 4 emails, 4 tasks, 3 transactions, 3 commitments, 2 meetings, 2 vector results and 1 finance aggregate. The top 20 items are assembled into a structured evidence block tagged with <code>[TRANSACTION]</code>, <code>[EMAIL]</code>, <code>[MEETING]</code>, <code>[COMMITMENT]</code>, <code>[TASK]</code>, <code>[INSIGHT]</code> and <code>[ANALYTICS]</code> markers.</p>
+
+  <p style="font-size:13px">This block, plus the system prompt (role: "proactive AI Chief of Staff"), is passed to <strong>GPT-4o</strong> (1 024 output tokens) and streamed back as an AI SDK UI-message stream, consumed by <code>useChat</code> in <code>components/ask/ask-chat.tsx</code>. In eval mode (<code>?eval=true</code> with a bearer token) it returns JSON <code>{response, trace}</code> instead.</p>
+
+  <p style="font-size:13px"><strong>Multi-turn context.</strong> The answer carries the conversation state — tracked people, merchants, categories and topics with a decaying persistence score, the active date range and intent — as AI SDK message metadata. <code>useChat</code> keeps it on the assistant message and sends it back with the next request, where it is schema-validated (it is client-supplied) and decoded. It is applied only when the new question reads as a follow-up — a pronoun ("did he…"), a "that one" reference, a lead such as "what about" or "and", or a bare time phrase — so "What meetings do I have today?" after a question about Kamal does not inherit Kamal. Follow-ups that swap one slot keep the previous intent, and a named category or merchant replaces its slot: "What about transport?" after a food question asks about transport, not food. The <code>X-Assistant-Context</code> header is still set but nothing reads it.</p>
+
+  <div class="callout callout-emerald">
+    <strong>Design rationale:</strong> Pure RAG over embeddings would conflate "how much did I spend on Uber?" with calendar events mentioning Uber. The intent + entity layers route each query to the correct table. The ranking layer then ensures SQL rows, vector matches, and precomputed insights are balanced — not whichever source returned the most rows.
+  </div>
+  <div class="page-footer"><strong>Chief of Staff</strong><span>Part II · Architecture · Ask AI, layers 3–5 — page 13 of 26</span></div>
+</div>
+
+<div class="page">
+  <div class="section-label">Part II · Architecture · Operational insights</div>
+  <h2>The operational-insights engine</h2>
+
+  <p>Dashboard alerts and the "what should I focus on" answers come from <code>operational_insights</code>, a table of precomputed, priority-scored findings. It is written by <code>compute-operational-state</code>, a worker job that runs <strong>no model at all</strong>: fourteen parallel queries feed eight deterministic processors, whose output is combined, de-duplicated and upserted.</p>
+
+  <div class="table-wrap">
+  <table class="detail-table">
+    <thead><tr><th>Processor</th><th>Insight types</th><th>Reads</th></tr></thead>
+    <tbody>
+      <tr><td><code>finance</code></td><td>spending_spike, category_spending_spike, large_transaction, pending_refund, duplicate_charge, spending_summary</td><td>Last 30 days of transactions (≤ 150) vs. the prior 30; merchants grouped by <code>merchantKey</code></td></tr>
+      <tr><td><code>bills</code></td><td>bill_due, overdue_bill, bill_payment_confirmed</td><td><code>finance_bills</code> emails (45 days); bill, EMI and utility payments (7 days)</td></tr>
+      <tr><td><code>subscriptions</code></td><td>renewal_due, subscription_cost_spike</td><td>Recurring transactions (180 days); subscription emails (30 days)</td></tr>
+      <tr><td><code>tasks</code></td><td>task_overload, overdue_task, stale_task</td><td>Pending and snoozed tasks</td></tr>
+      <tr><td><code>scheduling</code></td><td>meeting_overload, tight_transition, meeting_starting_soon</td><td>Meetings from 7 days back to 14 ahead</td></tr>
+      <tr><td><code>followup</code></td><td>missed_followup, unanswered_email, stale_relationship</td><td>Actionable and negative-sentiment emails; contacts with importance ≥ 0.5; relationships</td></tr>
+      <tr><td><code>relationships</code></td><td>cold_vip, waiting_for_reply, negative_trend</td><td>Relationships, contacts, emails</td></tr>
+      <tr><td><code>commitments</code></td><td>overdue_commitment, commitment_at_risk</td><td>Pending and overdue commitments (none exist while the flag is off)</td></tr>
+      <tr><td><code>synthesis</code></td><td>execution_risk, budget_pressure, burnout_risk, relationship_deteriorating, critical_schedule_risk</td><td>Combinations of the above — e.g. an overdue commitment plus an unanswered email to the same person</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3 style="margin-top:22px">Lifecycle of an insight</h3>
+  <p style="font-size:13px">Each insight carries a <code>state_key</code> such as <code>finance:spending_spike:zomato</code>, unique per user. <code>consolidateInsights</code> keeps the highest-priority insight per key and merges insights from different processors that name the same entity. Each survivor is upserted as <code>active</code> on <code>(user_id, state_key)</code>, so a spike that persists across runs keeps its <code>first_detected_at</code>. Active insights that a run no longer produces are marked <code>resolved</code>; those past <code>expires_at</code> are expired. The schema also allows <code>snoozed</code> and <code>acknowledged</code> statuses; no UI sets them yet.</p>
+
+  <p style="font-size:13px"><strong>Trigger.</strong> Every processed email and meeting calls <code>enqueueOperationalState</code>, which adds the job with a 30-second delay and a deduplication key <code>ops-&lt;userId&gt;</code> that itself expires after 30 seconds — so a burst of 50 emails produces one recompute rather than 50. Calendar sync does not trigger it.</p>
+
+  <div class="callout callout-indigo">
+    <strong>Incident, 10 Sep – 18 Oct: frozen for five weeks.</strong> The job was enqueued with a fixed <code>jobId</code> of <code>ops-&lt;userId&gt;</code>. BullMQ ignores an add whose id matches a stored job, and prunes completed jobs only when another job on the queue completes — so the first completed job blocked every later add, no job ever completed again, and nothing pruned it. 117 email jobs ran in one log window with zero recomputes, and no error anywhere. The fixed id is gone; the dedup key now carries its own 30-second expiry, and a one-off inline recompute refreshed the table.
+  </div>
+
+  <p style="font-size:12.5px;color:var(--slate-500)">Also present but unused: <code>rankInsights</code> is imported and never called, so insights are ordered only by <code>priority_score</code> at read time; one of the fourteen queries (travel emails) is fetched and discarded. <code>scripts/backfill-operational-insights.ts</code> runs the same computation inline, without Redis — the immediate workaround.</p>
+  <div class="page-footer"><strong>Chief of Staff</strong><span>Part II · Architecture · Operational insights — page 14 of 26</span></div>
+</div>
+
+<div class="page">
+  <div class="section-label">Part III · Reference · Data model</div>
+  <h2>Data model: overview and ingestion tables</h2>
+
+  <p>All application data lives in one Supabase Postgres database: 16 tables in the <code>public</code> schema, two RPC functions and two trigger functions. The authoritative definition is <code>lib/db/rebuild.sql</code> — <code>schema-safe.sql</code> plus both migrations in dependency order, idempotent, runnable in one paste on a fresh project. It was checked table-for-table and column-for-column against the live database for this document and matches. <code>schema.sql</code> is the original, non-idempotent version, kept for history.</p>
+
+  <div class="table-wrap">
+  <table class="detail-table">
+    <thead><tr><th>Convention</th><th>How it is applied</th></tr></thead>
+    <tbody>
+      <tr><td>Keys</td><td><code>uuid</code> primary keys (<code>uuid_generate_v4()</code>; <code>gen_random_uuid()</code> on the finance tables)</td></tr>
+      <tr><td>Tenancy</td><td>Every table has <code>user_id</code> with <code>ON DELETE CASCADE</code> to <code>users</code> (finance tables reference <code>auth.users</code> directly), and an RLS policy <code>auth.uid() = user_id</code></td></tr>
+      <tr><td>Idempotent ingestion</td><td>Source rows are unique on <code>(user_id, source, external_id)</code>, so re-delivered webhooks and re-run backfills upsert instead of duplicating</td></tr>
+      <tr><td>Timestamps</td><td><code>timestamptz</code>; <code>updated_at</code> maintained by the <code>update_updated_at()</code> trigger on nine tables</td></tr>
+      <tr><td>Flexible fields</td><td><code>jsonb</code> for <code>metadata</code>, <code>channel_metadata</code>, <code>business_context</code>, attendee lists and AI output that has no fixed shape</td></tr>
+      <tr><td>Vectors</td><td><code>vector(1024)</code> via pgvector on <code>communications</code>, <code>meetings</code>, <code>memory_chunks</code>, <code>business_entities</code>; no ANN index (see Trade-offs)</td></tr>
+      <tr><td>Polymorphic links</td><td><code>tasks</code>, <code>commitments</code> and <code>memory_chunks</code> point at their origin with <code>source_type</code> + <code>source_id</code>, with no foreign key</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3 style="margin-top:22px">How the tables relate</h3>
+  <div class="schema-map">users ─┬─ integrations       OAuth tokens (encrypted), watch state
+       ├─ raw_events         webhook payloads
+       ├─ contacts ─┬─ communications ─┬─ transactions_raw ─▶ transactions_normalized
+       │            │                  ├─ drafts
+       │            │                  └─ memory_chunks
+       │            ├─ tasks, commitments   (source_type + source_id)
+       │            ├─ relationships
+       │            └─ business_entities
+       ├─ meetings ── memory_chunks
+       ├─ operational_insights   derived
+       └─ daily_briefs</div>
+
+  <h3 style="margin-top:22px">Volume (production, 18 Oct 2026)</h3>
+  <div class="table-wrap">
+  <table class="source-table">
+    <thead><tr><th>Table</th><th>Rows</th><th>Table</th><th>Rows</th></tr></thead>
+    <tbody>
+      <tr><td>communications</td><td class="num">3 894</td><td>tasks</td><td class="num">143</td></tr>
+      <tr><td>memory_chunks</td><td class="num">3 887</td><td>meetings</td><td class="num">22</td></tr>
+      <tr><td>raw_events</td><td class="num">870</td><td>users · integrations · operational_insights</td><td class="num">1 each</td></tr>
+      <tr><td>transactions_raw</td><td class="num">672</td><td>commitments · relationships · daily_briefs</td><td class="num">0</td></tr>
+      <tr><td>transactions_normalized</td><td class="num">363</td><td>drafts · business_entities</td><td class="num">0</td></tr>
+      <tr><td>contacts</td><td class="num">333</td><td></td><td></td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="page-footer"><strong>Chief of Staff</strong><span>Part III · Reference · Data model — page 15 of 26</span></div>
+</div>
+
+<div class="page">
+  <div class="section-label">Part III · Reference · Data model</div>
+  <h3>Ingestion and identity tables</h3>
+
+  <div class="table-wrap">
+  <table class="detail-table schema-table">
+    <thead><tr><th>Table</th><th>Key columns</th><th>Constraints &amp; indexes</th><th>Written by</th></tr></thead>
+    <tbody>
+      <tr><td><code>users</code></td><td><code>id</code> (= <code>auth.users.id</code>), <code>email</code>, <code>full_name</code>, <code>onboarding_complete</code>, <code>business_context</code> jsonb (company, goals, key people — passed to every triage prompt), <code>preferences</code> jsonb</td><td>PK references <code>auth.users</code>, cascade</td><td><code>handle_new_user</code> trigger on signup; onboarding page</td></tr>
+      <tr><td><code>integrations</code></td><td><code>provider</code>, <code>access_token</code> / <code>refresh_token</code> (AES-256-GCM ciphertext), <code>token_expires_at</code>, <code>scopes</code>, <code>external_account_id</code> (the Google address), <code>is_active</code>, <code>metadata</code> jsonb: <code>last_history_id</code>, <code>watch_expires_at</code>, <code>calendar_sync_token</code>, <code>calendar_resource_id</code>, <code>calendar_watch_expires_at</code></td><td>UNIQUE <code>(user_id, provider)</code></td><td>OAuth callback; token refresh; watch renewal; Gmail webhook (history cursor)</td></tr>
+      <tr><td><code>raw_events</code></td><td><code>source</code>, <code>event_type</code> (<code>email.received</code>, <code>message.im</code>…), <code>external_id</code>, <code>raw_payload</code> jsonb, <code>processed</code>, <code>processing_attempts</code>, <code>processing_error</code></td><td>UNIQUE <code>(user_id, source, external_id)</code>; partial index on unprocessed rows</td><td>Gmail and Slack webhooks; <code>process-email</code> marks processed</td></tr>
+      <tr><td><code>contacts</code></td><td><code>email</code>, <code>name</code>, <code>organization</code>, <code>title</code>, <code>relationship_type</code>, <code>importance_score</code>, <code>last_interaction_at</code>, <code>interaction_count</code>, <code>tags</code></td><td>UNIQUE <code>(user_id, email)</code>; indexes on importance and last interaction</td><td>Upserted per sender by <code>process-email</code> and backfill</td></tr>
+      <tr><td><code>communications</code></td><td><code>source</code> (<code>gmail</code>), <code>external_id</code> (Gmail message id), <code>thread_id</code>, <code>contact_id</code>, <code>subject</code>, <code>body</code> (≤ 10 000 chars), <code>body_summary</code>, <code>email_category</code>, <code>category_processed</code>, <code>direction</code>, <code>channel_metadata</code> jsonb (<code>from</code>, <code>to</code>, <code>labels</code>, <code>list_unsubscribe</code>), <code>occurred_at</code>, <code>requires_action</code>, <code>action_taken</code>, <code>importance_score</code>, <code>sentiment</code>, <code>embedding</code></td><td>UNIQUE <code>(user_id, source, external_id)</code>; indexes on category, recency, and a partial index on open action items</td><td><code>process-email</code> / backfill (insert); <code>summarize-communication</code> (triage fields, embedding); inbox actions</td></tr>
+      <tr><td><code>meetings</code></td><td><code>source</code> (<code>google_calendar</code> | <code>zoom</code>), <code>external_id</code>, <code>title</code>, <code>start_time</code>, <code>end_time</code>, <code>attendees</code> jsonb, <code>meeting_url</code>, <code>status</code>, <code>transcript</code>, <code>transcript_summary</code>, <code>action_items</code> / <code>decisions</code> jsonb, <code>embedding</code></td><td>UNIQUE <code>(user_id, source, external_id)</code>; index on <code>(user_id, start_time)</code></td><td>Calendar webhook and <code>backfill-calendar</code>; Zoom webhook (transcript); <code>summarize-meeting</code></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p style="font-size:12.5px;color:var(--slate-500)"><code>direction</code> is always <code>inbound</code> today. The backfill's Gmail query is not limited to the inbox, so a handful of the user's own sent messages are stored as inbound; the task gate compares the sender with the user's address to keep them from becoming tasks.</p>
+  <div class="page-footer"><strong>Chief of Staff</strong><span>Part III · Reference · Data model — page 16 of 26</span></div>
+</div>
+
+<div class="page">
+  <div class="section-label">Part III · Reference · Data model</div>
+  <h2>Data model: derived tables, functions and security</h2>
+
+  <div class="table-wrap">
+  <table class="detail-table schema-table">
+    <thead><tr><th>Table</th><th>Key columns</th><th>Constraints &amp; indexes</th><th>Written by</th></tr></thead>
+    <tbody>
+      <tr><td><code>transactions_raw</code></td><td>One row per financial email: <code>communication_id</code>, <code>is_financial_email</code>, <code>confidence</code>, <code>transaction_type</code>, <code>category</code>, <code>amount</code>, <code>currency</code> (default INR), <code>merchant_name</code> (as extracted), <code>merchant_normalized</code>, <code>bank_name</code>, <code>payment_method</code>, <code>transaction_datetime</code>, <code>transaction_id</code>, <code>reference_id</code>, <code>upi_id</code>, <code>masked_account</code>, <code>is_recurring</code>, <code>sender_type</code>, <code>needs_review</code></td><td>UNIQUE <code>communication_id</code> (upsert target); index for the dedup scan on <code>(user_id, is_financial_email, needs_review, transaction_datetime)</code></td><td>Stage-1 financial extraction</td></tr>
+      <tr><td><code>transactions_normalized</code></td><td>One row per real-world transaction: <code>merchant_normalized</code>, <code>amount</code>, <code>currency</code>, <code>category</code>, <code>transaction_type</code>, <code>transaction_datetime</code>, <code>status</code>, <code>primary_source</code>, <code>raw_transaction_ids</code> / <code>communication_ids</code> uuid[], <code>merchant_email_present</code>, <code>bank_email_present</code></td><td>Partial UNIQUE <code>(user_id, communication_ids)</code> where non-empty — added after a race produced 694 duplicates of 729 rows; index on <code>(user_id, transaction_datetime DESC)</code></td><td><code>runDedup</code> after each extraction; <code>backfill-transactions</code>; <code>dedupe-normalized</code></td></tr>
+      <tr><td><code>tasks</code></td><td><code>title</code>, <code>source_type</code> (<code>email</code> | <code>meeting</code>), <code>source_id</code>, <code>contact_id</code>, <code>due_date</code>, <code>priority</code>, <code>status</code> (<code>pending</code> · <code>snoozed</code> · <code>done</code> · <code>dismissed</code>), <code>snoozed_until</code>, <code>ai_reasoning</code></td><td>Partial indexes on pending and snoozed tasks</td><td>Task gate in <code>summarize-communication</code>; <code>summarize-meeting</code>; Tasks page</td></tr>
+      <tr><td><code>commitments</code></td><td><code>description</code>, <code>to_contact_id</code>, <code>source_type</code> / <code>source_id</code>, <code>due_date</code>, <code>status</code>, <code>extracted_by</code>, <code>ai_confidence</code></td><td>Partial index on pending and overdue</td><td>Flag-gated extraction (off)</td></tr>
+      <tr><td><code>memory_chunks</code></td><td><code>source_type</code>, <code>source_id</code>, <code>chunk_text</code>, <code>chunk_index</code>, <code>embedding</code> vector(1024), <code>metadata</code> jsonb (<code>occurred_at</code>, <code>contact_email</code>, <code>entities</code>)</td><td>Indexes on <code>(user_id, source_type, source_id)</code> and recency</td><td><code>embedAndStoreChunks</code>: deletes a source's chunks, then reinserts</td></tr>
+      <tr><td><code>operational_insights</code></td><td><code>state_key</code>, <code>category</code>, <code>insight_type</code>, <code>title</code>, <code>summary</code>, <code>recommended_action</code>, <code>entities</code> / <code>source_refs</code> text[], <code>priority_score</code>, <code>urgency</code>, <code>status</code>, <code>first_detected_at</code>, <code>last_seen_at</code>, <code>expires_at</code>, <code>confidence</code>, <code>generated_by</code>, <code>explanation</code></td><td>UNIQUE <code>(user_id, state_key)</code>; partial index on active by priority; indexes by category and expiry</td><td><code>compute-operational-state</code></td></tr>
+      <tr><td><code>relationships</code></td><td><code>contact_id</code>, <code>category</code>, <code>health_score</code>, <code>follow_up_cadence_days</code>, <code>follow_up_due</code></td><td>UNIQUE <code>(user_id, contact_id, category)</code></td><td>Nothing — read-only today</td></tr>
+      <tr><td><code>daily_briefs</code></td><td><code>brief_date</code>, <code>content</code> jsonb, <code>raw_markdown</code>, <code>delivered_at</code></td><td>UNIQUE <code>(user_id, brief_date)</code></td><td><code>generate-daily-brief</code> (never scheduled)</td></tr>
+      <tr><td><code>drafts</code></td><td><code>communication_id</code>, <code>draft_text</code>, <code>status</code> (<code>pending_review</code> → <code>sent</code>), <code>sent_at</code></td><td>FK to <code>communications</code>, cascade</td><td><code>POST /api/drafts</code>; send-reply</td></tr>
+      <tr><td><code>business_entities</code></td><td><code>entity_type</code>, <code>name</code>, <code>status</code>, <code>owner_contact_id</code>, <code>mention_count</code>, <code>embedding</code></td><td>Index on <code>(user_id, entity_type, name)</code></td><td>Nothing — no code references the table</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3 style="margin-top:22px">Functions and triggers</h3>
+  <div class="table-wrap">
+  <table class="detail-table">
+    <thead><tr><th>Object</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td><code>match_memory_chunks(query_embedding, match_threshold, match_count, p_user_id, days_back = 30)</code></td><td>Exact cosine KNN over a user's chunks: <code>1 − (embedding &lt;=&gt; query)</code> above the threshold, ordered by similarity, restricted to a <code>days_back</code> window on the email's own <code>metadata.occurred_at</code> (falling back to <code>created_at</code> when that is not a valid date). Called with threshold 0.4 and a 90-day window.</td></tr>
+      <tr><td><code>get_category_counts(p_user_id)</code></td><td>Counts emails per <code>email_category</code> for the inbox sidebar in one round trip.</td></tr>
+      <tr><td><code>handle_new_user()</code> on <code>auth.users</code> insert</td><td>Creates the <code>public.users</code> profile. <code>SECURITY DEFINER</code> with a pinned <code>search_path</code>: unpinned, the unqualified table name resolved to <code>auth.users</code> and signup failed.</td></tr>
+      <tr><td><code>update_updated_at()</code></td><td>Sets <code>updated_at</code> on update for nine tables.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3 style="margin-top:22px">Access model</h3>
+  <p style="font-size:13px">Three clients reach the database. The <strong>session client</strong> (anon key + the user's cookie) is used by pages and most API routes and is bound by RLS. The <strong>service-role client</strong> bypasses RLS and is used by the worker, webhooks, scripts, token storage and vector search — so in that code, the <code>user_id</code> filter is the only isolation. The <strong>token client</strong> validates a bearer token for eval runs. The database runs on Supabase's free tier: a 500 MB ceiling, no managed backups (<code>npm run backup:db</code> takes a local <code>pg_dump</code>), and no ANN vector index, by choice.</p>
+  <div class="page-footer"><strong>Chief of Staff</strong><span>Part III · Reference · Data model — page 17 of 26</span></div>
+</div>
+
+<div class="page">
+  <div class="section-label">Part III · Reference · HTTP API</div>
+  <h2>HTTP API and pages</h2>
+
+  <h3>Authentication layer</h3>
+  <p style="font-size:13px"><strong>Sign-in</strong> is Supabase Auth: Google OAuth (<code>email profile</code> scopes) or an email magic link, both returning to <code>GET /auth/callback</code>, which exchanges the code for a session cookie. This is separate from connecting Gmail, which is its own OAuth grant (next section).</p>
+  <p style="font-size:13px"><strong><code>proxy.ts</code></strong> (Next 16's replacement for middleware) runs on every path except static assets. It refreshes the session cookie and redirects any request without a user to <code>/auth/login</code> — API routes included, so they receive a redirect rather than a 401. Public prefixes: <code>/</code>, <code>/auth/*</code>, <code>/api/webhooks/*</code>, <code>/api/auth/*</code>, <code>/api/admin/*</code>, and <code>/api/ask?eval=true</code> (which authenticates its own bearer token). The dashboard layout additionally sends users who have not finished onboarding to <code>/onboarding</code>. No route sets <code>runtime</code> or <code>maxDuration</code>.</p>
+
+  <div class="table-wrap">
+  <table class="detail-table api-table">
+    <thead><tr><th>Endpoint</th><th>Auth</th><th>Purpose</th><th>Reads / writes · calls</th></tr></thead>
+    <tbody>
+      <tr class="group"><td colspan="4">User-facing</td></tr>
+      <tr><td><code>POST /api/ask</code><br><small>body: AI SDK <code>{messages}</code></small></td><td>Session (or bearer with <code>?eval=true</code>)</td><td>Grounded Q&amp;A, streamed; returns conversation context as message metadata, read back from the request on the next turn</td><td>Reads tasks, meetings, communications, transactions, insights, chunks · OpenAI gpt-4o-mini, gpt-4o, embeddings</td></tr>
+      <tr><td><code>POST /api/drafts</code><br><small><code>{communicationId}</code></small></td><td>Session</td><td>Generate an AI reply draft</td><td>Reads communication, <code>users.business_context</code>; inserts <code>drafts</code> · gpt-4o</td></tr>
+      <tr><td><code>GET /api/inbox/spend</code><br><small><code>?period=week|month|all</code></small></td><td>Session</td><td>Spend summary JSON</td><td>Reads <code>transactions_normalized</code> · no caller in the app today</td></tr>
+      <tr class="group"><td colspan="4">Inbox actions — all <code>POST</code>, body <code>{communicationId, …}</code></td></tr>
+      <tr><td><code>/api/actions/mark-done</code></td><td>Session</td><td>Mark handled</td><td><code>communications.action_taken</code></td></tr>
+      <tr><td><code>/api/actions/mark-spam</code></td><td>Session</td><td>Move to Spam</td><td>Gmail <code>messages.modify</code> (+SPAM −INBOX)</td></tr>
+      <tr><td><code>/api/actions/send-reply</code><br><small><code>{communicationId, draftId?, body}</code></small></td><td>Session</td><td>Reply on the original thread</td><td>Gmail <code>messages.send</code>; marks draft <code>sent</code></td></tr>
+      <tr><td><code>/api/actions/unsubscribe</code></td><td>Session</td><td>Follow List-Unsubscribe, then spam</td><td>mailto via Gmail send, or server-side HTTP POST/GET to the sender's URL; then <code>messages.modify</code></td></tr>
+      <tr class="group"><td colspan="4">Webhooks — public; service-role client</td></tr>
+      <tr><td><code>POST /api/webhooks/gmail</code></td><td><strong>None</strong></td><td>Pub/Sub push for the Gmail watch</td><td>Walks <code>history.list</code> since the stored cursor; inserts <code>raw_events</code>; enqueues <code>email-raw</code>; advances the cursor</td></tr>
+      <tr><td><code>POST /api/webhooks/calendar</code></td><td><strong>None</strong> (user id parsed from channel id)</td><td>Calendar push channel</td><td><code>events.list</code> with sync token; upserts <code>meetings</code></td></tr>
+      <tr><td><code>POST /api/webhooks/zoom</code></td><td>HMAC-SHA256 (<code>x-zm-signature</code>)</td><td>Recording completed</td><td>Zoom recordings API; updates <code>meetings.transcript</code>; enqueues (wrong queue)</td></tr>
+      <tr><td><code>POST /api/webhooks/slack</code></td><td>HMAC-SHA256, 5-min window, timing-safe</td><td>DMs and mentions</td><td>Inserts <code>raw_events</code>; enqueues <code>slack-raw</code> (no consumer)</td></tr>
+      <tr class="group"><td colspan="4">OAuth and admin</td></tr>
+      <tr><td><code>GET /api/auth/google</code></td><td>None</td><td>Start Gmail/Calendar connect</td><td>302 to Google consent (offline access, forced consent)</td></tr>
+      <tr><td><code>GET /api/auth/google/callback</code></td><td>Session</td><td>Finish connect</td><td>Exchanges code; encrypts and upserts tokens in <code>integrations</code>; registers Gmail and Calendar watches</td></tr>
+      <tr><td><code>GET /auth/callback</code></td><td>Code exchange</td><td>Finish app sign-in</td><td>Sets the Supabase session; redirects to <code>next</code> (default <code>/dashboard</code>)</td></tr>
+      <tr><td><code>POST /api/admin/backfill-gmail</code><br><small><code>{secret}</code></small></td><td>Shared secret <code>ADMIN_SECRET</code></td><td>90-day backfill for every user</td><td>Fire-and-forget after responding; not guaranteed to finish on serverless</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="page-footer"><strong>Chief of Staff</strong><span>Part III · Reference · HTTP API — page 18 of 26</span></div>
+</div>
+
+<div class="page">
+  <div class="section-label">Part III · Reference · Pages</div>
+  <h3>Pages and server actions</h3>
+  <p style="font-size:13px">Every dashboard page is <code>force-dynamic</code>, reads through the session client and redirects to sign-in without a user.</p>
+
+  <div class="table-wrap">
+  <table class="detail-table">
+    <thead><tr><th>Route</th><th>Loads</th><th>Mutations</th></tr></thead>
+    <tbody>
+      <tr><td><code>/dashboard</code></td><td>Pending tasks, latest daily brief, upcoming meetings, open action emails (commitments when flagged on)</td><td>—</td></tr>
+      <tr><td><code>/inbox</code></td><td><code>get_category_counts</code> + communications</td><td>—</td></tr>
+      <tr><td><code>/inbox/[id]</code></td><td>The email, sender, drafts; HTML body fetched live from Gmail (never stored)</td><td>Buttons call the action routes, drafts and send-reply</td></tr>
+      <tr><td><code>/inbox/spend</code>, <code>/finance</code></td><td><code>transactions_normalized</code> (6 months, ≤ 500 rows)</td><td>—</td></tr>
+      <tr><td><code>/tasks</code></td><td>Tasks with contact, excluding dismissed</td><td>Server action <code>updateTaskStatus</code></td></tr>
+      <tr><td><code>/commitments</code></td><td>404 unless <code>FEATURES.commitments</code></td><td>Server action <code>markDone</code></td></tr>
+      <tr><td><code>/meetings</code>, <code>/relationships</code></td><td><code>meetings</code>; <code>relationships</code> (empty)</td><td>—</td></tr>
+      <tr><td><code>/ask</code></td><td>Chat client over <code>/api/ask</code></td><td>—</td></tr>
+      <tr><td><code>/settings</code></td><td><code>integrations</code>, <code>users</code></td><td>Links to <code>/api/auth/google</code>; Slack card links to <code>#</code></td></tr>
+      <tr><td><code>/onboarding</code></td><td>Client component</td><td>Writes <code>users.business_context</code> and <code>onboarding_complete</code> through the browser client (RLS)</td></tr>
+      <tr><td><code>/auth/login</code>, <code>/</code></td><td>Sign-in options; <code>/</code> redirects signed-in users to the dashboard</td><td>—</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="callout callout-emerald">
+    <strong>Both server actions run under RLS.</strong> <code>updateTaskStatus</code> and <code>markDone</code> use the session client, so they can only change the caller's own rows; task status must be one of <code>pending</code>, <code>snoozed</code>, <code>done</code>, <code>dismissed</code>. Until 18 October they used the service-role client and updated by id alone.
+  </div>
+  <div class="page-footer"><strong>Chief of Staff</strong><span>Part III · Reference · Pages — page 19 of 26</span></div>
+</div>
+
+<div class="page">
+  <div class="section-label">Part III · Reference · External services</div>
+  <h2>External services, OAuth and tokens</h2>
+
+  <div class="table-wrap">
+  <table class="detail-table">
+    <thead><tr><th>Service</th><th>Used for</th><th>Calls</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Gmail API v1</strong></td><td>Ingestion, replies, inbox actions</td><td><code>users.watch</code> (INBOX → Pub/Sub), <code>history.list</code> (messageAdded), <code>messages.get</code> (full), <code>messages.list</code> (backfill), <code>messages.send</code>, <code>messages.modify</code></td><td><span class="badge-sm badge-emerald">Live</span></td></tr>
+      <tr><td><strong>Google Pub/Sub</strong></td><td>Gmail change notifications</td><td>Topic <code>projects/$GOOGLE_CLOUD_PROJECT_ID/topics/gmail-push</code>, push subscription to <code>/api/webhooks/gmail</code></td><td><span class="badge-sm badge-emerald">Live</span></td></tr>
+      <tr><td><strong>Google Calendar API v3</strong></td><td>Meeting sync</td><td><code>events.watch</code> (primary, 7-day channel), <code>events.list</code> with <code>syncToken</code></td><td><span class="badge-sm badge-emerald">Live</span></td></tr>
+      <tr><td><strong>Google OAuth 2.0</strong></td><td>Gmail + Calendar grant</td><td><code>generateAuthUrl</code> (offline, consent), <code>getToken</code>, <code>refreshAccessToken</code>, <code>userinfo.get</code></td><td><span class="badge-sm badge-emerald">Live</span></td></tr>
+      <tr><td><strong>OpenAI</strong></td><td>All model calls and embeddings</td><td><code>chat.completions.create</code>, <code>embeddings.create</code>, AI SDK <code>streamText</code> / <code>generateText</code></td><td><span class="badge-sm badge-emerald">Live</span></td></tr>
+      <tr><td><strong>Supabase</strong></td><td>Postgres, Auth, pgvector RPC</td><td>supabase-js (SSR, service-role and token clients); RPC <code>match_memory_chunks</code>, <code>get_category_counts</code></td><td><span class="badge-sm badge-emerald">Live</span></td></tr>
+      <tr><td><strong>Redis</strong></td><td>BullMQ transport</td><td>ioredis from <code>REDIS_URL</code>; TLS for <code>rediss://</code></td><td><span class="badge-sm badge-emerald">Live</span></td></tr>
+      <tr><td><strong>Zoom API</strong></td><td>Recording transcripts</td><td>Server-to-server OAuth (<code>account_credentials</code>); <code>GET /v2/meetings/{id}/recordings</code>; transcript download</td><td><span class="badge-sm badge-rose">Not live</span></td></tr>
+      <tr><td><strong>Resend</strong></td><td>Daily brief email</td><td><code>emails.send</code></td><td><span class="badge-sm badge-rose">Not live</span></td></tr>
+      <tr><td><strong>Slack Web API</strong></td><td>DMs and mentions</td><td>Client wrappers exist; none called</td><td><span class="badge-sm badge-rose">Not live</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3 style="margin-top:22px">Google OAuth scopes</h3>
+  <p style="font-size:13px"><code>gmail.readonly</code>, <code>gmail.send</code>, <code>gmail.modify</code>, <code>calendar.readonly</code>, <code>calendar.events</code>, <code>userinfo.email</code>, <code>userinfo.profile</code> — requested with <code>access_type=offline</code> and <code>prompt=consent</code>, so every connect returns a fresh refresh token. <code>gmail.modify</code> and <code>gmail.send</code> are restricted scopes: an app in Google's <em>Testing</em> status gets refresh tokens that expire after 7 days, and a published but unverified app shows an "unverified app" warning at consent and is capped at 100 users until Google verifies it. The app was published to production on 14 October; the first post-publish token is the test.</p>
+
+  <h3 style="margin-top:22px">Token lifecycle</h3>
+  <div class="table-wrap">
+  <table class="detail-table">
+    <thead><tr><th>Step</th><th>Behaviour</th></tr></thead>
+    <tbody>
+      <tr><td>Store</td><td><code>saveTokens</code> upserts <code>integrations</code> on <code>(user_id, provider)</code> through the service-role client. Access and refresh tokens are each encrypted with AES-256-GCM: key from <code>ENCRYPTION_KEY</code> (64 hex chars, 32 bytes), a random 12-byte IV per value, stored as <code>base64(iv ‖ authTag[16] ‖ ciphertext)</code>.</td></tr>
+      <tr><td>Use</td><td><code>getAuthenticatedClient</code> decrypts, and refreshes when the access token is within 5 minutes of expiry, re-encrypting the result.</td></tr>
+      <tr><td>Watch</td><td>On connect, and every 6 hours via <code>renew-gmail-watches</code>, re-registers the Gmail watch (expires after 7 days) and a new Calendar channel, merging the new expiry into <code>metadata</code>.</td></tr>
+      <tr><td>Refresh fails</td><td>Nothing handles it. The error propagates, the integration stays <code>is_active</code>, renewal keeps retrying every 6 hours, and the only trace is <code>invalid_grant</code> in the worker log. This is how two ingestion outages went unnoticed.</td></tr>
+      <tr><td>Reconnect</td><td>Visiting <code>/api/auth/google</code> replaces the tokens. The callback overwrites <code>metadata</code> wholesale rather than merging, which drops the Calendar sync token and forces a full re-sync.</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="page-footer"><strong>Chief of Staff</strong><span>Part III · Reference · External services — page 20 of 26</span></div>
+</div>
+
+<div class="page">
+  <div class="section-label">Part III · Reference · Worker</div>
+  <h2>Background worker and queues</h2>
+
+  <p>One Node process on Railway (<code>npx tsx worker/index.ts</code>, restart on failure up to 10 times) runs a BullMQ <code>Worker</code> per live queue. Every worker uses concurrency 5, a 60 s lock renewed every 30 s, stalled-job checks every 60 s, and a 60 s <code>drainDelay</code>: the Redis provider handles blocking reads poorly, so idle workers poll, and 60 s balances polling cost (about $0.40 a month) against pickup latency. Producers share defaults of 3 attempts with exponential backoff from 2 s; completed jobs are kept for 1 hour and failed jobs for 24.</p>
+
+  <div class="table-wrap">
+  <table class="detail-table">
+    <thead><tr><th>Queue</th><th>Handler</th><th>Produced by</th><th>Options</th></tr></thead>
+    <tbody>
+      <tr><td><code>email-raw</code></td><td><code>process-email</code> — fetch, parse, upsert contact and communication</td><td>Gmail webhook; <code>requeue-pending-emails</code></td><td>defaults</td></tr>
+      <tr><td><code>summarize</code></td><td><code>summarize-communication</code> — triage, finance, embed, task gate</td><td><code>process-email</code>; Gmail backfill; admin backfill; reconcile (<code>jobId resummarize-&lt;id&gt;</code>); <code>reparse-bodies</code> — and, wrongly, the Zoom webhook</td><td>defaults</td></tr>
+      <tr><td><code>compute-operational-state</code></td><td>Insights engine</td><td><code>summarize-communication</code>, <code>summarize-meeting</code></td><td>30 s delay, <code>jobId</code> and dedup id <code>ops-&lt;userId&gt;</code></td></tr>
+      <tr><td><code>scheduled</code></td><td>Dispatch on job name: <code>renew-gmail-watches</code>, <code>reconcile-unprocessed</code>, <code>generate-daily-brief</code></td><td>Repeat jobs registered at boot</td><td>see schedules</td></tr>
+      <tr><td><code>meetings-summarize</code></td><td><code>summarize-meeting</code></td><td><strong>Nothing</strong></td><td>—</td></tr>
+      <tr><td><code>calendar-raw</code>, <code>zoom-raw</code>, <code>slack-raw</code>, <code>embed</code>, <code>reason</code>, <code>act</code></td><td><strong>No worker</strong></td><td>Only <code>slack-raw</code> has a producer</td><td>Declared, unused</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3 style="margin-top:22px">Schedules</h3>
+  <div class="table-wrap">
+  <table class="detail-table">
+    <thead><tr><th>Job</th><th>Cron (UTC)</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td><code>renew-gmail-watches</code></td><td><code>0 */6 * * *</code></td><td>Re-registers the Gmail watch and a Calendar channel for every active Google integration</td></tr>
+      <tr><td><code>reconcile-unprocessed</code></td><td><code>30 */6 * * *</code></td><td>For users with a live Gmail watch, re-enqueues up to 500 emails missing a summary or embedding — the safety net for write-then-enqueue</td></tr>
+      <tr><td><code>generate-daily-brief</code></td><td><strong>none</strong></td><td>Handler exists; no repeat job registers it</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p style="font-size:12.5px;color:var(--slate-500)">Repeat registration is idempotent by <code>jobId</code> and wrapped so that a Redis failure at boot cannot crash the process. Each worker attaches an <code>error</code> listener: without one, a transient Redis error is an uncaught exception that takes down every queue's worker at once.</p>
+
+  <h3 style="margin-top:22px">Scripts and one-off jobs</h3>
+  <div class="table-wrap">
+  <table class="detail-table">
+    <thead><tr><th>Command</th><th>Purpose</th></tr></thead>
+    <tbody>
+      <tr><td><code>backfill:gmail -- --days=N</code></td><td>Import N days of mail (default 90) and enqueue summaries; idempotent</td></tr>
+      <tr><td><code>backfill:transactions</code> · <code>dedupe:normalized</code></td><td>Re-run financial extraction and dedup; collapse duplicate normalised rows (dry run unless <code>--apply</code>)</td></tr>
+      <tr><td><code>backfill:embeddings</code> · <code>backfill:categories</code></td><td>Embed summarised emails with no chunks; re-triage uncategorised rows</td></tr>
+      <tr><td><code>retriage:emails</code> · <code>reparse:bodies</code> · <code>reconcile:emails</code></td><td>Re-run triage with the current prompt; re-fetch bodies mangled by the old parser; run reconcile on demand</td></tr>
+      <tr><td><code>scripts/backfill-calendar.ts</code> · <code>backfill-operational-insights.ts</code></td><td>Re-sync N days of calendar; compute insights inline, without Redis</td></tr>
+      <tr><td><code>snapshot:tasks</code> · <code>snapshot:payloads</code></td><td>Capture real emails as labelled eval fixtures</td></tr>
+      <tr><td><code>backup:db</code></td><td><code>pg_dump</code> of the database to a local file</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="page-footer"><strong>Chief of Staff</strong><span>Part III · Reference · Worker — page 21 of 26</span></div>
+</div>
+
+<div class="page">
+  <div class="section-label">Part III · Reference · Operations</div>
+  <h2>Configuration, deployment and operations</h2>
+
+  <h3>Environment variables</h3>
+  <p style="font-size:13px">Names only. Web means Vercel; worker means Railway; locally, scripts read <code>.env.local</code> through <code>tsx --env-file</code>.</p>
+  <div class="table-wrap">
+  <table class="detail-table">
+    <thead><tr><th>Group</th><th>Variables</th><th>Used by</th></tr></thead>
+    <tbody>
+      <tr><td>Supabase</td><td><code>NEXT_PUBLIC_SUPABASE_URL</code>, <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code>, <code>SUPABASE_SERVICE_ROLE_KEY</code>; <code>SUPABASE_DB_URL</code> (backup script)</td><td>web, worker, scripts</td></tr>
+      <tr><td>Google</td><td><code>GOOGLE_CLIENT_ID</code>, <code>GOOGLE_CLIENT_SECRET</code>, <code>GOOGLE_REDIRECT_URI</code>, <code>GOOGLE_CLOUD_PROJECT_ID</code> (enables watches; must be the OAuth client's project)</td><td>web, worker</td></tr>
+      <tr><td>OpenAI</td><td><code>OPENAI_API_KEY</code></td><td>web, worker, evals</td></tr>
+      <tr><td>Queue</td><td><code>REDIS_URL</code></td><td>web (producers), worker</td></tr>
+      <tr><td>Security</td><td><code>ENCRYPTION_KEY</code> (64 hex chars), <code>ADMIN_SECRET</code></td><td>web, worker</td></tr>
+      <tr><td>App</td><td><code>NEXT_PUBLIC_APP_URL</code> (OAuth redirects, Calendar webhook address, brief links)</td><td>web, worker</td></tr>
+      <tr><td>Not live</td><td><code>RESEND_API_KEY</code>, <code>RESEND_FROM_EMAIL</code>, <code>ZOOM_ACCOUNT_ID</code>, <code>ZOOM_CLIENT_ID</code>, <code>ZOOM_CLIENT_SECRET</code>, <code>ZOOM_WEBHOOK_SECRET_TOKEN</code>, <code>SLACK_BOT_TOKEN</code>, <code>SLACK_SIGNING_SECRET</code></td><td>worker, web</td></tr>
+      <tr><td>Evals</td><td><code>EVAL_USER_ID</code>, <code>EVAL_USER_B_ID</code>, <code>EVAL_BASE_URL</code></td><td>evals</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3 style="margin-top:22px">Build and deploy</h3>
+  <p style="font-size:13px">The web app deploys on Vercel with a default Next.js build (no <code>vercel.json</code>; <code>next.config.ts</code> is empty). The worker deploys on Railway with Nixpacks — <code>npm install</code>, then <code>npx tsx --tsconfig tsconfig.json worker/index.ts</code> — and builds from <code>main</code>. Node 24 is pinned through <code>engines</code>. Day-to-day work happens on <code>dev</code>; shipping is a fast-forward of <code>main</code> to <code>dev</code> and a push. There is no CI: type-checking (<code>tsc --noEmit</code>) and evals are run by hand.</p>
+
+  <h3 style="margin-top:22px">Evaluation suites</h3>
+  <div class="table-wrap">
+  <table class="detail-table">
+    <thead><tr><th>Suite</th><th>Command</th><th>What it asserts</th></tr></thead>
+    <tbody>
+      <tr><td>Task creation</td><td><code>npm run eval:tasks</code></td><td>40 real emails: does a task appear, is the action first-person, is the category stable across re-runs. 40/40 at last run.</td></tr>
+      <tr><td>Financial extraction</td><td><code>npm run eval:extraction</code></td><td>Amounts, merchants, types and dates from real finance emails</td></tr>
+      <tr><td>Email parsing</td><td><code>npm run eval:parsing</code></td><td>Body extraction from captured Gmail payloads</td></tr>
+      <tr><td>Vector retrieval</td><td><code>npm run eval:retrieval</code></td><td>Calibration of the 0.4 similarity threshold</td></tr>
+      <tr><td>End-to-end Ask</td><td><code>evals/scripts/run.ts</code></td><td>97 cases — 22 hand-written (factual, temporal, semantic, adversarial, hallucination, multi-turn) and 75 generated from real use cases; 5 marked smoke — against <code>/api/ask?eval=true</code>, asserting intent, entities, temporal resolution, plan and grounding</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3 style="margin-top:22px">Runbook</h3>
+  <div class="table-wrap">
+  <table class="detail-table">
+    <thead><tr><th>Symptom</th><th>Check</th><th>Fix</th></tr></thead>
+    <tbody>
+      <tr><td>No new email</td><td><code>railway logs</code> for <code>invalid_grant</code> in <code>[renew-watches]</code>; newest <code>raw_events.created_at</code></td><td>Reconnect at <code>/api/auth/google</code>; then <code>backfill:gmail -- --days=&lt;gap&gt;</code></td></tr>
+      <tr><td>Emails without summaries</td><td>Count rows with null <code>body_summary</code></td><td>Wait for reconcile (≤ 6 h) or <code>reconcile:emails</code></td></tr>
+      <tr><td>Stale dashboard alerts</td><td><code>operational_insights.updated_at</code></td><td><code>scripts/backfill-operational-insights.ts</code> (inline, no Redis)</td></tr>
+      <tr><td>Fix pushed but not live</td><td><code>railway deployment list</code> vs. <code>git log origin/main</code></td><td>Fast-forward and push <code>main</code></td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="page-footer"><strong>Chief of Staff</strong><span>Part III · Reference · Operations — page 22 of 26</span></div>
+</div>
+
+<div class="page">
+  <div class="section-label">Part IV · Quality and risk</div>
+  <h2>Correctness log</h2>
+
+  <p>An assistant that quietly gets the numbers wrong is worse than no assistant, because the user cannot tell. Every failure below was found in production on real data, and each one was silent — no error, no alert, no crash. They are documented here because the engineering response to them is a larger part of the product's value than any individual feature.</p>
+
+  <table class="detail-table">
+    <thead>
+      <tr><th>Failure</th><th>Effect</th><th>Response</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>HTML body parsing kept stylesheet text</td>
+        <td>41% of stored email bodies began with CSS, rising to 47% of finance email. The extractor was reading <code>@media screen and…</code> instead of the receipt.</td>
+        <td>Strip <code>&lt;style&gt;</code> and <code>&lt;script&gt;</code> blocks with their contents before removing tags; prefer <code>text/plain</code> only when it carries real content, since some senders ship a part holding nothing but an unsubscribe line.</td>
+      </tr>
+      <tr>
+        <td>Check-then-insert race on normalised transactions</td>
+        <td>One transaction reached 294 duplicate rows, inflating dashboard totals roughly 20&times;. <code>maybeSingle()</code> errors once two rows match and returns null, which read as "not found".</td>
+        <td>Fetch all matches, update the oldest, delete the rest — the table now self-heals. A partial unique index on <code>(user_id, communication_ids)</code> makes recurrence impossible at the database level.</td>
+      </tr>
+      <tr>
+        <td>Slow intent classification degraded silently</td>
+        <td>A classification call exceeding its timeout fell back to weights that skipped the communications and vector sources, so emails that existed were invisible to the answer.</td>
+        <td>Longer timeout, and a fallback that searches broadly rather than narrowly. Degradation should widen the net, never close it.</td>
+      </tr>
+      <tr>
+        <td>Extracted dates trusted blindly</td>
+        <td>Delivery and due dates landed as transaction dates in the future; <code>DD-MM-YY</code> bank alerts parsed as <code>YY-MM-DD</code> put 9% of transactions years in the past.</td>
+        <td>Clamp both sides against the email's arrival time, which for a transactional alert is within hours of the event.</td>
+      </tr>
+      <tr>
+        <td>Work lost when a queue write failed</td>
+        <td>Rows were written to the database before their processing job was enqueued. When the enqueue failed, the row was committed with nothing recording that it still needed work — 2,112 emails sat unprocessed indefinitely.</td>
+        <td>A reconcile job runs every six hours, finds rows missing a summary or embedding, and re-enqueues them. A failed enqueue now costs a delay, not the data.</td>
+      </tr>
+      <tr>
+        <td>Google refresh tokens expired every 7 days</td>
+        <td>With the OAuth app still in Google's "Testing" status, refresh tokens died a week after each connect. Watch renewal failed with <code>invalid_grant</code>, push stopped, and no new email arrived for 18 days — the worker stayed healthy and logged success throughout.</td>
+        <td>App published to production on 14 October and the gap backfilled; the first token issued since then is the test of the fix. Token death is still visible only in worker logs.</td>
+      </tr>
+      <tr>
+        <td>Marketing mail became tasks</td>
+        <td>Promotions filed under finance, travel, security or learning slipped past the category block, and repeated nudges from one sender each raised a task. 37 tasks in a week, of which 22 were promotions or repeats.</td>
+        <td>Triage judges promotions by intent and sees the bulk-mail signal; same-sender similar-title dedup. Replayed on the same week's mail: 15 tasks instead of 37. Five of the leaked emails are now eval cases.</td>
+      </tr>
+      <tr>
+        <td>One merchant, three spellings</td>
+        <td>A known merchant whose canonical name matched its own title-case was treated as unknown, so the model's casing was stored: Zomato appeared as "Zomato", "ZOMATO" and "zomato", splitting spend totals. Separately, short aliases matched as bare prefixes and filed "Vijay Das" under Vi and "Micron Technology" under Xiaomi.</td>
+        <td>Grouping and lookups compare on a case- and separator-insensitive key; short aliases need a word boundary. A one-off cleanup collapsed 154 rows and refiled 4 misattributed payments.</td>
+      </tr>
+      <tr>
+        <td>Dashboard insights frozen for five weeks</td>
+        <td>The recompute job used a fixed <code>jobId</code>. BullMQ ignores adds whose id matches a stored job and prunes completed jobs only when another completes, so the job from 10 September blocked every later one. 117 email jobs ran in one log window with zero recomputes, and nothing errored.</td>
+        <td>One enqueue helper with a dedup key that expires after 30 s and no fixed id; one-off inline recompute (174 insights). Verified end to end: a burst collapses to one job, and a later enqueue creates a new one.</td>
+      </tr>
+      <tr>
+        <td>Ask AI forgot the previous question</td>
+        <td>Conversation context was returned in a header the chat client never read, so every follow-up — "and in August?" — was answered as a first question.</td>
+        <td>Context rides on message metadata, which the chat client already sends back. It is applied only to questions that read as follow-ups, so an unrelated question does not inherit the last person or merchant. Seven live two-turn conversations verified before shipping.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout callout-indigo">
+    <strong>The pattern worth naming.</strong> Every one of these failed silently, and several were invisible precisely because the system caught the error and moved on. Swallowed errors and permissive fallbacks are how a pipeline reports success while producing wrong answers. The safeguards that matter are the ones that make bad state impossible (a unique index), self-correcting (a reconcile pass), or loud (a checked error) — in that order.
+  </div>
+
+  <p style="font-size:13px">Quality is now tested at two levels. End-to-end cases drive the full <code>/api/ask</code> pipeline and assert on intent, entities, temporal resolution, retrieval plan, and grounding. Component evals call the individual model steps directly — no server, no database — because a wrong amount from the extractor is invisible to any end-to-end assertion but lands straight in the finance dashboard. Both suites treat the failures above as regression cases. The task-creation eval now runs 40 real emails, including the promotions that leaked, and passes 40/40. Evals run by hand; there is no CI.</p>
+  <div class="page-footer"><strong>Chief of Staff</strong><span>Part IV · Quality and risk — page 23 of 26</span></div>
+</div>
+
+<div class="page">
+  <div class="section-label">Part IV · Quality and risk</div>
+  <h2>Security review</h2>
+
+  <p>Findings from a full read of every route, server action and integration, ranked by what an attacker could do. Most are latent while the product has one user; all become real with the second. None is known to have been exploited.</p>
+
+  <div class="table-wrap">
+  <table class="detail-table">
+    <thead><tr><th>#</th><th>Finding</th><th>Impact</th><th>Fix</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td><strong>Server actions skipped ownership checks</strong> — <span class="badge-sm badge-emerald">Fixed 18 Oct</span>. <code>updateTaskStatus</code> and <code>markDone</code> used the service-role client and updated by <code>id</code> alone.</td><td>Any signed-in user could have changed another user's tasks or commitments.</td><td>Both now use the session client, so RLS scopes them; task status is validated against the four allowed values.</td></tr>
+      <tr><td>2</td><td><strong>Gmail webhook is unauthenticated.</strong> It trusts <code>emailAddress</code> and <code>historyId</code> from the body and writes the history cursor from it.</td><td>Anyone who knows a connected address can move the sync cursor, causing mail to be skipped or replayed, and trigger Gmail fetches on that user's quota.</td><td>Verify the Pub/Sub push OIDC token (audience + service account).</td></tr>
+      <tr><td>3</td><td><strong>Calendar webhook is unauthenticated.</strong> The user id comes from the channel-id header; no channel token is set or checked.</td><td>Anyone with a user's UUID can force calendar syncs. Data still comes from Google, so the impact is quota, not injection.</td><td>Set a channel <code>token</code> at watch time and verify it.</td></tr>
+      <tr><td>4</td><td><strong>Server-side request forgery in unsubscribe.</strong> The server fetches any <code>http(s)</code> URL from an inbound email's <code>List-Unsubscribe</code> header.</td><td>A sender chooses a URL the server will request — including internal addresses.</td><td>Allow only public HTTPS hosts; resolve and reject private ranges; or open the link client-side.</td></tr>
+      <tr><td>5</td><td><strong>No OAuth <code>state</code></strong> on the Google connect flow.</td><td>Login-CSRF: a victim can be made to attach the attacker's Google account to their session.</td><td>Generate, store and verify a <code>state</code> value.</td></tr>
+      <tr><td>6</td><td><strong>Header injection risk in outbound mail.</strong> <code>To:</code> and <code>Subject:</code> are interpolated into the raw message without stripping CR/LF; the subject comes from inbound mail.</td><td>Possible extra headers or recipients on replies (Gmail-side behaviour not verified).</td><td>Strip <code>\r\n</code> from header values.</td></tr>
+      <tr><td>7</td><td><strong>Admin backfill behind one shared secret</strong>, compared with <code>!==</code>, no rate limit; runs a cross-tenant service-role backfill.</td><td>A leaked secret lets anyone trigger mass Gmail reads. Fails closed if the secret is unset.</td><td>Require an authenticated admin session; timing-safe compare.</td></tr>
+      <tr><td>8</td><td><strong>Zoom webhook</strong> compares signatures with <code>===</code> and has no replay window; the Zoom token is sent in a URL query string.</td><td>Low while Zoom is not live.</td><td>Timing-safe compare, timestamp window, bearer header for downloads.</td></tr>
+      <tr><td>9</td><td><strong>Redis TLS without certificate verification</strong> (<code>rejectUnauthorized: false</code>).</td><td>A network attacker could intercept queue traffic, which carries row ids, not content.</td><td>Verify the certificate.</td></tr>
+      <tr><td>10</td><td><strong>Error text returned to clients</strong> — <code>/api/ask</code> returns <code>String(e)</code>; action routes return database error messages.</td><td>Leaks internals.</td><td>Log the detail; return a generic message.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="callout callout-emerald">
+    <strong>What is sound.</strong> OAuth tokens are encrypted with authenticated encryption and a per-value IV. Every table has RLS. The Slack webhook verifies HMAC signatures with a timing-safe compare and a five-minute window. The eval bypass on <code>/api/ask</code> still validates a bearer token against Supabase Auth. Conversation context returned by the client is schema-validated and size-capped before use, and person names are stripped of PostgREST filter syntax before any lookup. Only <code>NEXT_PUBLIC_*</code> variables reach the browser.
+  </div>
+  <div class="page-footer"><strong>Chief of Staff</strong><span>Part IV · Quality and risk — page 24 of 26</span></div>
+</div>
+
+<div class="page">
+  <div class="section-label">Part IV · Quality and risk</div>
+  <h2>Trade-offs taken, and what they cost</h2>
+
+  <p>Decisions made deliberately, with the cost each one accepts. A trade-off differs from a known issue: these were chosen, and reversing them would cost more than the problem they create.</p>
+
+  <div class="table-wrap">
+  <table class="detail-table">
+    <thead><tr><th>Decision</th><th>Chosen because</th><th>Accepted cost</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Exact KNN, no HNSW index</strong></td><td>At ~3 900 chunks exact search is milliseconds. An HNSW index over 1 024-dim vectors costs an estimated 50–100 MB of a 500 MB budget and must stay memory-resident; its maintenance on bulk embedding writes is what exhausted a database's disk.</td><td>Search cost grows linearly. Revisit past roughly 50 000 rows — the definitions are in the schema, commented out.</td></tr>
+      <tr><td><strong>Do not store rendered HTML</strong></td><td>At ~26 KB average it was the largest thing in the database — ~160 MB across a mailbox, against a 500 MB ceiling, and the single largest contributor to running out of disk.</td><td>Opening an email costs a Gmail round-trip. Gmail is the canonical copy, so nothing is lost but latency.</td></tr>
+      <tr><td><strong>60-second queue poll</strong></td><td>Upstash does not support blocking commands well, so BullMQ polls. The 5-second default consumed a 500 k/month quota in three days on idle polling alone; one hour made push-delivered email arrive an hour late, defeating the point of push.</td><td>Roughly $0.40/month in polling, and up to a minute of pickup latency.</td></tr>
+      <tr><td><strong>Reconcile rather than transact</strong></td><td>Database writes and queue enqueues cannot share a transaction across Supabase and Redis. A periodic sweep that re-enqueues anything missing a summary or embedding is simple and covers every ingestion path.</td><td>Up to six hours before a dropped job is retried.</td></tr>
+      <tr><td><strong>Skip, not replace, on reprocessing</strong></td><td>Commitments and tasks accumulate user state — completions, snoozes, edits. Re-deriving them would silently discard that.</td><td>An email reprocessed after a parser fix keeps commitments derived from the worse input.</td></tr>
+      <tr><td><strong>Clamp extracted dates to email arrival</strong></td><td>Extraction confuses delivery dates, due dates, and <code>DD-MM-YY</code> ordering. A transactional alert arrives within hours of the event, making arrival time a reliable anchor.</td><td>A genuinely old transaction referenced in a new email is dated wrongly. Bounded at 90 days to make that rare.</td></tr>
+      <tr><td><strong>Promotions judged by intent; bulk header is a signal, not a block</strong></td><td>72% of mail carries <code>List-Unsubscribe</code>, but so do genuine obligations — an insurance renewal the user owes is bulk-sent. A header block would drop those; a category block alone let marketing filed as finance or travel through.</td><td>Task quality depends on a prompt. Guarded by a 40-case task eval over real mail — run by hand, since evals are not yet in CI.</td></tr>
+      <tr><td><strong>Group merchants by key, not by rewriting names</strong></td><td>Title-casing every name would collapse case variants but mangle acronyms ("HDFC Bank" &rarr; "Hdfc Bank") and still miss separator variants.</td><td>Display spellings follow whichever form is most common, so some read oddly ("pnb", "BOOK MY SHOW"). Grouping is correct regardless.</td></tr>
+      <tr><td><strong>Free-tier Postgres, local <code>pg_dump</code></strong></td><td>Single-user product; managed backups are a paid tier.</td><td>Backups live on one laptop, and the ceiling is a real operational constraint rather than a theoretical one.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="callout callout-emerald">
+    <strong>The through-line.</strong> Almost every defect documented here shares one shape: an error was caught, handled, and discarded, so the pipeline reported success while producing wrong or missing data. The durable fixes were not smarter prompts or bigger models — they were a unique index, a reconcile pass, checked error returns, and clamps on values a model is known to get wrong.
+  </div>
+  <div class="page-footer"><strong>Chief of Staff</strong><span>Part IV · Quality and risk — page 25 of 26</span></div>
+</div>
+
+<div class="page">
+  <div class="section-label">Part IV · Quality and risk</div>
+  <h2>Known issues and the path forward</h2>
+
+  <p>Open defects and gaps, in the order they should be fixed. Priority 1 means wrong or missing data in production today; 2 means a built feature that does not work; 3 means debt that will cause the next silent failure.</p>
+
+  <div class="table-wrap">
+  <table class="detail-table">
+    <thead><tr><th>P</th><th>Issue</th><th>Consequence</th><th>Fix</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>A dead Google token is visible only in logs</td><td>Ingestion stopped silently twice (18 days, then 2)</td><td>On refresh failure, mark the integration inactive and surface it in Settings; alert when the newest <code>raw_event</code> is older than a day</td></tr>
+      <tr><td>1</td><td>Webhooks without authentication</td><td>See Security review, items 2–3</td><td>Verify the Pub/Sub OIDC token and a Calendar channel token</td></tr>
+      <tr><td>2</td><td>Daily brief never scheduled</td><td>Feature built, never delivered</td><td>Register a repeat job at the user's <code>preferences.digest_time</code></td></tr>
+      <tr><td>2</td><td>Zoom summaries enqueued on the wrong queue; no <code>source = 'zoom'</code> meeting rows</td><td>Meeting decisions and action items never extracted</td><td>Enqueue on <code>meetings-summarize</code>; match Zoom meetings to calendar events by join URL</td></tr>
+      <tr><td>2</td><td>Backup name extractor mangles names after "did"</td><td>"What did Kamal ask me?" extracts the person "Kamal ask me", which matches no contact</td><td>Stop the <code>inferPeople</code> capture at the verb</td></tr>
+      <tr><td>2</td><td>Calendar sync reads one page of 50, ignores HTTP 410, leaks channels</td><td>Busy calendars miss events; an expired sync token stops sync; orphan channels accumulate</td><td>Page through results; on 410 clear the token and full-sync; store and stop the previous channel</td></tr>
+      <tr><td>2</td><td>Connect callback overwrites <code>integrations.metadata</code></td><td>Reconnecting drops the Calendar sync token</td><td>Merge instead of replace</td></tr>
+      <tr><td>2</td><td>Dedup window anchored on now</td><td>Backfilled transactions older than a day are not normalised until <code>backfill:transactions</code> runs</td><td>Anchor the window on the transaction's own time</td></tr>
+      <tr><td>2</td><td>17% of normalised transactions (63 of 363) have no merchant</td><td>Blank rows in Finance; invisible to merchant questions</td><td>Fall back to the UPI payee or account descriptor</td></tr>
+      <tr><td>3</td><td>No CI; evals run by hand</td><td>Regressions reach production — a classification regression already has</td><td>Run <code>tsc</code> and the component evals on every push to <code>main</code></td></tr>
+      <tr><td>3</td><td>Normalisation duplicated between worker and backfill scripts</td><td>The same dedup defect was fixed twice, weeks apart</td><td>One shared module</td></tr>
+      <tr><td>3</td><td>Only triage retries rate limits</td><td>A burst of extraction or draft calls fails outright</td><td>Wrap every model call in <code>withAiRetry</code></td></tr>
+      <tr><td>3</td><td>Dead code: six queues without workers, unused Slack and watch-stop helpers, <code>rankInsights</code>, a dozen unimported packages (Anthropic, Voyage, PostHog, Upstash)</td><td>Readers assume capabilities that do not exist</td><td>Delete, or wire up deliberately</td></tr>
+      <tr><td>3</td><td>Glued alias prefixes of 4+ characters match unconditionally</td><td>A future "Applebees" would file under Apple</td><td>Add an exclusion list when the first false match appears</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="divider"></div>
+  <h2>The path forward</h2>
+
+  <p>The executive assistant software market is large and fragmented. Chief of Staff occupies a defensible position: a tool that combines email, calendar and financial intelligence into one queryable layer. The near-term work is less new capability than making what is built run reliably — the priority-1 and -2 items above — because a confident answer from stale or missing data is worse than no answer. As the platform accumulates longitudinal data per user, the Ask AI feature compounds in value — making it increasingly difficult for single-purpose tools to match the contextual depth of answers Chief of Staff can provide.</p>
+
+  <div class="callout callout-indigo">
+    <strong>The moat is data depth, not features.</strong> Every email processed, every task created, every transaction categorised makes future answers more accurate and more personal. The longer a user is on the platform, the better it understands their professional context — relationships, recurring obligations, spending patterns, communication style.
+  </div>
+  <div class="page-footer"><strong>Chief of Staff</strong><span>Part IV · Quality and risk — page 26 of 26</span></div>
+</div>
+
+</body>
+</html>
