@@ -7,6 +7,10 @@ const financialExtractionSchema = z.object({
   confidence: z.number().min(0).max(1),
   transaction: z
     .object({
+      // Whether money actually moved. Payment reminders are financial emails,
+      // and without this field every renewal quote became a "payment": 11
+      // PolicyBazaar reminders were counted as ₹44k of spending.
+      event_kind: z.enum(["completed", "requested", "scheduled", "failed", "promotional"]),
       transaction_type: z.enum([
         "purchase", "bill_payment", "subscription", "subscription_renewal",
         "refund", "salary_credit", "bank_transfer", "upi_payment", "wallet_payment",
@@ -83,6 +87,20 @@ EXTRACTION RULES:
 - Credit card statements and payment reminders are financial emails.
 - Refund amounts are positive numbers; transaction_type handles directionality.
 - If multiple transactions exist, extract only the primary one.
+
+EVENT KIND - decide this first; it says whether money actually moved:
+- "completed": money has moved. A debit or credit alert, "payment successful", a paid receipt or order confirmation, a refund processed, salary credited, an investment executed.
+- "requested": money is owed or asked for and has NOT been paid. A bill or EMI due, a payment reminder, a renewal notice quoting a premium or price, a credit-card statement showing an amount due, an invoice awaiting payment. The amount is the amount due.
+- "scheduled": an automatic charge that will happen later - "will renew on", "will be debited on", "autopay scheduled". The amount is the amount that will be charged.
+- "failed": a payment that was attempted and did not go through - declined, failed, reversed.
+- "promotional": no payment owed or made - offers, cashback offers, discounts, loyalty points or store credit about to expire, price quotes for something not yet bought.
+A renewal reminder is "requested" even when it shows a price and a "Renew now" button: quoting a price is not a payment.
+A declined or failed payment is "failed" even when the email asks you to update your card or retry.
+Store credit, gift-card balance, cashback or points that are about to expire are "promotional" even when phrased as a reminder: nothing is owed. Use "completed" only when the email states the money was paid, debited, credited or refunded.
+
+DATES:
+- transaction_datetime is when money moved. Set it only for "completed" and "failed"; otherwise null.
+- due_date is when payment is due or will be taken. Copy the year from the email; if the email gives no year, use the year the email was sent - never an earlier one.
 
 Set transaction to null if is_financial_email is false.`;
 }

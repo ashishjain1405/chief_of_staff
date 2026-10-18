@@ -612,6 +612,9 @@ CREATE TABLE IF NOT EXISTS transactions_raw (
   status              text,
   sender_type         text,
   raw_sender          text,
+  -- completed | requested | scheduled | failed | promotional; only completed
+  -- rows are normalized. See migrations/add-event-kind.sql.
+  event_kind          text,
   -- Set when signals conflict (e.g. "not financial" but an amount was found).
   -- Dedup deliberately ignores these rows.
   needs_review        boolean NOT NULL DEFAULT false,

@@ -32,6 +32,10 @@ type Expect = {
   min_confidence?: number;
   max_confidence?: number;
   datetime_not_after_today?: boolean;
+  event_kind?: string[];
+  // The invariant that matters for spend totals: this email must not produce a
+  // completed payment, whether it is skipped or classified as non-completed.
+  not_completed?: boolean;
 };
 
 type Case = {
@@ -128,6 +132,22 @@ function checkCase(c: Case, result: any): Check[] {
       "max_confidence",
       result.confidence <= e.max_confidence,
       `expected <= ${e.max_confidence}, got ${result.confidence}`
+    );
+  }
+
+  if (e.event_kind !== undefined) {
+    add(
+      "event_kind",
+      e.event_kind.includes(txn.event_kind),
+      `expected one of [${e.event_kind.join(", ")}], got ${txn.event_kind}`
+    );
+  }
+
+  if (e.not_completed) {
+    add(
+      "not_completed",
+      !result.is_financial_email || !result.transaction || result.transaction.event_kind !== "completed",
+      `got is_financial_email=${result.is_financial_email}, event_kind=${result.transaction?.event_kind}`
     );
   }
 

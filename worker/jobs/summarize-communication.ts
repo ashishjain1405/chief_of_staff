@@ -395,6 +395,7 @@ async function runFinancialExtraction(
       status: raw?.status ?? null,
       sender_type: resolvedSenderType,
       raw_sender: senderEmail,
+      event_kind: raw?.event_kind ?? null,
       needs_review: needsReview,
       extracted_at: new Date().toISOString(),
     },
@@ -410,7 +411,9 @@ async function runFinancialExtraction(
       .eq("id", communicationId);
   }
 
-  if (!needsReview && transactionDatetime) {
+  // Only money that moved becomes a transaction. A bill due, renewal quote or
+  // statement stays as a raw row for reference but is never normalized.
+  if (!needsReview && transactionDatetime && raw?.event_kind === "completed") {
     await runDedup(supabase, userId, transactionDatetime);
   }
 }
@@ -434,6 +437,7 @@ async function runDedup(supabase: any, userId: string, anchor: string) {
     .eq("user_id", userId)
     .eq("is_financial_email", true)
     .eq("needs_review", false)
+    .eq("event_kind", "completed")
     .gte("transaction_datetime", from)
     .lte("transaction_datetime", to);
   if (error) throw new Error(`[dedup] raw scan failed: ${error.message}`);

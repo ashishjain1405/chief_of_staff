@@ -100,6 +100,7 @@ async function main() {
             status: raw?.status ?? null,
             sender_type: senderType,
             raw_sender: senderEmail,
+            event_kind: raw?.event_kind ?? null,
             needs_review: needsReview,
             extracted_at: new Date().toISOString(),
           },
@@ -143,7 +144,8 @@ async function main() {
       .select("*")
       .eq("user_id", userId)
       .eq("is_financial_email", true)
-      .eq("needs_review", false);
+      .eq("needs_review", false)
+      .eq("event_kind", "completed");
 
     if (!rawRows?.length) continue;
 
