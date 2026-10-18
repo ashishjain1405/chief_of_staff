@@ -1,18 +1,33 @@
 import { Job } from "bullmq";
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { generateDailyBrief } from "@/lib/ai/claude";
 import { searchMemory, getStructuredContext } from "@/lib/memory/search";
 import { dailyBriefPrompt } from "@/lib/ai/prompts";
 import { Resend } from "resend";
 
 
+// The scheduled run carries no userId and briefs every onboarded user; a job
+// with a userId briefs just that user.
 export async function generateAndDeliverDailyBrief(job: Job) {
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
-  const resend = new Resend(process.env.RESEND_API_KEY!);
-  const { userId } = job.data;
+
+  if (job.data?.userId) return briefUser(supabase, job.data.userId);
+
+  const { data: users, error } = await supabase.from("users").select("id").eq("onboarding_complete", true);
+  if (error) throw error;
+  for (const { id } of users ?? []) {
+    try {
+      await briefUser(supabase, id);
+    } catch (err) {
+      console.error(`[daily-brief] ${id} failed:`, (err as Error).message);
+    }
+  }
+}
+
+async function briefUser(supabase: SupabaseClient, userId: string) {
 
   const { data: user } = await supabase
     .from("users")
@@ -55,12 +70,18 @@ export async function generateAndDeliverDailyBrief(job: Job) {
         meetings_today: structured.upcomingMeetings,
         commitments_due: structured.overdueCommitments,
       },
-      delivered_at: new Date().toISOString(),
     },
     { onConflict: "user_id,brief_date" }
   );
 
-  // Send email via Resend
+  // Saved first, so the brief is on the dashboard even without email. Resend
+  // threw at construction when its key was missing, which would have aborted
+  // the whole brief; it is optional now.
+  if (!process.env.RESEND_API_KEY || !process.env.RESEND_FROM_EMAIL) {
+    console.log(`[daily-brief] ${userId}: saved; email skipped (Resend not configured)`);
+    return;
+  }
+  const resend = new Resend(process.env.RESEND_API_KEY);
   await resend.emails.send({
     from: process.env.RESEND_FROM_EMAIL!,
     to: user.email,
@@ -71,6 +92,12 @@ export async function generateAndDeliverDailyBrief(job: Job) {
       <div style="white-space:pre-wrap;line-height:1.6">${briefMarkdown.replace(/\n/g, "<br>")}</div>
       <hr style="margin:24px 0;border:none;border-top:1px solid #eee">
       <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard" style="color:#6366f1">Open Dashboard →</a>
-    </div>`,
+        </div>`,
   });
+  await supabase
+    .from("daily_briefs")
+    .update({ delivered_at: new Date().toISOString() })
+    .eq("user_id", userId)
+    .eq("brief_date", today);
+  console.log(`[daily-brief] ${userId}: saved and emailed`);
 }

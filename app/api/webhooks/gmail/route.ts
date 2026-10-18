@@ -2,8 +2,48 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { fetchHistorySince } from "@/lib/integrations/gmail";
 import { emailRawQueue } from "@/lib/queues";
+import { OAuth2Client } from "google-auth-library";
+
+const tokenVerifier = new OAuth2Client();
+let warnedUnverified = false;
+
+// Unauthenticated, this route let anyone who knew a connected address move the
+// Gmail history cursor and make mail skip or replay. Pub/Sub can sign each push
+// with an OIDC token for a chosen service account; this checks it.
+//
+// Enforced only once GMAIL_PUSH_SERVICE_ACCOUNT is set, because it requires the
+// subscription to be configured to send the token first — enforcing earlier
+// rejects every push and stops ingestion, the outage this app has had twice.
+async function rejectUnverifiedPush(request: NextRequest): Promise<string | null> {
+  const expected = process.env.GMAIL_PUSH_SERVICE_ACCOUNT;
+  if (!expected) {
+    if (!warnedUnverified) console.warn("[gmail-webhook] GMAIL_PUSH_SERVICE_ACCOUNT unset — accepting unauthenticated pushes");
+    warnedUnverified = true;
+    return null;
+  }
+  const header = request.headers.get("authorization") ?? "";
+  const idToken = header.startsWith("Bearer ") ? header.slice(7) : "";
+  if (!idToken) return "missing bearer token";
+  try {
+    const ticket = await tokenVerifier.verifyIdToken({
+      idToken,
+      audience: process.env.GMAIL_PUSH_AUDIENCE ?? `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/gmail`,
+    });
+    const payload = ticket.getPayload();
+    if (payload?.email !== expected || !payload.email_verified) return "token from an unexpected service account";
+    return null;
+  } catch {
+    return "invalid token";
+  }
+}
 
 export async function POST(request: NextRequest) {
+  const rejection = await rejectUnverifiedPush(request);
+  if (rejection) {
+    console.error(`[gmail-webhook] rejected push: ${rejection}`);
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
+
   const body = await request.json();
 
   // Google Pub/Sub push format

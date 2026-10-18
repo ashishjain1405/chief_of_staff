@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
-import { syncCalendarEvents } from "@/lib/integrations/calendar";
+import { syncCalendarEvents, isValidCalendarChannelToken } from "@/lib/integrations/calendar";
 
 export async function POST(request: NextRequest) {
   const channelId = request.headers.get("x-goog-channel-id") ?? "";
@@ -13,6 +13,12 @@ export async function POST(request: NextRequest) {
   if (!match) return NextResponse.json({ ok: true });
 
   const userId = match[1];
+  // 200 rather than 401 on a bad token: Google retries failed notifications,
+  // and channels registered before tokens existed keep firing until they
+  // expire. Acknowledging without syncing is enough.
+  if (!isValidCalendarChannelToken(userId, request.headers.get("x-goog-channel-token"))) {
+    return NextResponse.json({ ok: true });
+  }
   const supabase = await createServiceClient();
 
   try {

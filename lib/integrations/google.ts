@@ -86,10 +86,38 @@ export async function getAuthenticatedClient(userId: string) {
     ? new Date(integration.token_expires_at).getTime()
     : 0;
   if (Date.now() > expiresAt - 5 * 60 * 1000) {
-    const { credentials } = await oauth2Client.refreshAccessToken();
-    oauth2Client.setCredentials(credentials);
-    await saveTokens(userId, credentials);
+    try {
+      const { credentials } = await oauth2Client.refreshAccessToken();
+      oauth2Client.setCredentials(credentials);
+      await saveTokens(userId, credentials);
+    } catch (err) {
+      if (isInvalidGrant(err)) await markGoogleDisconnected(userId, integration.metadata);
+      throw err;
+    }
   }
 
   return oauth2Client;
+}
+
+// invalid_grant means the refresh token is dead (revoked, or expired after 7
+// days while the OAuth app was in Testing) and only a reconnect fixes it. Until
+// this was recorded, the integration stayed "active", renewal retried every 6h,
+// and ingestion stopped silently twice. Other errors may be transient and are
+// left alone.
+function isInvalidGrant(err: unknown): boolean {
+  const e = err as { message?: string; response?: { data?: { error?: string } } };
+  return e?.response?.data?.error === "invalid_grant" || /invalid_grant/.test(e?.message ?? "");
+}
+
+async function markGoogleDisconnected(userId: string, metadata: Record<string, unknown> | null) {
+  const supabase = await createServiceClient();
+  await supabase
+    .from("integrations")
+    .update({
+      is_active: false,
+      metadata: { ...(metadata ?? {}), auth_error: { code: "invalid_grant", at: new Date().toISOString() } },
+    })
+    .eq("user_id", userId)
+    .eq("provider", "google");
+  console.error(`[google-auth] ${userId}: refresh token rejected (invalid_grant) — marked disconnected`);
 }

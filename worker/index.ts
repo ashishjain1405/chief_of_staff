@@ -74,6 +74,18 @@ scheduledQueue
     console.error("Failed to register renew-gmail-watches repeat job:", err.message);
   });
 
+// Every onboarded user's brief at 08:00 IST. The handler existed with nothing
+// scheduling it, so no brief had ever been produced.
+scheduledQueue
+  .add(
+    "generate-daily-brief",
+    {},
+    { repeat: { pattern: "0 8 * * *", tz: "Asia/Kolkata" }, jobId: "generate-daily-brief" }
+  )
+  .catch((err) => {
+    console.error("Failed to register generate-daily-brief repeat job:", err.message);
+  });
+
 // Offset from the watch renewal above so the two don't fire together.
 scheduledQueue
   .add(

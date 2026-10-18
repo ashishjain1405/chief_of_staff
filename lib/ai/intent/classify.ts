@@ -152,13 +152,19 @@ function inferTemporal(query: string): TemporalAnchor | null {
   return null;
 }
 
+const NAME_ENDING_VERBS = "say|tell|send|write|ask|want|need|mention|request|suggest|propose|think|share|reply|mean|promise|agree|offer|decide|recommend|confirm|forward|schedule|invite|pay|owe";
+
 // Extracts likely person names from query when LLM is unavailable.
 // Looks for capitalized word sequences (1-3 words) near relational trigger words.
-function inferPeople(query: string): string[] {
+export function inferPeople(query: string): string[] {
   const matches: string[] = [];
-  const FIRST_PERSON = new Set(["i", "me", "my", "we", "our", "us"]);
+  // Pronouns too: "Did he follow up?" yielded the person "he follow up", which
+  // blocked the previous turn's person from filling in.
+  const FIRST_PERSON = new Set(["i", "me", "my", "we", "our", "us", "he", "she", "they", "him", "her", "them", "it"]);
   // Trigger words before a name — case-insensitive, any casing
-  const triggerPattern = /\b(?:did|with|told|asked|about|regarding|to|by|meet|met)\s+([A-Za-z][a-zA-Z\s]{1,40}?)(?=\s+(?:say|tell|send|write|message|call|contact|email|about|on|regarding|in|after|before)|[.!?]?$)/gi;
+  // Verbs that end a name after "did X …". The list stopped at say/tell/send, so
+  // "What did Kamal ask me?" captured "Kamal ask me" and matched no contact.
+  const triggerPattern = new RegExp(String.raw`\b(?:did|with|told|asked|about|regarding|to|by|meet|met)\s+([A-Za-z][a-zA-Z\s]{1,40}?)(?=\s+(?:${NAME_ENDING_VERBS}|message|call|contact|email|about|on|regarding|in|after|before)\b|[.!?]?$)`, "gi");
   let m: RegExpExecArray | null;
   while ((m = triggerPattern.exec(query)) !== null) {
     const name = m[1].trim();
@@ -175,7 +181,7 @@ function inferPeople(query: string): string[] {
   const fromEnd = /\bfrom\s+([A-Za-z][\w\s.-]{1,40}?)$/i.exec(query);
   if (fromEnd) matches.push(fromEnd[1].trim());
   // Leading: "What did Ashish Jain say"
-  const leading = /^(?:what|when|why|how|show|find|get)\s+did\s+([A-Za-z][\w\s]{1,40}?)\s+(?:say|send|write|tell)/i.exec(query);
+  const leading = new RegExp(String.raw`^(?:what|when|why|how|show|find|get)\s+did\s+([A-Za-z][\w\s]{1,40}?)\s+(?:${NAME_ENDING_VERBS})\b`, "i").exec(query);
   if (leading && !FIRST_PERSON.has(leading[1].trim().toLowerCase())) matches.push(leading[1].trim());
   // "Did I meet/see/talk to X" — first-person activity with named person
   const didIMeet = /\bdid\s+(?:i|we)\s+(?:meet|see|talk\s+to|speak\s+with|chat\s+with)\s+([A-Za-z][\w\s]{1,40}?)(?:[.!?]?$|\s+(?:about|on|regarding|in|after|before))/i.exec(query);

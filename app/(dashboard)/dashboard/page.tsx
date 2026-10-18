@@ -33,7 +33,7 @@ export default async function DashboardPage() {
       .eq("user_id", user.id)
       .eq("status", "pending");
 
-  const [briefRes, overdueRes, upcomingRes, undatedRes, dueSoonCountRes, meetingsRes, actionEmailsRes] = await Promise.all([
+  const [briefRes, overdueRes, upcomingRes, undatedRes, dueSoonCountRes, meetingsRes, actionEmailsRes, googleRes, latestEmailRes] = await Promise.all([
     supabase
       .from("daily_briefs")
       .select("raw_markdown, brief_date")
@@ -74,7 +74,37 @@ export default async function DashboardPage() {
       .eq("action_taken", false)
       .order("importance_score", { ascending: false })
       .limit(5),
+
+    supabase
+      .from("integrations")
+      .select("is_active, metadata")
+      .eq("user_id", user.id)
+      .eq("provider", "google")
+      .maybeSingle(),
+
+    // created_at, not occurred_at: what matters is when ingestion last wrote.
+    supabase
+      .from("communications")
+      .select("created_at")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
   ]);
+
+  // Ingestion has failed silently twice with every job reporting success, so
+  // the dashboard says so: a rejected token marks Google inactive, and a day
+  // with no new mail is flagged even when the cause is something else.
+  const google = googleRes.data;
+  const lastEmailAt = latestEmailRes.data?.created_at ? new Date(latestEmailRes.data.created_at) : null;
+  const hoursSinceEmail = lastEmailAt ? Math.floor((Date.now() - lastEmailAt.getTime()) / 3_600_000) : null;
+  const ingestionWarning = !google
+    ? null
+    : !google.is_active
+      ? `Google is disconnected${google.metadata?.auth_error?.at ? ` since ${new Date(google.metadata.auth_error.at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}` : ""} — Gmail and Calendar have stopped syncing.`
+      : hoursSinceEmail !== null && hoursSinceEmail >= 24
+        ? `No new email in ${hoursSinceEmail} hours — Gmail sync may have stopped.`
+        : null;
 
   const brief = briefRes.data;
   // Which five to show: reserve two slots for the most recently missed so a
@@ -159,6 +189,13 @@ export default async function DashboardPage() {
 
   return (
     <div className="p-6 space-y-6 max-w-5xl">
+      {ingestionWarning && (
+        <div className="flex items-center justify-between gap-4 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          <span>{ingestionWarning}</span>
+          <a href="/api/auth/google" className="shrink-0 font-semibold underline underline-offset-2">Reconnect Google</a>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>

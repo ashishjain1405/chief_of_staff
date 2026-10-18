@@ -1,6 +1,22 @@
 import { google } from "googleapis";
+import { createHmac, timingSafeEqual } from "crypto";
 import { getAuthenticatedClient } from "./google";
 import { createServiceClient } from "@/lib/supabase/server";
+
+// Google echoes a channel's token on every notification as X-Goog-Channel-Token.
+// Without one, the webhook trusted the user id in the channel id, so anyone with
+// a user's UUID could force syncs. Derived rather than stored, so the web and
+// worker processes agree on it with no extra state.
+export function calendarChannelToken(userId: string): string {
+  return createHmac("sha256", process.env.ENCRYPTION_KEY!).update(`calendar-channel:${userId}`).digest("hex");
+}
+
+export function isValidCalendarChannelToken(userId: string, token: string | null): boolean {
+  if (!token) return false;
+  const expected = Buffer.from(calendarChannelToken(userId));
+  const given = Buffer.from(token);
+  return given.length === expected.length && timingSafeEqual(given, expected);
+}
 
 export async function getCalendarClient(userId: string) {
   const auth = await getAuthenticatedClient(userId);
@@ -16,6 +32,7 @@ export async function watchCalendar(userId: string): Promise<{ resourceId: strin
       id: channelId,
       type: "web_hook",
       address: `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/calendar`,
+      token: calendarChannelToken(userId),
       expiration: String(Date.now() + 7 * 24 * 60 * 60 * 1000 - 60000), // 7 days - 1 min
     },
   });

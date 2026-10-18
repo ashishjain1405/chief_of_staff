@@ -74,6 +74,12 @@ export default async function SettingsPage() {
                   <div>
                     <div className="font-medium text-sm">{i.name}</div>
                     <div className="text-xs text-muted-foreground">{i.desc}</div>
+                    {!isConnected && integration?.metadata?.auth_error && (
+                      <div className="text-xs text-amber-700">
+                        Google rejected the saved sign-in on{" "}
+                        {new Date(integration.metadata.auth_error.at).toLocaleDateString()} — reconnect to resume syncing.
+                      </div>
+                    )}
                     {integration?.last_synced_at && (
                       <div className="text-xs text-muted-foreground">
                         Last synced: {new Date(integration.last_synced_at).toLocaleString()}
