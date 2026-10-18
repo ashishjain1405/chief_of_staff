@@ -1,4 +1,5 @@
 import type { AggregatedFinance } from "./types";
+import { countsAsSpend } from "@/lib/finance/spend";
 import { merchantMatchFilter } from "@/lib/finance/normalize";
 
 export async function aggregateTransactions(
@@ -70,7 +71,9 @@ export async function aggregateTransactions(
     return { total: 0, by_category: {}, by_merchant: {}, by_currency: {}, weekly_trend: [], period: periodLabel, transaction_count: 0 };
   }
 
-  const rows = data as { amount: number; currency: string | null; category: string | null; merchant_normalized: string | null; transaction_datetime: string | null; transaction_type: string | null }[];
+  // Same rule as the finance pages, so "how much did I spend" matches them.
+  const rows = (data as { amount: number; currency: string | null; category: string | null; merchant_normalized: string | null; transaction_datetime: string | null; transaction_type: string | null }[])
+    .filter(countsAsSpend);
 
   const by_category: Record<string, number> = {};
   const by_merchant: Record<string, number> = {};

@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { redirect } from "next/navigation";
+import { countsAsSpend } from "@/lib/finance/spend";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 
@@ -49,10 +50,12 @@ export default async function InboxSpendPage({
     .limit(200);
 
   const all = rows ?? [];
-  const total = all.reduce((s, r) => s + (r.amount ?? 0), 0);
+  // Totals count spending only; the list below still shows every row.
+  const spend = all.filter(countsAsSpend);
+  const total = spend.reduce((s, r) => s + (r.amount ?? 0), 0);
 
   const byCat: Record<string, number> = {};
-  for (const r of all) {
+  for (const r of spend) {
     const cat = r.category ?? "other";
     byCat[cat] = (byCat[cat] ?? 0) + (r.amount ?? 0);
   }
@@ -134,7 +137,10 @@ export default async function InboxSpendPage({
               const inner = (
                 <div className="flex items-center justify-between px-4 py-3">
                   <div className="min-w-0 space-y-0.5">
-                    <p className="text-sm truncate">{r.merchant_normalized ?? "—"}</p>
+                    <p className="text-sm truncate">
+                      {r.merchant_normalized ?? "—"}
+                      {!countsAsSpend(r) && <span className="ml-2 text-xs text-muted-foreground">card payment · not counted</span>}
+                    </p>
                     <p className="text-xs text-muted-foreground capitalize">
                       {(r.category ?? "—").replace(/_/g, " ")} ·{" "}
                       {new Date(r.transaction_datetime).toLocaleDateString("en-IN", {

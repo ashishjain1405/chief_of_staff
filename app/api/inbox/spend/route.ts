@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { countsAsSpend } from "@/lib/finance/spend";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
@@ -24,9 +25,10 @@ export async function GET(req: NextRequest) {
     .limit(500);
 
   const all = rows ?? [];
+  const spend = all.filter(countsAsSpend);
 
-  const weeklyRows = all.filter((r) => r.transaction_datetime >= weekAgo);
-  const monthlyRows = all.filter((r) => r.transaction_datetime >= monthAgo);
+  const weeklyRows = spend.filter((r) => r.transaction_datetime >= weekAgo);
+  const monthlyRows = spend.filter((r) => r.transaction_datetime >= monthAgo);
 
   const weekly_total = weeklyRows.reduce((s, r) => s + (r.amount ?? 0), 0);
   const monthly_total = monthlyRows.reduce((s, r) => s + (r.amount ?? 0), 0);
@@ -38,7 +40,7 @@ export async function GET(req: NextRequest) {
   }
 
   const monthly: Record<string, number> = {};
-  for (const r of all) {
+  for (const r of spend) {
     const month = (r.transaction_datetime as string).substring(0, 7);
     monthly[month] = (monthly[month] ?? 0) + (r.amount ?? 0);
   }

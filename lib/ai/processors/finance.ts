@@ -1,4 +1,5 @@
 import { ProcessorInsight, RawTransaction } from "./types";
+import { countsAsSpend } from "@/lib/finance/spend";
 import { merchantKey } from "@/lib/finance/normalize";
 
 function clamp(v: number): number {
@@ -47,9 +48,12 @@ function spendByCategory(txns: RawTransaction[]): Record<string, number> {
 }
 
 export function processFinance(
-  transactions: RawTransaction[],
-  priorTransactions: RawTransaction[],
+  allTransactions: RawTransaction[],
+  allPriorTransactions: RawTransaction[],
 ): ProcessorInsight[] {
+  // A card bill is not spending, so it cannot be a spending spike either.
+  const transactions = allTransactions.filter(countsAsSpend);
+  const priorTransactions = allPriorTransactions.filter(countsAsSpend);
   const insights: ProcessorInsight[] = [];
   const now = new Date().toISOString();
   const in7Days = new Date(Date.now() + 7 * 864e5).toISOString();

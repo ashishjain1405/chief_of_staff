@@ -1,6 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { createClient } from "@/lib/supabase/server";
+import { countsAsSpend } from "@/lib/finance/spend";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 
@@ -49,28 +50,30 @@ export default async function FinancePage({
     .limit(500);
 
   const all = rows ?? [];
+  // Totals and charts count spending only; the list below still shows every row.
+  const spend = all.filter(countsAsSpend);
 
-  const weekly_total = all
+  const weekly_total = spend
     .filter((r) => r.transaction_datetime >= weekAgo)
     .reduce((s, r) => s + (r.amount ?? 0), 0);
 
-  const monthly_total = all
+  const monthly_total = spend
     .filter((r) => r.transaction_datetime >= monthAgo)
     .reduce((s, r) => s + (r.amount ?? 0), 0);
 
   const byCat: Record<string, number> = {};
-  for (const r of all.filter((r) => r.transaction_datetime >= monthAgo)) {
+  for (const r of spend.filter((r) => r.transaction_datetime >= monthAgo)) {
     const c = r.category ?? "other";
     byCat[c] = (byCat[c] ?? 0) + (r.amount ?? 0);
   }
 
   const monthlyTrend: Record<string, number> = {};
-  for (const r of all) {
+  for (const r of spend) {
     const month = (r.transaction_datetime as string).substring(0, 7);
     monthlyTrend[month] = (monthlyTrend[month] ?? 0) + (r.amount ?? 0);
   }
 
-  const largestSpend = all.reduce((max, r) => Math.max(max, r.amount ?? 0), 0);
+  const largestSpend = spend.reduce((max, r) => Math.max(max, r.amount ?? 0), 0);
   const maxCat = Math.max(...Object.values(byCat), 1);
   const sortedCats = Object.entries(byCat).sort((a, b) => b[1] - a[1]);
   const sortedMonths = Object.entries(monthlyTrend).sort((a, b) => a[0].localeCompare(b[0]));
@@ -183,7 +186,10 @@ export default async function FinancePage({
               const primaryCommId = r.communication_ids?.[0] ?? null;
               const inner = (
                 <>
-                  <span className="text-sm truncate">{r.merchant_normalized ?? "—"}</span>
+                  <span className="text-sm truncate">
+                    {r.merchant_normalized ?? "—"}
+                    {!countsAsSpend(r) && <span className="ml-2 text-xs text-muted-foreground">card payment · not counted</span>}
+                  </span>
                   <span className="px-4 text-xs text-muted-foreground capitalize">
                     {(r.category ?? "—").replace(/_/g, " ")}
                   </span>
