@@ -747,7 +747,7 @@
     <div><strong>Category</strong>Personal AI assistant</div>
     <div><strong>Platform</strong>Next.js · Supabase · BullMQ</div>
     <div><strong>Status</strong>Early access · single user</div>
-    <div><strong>Reflects code at</strong><code style="color:inherit;background:none">main @ 315354f</code> · 18 Oct 2026</div>
+    <div><strong>Reflects code at</strong><code style="color:inherit;background:none">main @ 8d0c6c8</code> · 18 Oct 2026</div>
   </div>
 </div>
 
@@ -1850,6 +1850,11 @@
         <td>Grouping and lookups compare on a case- and separator-insensitive key; short aliases need a word boundary. A one-off cleanup collapsed 154 rows and refiled 4 misattributed payments.</td>
       </tr>
       <tr>
+        <td>Card purchases hidden as bill payments</td>
+        <td>Excluding <code>credit_card_payment</code> from spend hid 104 purchases (₹1.45 lakh), Zomato among them: the extractor gives that type to "debited from your Credit Card towards ZOMATO" as well as to paying the card bill. Only 6 of 110 such rows were bill payments.</td>
+        <td><code>isCardBillPayment</code>: no merchant, or the bank itself as merchant. Checked row by row against the 110 before shipping the correction. The extractor's labels are the real fix, still open.</td>
+      </tr>
+      <tr>
         <td>A third of transactions missing from Finance</td>
         <td>203 of 588 valid transactions were never normalized (₹6.5 lakh): undated rows were excluded from every dedup scan, and the scan window was anchored on <em>now</em>, so anything processed a day late was skipped. Separately, a growing group of emails found no row containing all of them and inserted a second, so 8 emails were counted twice; and wallet emails discarded the payee they named, leaving 63 transactions merchant-less.</td>
         <td>Dates fall back to the email; the window is centred on the transaction; groups merge into any row sharing an email, through one save function used by the worker and backfill; <code>resolveMerchant</code> keeps wallet payees and never records the wallet or bank. One-off repair: 574 normalised, 0 stranded, 0 doubled, 15 merchant-less.</td>
@@ -1950,9 +1955,10 @@
     <thead><tr><th>P</th><th>Issue</th><th>Consequence</th><th>Fix</th></tr></thead>
     <tbody>
       <tr><td>3</td><td>Daily brief at one fixed time</td><td>Every user gets it at 08:00 IST</td><td>Honour <code>preferences.digest_time</code> and timezone per user</td></tr>
-      <tr><td>2</td><td>Finance totals still count investments, transfers and income</td><td>Credit-card bill payments are excluded since 18 Oct (<code>countsAsSpend</code>), but investments, bank and P2P transfers, wallet top-ups and salary credits are still summed as spend, and refunds are netted only in Ask AI</td><td>Extend <code>countsAsSpend</code> to real spending only and net refunds everywhere; show transfers as their own line</td></tr>
+      <tr><td>2</td><td>Finance totals still count investments, transfers and income</td><td>Credit-card bill payments are excluded since 18 Oct (<code>countsAsSpend</code>; a <code>credit_card_payment</code> with no merchant or a bank as merchant — the extractor uses the same type for purchases made with the card), but investments, bank and P2P transfers, wallet top-ups and salary credits are still summed as spend, and refunds are netted only in Ask AI</td><td>Extend <code>countsAsSpend</code> to real spending only and net refunds everywhere; show transfers as their own line</td></tr>
       <tr><td>1</td><td>Finance pages drop every transaction with no status</td><td><code>.neq("status", "failed")</code> also excludes NULL statuses, removing ₹2.14 lakh from the last 30 days; Ask AI does not filter, so its totals disagree with the pages. <code>status</code> is free text, so failed / declined / cancelled are spelled several ways</td><td>Exclude a normalised set of failure statuses, keeping NULL</td></tr>
       <tr><td>2</td><td>Zoom summaries enqueued on the wrong queue; no <code>source = 'zoom'</code> meeting rows</td><td>Meeting decisions and action items never extracted</td><td>Enqueue on <code>meetings-summarize</code>; match Zoom meetings to calendar events by join URL</td></tr>
+      <tr><td>2</td><td>Extractor labels card purchases as <code>credit_card_payment</code></td><td>Spend totals rely on a merchant-based rule to tell purchases from bill payments</td><td>Clarify the type definitions in the extraction prompt, add eval cases, relabel existing rows</td></tr>
       <tr><td>3</td><td>No CI; evals run by hand</td><td>Regressions reach production — a classification regression already has</td><td>Run <code>tsc</code> and the component evals on every push to <code>main</code></td></tr>
       <tr><td>3</td><td>Normalisation duplicated between worker and backfill scripts</td><td>The same dedup defect was fixed twice, weeks apart</td><td>One shared module</td></tr>
       <tr><td>3</td><td>Only triage retries rate limits</td><td>A burst of extraction or draft calls fails outright</td><td>Wrap every model call in <code>withAiRetry</code></td></tr>
