@@ -139,7 +139,7 @@ export default async function InboxSpendPage({
                   <div className="min-w-0 space-y-0.5">
                     <p className="text-sm truncate">
                       {r.merchant_normalized ?? "—"}
-                      {!countsAsSpend(r) && <span className="ml-2 text-xs text-muted-foreground">card payment · not counted</span>}
+                      {!countsAsSpend(r) && <span className="ml-2 text-xs text-muted-foreground">card bill payment · not counted</span>}
                     </p>
                     <p className="text-xs text-muted-foreground capitalize">
                       {(r.category ?? "—").replace(/_/g, " ")} ·{" "}

@@ -188,7 +188,7 @@ export default async function FinancePage({
                 <>
                   <span className="text-sm truncate">
                     {r.merchant_normalized ?? "—"}
-                    {!countsAsSpend(r) && <span className="ml-2 text-xs text-muted-foreground">card payment · not counted</span>}
+                    {!countsAsSpend(r) && <span className="ml-2 text-xs text-muted-foreground">card bill payment · not counted</span>}
                   </span>
                   <span className="px-4 text-xs text-muted-foreground capitalize">
                     {(r.category ?? "—").replace(/_/g, " ")}
