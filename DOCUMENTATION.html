@@ -747,7 +747,7 @@
     <div><strong>Category</strong>Personal AI assistant</div>
     <div><strong>Platform</strong>Next.js · Supabase · BullMQ</div>
     <div><strong>Status</strong>Early access · single user</div>
-    <div><strong>Reflects code at</strong><code style="color:inherit;background:none">main @ 1f1fef5</code> · 18 Oct 2026</div>
+    <div><strong>Reflects code at</strong><code style="color:inherit;background:none">main @ db93073</code> · 18 Oct 2026</div>
   </div>
 </div>
 
@@ -1017,10 +1017,10 @@
       <tr><td>Gmail ingestion (push + backfill)</td><td><span class="badge-sm badge-emerald">Live</span></td><td>3 893 emails in <code>communications</code>; 870 <code>raw_events</code></td><td>A rejected Google token now marks the integration disconnected and the dashboard warns; pushes are signature-verified</td></tr>
       <tr><td>AI triage &amp; categories</td><td><span class="badge-sm badge-emerald">Live</span></td><td>Every stored email has a category and summary; 3 887 memory chunks</td><td>—</td></tr>
       <tr><td>Task creation</td><td><span class="badge-sm badge-emerald">Live</span></td><td>143 tasks: 80 pending, 2 done, 61 dismissed</td><td>—</td></tr>
-      <tr><td>Financial extraction &amp; dedup</td><td><span class="badge-sm badge-emerald">Live</span></td><td>672 raw → 363 normalised transactions</td><td>Dedup window anchored on "now"; old backfilled rows need a manual pass</td></tr>
+      <tr><td>Financial extraction &amp; dedup</td><td><span class="badge-sm badge-emerald">Live</span></td><td>589 raw → 574 normalised transactions; none stranded, none double-counted; 15 without a merchant</td><td>Totals add every transaction type, including card-bill payments and credits</td></tr>
       <tr><td>Ask AI (single turn)</td><td><span class="badge-sm badge-emerald">Live</span></td><td>Streaming answers over 8 retrieval sources</td><td>—</td></tr>
       <tr><td>Ask AI follow-ups</td><td><span class="badge-sm badge-emerald">Live</span></td><td>Context round-trips on message metadata; 7 live two-turn scenarios verified</td><td>Follow-up detection is rule-based; phrasings outside the rules start fresh</td></tr>
-      <tr><td>Calendar sync</td><td><span class="badge-sm badge-emerald">Live</span></td><td>22 meetings from Google Calendar</td><td>No paging past 50 events; no recovery from an expired sync token</td></tr>
+      <tr><td>Calendar sync</td><td><span class="badge-sm badge-emerald">Live</span></td><td>Pages through all events; recovers from an expired sync token; replaced channels are stopped</td><td>—</td></tr>
       <tr><td>Inbox actions (spam, unsubscribe, done)</td><td><span class="badge-sm badge-emerald">Live</span></td><td>Routes under <code>/api/actions/*</code></td><td>Unsubscribe fetches sender-supplied URLs server-side</td></tr>
       <tr><td>AI reply drafts &amp; send</td><td><span class="badge-sm badge-emerald">Live</span></td><td><code>/api/drafts</code>, <code>/api/actions/send-reply</code>; 0 drafts stored to date</td><td>Unused so far</td></tr>
       <tr><td>Operational insights</td><td><span class="badge-sm badge-emerald">Live</span></td><td>174 active insights after the 18 Oct recompute</td><td>Was frozen 10 Sep – 18 Oct by a stuck queue key; fixed</td></tr>
@@ -1124,7 +1124,7 @@
     <div class="pipe-dot">C</div>
     <div class="pipe-content">
       <h4>Calendar — push channel <span class="badge-sm badge-emerald" style="margin-left:6px">live</span></h4>
-      <p>On connect and every 6 hours, <code>events.watch</code> registers a channel on the primary calendar pointing at <code>POST /api/webhooks/calendar</code>. Each notification triggers <code>events.list</code> with the stored sync token (first sync: 30 days back to 90 ahead) and upserts <code>meetings</code> directly in the request — no queue. Limitations: one page of 50 events, no handling of an expired sync token (HTTP 410), and old channels are never stopped when a new one is registered.</p>
+      <p>On connect and every 6 hours, <code>events.watch</code> registers a channel on the primary calendar pointing at <code>POST /api/webhooks/calendar</code>, carrying a per-user HMAC token, and stops the channel it replaces. Each notification with a valid token triggers <code>events.list</code> with the stored sync token (first sync: 30 days back to 90 ahead), paging until Google returns the next sync token, and upserts <code>meetings</code> directly in the request — no queue. An expired sync token (HTTP 410) falls back to a full sync. Reconnecting merges into the stored metadata rather than replacing it, so the sync token survives.</p>
     </div>
   </div>
 
@@ -1516,7 +1516,7 @@
       <tr><td>memory_chunks</td><td class="num">3 887</td><td>meetings</td><td class="num">22</td></tr>
       <tr><td>raw_events</td><td class="num">870</td><td>users · integrations · operational_insights</td><td class="num">1 each</td></tr>
       <tr><td>transactions_raw</td><td class="num">672</td><td>commitments · relationships · daily_briefs</td><td class="num">0</td></tr>
-      <tr><td>transactions_normalized</td><td class="num">363</td><td>drafts · business_entities</td><td class="num">0</td></tr>
+      <tr><td>transactions_normalized</td><td class="num">574</td><td>drafts · business_entities</td><td class="num">0</td></tr>
       <tr><td>contacts</td><td class="num">333</td><td></td><td></td></tr>
     </tbody>
   </table>
@@ -1850,6 +1850,11 @@
         <td>Grouping and lookups compare on a case- and separator-insensitive key; short aliases need a word boundary. A one-off cleanup collapsed 154 rows and refiled 4 misattributed payments.</td>
       </tr>
       <tr>
+        <td>A third of transactions missing from Finance</td>
+        <td>203 of 588 valid transactions were never normalized (₹6.5 lakh): undated rows were excluded from every dedup scan, and the scan window was anchored on <em>now</em>, so anything processed a day late was skipped. Separately, a growing group of emails found no row containing all of them and inserted a second, so 8 emails were counted twice; and wallet emails discarded the payee they named, leaving 63 transactions merchant-less.</td>
+        <td>Dates fall back to the email; the window is centred on the transaction; groups merge into any row sharing an email, through one save function used by the worker and backfill; <code>resolveMerchant</code> keeps wallet payees and never records the wallet or bank. One-off repair: 574 normalised, 0 stranded, 0 doubled, 15 merchant-less.</td>
+      </tr>
+      <tr>
         <td>Every signed Gmail push rejected</td>
         <td>Turning on push verification rejected all mail for about three hours: <code>NEXT_PUBLIC_APP_URL</code> ends in a slash on Vercel, so the expected audience was <code>.app//api/webhooks/gmail</code>. The first log only said "invalid token".</td>
         <td>Rejections now log the token's and the expected audience side by side, which found it in one line. <code>appUrl()</code> strips the trailing slash for every URL built from the variable. No mail was lost — Pub/Sub retried until accepted.</td>
@@ -1945,11 +1950,8 @@
     <thead><tr><th>P</th><th>Issue</th><th>Consequence</th><th>Fix</th></tr></thead>
     <tbody>
       <tr><td>3</td><td>Daily brief at one fixed time</td><td>Every user gets it at 08:00 IST</td><td>Honour <code>preferences.digest_time</code> and timezone per user</td></tr>
+      <tr><td>2</td><td>Finance totals add every transaction type</td><td>Credit-card bill payments double-count the purchases on that card; investments, refunds and salary credits are summed as spend</td><td>Total only debit spend types; net refunds; show card payments and investments separately</td></tr>
       <tr><td>2</td><td>Zoom summaries enqueued on the wrong queue; no <code>source = 'zoom'</code> meeting rows</td><td>Meeting decisions and action items never extracted</td><td>Enqueue on <code>meetings-summarize</code>; match Zoom meetings to calendar events by join URL</td></tr>
-      <tr><td>2</td><td>Calendar sync reads one page of 50, ignores HTTP 410, leaks channels</td><td>Busy calendars miss events; an expired sync token stops sync; orphan channels accumulate</td><td>Page through results; on 410 clear the token and full-sync; store and stop the previous channel</td></tr>
-      <tr><td>2</td><td>Connect callback overwrites <code>integrations.metadata</code></td><td>Reconnecting drops the Calendar sync token</td><td>Merge instead of replace</td></tr>
-      <tr><td>2</td><td>Dedup window anchored on now</td><td>Backfilled transactions older than a day are not normalised until <code>backfill:transactions</code> runs</td><td>Anchor the window on the transaction's own time</td></tr>
-      <tr><td>2</td><td>17% of normalised transactions (63 of 363) have no merchant</td><td>Blank rows in Finance; invisible to merchant questions</td><td>Fall back to the UPI payee or account descriptor</td></tr>
       <tr><td>3</td><td>No CI; evals run by hand</td><td>Regressions reach production — a classification regression already has</td><td>Run <code>tsc</code> and the component evals on every push to <code>main</code></td></tr>
       <tr><td>3</td><td>Normalisation duplicated between worker and backfill scripts</td><td>The same dedup defect was fixed twice, weeks apart</td><td>One shared module</td></tr>
       <tr><td>3</td><td>Only triage retries rate limits</td><td>A burst of extraction or draft calls fails outright</td><td>Wrap every model call in <code>withAiRetry</code></td></tr>
