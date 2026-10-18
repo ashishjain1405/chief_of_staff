@@ -747,7 +747,7 @@
     <div><strong>Category</strong>Personal AI assistant</div>
     <div><strong>Platform</strong>Next.js · Supabase · BullMQ</div>
     <div><strong>Status</strong>Early access · single user</div>
-    <div><strong>Reflects code at</strong><code style="color:inherit;background:none">main @ db93073</code> · 18 Oct 2026</div>
+    <div><strong>Reflects code at</strong><code style="color:inherit;background:none">main @ 315354f</code> · 18 Oct 2026</div>
   </div>
 </div>
 
@@ -1017,7 +1017,7 @@
       <tr><td>Gmail ingestion (push + backfill)</td><td><span class="badge-sm badge-emerald">Live</span></td><td>3 893 emails in <code>communications</code>; 870 <code>raw_events</code></td><td>A rejected Google token now marks the integration disconnected and the dashboard warns; pushes are signature-verified</td></tr>
       <tr><td>AI triage &amp; categories</td><td><span class="badge-sm badge-emerald">Live</span></td><td>Every stored email has a category and summary; 3 887 memory chunks</td><td>—</td></tr>
       <tr><td>Task creation</td><td><span class="badge-sm badge-emerald">Live</span></td><td>143 tasks: 80 pending, 2 done, 61 dismissed</td><td>—</td></tr>
-      <tr><td>Financial extraction &amp; dedup</td><td><span class="badge-sm badge-emerald">Live</span></td><td>589 raw → 574 normalised transactions; none stranded, none double-counted; 15 without a merchant</td><td>Totals add every transaction type, including card-bill payments and credits</td></tr>
+      <tr><td>Financial extraction &amp; dedup</td><td><span class="badge-sm badge-emerald">Live</span></td><td>589 raw → 574 normalised transactions; none stranded, none double-counted; 15 without a merchant</td><td>Totals exclude card-bill payments but still count investments and transfers; the pages drop rows with no status</td></tr>
       <tr><td>Ask AI (single turn)</td><td><span class="badge-sm badge-emerald">Live</span></td><td>Streaming answers over 8 retrieval sources</td><td>—</td></tr>
       <tr><td>Ask AI follow-ups</td><td><span class="badge-sm badge-emerald">Live</span></td><td>Context round-trips on message metadata; 7 live two-turn scenarios verified</td><td>Follow-up detection is rule-based; phrasings outside the rules start fresh</td></tr>
       <tr><td>Calendar sync</td><td><span class="badge-sm badge-emerald">Live</span></td><td>Pages through all events; recovers from an expired sync token; replaced channels are stopped</td><td>—</td></tr>
@@ -1950,7 +1950,8 @@
     <thead><tr><th>P</th><th>Issue</th><th>Consequence</th><th>Fix</th></tr></thead>
     <tbody>
       <tr><td>3</td><td>Daily brief at one fixed time</td><td>Every user gets it at 08:00 IST</td><td>Honour <code>preferences.digest_time</code> and timezone per user</td></tr>
-      <tr><td>2</td><td>Finance totals add every transaction type</td><td>Credit-card bill payments double-count the purchases on that card; investments, refunds and salary credits are summed as spend</td><td>Total only debit spend types; net refunds; show card payments and investments separately</td></tr>
+      <tr><td>2</td><td>Finance totals still count investments, transfers and income</td><td>Credit-card bill payments are excluded since 18 Oct (<code>countsAsSpend</code>), but investments, bank and P2P transfers, wallet top-ups and salary credits are still summed as spend, and refunds are netted only in Ask AI</td><td>Extend <code>countsAsSpend</code> to real spending only and net refunds everywhere; show transfers as their own line</td></tr>
+      <tr><td>1</td><td>Finance pages drop every transaction with no status</td><td><code>.neq("status", "failed")</code> also excludes NULL statuses, removing ₹2.14 lakh from the last 30 days; Ask AI does not filter, so its totals disagree with the pages. <code>status</code> is free text, so failed / declined / cancelled are spelled several ways</td><td>Exclude a normalised set of failure statuses, keeping NULL</td></tr>
       <tr><td>2</td><td>Zoom summaries enqueued on the wrong queue; no <code>source = 'zoom'</code> meeting rows</td><td>Meeting decisions and action items never extracted</td><td>Enqueue on <code>meetings-summarize</code>; match Zoom meetings to calendar events by join URL</td></tr>
       <tr><td>3</td><td>No CI; evals run by hand</td><td>Regressions reach production — a classification regression already has</td><td>Run <code>tsc</code> and the component evals on every push to <code>main</code></td></tr>
       <tr><td>3</td><td>Normalisation duplicated between worker and backfill scripts</td><td>The same dedup defect was fixed twice, weeks apart</td><td>One shared module</td></tr>
