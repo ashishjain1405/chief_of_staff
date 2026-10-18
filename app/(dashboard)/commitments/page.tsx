@@ -8,9 +8,10 @@ import { Button } from "@/components/ui/button";
 
 async function markDone(formData: FormData) {
   "use server";
-  const id = formData.get("id") as string;
-  const { createServiceClient } = await import("@/lib/supabase/server");
-  const supabase = await createServiceClient();
+  const id = formData.get("id");
+  if (typeof id !== "string") return;
+  // Session client, not service role: RLS limits the update to the caller's rows.
+  const supabase = await createClient();
   await supabase.from("commitments").update({ status: "done" }).eq("id", id);
 }
 

@@ -3,7 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { triageEmail, extractCommitments } from "@/lib/ai/claude";
 import { embedAndStoreChunks, updateCommunicationEmbedding } from "@/lib/memory/embed";
 import { classifySender, getSenderHint, shouldRunStage1, isKnownFinancialDomain } from "@/lib/finance/senders";
-import { operationalQueue } from "@/lib/queues";
+import { enqueueOperationalState } from "@/lib/queues";
 import { extractFinancialTransaction } from "@/lib/ai/extractors/financial";
 import { normalizeMerchant, findKnownMerchant, getCategoryForMerchant, getWalletPaymentModeLabel } from "@/lib/finance/normalize";
 import { deduplicateRawTransactions, type TransactionRaw } from "@/lib/finance/dedup";
@@ -275,7 +275,7 @@ export async function summarizeCommunication(job: Job) {
     });
   }
 
-  await operationalQueue.add("compute-operational-state", { userId }, { delay: 30000, jobId: `ops-${userId}`, deduplication: { id: `ops-${userId}` } });
+  await enqueueOperationalState(userId);
 }
 
 // A statement or receipt can legitimately reference a transaction from a prior

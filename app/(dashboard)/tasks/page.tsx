@@ -5,12 +5,17 @@ import { redirect } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
+const TASK_STATUSES = new Set(["pending", "snoozed", "done", "dismissed"]);
+
+// Server actions are public POST endpoints. The session client keeps this
+// behind RLS, so a caller can only ever touch their own rows; the service-role
+// client used here before updated any task by id.
 async function updateTaskStatus(formData: FormData) {
   "use server";
-  const id = formData.get("id") as string;
-  const status = formData.get("status") as string;
-  const { createServiceClient } = await import("@/lib/supabase/server");
-  const supabase = await createServiceClient();
+  const id = formData.get("id");
+  const status = formData.get("status");
+  if (typeof id !== "string" || typeof status !== "string" || !TASK_STATUSES.has(status)) return;
+  const supabase = await createClient();
   await supabase.from("tasks").update({ status }).eq("id", id);
 }
 

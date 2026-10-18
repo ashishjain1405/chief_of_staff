@@ -50,3 +50,19 @@ export const reasonQueue = makeQueue("reason");
 export const actQueue = makeQueue("act");
 export const scheduledQueue = makeQueue("scheduled");
 export const operationalQueue = makeQueue("compute-operational-state");
+
+const OPS_DEBOUNCE_MS = 30_000;
+
+// Collapses a burst of processed emails into one recompute. Deliberately no
+// fixed jobId: with jobId `ops-<user>`, BullMQ ignored every later add while the
+// completed job was still stored, and completed jobs are only pruned when
+// another job on the queue completes — so the first job pinned itself forever
+// and insights stopped recomputing after 10 Sep. A ttl-bound dedup key expires
+// on its own, so a stuck key cannot outlive the window.
+export function enqueueOperationalState(userId: string) {
+  return operationalQueue.add(
+    "compute-operational-state",
+    { userId },
+    { delay: OPS_DEBOUNCE_MS, deduplication: { id: `ops-${userId}`, ttl: OPS_DEBOUNCE_MS } }
+  );
+}
