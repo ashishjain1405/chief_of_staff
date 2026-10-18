@@ -13,7 +13,7 @@ export async function aggregateTransactions(
 ): Promise<AggregatedFinance> {
   let query = (supabase as any)
     .from("transactions_normalized")
-    .select("amount, currency, category, merchant_normalized, transaction_datetime, transaction_type")
+    .select("amount, currency, category, merchant_normalized, transaction_datetime, transaction_type, status")
     .eq("user_id", userId)
     .not("amount", "is", null);
 
@@ -42,7 +42,7 @@ export async function aggregateTransactions(
   if (!error && !data?.length && filters.categories?.length) {
     let retryQuery = supabase
       .from("transactions_normalized")
-      .select("amount, currency, category, merchant_normalized, transaction_datetime, transaction_type")
+      .select("amount, currency, category, merchant_normalized, transaction_datetime, transaction_type, status")
       .eq("user_id", userId)
       .not("amount", "is", null);
     if (filters.dateRange) {
@@ -72,7 +72,7 @@ export async function aggregateTransactions(
   }
 
   // Same rule as the finance pages, so "how much did I spend" matches them.
-  const rows = (data as { amount: number; currency: string | null; category: string | null; merchant_normalized: string | null; transaction_datetime: string | null; transaction_type: string | null }[])
+  const rows = (data as { amount: number; currency: string | null; category: string | null; merchant_normalized: string | null; transaction_datetime: string | null; transaction_type: string | null; status: string | null }[])
     .filter(countsAsSpend);
 
   const by_category: Record<string, number> = {};

@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { countsAsSpend } from "@/lib/finance/spend";
+import { countsAsSpend, isFailedTransaction } from "@/lib/finance/spend";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
@@ -19,12 +19,12 @@ export async function GET(req: NextRequest) {
     .from("transactions_normalized")
     .select("*")
     .eq("user_id", user.id)
-    .neq("status", "failed")
     .gte("transaction_datetime", since)
     .order("transaction_datetime", { ascending: false })
     .limit(500);
 
-  const all = rows ?? [];
+  // Failed attempts are dropped here rather than in SQL, where != also drops NULL.
+  const all = (rows ?? []).filter((r) => !isFailedTransaction(r));
   const spend = all.filter(countsAsSpend);
 
   const weeklyRows = spend.filter((r) => r.transaction_datetime >= weekAgo);

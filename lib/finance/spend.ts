@@ -13,6 +13,17 @@ export function isCardBillPayment(t: { transaction_type?: string | null; merchan
   return !t.merchant_normalized || BANK.test(t.merchant_normalized.trim());
 }
 
-export function countsAsSpend(t: { transaction_type?: string | null; merchant_normalized?: string | null }): boolean {
-  return !isCardBillPayment(t);
+export function countsAsSpend(t: { transaction_type?: string | null; merchant_normalized?: string | null; status?: string | null }): boolean {
+  return !isCardBillPayment(t) && !isFailedTransaction(t);
+}
+
+// status is free text from extraction, so a failure arrives as "failed",
+// "declined", "Cancelled"… The pages filtered with .neq("status", "failed"),
+// which in SQL also drops every row whose status is NULL - ₹2.14 lakh of the
+// last 30 days vanished that way, while Ask AI, with no filter, counted even
+// the failed ones. Matched in code instead, so NULL means "no failure noted".
+const FAILED = /^(failed|declined|cancell?ed|rejected|unsuccessful|reversed|(payment|transaction) (failed|declined))$/i;
+
+export function isFailedTransaction(t: { status?: string | null }): boolean {
+  return !!t.status && FAILED.test(t.status.trim());
 }

@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { redirect } from "next/navigation";
-import { countsAsSpend } from "@/lib/finance/spend";
+import { countsAsSpend, isFailedTransaction } from "@/lib/finance/spend";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 
@@ -44,12 +44,12 @@ export default async function InboxSpendPage({
     .from("transactions_normalized")
     .select("*")
     .eq("user_id", user.id)
-    .neq("status", "failed")
     .gte("transaction_datetime", since)
     .order("transaction_datetime", { ascending: false })
     .limit(200);
 
-  const all = rows ?? [];
+  // Failed attempts are dropped here rather than in SQL, where != also drops NULL.
+  const all = (rows ?? []).filter((r) => !isFailedTransaction(r));
   // Totals count spending only; the list below still shows every row.
   const spend = all.filter(countsAsSpend);
   const total = spend.reduce((s, r) => s + (r.amount ?? 0), 0);
