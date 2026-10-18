@@ -24,16 +24,28 @@ async function rejectUnverifiedPush(request: NextRequest): Promise<string | null
   const header = request.headers.get("authorization") ?? "";
   const idToken = header.startsWith("Bearer ") ? header.slice(7) : "";
   if (!idToken) return "missing bearer token";
+  const audience = process.env.GMAIL_PUSH_AUDIENCE ?? `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/gmail`;
   try {
-    const ticket = await tokenVerifier.verifyIdToken({
-      idToken,
-      audience: process.env.GMAIL_PUSH_AUDIENCE ?? `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/gmail`,
-    });
+    const ticket = await tokenVerifier.verifyIdToken({ idToken, audience });
     const payload = ticket.getPayload();
-    if (payload?.email !== expected || !payload.email_verified) return "token from an unexpected service account";
+    if (payload?.email !== expected || !payload.email_verified) {
+      return `token from an unexpected service account (got ${payload?.email ?? "none"}, expected ${expected})`;
+    }
     return null;
+  } catch (err) {
+    // The library's message omits the values that differ ("payload audience !=
+    // requiredAudience"), so log the token's own aud/email claims - identifiers,
+    // not secrets - to make a misconfigured subscription diagnosable.
+    return `invalid token: ${(err as Error).message} | token aud=${claim(idToken, "aud")} email=${claim(idToken, "email")} | expected aud=${audience}`;
+  }
+}
+
+function claim(jwt: string, name: string): string {
+  try {
+    const value = JSON.parse(Buffer.from(jwt.split(".")[1], "base64url").toString())[name];
+    return typeof value === "string" ? value : "none";
   } catch {
-    return "invalid token";
+    return "unreadable";
   }
 }
 
