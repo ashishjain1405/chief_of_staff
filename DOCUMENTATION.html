@@ -747,7 +747,7 @@
     <div><strong>Category</strong>Personal AI assistant</div>
     <div><strong>Platform</strong>Next.js · Supabase · BullMQ</div>
     <div><strong>Status</strong>Early access · single user</div>
-    <div><strong>Reflects code at</strong><code style="color:inherit;background:none">main @ 76d7df5</code> · 18 Oct 2026</div>
+    <div><strong>Reflects code at</strong><code style="color:inherit;background:none">main @ d364e19</code> · 18 Oct 2026</div>
   </div>
 </div>
 
@@ -805,7 +805,7 @@
 
   <p>Knowledge workers — founders, operators, senior executives — manage hundreds of emails a week, attend back-to-back meetings, and are expected to track every commitment made across both. The cognitive cost of staying on top of this is enormous.</p>
 
-  <p><strong style="color:var(--slate-800)">Chief of Staff</strong> connects to your Gmail and Google Calendar and does the work for you. It triages every email with AI, turns the ones that need you into tasks, extracts and de-duplicates the transactions buried in bank alerts and receipts, and answers questions about all of it through a conversational Ask AI interface grounded in your own records. Zoom transcripts, commitment tracking and a daily brief are built but not yet switched on — see the status page.</p>
+  <p><strong style="color:var(--slate-800)">Chief of Staff</strong> connects to your Gmail and Google Calendar and does the work for you. It triages every email with AI, turns the ones that need you into tasks, extracts and de-duplicates the transactions buried in bank alerts and receipts, and answers questions about all of it through a conversational Ask AI interface grounded in your own records. A daily brief lands on the dashboard every morning. Zoom transcripts and commitment tracking are built but not yet switched on — see the status page.</p>
 
   <div class="stat-grid">
     <div class="stat-card">
@@ -891,8 +891,8 @@
     </div>
     <div class="feature-card">
       <div class="icon icon-rose">📊</div>
-      <h4>Daily Brief <span class="badge-sm badge-rose">Not live</span></h4>
-      <p>A morning summary written by GPT-4o and emailed via Resend. The generator exists; nothing schedules it, so no brief has ever been produced.</p>
+      <h4>Daily Brief <span class="badge-sm badge-amber">Partial</span></h4>
+      <p>A morning summary written by GPT-4o at 08:00 IST and shown on the dashboard. It is also emailed via Resend once the Resend keys are set on the worker; today they are not.</p>
     </div>
     <div class="feature-card">
       <div class="icon icon-violet">🤝</div>
@@ -1014,7 +1014,7 @@
   <table class="detail-table">
     <thead><tr><th>Capability</th><th>Status</th><th>Evidence (18 Oct 2026)</th><th>What is missing</th></tr></thead>
     <tbody>
-      <tr><td>Gmail ingestion (push + backfill)</td><td><span class="badge-sm badge-emerald">Live</span></td><td>3 893 emails in <code>communications</code>; 870 <code>raw_events</code></td><td>Depends on the Google token staying alive — two silent outages so far</td></tr>
+      <tr><td>Gmail ingestion (push + backfill)</td><td><span class="badge-sm badge-emerald">Live</span></td><td>3 893 emails in <code>communications</code>; 870 <code>raw_events</code></td><td>A rejected Google token now marks the integration disconnected and the dashboard warns; Pub/Sub token verification waits on subscription config</td></tr>
       <tr><td>AI triage &amp; categories</td><td><span class="badge-sm badge-emerald">Live</span></td><td>Every stored email has a category and summary; 3 887 memory chunks</td><td>—</td></tr>
       <tr><td>Task creation</td><td><span class="badge-sm badge-emerald">Live</span></td><td>143 tasks: 80 pending, 2 done, 61 dismissed</td><td>—</td></tr>
       <tr><td>Financial extraction &amp; dedup</td><td><span class="badge-sm badge-emerald">Live</span></td><td>672 raw → 363 normalised transactions</td><td>Dedup window anchored on "now"; old backfilled rows need a manual pass</td></tr>
@@ -1025,7 +1025,7 @@
       <tr><td>AI reply drafts &amp; send</td><td><span class="badge-sm badge-emerald">Live</span></td><td><code>/api/drafts</code>, <code>/api/actions/send-reply</code>; 0 drafts stored to date</td><td>Unused so far</td></tr>
       <tr><td>Operational insights</td><td><span class="badge-sm badge-emerald">Live</span></td><td>174 active insights after the 18 Oct recompute</td><td>Was frozen 10 Sep – 18 Oct by a stuck queue key; fixed</td></tr>
       <tr><td>Zoom transcripts &amp; meeting summaries</td><td><span class="badge-sm badge-rose">Not live</span></td><td>0 meetings with <code>source = 'zoom'</code></td><td>Job is enqueued on <code>summarize</code>, whose handler expects an email</td></tr>
-      <tr><td>Daily brief</td><td><span class="badge-sm badge-rose">Not live</span></td><td>0 rows in <code>daily_briefs</code></td><td>No schedule registers the job</td></tr>
+      <tr><td>Daily brief</td><td><span class="badge-sm badge-amber">Partial</span></td><td>Scheduled 08:00 IST from 18 Oct; first brief generated and saved that day</td><td>Email delivery: <code>RESEND_API_KEY</code> and <code>RESEND_FROM_EMAIL</code> are not set on Railway</td></tr>
       <tr><td>Commitments</td><td><span class="badge-sm badge-rose">Not live</span></td><td>0 rows; <code>FEATURES.commitments = false</code></td><td>Sent-mail ingestion</td></tr>
       <tr><td>Relationships &amp; follow-up cadence</td><td><span class="badge-sm badge-rose">Not live</span></td><td>0 rows in <code>relationships</code></td><td>No code writes the table</td></tr>
       <tr><td>Slack</td><td><span class="badge-sm badge-rose">Not live</span></td><td>Webhook verifies and stores events</td><td>No worker consumes <code>slack-raw</code>; Settings card links to <code>#</code></td></tr>
@@ -1034,7 +1034,7 @@
   </div>
 
   <div class="callout callout-indigo">
-    <strong>The pattern.</strong> Every gap in this table is silent. Nothing errors when the daily brief is never scheduled or when meeting jobs land on the wrong queue — the worker reports healthy throughout. Part IV lists the fixes and their order.
+    <strong>The pattern.</strong> Every gap in this table is silent. Nothing errors when meeting jobs land on the wrong queue or when a Slack event has no consumer — the worker reports healthy throughout. Part IV lists the fixes and their order.
   </div>
   <div class="page-footer"><strong>Chief of Staff</strong><span>Part I · Product — page 7 of 26</span></div>
 </div>
@@ -1105,7 +1105,7 @@
       <h4>Live path — Gmail push <span class="badge-sm badge-emerald" style="margin-left:6px">near real-time</span></h4>
       <p>A registered Gmail <code>watch</code> publishes mailbox changes to a Pub/Sub topic; a push subscription forwards them to <code>/api/webhooks/gmail</code>. The route resolves the account, walks Gmail history since the stored cursor, filters to messages with <code>INBOX</code> and without <code>SENT</code>, writes <code>raw_events</code>, and enqueues one job per message.</p>
       <p><strong>Five independent things must all hold:</strong> the watch must be current (it expires after 7 days and is renewed 4&times;/day); the refresh token behind that renewal must be alive; the topic must live in the same Google Cloud project as the OAuth client that minted the token; that topic must grant publish rights to <code>gmail-api-push@system.gserviceaccount.com</code>; and a <em>push</em> subscription must point at the live webhook URL. Any one missing produces total silence with no error anywhere — three of these were wrong simultaneously in production.</p>
-      <p>The refresh token is the one that failed most recently, twice. While the OAuth consent screen sits in Google's <strong>Testing</strong> status, refresh tokens expire 7 days after issue. Renewal then fails with <code>invalid_grant</code>, the watch lapses, and reconcile correctly reports "no accounts with a live Gmail watch" — every job completes, nothing alerts, and email simply stops. The first occurrence went unnoticed for 18 days. The app is now published to production; reconnecting alone does not fix it, because a token minted under Testing keeps its 7-day life.</p>
+      <p>The refresh token is the one that failed most recently, twice. While the OAuth consent screen sits in Google's <strong>Testing</strong> status, refresh tokens expire 7 days after issue. Renewal then fails with <code>invalid_grant</code>, the watch lapses, and reconcile correctly reports "no accounts with a live Gmail watch" — every job completes, nothing alerts, and email simply stops. The first occurrence went unnoticed for 18 days. The app is now published to production; reconnecting alone does not fix it, because a token minted under Testing keeps its 7-day life. Since 18 October an <code>invalid_grant</code> marks the integration disconnected and records why, and the dashboard shows a banner when Google is disconnected or no email has been stored for 24 hours.</p>
       <p>Because self-sent mail is excluded by design, a self-addressed test email will never produce a <code>raw_event</code>. Testing this path requires genuinely external mail.</p>
     </div>
   </div>
@@ -1251,7 +1251,7 @@
       <tr><td>Answer synthesis<br><code>/api/ask</code></td><td><code>gpt-4o</code><br>1 024 tok · streaming (AI SDK)</td><td>Every Ask query</td><td>The one place output quality is directly user-visible and the reasoning is open-ended. Worth the cost.</td></tr>
       <tr><td>Reply draft<br><code>generateDraft</code></td><td><code>gpt-4o</code><br>1 024 tok · text</td><td>On request from the email view</td><td>User-visible prose sent under the user's name.</td></tr>
       <tr><td>Meeting summary<br><code>summarizeMeeting</code></td><td><code>gpt-4o</code><br>2 048 tok · JSON</td><td>Not live (see Processing)</td><td>Long-transcript synthesis. Not yet evaluated against a smaller model — a candidate for the same downgrade commitment extraction got.</td></tr>
-      <tr><td>Daily brief<br><code>generateDailyBrief</code></td><td><code>gpt-4o</code><br>2 048 tok · text</td><td>Not live (no schedule)</td><td>Cross-domain synthesis into prose.</td></tr>
+      <tr><td>Daily brief<br><code>generateDailyBrief</code></td><td><code>gpt-4o</code><br>2 048 tok · text</td><td>Daily at 08:00 IST, every onboarded user</td><td>Cross-domain synthesis into prose.</td></tr>
       <tr><td>Embeddings<br><code>embedAndStoreChunks</code></td><td><code>text-embedding-3-small</code><br>1 024 dim</td><td>Every summary and chunk; every Ask query</td><td>1 024 rather than the default 1 536 to cut storage and index cost by a third on a tier where storage is the binding constraint.</td></tr>
     </tbody>
   </table>
@@ -1561,7 +1561,7 @@
       <tr><td><code>memory_chunks</code></td><td><code>source_type</code>, <code>source_id</code>, <code>chunk_text</code>, <code>chunk_index</code>, <code>embedding</code> vector(1024), <code>metadata</code> jsonb (<code>occurred_at</code>, <code>contact_email</code>, <code>entities</code>)</td><td>Indexes on <code>(user_id, source_type, source_id)</code> and recency</td><td><code>embedAndStoreChunks</code>: deletes a source's chunks, then reinserts</td></tr>
       <tr><td><code>operational_insights</code></td><td><code>state_key</code>, <code>category</code>, <code>insight_type</code>, <code>title</code>, <code>summary</code>, <code>recommended_action</code>, <code>entities</code> / <code>source_refs</code> text[], <code>priority_score</code>, <code>urgency</code>, <code>status</code>, <code>first_detected_at</code>, <code>last_seen_at</code>, <code>expires_at</code>, <code>confidence</code>, <code>generated_by</code>, <code>explanation</code></td><td>UNIQUE <code>(user_id, state_key)</code>; partial index on active by priority; indexes by category and expiry</td><td><code>compute-operational-state</code></td></tr>
       <tr><td><code>relationships</code></td><td><code>contact_id</code>, <code>category</code>, <code>health_score</code>, <code>follow_up_cadence_days</code>, <code>follow_up_due</code></td><td>UNIQUE <code>(user_id, contact_id, category)</code></td><td>Nothing — read-only today</td></tr>
-      <tr><td><code>daily_briefs</code></td><td><code>brief_date</code>, <code>content</code> jsonb, <code>raw_markdown</code>, <code>delivered_at</code></td><td>UNIQUE <code>(user_id, brief_date)</code></td><td><code>generate-daily-brief</code> (never scheduled)</td></tr>
+      <tr><td><code>daily_briefs</code></td><td><code>brief_date</code>, <code>content</code> jsonb, <code>raw_markdown</code>, <code>delivered_at</code></td><td>UNIQUE <code>(user_id, brief_date)</code></td><td><code>generate-daily-brief</code> (08:00 IST daily); <code>delivered_at</code> set only once emailed</td></tr>
       <tr><td><code>drafts</code></td><td><code>communication_id</code>, <code>draft_text</code>, <code>status</code> (<code>pending_review</code> → <code>sent</code>), <code>sent_at</code></td><td>FK to <code>communications</code>, cascade</td><td><code>POST /api/drafts</code>; send-reply</td></tr>
       <tr><td><code>business_entities</code></td><td><code>entity_type</code>, <code>name</code>, <code>status</code>, <code>owner_contact_id</code>, <code>mention_count</code>, <code>embedding</code></td><td>Index on <code>(user_id, entity_type, name)</code></td><td>Nothing — no code references the table</td></tr>
     </tbody>
@@ -1608,8 +1608,8 @@
       <tr><td><code>/api/actions/send-reply</code><br><small><code>{communicationId, draftId?, body}</code></small></td><td>Session</td><td>Reply on the original thread</td><td>Gmail <code>messages.send</code>; marks draft <code>sent</code></td></tr>
       <tr><td><code>/api/actions/unsubscribe</code></td><td>Session</td><td>Follow List-Unsubscribe, then spam</td><td>mailto via Gmail send, or server-side HTTP POST/GET to the sender's URL; then <code>messages.modify</code></td></tr>
       <tr class="group"><td colspan="4">Webhooks — public; service-role client</td></tr>
-      <tr><td><code>POST /api/webhooks/gmail</code></td><td><strong>None</strong></td><td>Pub/Sub push for the Gmail watch</td><td>Walks <code>history.list</code> since the stored cursor; inserts <code>raw_events</code>; enqueues <code>email-raw</code>; advances the cursor</td></tr>
-      <tr><td><code>POST /api/webhooks/calendar</code></td><td><strong>None</strong> (user id parsed from channel id)</td><td>Calendar push channel</td><td><code>events.list</code> with sync token; upserts <code>meetings</code></td></tr>
+      <tr><td><code>POST /api/webhooks/gmail</code></td><td>Pub/Sub OIDC token — enforced once <code>GMAIL_PUSH_SERVICE_ACCOUNT</code> is set; until then <strong>none</strong></td><td>Pub/Sub push for the Gmail watch</td><td>Walks <code>history.list</code> since the stored cursor; inserts <code>raw_events</code>; enqueues <code>email-raw</code>; advances the cursor</td></tr>
+      <tr><td><code>POST /api/webhooks/calendar</code></td><td>Per-user HMAC channel token (<code>X-Goog-Channel-Token</code>); tokenless notifications are acknowledged without syncing</td><td>Calendar push channel</td><td><code>events.list</code> with sync token; upserts <code>meetings</code></td></tr>
       <tr><td><code>POST /api/webhooks/zoom</code></td><td>HMAC-SHA256 (<code>x-zm-signature</code>)</td><td>Recording completed</td><td>Zoom recordings API; updates <code>meetings.transcript</code>; enqueues (wrong queue)</td></tr>
       <tr><td><code>POST /api/webhooks/slack</code></td><td>HMAC-SHA256, 5-min window, timing-safe</td><td>DMs and mentions</td><td>Inserts <code>raw_events</code>; enqueues <code>slack-raw</code> (no consumer)</td></tr>
       <tr class="group"><td colspan="4">OAuth and admin</td></tr>
@@ -1669,7 +1669,7 @@
       <tr><td><strong>Supabase</strong></td><td>Postgres, Auth, pgvector RPC</td><td>supabase-js (SSR, service-role and token clients); RPC <code>match_memory_chunks</code>, <code>get_category_counts</code></td><td><span class="badge-sm badge-emerald">Live</span></td></tr>
       <tr><td><strong>Redis</strong></td><td>BullMQ transport</td><td>ioredis from <code>REDIS_URL</code>; TLS for <code>rediss://</code></td><td><span class="badge-sm badge-emerald">Live</span></td></tr>
       <tr><td><strong>Zoom API</strong></td><td>Recording transcripts</td><td>Server-to-server OAuth (<code>account_credentials</code>); <code>GET /v2/meetings/{id}/recordings</code>; transcript download</td><td><span class="badge-sm badge-rose">Not live</span></td></tr>
-      <tr><td><strong>Resend</strong></td><td>Daily brief email</td><td><code>emails.send</code></td><td><span class="badge-sm badge-rose">Not live</span></td></tr>
+      <tr><td><strong>Resend</strong></td><td>Daily brief email</td><td><code>emails.send</code></td><td><span class="badge-sm badge-amber">Needs keys</span></td></tr>
       <tr><td><strong>Slack Web API</strong></td><td>DMs and mentions</td><td>Client wrappers exist; none called</td><td><span class="badge-sm badge-rose">Not live</span></td></tr>
     </tbody>
   </table>
@@ -1685,8 +1685,8 @@
     <tbody>
       <tr><td>Store</td><td><code>saveTokens</code> upserts <code>integrations</code> on <code>(user_id, provider)</code> through the service-role client. Access and refresh tokens are each encrypted with AES-256-GCM: key from <code>ENCRYPTION_KEY</code> (64 hex chars, 32 bytes), a random 12-byte IV per value, stored as <code>base64(iv ‖ authTag[16] ‖ ciphertext)</code>.</td></tr>
       <tr><td>Use</td><td><code>getAuthenticatedClient</code> decrypts, and refreshes when the access token is within 5 minutes of expiry, re-encrypting the result.</td></tr>
-      <tr><td>Watch</td><td>On connect, and every 6 hours via <code>renew-gmail-watches</code>, re-registers the Gmail watch (expires after 7 days) and a new Calendar channel, merging the new expiry into <code>metadata</code>.</td></tr>
-      <tr><td>Refresh fails</td><td>Nothing handles it. The error propagates, the integration stays <code>is_active</code>, renewal keeps retrying every 6 hours, and the only trace is <code>invalid_grant</code> in the worker log. This is how two ingestion outages went unnoticed.</td></tr>
+      <tr><td>Watch</td><td>On connect, and every 6 hours via <code>renew-gmail-watches</code>, re-registers the Gmail watch (expires after 7 days) and a new Calendar channel carrying its HMAC token, merging the new expiry into <code>metadata</code>.</td></tr>
+      <tr><td>Refresh fails</td><td>On <code>invalid_grant</code> — the refresh token is dead and only a reconnect helps — the integration is set <code>is_active = false</code> with <code>metadata.auth_error</code>; renewal stops retrying, Settings explains why, and the dashboard shows a reconnect banner. Other errors are re-thrown untouched, so a transient failure cannot disconnect anyone. Before 18 October nothing handled it, which is how two ingestion outages went unnoticed.</td></tr>
       <tr><td>Reconnect</td><td>Visiting <code>/api/auth/google</code> replaces the tokens. The callback overwrites <code>metadata</code> wholesale rather than merging, which drops the Calendar sync token and forces a full re-sync.</td></tr>
     </tbody>
   </table>
@@ -1717,11 +1717,11 @@
   <h3 style="margin-top:22px">Schedules</h3>
   <div class="table-wrap">
   <table class="detail-table">
-    <thead><tr><th>Job</th><th>Cron (UTC)</th><th>What it does</th></tr></thead>
+    <thead><tr><th>Job</th><th>Cron</th><th>What it does</th></tr></thead>
     <tbody>
-      <tr><td><code>renew-gmail-watches</code></td><td><code>0 */6 * * *</code></td><td>Re-registers the Gmail watch and a Calendar channel for every active Google integration</td></tr>
-      <tr><td><code>reconcile-unprocessed</code></td><td><code>30 */6 * * *</code></td><td>For users with a live Gmail watch, re-enqueues up to 500 emails missing a summary or embedding — the safety net for write-then-enqueue</td></tr>
-      <tr><td><code>generate-daily-brief</code></td><td><strong>none</strong></td><td>Handler exists; no repeat job registers it</td></tr>
+      <tr><td><code>renew-gmail-watches</code></td><td><code>0 */6 * * *</code> UTC</td><td>Re-registers the Gmail watch and a Calendar channel for every active Google integration</td></tr>
+      <tr><td><code>reconcile-unprocessed</code></td><td><code>30 */6 * * *</code> UTC</td><td>For users with a live Gmail watch, re-enqueues up to 500 emails missing a summary or embedding — the safety net for write-then-enqueue</td></tr>
+      <tr><td><code>generate-daily-brief</code></td><td><code>0 8 * * *</code> Asia/Kolkata</td><td>Generates and saves a brief for every onboarded user; emails it when Resend is configured</td></tr>
     </tbody>
   </table>
   </div>
@@ -1756,12 +1756,13 @@
     <thead><tr><th>Group</th><th>Variables</th><th>Used by</th></tr></thead>
     <tbody>
       <tr><td>Supabase</td><td><code>NEXT_PUBLIC_SUPABASE_URL</code>, <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code>, <code>SUPABASE_SERVICE_ROLE_KEY</code>; <code>SUPABASE_DB_URL</code> (backup script)</td><td>web, worker, scripts</td></tr>
-      <tr><td>Google</td><td><code>GOOGLE_CLIENT_ID</code>, <code>GOOGLE_CLIENT_SECRET</code>, <code>GOOGLE_REDIRECT_URI</code>, <code>GOOGLE_CLOUD_PROJECT_ID</code> (enables watches; must be the OAuth client's project)</td><td>web, worker</td></tr>
+      <tr><td>Google</td><td><code>GOOGLE_CLIENT_ID</code>, <code>GOOGLE_CLIENT_SECRET</code>, <code>GOOGLE_REDIRECT_URI</code>, <code>GOOGLE_CLOUD_PROJECT_ID</code> (enables watches; must be the OAuth client's project); <code>GMAIL_PUSH_SERVICE_ACCOUNT</code> (turns on push-token verification, web), <code>GMAIL_PUSH_AUDIENCE</code> (optional; defaults to the webhook URL)</td><td>web, worker</td></tr>
       <tr><td>OpenAI</td><td><code>OPENAI_API_KEY</code></td><td>web, worker, evals</td></tr>
       <tr><td>Queue</td><td><code>REDIS_URL</code></td><td>web (producers), worker</td></tr>
       <tr><td>Security</td><td><code>ENCRYPTION_KEY</code> (64 hex chars), <code>ADMIN_SECRET</code></td><td>web, worker</td></tr>
       <tr><td>App</td><td><code>NEXT_PUBLIC_APP_URL</code> (OAuth redirects, Calendar webhook address, brief links)</td><td>web, worker</td></tr>
-      <tr><td>Not live</td><td><code>RESEND_API_KEY</code>, <code>RESEND_FROM_EMAIL</code>, <code>ZOOM_ACCOUNT_ID</code>, <code>ZOOM_CLIENT_ID</code>, <code>ZOOM_CLIENT_SECRET</code>, <code>ZOOM_WEBHOOK_SECRET_TOKEN</code>, <code>SLACK_BOT_TOKEN</code>, <code>SLACK_SIGNING_SECRET</code></td><td>worker, web</td></tr>
+      <tr><td>Email (optional)</td><td><code>RESEND_API_KEY</code>, <code>RESEND_FROM_EMAIL</code> — worker; brief is emailed only when both are set</td><td>worker</td></tr>
+      <tr><td>Not live</td><td><code>ZOOM_ACCOUNT_ID</code>, <code>ZOOM_CLIENT_ID</code>, <code>ZOOM_CLIENT_SECRET</code>, <code>ZOOM_WEBHOOK_SECRET_TOKEN</code>, <code>SLACK_BOT_TOKEN</code>, <code>SLACK_SIGNING_SECRET</code></td><td>worker, web</td></tr>
       <tr><td>Evals</td><td><code>EVAL_USER_ID</code>, <code>EVAL_USER_B_ID</code>, <code>EVAL_BASE_URL</code></td><td>evals</td></tr>
     </tbody>
   </table>
@@ -1789,7 +1790,7 @@
   <table class="detail-table">
     <thead><tr><th>Symptom</th><th>Check</th><th>Fix</th></tr></thead>
     <tbody>
-      <tr><td>No new email</td><td><code>railway logs</code> for <code>invalid_grant</code> in <code>[renew-watches]</code>; newest <code>raw_events.created_at</code></td><td>Reconnect at <code>/api/auth/google</code>; then <code>backfill:gmail -- --days=&lt;gap&gt;</code></td></tr>
+      <tr><td>No new email (dashboard banner)</td><td>Settings shows whether Google rejected the token; otherwise <code>railway logs</code> for <code>[renew-watches]</code> and Vercel logs for <code>[gmail-webhook] rejected push</code></td><td>Reconnect at <code>/api/auth/google</code>; then <code>backfill:gmail -- --days=&lt;gap&gt;</code></td></tr>
       <tr><td>Emails without summaries</td><td>Count rows with null <code>body_summary</code></td><td>Wait for reconcile (≤ 6 h) or <code>reconcile:emails</code></td></tr>
       <tr><td>Stale dashboard alerts</td><td><code>operational_insights.updated_at</code></td><td><code>scripts/backfill-operational-insights.ts</code> (inline, no Redis)</td></tr>
       <tr><td>Fix pushed but not live</td><td><code>railway deployment list</code> vs. <code>git log origin/main</code></td><td>Fast-forward and push <code>main</code></td></tr>
@@ -1882,8 +1883,8 @@
     <thead><tr><th>#</th><th>Finding</th><th>Impact</th><th>Fix</th></tr></thead>
     <tbody>
       <tr><td>1</td><td><strong>Server actions skipped ownership checks</strong> — <span class="badge-sm badge-emerald">Fixed 18 Oct</span>. <code>updateTaskStatus</code> and <code>markDone</code> used the service-role client and updated by <code>id</code> alone.</td><td>Any signed-in user could have changed another user's tasks or commitments.</td><td>Both now use the session client, so RLS scopes them; task status is validated against the four allowed values.</td></tr>
-      <tr><td>2</td><td><strong>Gmail webhook is unauthenticated.</strong> It trusts <code>emailAddress</code> and <code>historyId</code> from the body and writes the history cursor from it.</td><td>Anyone who knows a connected address can move the sync cursor, causing mail to be skipped or replayed, and trigger Gmail fetches on that user's quota.</td><td>Verify the Pub/Sub push OIDC token (audience + service account).</td></tr>
-      <tr><td>3</td><td><strong>Calendar webhook is unauthenticated.</strong> The user id comes from the channel-id header; no channel token is set or checked.</td><td>Anyone with a user's UUID can force calendar syncs. Data still comes from Google, so the impact is quota, not injection.</td><td>Set a channel <code>token</code> at watch time and verify it.</td></tr>
+      <tr><td>2</td><td><strong>Gmail webhook is unauthenticated</strong> — <span class="badge-sm badge-amber">Fix shipped, needs config</span>. The route now verifies Pub/Sub OIDC push tokens (signature, audience, service account), but only once <code>GMAIL_PUSH_SERVICE_ACCOUNT</code> is set on Vercel; enforcing earlier would reject every push.</td><td>Until configured, anyone who knows a connected address can move the sync cursor, causing mail to be skipped or replayed.</td><td>Enable authentication on the push subscription with a service account, then set <code>GMAIL_PUSH_SERVICE_ACCOUNT</code> to its email.</td></tr>
+      <tr><td>3</td><td><strong>Calendar webhook was unauthenticated</strong> — <span class="badge-sm badge-emerald">Fixed 18 Oct</span>. The user id came from the channel-id header with no token.</td><td>Anyone with a user's UUID could force calendar syncs.</td><td>Each channel now carries an HMAC token derived from the user id; notifications without a valid token are acknowledged and ignored.</td></tr>
       <tr><td>4</td><td><strong>Server-side request forgery in unsubscribe.</strong> The server fetches any <code>http(s)</code> URL from an inbound email's <code>List-Unsubscribe</code> header.</td><td>A sender chooses a URL the server will request — including internal addresses.</td><td>Allow only public HTTPS hosts; resolve and reject private ranges; or open the link client-side.</td></tr>
       <tr><td>5</td><td><strong>No OAuth <code>state</code></strong> on the Google connect flow.</td><td>Login-CSRF: a victim can be made to attach the attacker's Google account to their session.</td><td>Generate, store and verify a <code>state</code> value.</td></tr>
       <tr><td>6</td><td><strong>Header injection risk in outbound mail.</strong> <code>To:</code> and <code>Subject:</code> are interpolated into the raw message without stripping CR/LF; the subject comes from inbound mail.</td><td>Possible extra headers or recipients on replies (Gmail-side behaviour not verified).</td><td>Strip <code>\r\n</code> from header values.</td></tr>
@@ -1940,11 +1941,9 @@
   <table class="detail-table">
     <thead><tr><th>P</th><th>Issue</th><th>Consequence</th><th>Fix</th></tr></thead>
     <tbody>
-      <tr><td>1</td><td>A dead Google token is visible only in logs</td><td>Ingestion stopped silently twice (18 days, then 2)</td><td>On refresh failure, mark the integration inactive and surface it in Settings; alert when the newest <code>raw_event</code> is older than a day</td></tr>
-      <tr><td>1</td><td>Webhooks without authentication</td><td>See Security review, items 2–3</td><td>Verify the Pub/Sub OIDC token and a Calendar channel token</td></tr>
-      <tr><td>2</td><td>Daily brief never scheduled</td><td>Feature built, never delivered</td><td>Register a repeat job at the user's <code>preferences.digest_time</code></td></tr>
+      <tr><td>1</td><td>Gmail push verification not yet enforced</td><td>See Security review, item 2</td><td>Configure the Pub/Sub subscription's push authentication, then set <code>GMAIL_PUSH_SERVICE_ACCOUNT</code></td></tr>
+      <tr><td>2</td><td>Daily brief is not emailed</td><td>The brief is only visible on the dashboard</td><td>Set <code>RESEND_API_KEY</code> and <code>RESEND_FROM_EMAIL</code> on Railway; honour <code>preferences.digest_time</code> per user</td></tr>
       <tr><td>2</td><td>Zoom summaries enqueued on the wrong queue; no <code>source = 'zoom'</code> meeting rows</td><td>Meeting decisions and action items never extracted</td><td>Enqueue on <code>meetings-summarize</code>; match Zoom meetings to calendar events by join URL</td></tr>
-      <tr><td>2</td><td>Backup name extractor mangles names after "did"</td><td>"What did Kamal ask me?" extracts the person "Kamal ask me", which matches no contact</td><td>Stop the <code>inferPeople</code> capture at the verb</td></tr>
       <tr><td>2</td><td>Calendar sync reads one page of 50, ignores HTTP 410, leaks channels</td><td>Busy calendars miss events; an expired sync token stops sync; orphan channels accumulate</td><td>Page through results; on 410 clear the token and full-sync; store and stop the previous channel</td></tr>
       <tr><td>2</td><td>Connect callback overwrites <code>integrations.metadata</code></td><td>Reconnecting drops the Calendar sync token</td><td>Merge instead of replace</td></tr>
       <tr><td>2</td><td>Dedup window anchored on now</td><td>Backfilled transactions older than a day are not normalised until <code>backfill:transactions</code> runs</td><td>Anchor the window on the transaction's own time</td></tr>
