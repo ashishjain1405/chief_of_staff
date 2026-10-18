@@ -747,7 +747,7 @@
     <div><strong>Category</strong>Personal AI assistant</div>
     <div><strong>Platform</strong>Next.js · Supabase · BullMQ</div>
     <div><strong>Status</strong>Early access · single user</div>
-    <div><strong>Reflects code at</strong><code style="color:inherit;background:none">main @ d364e19</code> · 18 Oct 2026</div>
+    <div><strong>Reflects code at</strong><code style="color:inherit;background:none">main @ d83e5ae</code> · 18 Oct 2026</div>
   </div>
 </div>
 
@@ -1014,7 +1014,7 @@
   <table class="detail-table">
     <thead><tr><th>Capability</th><th>Status</th><th>Evidence (18 Oct 2026)</th><th>What is missing</th></tr></thead>
     <tbody>
-      <tr><td>Gmail ingestion (push + backfill)</td><td><span class="badge-sm badge-emerald">Live</span></td><td>3 893 emails in <code>communications</code>; 870 <code>raw_events</code></td><td>A rejected Google token now marks the integration disconnected and the dashboard warns; Pub/Sub token verification waits on subscription config</td></tr>
+      <tr><td>Gmail ingestion (push + backfill)</td><td><span class="badge-sm badge-emerald">Live</span></td><td>3 893 emails in <code>communications</code>; 870 <code>raw_events</code></td><td>A rejected Google token now marks the integration disconnected and the dashboard warns; pushes are signature-verified</td></tr>
       <tr><td>AI triage &amp; categories</td><td><span class="badge-sm badge-emerald">Live</span></td><td>Every stored email has a category and summary; 3 887 memory chunks</td><td>—</td></tr>
       <tr><td>Task creation</td><td><span class="badge-sm badge-emerald">Live</span></td><td>143 tasks: 80 pending, 2 done, 61 dismissed</td><td>—</td></tr>
       <tr><td>Financial extraction &amp; dedup</td><td><span class="badge-sm badge-emerald">Live</span></td><td>672 raw → 363 normalised transactions</td><td>Dedup window anchored on "now"; old backfilled rows need a manual pass</td></tr>
@@ -1608,7 +1608,7 @@
       <tr><td><code>/api/actions/send-reply</code><br><small><code>{communicationId, draftId?, body}</code></small></td><td>Session</td><td>Reply on the original thread</td><td>Gmail <code>messages.send</code>; marks draft <code>sent</code></td></tr>
       <tr><td><code>/api/actions/unsubscribe</code></td><td>Session</td><td>Follow List-Unsubscribe, then spam</td><td>mailto via Gmail send, or server-side HTTP POST/GET to the sender's URL; then <code>messages.modify</code></td></tr>
       <tr class="group"><td colspan="4">Webhooks — public; service-role client</td></tr>
-      <tr><td><code>POST /api/webhooks/gmail</code></td><td>Pub/Sub OIDC token — enforced once <code>GMAIL_PUSH_SERVICE_ACCOUNT</code> is set; until then <strong>none</strong></td><td>Pub/Sub push for the Gmail watch</td><td>Walks <code>history.list</code> since the stored cursor; inserts <code>raw_events</code>; enqueues <code>email-raw</code>; advances the cursor</td></tr>
+      <tr><td><code>POST /api/webhooks/gmail</code></td><td>Pub/Sub OIDC push token (signature, audience, service account in <code>GMAIL_PUSH_SERVICE_ACCOUNT</code>)</td><td>Pub/Sub push for the Gmail watch</td><td>Walks <code>history.list</code> since the stored cursor; inserts <code>raw_events</code>; enqueues <code>email-raw</code>; advances the cursor</td></tr>
       <tr><td><code>POST /api/webhooks/calendar</code></td><td>Per-user HMAC channel token (<code>X-Goog-Channel-Token</code>); tokenless notifications are acknowledged without syncing</td><td>Calendar push channel</td><td><code>events.list</code> with sync token; upserts <code>meetings</code></td></tr>
       <tr><td><code>POST /api/webhooks/zoom</code></td><td>HMAC-SHA256 (<code>x-zm-signature</code>)</td><td>Recording completed</td><td>Zoom recordings API; updates <code>meetings.transcript</code>; enqueues (wrong queue)</td></tr>
       <tr><td><code>POST /api/webhooks/slack</code></td><td>HMAC-SHA256, 5-min window, timing-safe</td><td>DMs and mentions</td><td>Inserts <code>raw_events</code>; enqueues <code>slack-raw</code> (no consumer)</td></tr>
@@ -1852,6 +1852,11 @@
         <td>Grouping and lookups compare on a case- and separator-insensitive key; short aliases need a word boundary. A one-off cleanup collapsed 154 rows and refiled 4 misattributed payments.</td>
       </tr>
       <tr>
+        <td>Every signed Gmail push rejected</td>
+        <td>Turning on push verification rejected all mail for about three hours: <code>NEXT_PUBLIC_APP_URL</code> ends in a slash on Vercel, so the expected audience was <code>.app//api/webhooks/gmail</code>. The first log only said "invalid token".</td>
+        <td>Rejections now log the token's and the expected audience side by side, which found it in one line. <code>appUrl()</code> strips the trailing slash for every URL built from the variable. No mail was lost — Pub/Sub retried until accepted.</td>
+      </tr>
+      <tr>
         <td>Dashboard insights frozen for five weeks</td>
         <td>The recompute job used a fixed <code>jobId</code>. BullMQ ignores adds whose id matches a stored job and prunes completed jobs only when another completes, so the job from 10 September blocked every later one. 117 email jobs ran in one log window with zero recomputes, and nothing errored.</td>
         <td>One enqueue helper with a dedup key that expires after 30 s and no fixed id; one-off inline recompute (174 insights). Verified end to end: a burst collapses to one job, and a later enqueue creates a new one.</td>
@@ -1883,7 +1888,7 @@
     <thead><tr><th>#</th><th>Finding</th><th>Impact</th><th>Fix</th></tr></thead>
     <tbody>
       <tr><td>1</td><td><strong>Server actions skipped ownership checks</strong> — <span class="badge-sm badge-emerald">Fixed 18 Oct</span>. <code>updateTaskStatus</code> and <code>markDone</code> used the service-role client and updated by <code>id</code> alone.</td><td>Any signed-in user could have changed another user's tasks or commitments.</td><td>Both now use the session client, so RLS scopes them; task status is validated against the four allowed values.</td></tr>
-      <tr><td>2</td><td><strong>Gmail webhook is unauthenticated</strong> — <span class="badge-sm badge-amber">Fix shipped, needs config</span>. The route now verifies Pub/Sub OIDC push tokens (signature, audience, service account), but only once <code>GMAIL_PUSH_SERVICE_ACCOUNT</code> is set on Vercel; enforcing earlier would reject every push.</td><td>Until configured, anyone who knows a connected address can move the sync cursor, causing mail to be skipped or replayed.</td><td>Enable authentication on the push subscription with a service account, then set <code>GMAIL_PUSH_SERVICE_ACCOUNT</code> to its email.</td></tr>
+      <tr><td>2</td><td><strong>Gmail webhook was unauthenticated</strong> — <span class="badge-sm badge-emerald">Fixed 18 Oct</span>. It trusted <code>emailAddress</code> and <code>historyId</code> from any caller.</td><td>Anyone who knew a connected address could move the sync cursor, causing mail to be skipped or replayed.</td><td>The subscription signs each push as <code>gmail-push-invoker@…</code>; the route verifies signature, audience and service account, and rejects anything else with a 401. Enforced since 18 Oct.</td></tr>
       <tr><td>3</td><td><strong>Calendar webhook was unauthenticated</strong> — <span class="badge-sm badge-emerald">Fixed 18 Oct</span>. The user id came from the channel-id header with no token.</td><td>Anyone with a user's UUID could force calendar syncs.</td><td>Each channel now carries an HMAC token derived from the user id; notifications without a valid token are acknowledged and ignored.</td></tr>
       <tr><td>4</td><td><strong>Server-side request forgery in unsubscribe.</strong> The server fetches any <code>http(s)</code> URL from an inbound email's <code>List-Unsubscribe</code> header.</td><td>A sender chooses a URL the server will request — including internal addresses.</td><td>Allow only public HTTPS hosts; resolve and reject private ranges; or open the link client-side.</td></tr>
       <tr><td>5</td><td><strong>No OAuth <code>state</code></strong> on the Google connect flow.</td><td>Login-CSRF: a victim can be made to attach the attacker's Google account to their session.</td><td>Generate, store and verify a <code>state</code> value.</td></tr>
@@ -1941,7 +1946,6 @@
   <table class="detail-table">
     <thead><tr><th>P</th><th>Issue</th><th>Consequence</th><th>Fix</th></tr></thead>
     <tbody>
-      <tr><td>1</td><td>Gmail push verification not yet enforced</td><td>See Security review, item 2</td><td>Configure the Pub/Sub subscription's push authentication, then set <code>GMAIL_PUSH_SERVICE_ACCOUNT</code></td></tr>
       <tr><td>2</td><td>Daily brief is not emailed</td><td>The brief is only visible on the dashboard</td><td>Set <code>RESEND_API_KEY</code> and <code>RESEND_FROM_EMAIL</code> on Railway; honour <code>preferences.digest_time</code> per user</td></tr>
       <tr><td>2</td><td>Zoom summaries enqueued on the wrong queue; no <code>source = 'zoom'</code> meeting rows</td><td>Meeting decisions and action items never extracted</td><td>Enqueue on <code>meetings-summarize</code>; match Zoom meetings to calendar events by join URL</td></tr>
       <tr><td>2</td><td>Calendar sync reads one page of 50, ignores HTTP 410, leaks channels</td><td>Busy calendars miss events; an expired sync token stops sync; orphan channels accumulate</td><td>Page through results; on 410 clear the token and full-sync; store and stop the previous channel</td></tr>
