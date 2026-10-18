@@ -4,7 +4,7 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { generateDailyBrief } from "@/lib/ai/claude";
 import { searchMemory, getStructuredContext } from "@/lib/memory/search";
 import { dailyBriefPrompt } from "@/lib/ai/prompts";
-import { Resend } from "resend";
+import { sendEmail } from "@/lib/integrations/gmail";
 
 
 // The scheduled run carries no userId and briefs every onboarded user; a job
@@ -32,7 +32,7 @@ async function briefUser(supabase: SupabaseClient, userId: string) {
 
   const { data: user } = await supabase
     .from("users")
-    .select("email, full_name, business_context")
+    .select("email, business_context")
     .eq("id", userId)
     .single();
 
@@ -75,26 +75,25 @@ async function briefUser(supabase: SupabaseClient, userId: string) {
     { onConflict: "user_id,brief_date" }
   );
 
-  // Saved first, so the brief is on the dashboard even without email. Resend
-  // threw at construction when its key was missing, which would have aborted
-  // the whole brief; it is optional now.
-  if (!process.env.RESEND_API_KEY || !process.env.RESEND_FROM_EMAIL) {
-    console.log(`[daily-brief] ${userId}: saved; email skipped (Resend not configured)`);
+  // Saved first, so the brief is on the dashboard even if sending fails.
+  // Sent from the user's own Gmail through the existing gmail.send grant rather
+  // than a separate email provider: no extra account, key or sender domain for
+  // one message a day. Self-sent mail carries the SENT label, which the push
+  // webhook skips, so the brief does not come back in as an inbox email.
+  const dateLabel = new Date().toLocaleDateString("en-US", {
+    weekday: "long", month: "long", day: "numeric", timeZone: "Asia/Kolkata",
+  });
+  try {
+    await sendEmail(userId, {
+      to: user.email,
+      // ASCII only: sendEmail writes headers raw, without RFC 2047 encoding.
+      subject: `Your Daily Brief - ${dateLabel}`,
+      body: `${briefMarkdown}\n\nOpen the dashboard: ${appUrl("/dashboard")}`,
+    });
+  } catch (err) {
+    console.error(`[daily-brief] ${userId}: saved; email failed:`, (err as Error).message);
     return;
   }
-  const resend = new Resend(process.env.RESEND_API_KEY);
-  await resend.emails.send({
-    from: process.env.RESEND_FROM_EMAIL!,
-    to: user.email,
-    subject: `Your Daily Brief — ${new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}`,
-    text: briefMarkdown,
-    html: `<div style="font-family:sans-serif;max-width:640px;margin:0 auto;padding:24px">
-      <h2 style="color:#1a1a1a">Good morning, ${user.full_name?.split(" ")[0] ?? "there"} 👋</h2>
-      <div style="white-space:pre-wrap;line-height:1.6">${briefMarkdown.replace(/\n/g, "<br>")}</div>
-      <hr style="margin:24px 0;border:none;border-top:1px solid #eee">
-      <a href="${appUrl("/dashboard")}" style="color:#6366f1">Open Dashboard →</a>
-        </div>`,
-  });
   await supabase
     .from("daily_briefs")
     .update({ delivered_at: new Date().toISOString() })
