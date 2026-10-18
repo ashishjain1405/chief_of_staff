@@ -5,7 +5,7 @@ import { buildRetrievalPlan } from "@/lib/ai/retrieval/plan";
 import { executeRetrievalPlan } from "@/lib/ai/retrieval/execute";
 import { aggregateTransactions } from "@/lib/ai/retrieval/aggregate";
 import { unifiedRank, getRankingProfile, DEFAULT_DIVERSITY_CAPS } from "@/lib/ai/retrieval/rank";
-import { decodeConversationContext, updateConversationContext, mergeContextWithIntent } from "@/lib/ai/retrieval/context";
+import { decodeConversationContext, updateConversationContext, mergeContextWithIntent, isFollowUpQuery } from "@/lib/ai/retrieval/context";
 import { buildTrace } from "@/lib/ai/retrieval/trace";
 import { askSystemPrompt, askContextPrompt } from "@/lib/ai/prompts";
 import { streamText, generateText, convertToModelMessages, type UIMessage } from "ai";
@@ -42,10 +42,13 @@ export async function POST(request: Request) {
 
     // Stage 1: Decode conversational context from prior messages
     const prevContext = decodeConversationContext(messages);
+    // Only a question that refers back gets the previous turn's entities, both
+    // as a classifier hint and as gap-fill; the context is still carried forward.
+    const usableContext = prevContext && isFollowUpQuery(lastMessageText) ? prevContext : null;
 
     // Stage 2: Intent + entities + temporal + weights (single gpt-4o-mini call)
-    const rawIntent = await classifyIntent(lastMessageText, prevContext).catch(() => FALLBACK_INTENT);
-    const intent = mergeContextWithIntent(prevContext, rawIntent);
+    const rawIntent = await classifyIntent(lastMessageText, usableContext).catch(() => FALLBACK_INTENT);
+    const intent = mergeContextWithIntent(usableContext, rawIntent, lastMessageText);
     const newContext = updateConversationContext(prevContext, intent);
 
     // Stage 3: Parallel — resolve entities + fetch user context
@@ -138,13 +141,14 @@ export async function POST(request: Request) {
       maxOutputTokens: 1024,
     });
 
-    // Attach context metadata to response for next-turn retrieval
-    // Frontend should store this and send it back in subsequent messages
-    const response = result.toUIMessageStreamResponse();
-    response.headers.set(
-      "X-Assistant-Context",
-      JSON.stringify({ context: newContext, sources_used: sourceStatuses.filter(s => s.success).map(s => s.source) })
-    );
+    // Context rides on the assistant message's metadata, which useChat keeps and
+    // sends back with the next request. The header alone never round-tripped.
+    const sourcesUsed = sourceStatuses.filter(s => s.success).map(s => s.source);
+    const response = result.toUIMessageStreamResponse({
+      messageMetadata: ({ part }) =>
+        part.type === "finish" ? { context: newContext, sources_used: sourcesUsed } : undefined,
+    });
+    response.headers.set("X-Assistant-Context", JSON.stringify({ context: newContext, sources_used: sourcesUsed }));
     return response;
   } catch (e) {
     console.error("Ask AI route error:", e);

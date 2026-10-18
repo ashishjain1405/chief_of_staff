@@ -57,7 +57,12 @@ export async function resolveEntities(
 
   // Resolve people → contact IDs (fuzzy: name + email + tags)
   if (entities.people.length > 0) {
-    for (const name of entities.people) {
+    for (const rawName of entities.people) {
+      // Commas and parentheses are PostgREST `or` syntax and %/* are wildcards;
+      // a name can now come from client-returned context, so it must not be
+      // able to add conditions or widen the match.
+      const name = rawName.replace(/[,()%*\\"]/g, " ").replace(/\s+/g, " ").trim();
+      if (!name) continue;
       const { data } = await (supabase as any)
         .from("contacts")
         .select("id")
