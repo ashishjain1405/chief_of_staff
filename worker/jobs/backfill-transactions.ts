@@ -1,8 +1,8 @@
 import { createClient } from "@supabase/supabase-js";
 import { classifySender, shouldRunStage1 } from "@/lib/finance/senders";
 import { extractFinancialTransaction } from "@/lib/ai/extractors/financial";
-import { normalizeMerchant, getCategoryForMerchant } from "@/lib/finance/normalize";
-import { deduplicateRawTransactions, type TransactionRaw } from "@/lib/finance/dedup";
+import { getCategoryForMerchant, resolveMerchant } from "@/lib/finance/normalize";
+import { deduplicateRawTransactions, saveNormalizedGroups, type TransactionRaw } from "@/lib/finance/dedup";
 
 async function main() {
   const supabase = createClient(
@@ -62,8 +62,13 @@ async function main() {
           (extraction.is_financial_email && extraction.confidence < 0.5) ||
           (extraction.is_financial_email && extraction.confidence >= 0.5 && raw?.amount == null);
 
-        const merchantRaw = raw?.merchant_name ?? null;
-        const merchantNormalized = merchantRaw ? normalizeMerchant(merchantRaw) : null;
+        const merchantRaw = raw?.merchant_name?.trim() || null;
+        const merchantNormalized = resolveMerchant({
+          extractedName: merchantRaw,
+          extractedNormalized: raw?.merchant_normalized,
+          senderDomain: senderEmail.includes("@") ? senderEmail.split("@")[1].toLowerCase() : "",
+          bankName: raw?.bank_name,
+        });
         const category = merchantNormalized
           ? (getCategoryForMerchant(merchantNormalized) ?? raw?.category ?? null)
           : (raw?.category ?? null);
@@ -143,42 +148,7 @@ async function main() {
     if (!rawRows?.length) continue;
 
     const normalized = deduplicateRawTransactions(rawRows as TransactionRaw[]);
-
-    for (const norm of normalized) {
-      // Mirrors the fixed logic in summarize-communication.ts. maybeSingle()
-      // errors once 2+ rows match and returns null, which reads as "not found"
-      // and inserts another copy; with the unique index now in place that
-      // insert is rejected with 23505 and, since the error was unchecked, the
-      // transaction was silently dropped instead.
-      const now = new Date().toISOString();
-      const { data: matches } = await supabase
-        .from("transactions_normalized")
-        .select("id")
-        .eq("user_id", userId)
-        .contains("communication_ids", norm.communication_ids)
-        .order("created_at", { ascending: true });
-
-      if (!matches?.length) {
-        const { error: insertErr } = await supabase
-          .from("transactions_normalized")
-          .insert({ ...norm, created_at: now, updated_at: now });
-        if (insertErr && insertErr.code !== "23505") {
-          console.error(`  insert failed: ${insertErr.message}`);
-        }
-      } else {
-        const [keep, ...redundant] = matches;
-        await supabase
-          .from("transactions_normalized")
-          .update({ ...norm, updated_at: now })
-          .eq("id", keep.id);
-        if (redundant.length > 0) {
-          await supabase
-            .from("transactions_normalized")
-            .delete()
-            .in("id", redundant.map((r) => r.id));
-        }
-      }
-    }
+    await saveNormalizedGroups(supabase, userId, normalized);
 
     console.log(`Deduped ${normalized.length} transactions for user ${userId}`);
   }

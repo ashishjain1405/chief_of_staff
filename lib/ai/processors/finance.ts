@@ -18,7 +18,11 @@ function spendByMerchant(txns: RawTransaction[]): Map<string, { name: string; am
   const groups = new Map<string, { amounts: number[]; spellings: Map<string, number> }>();
   const empty = () => ({ amounts: [] as number[], spellings: new Map<string, number>() });
   for (const t of txns) {
-    const name = t.merchant_normalized ?? "Unknown";
+    // Merchant-less rows are unrelated payments (IMPS transfers, vouchers);
+    // pooled as "Unknown" they produced a spending spike for a merchant that
+    // doesn't exist. They still count toward category and total spend.
+    if (!t.merchant_normalized) continue;
+    const name = t.merchant_normalized;
     const key = merchantKey(name);
     const g = groups.get(key) ?? empty();
     g.amounts.push(t.amount);

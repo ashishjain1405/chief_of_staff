@@ -179,3 +179,47 @@ const WALLET_PAYMENT_MODES: Record<string, string> = {
 export function getWalletPaymentModeLabel(senderDomain: string): string | null {
   return WALLET_PAYMENT_MODES[senderDomain.toLowerCase()] ?? null;
 }
+
+// Picks the merchant for an extracted transaction. Wallet emails (Amazon Pay,
+// Paytm…) used to have their merchant discarded outright, to keep the wallet
+// from being recorded as one — which also threw away the payee they name
+// ("Your payment to URBAN COMPANY"), leaving most of them merchant-less. Now
+// only the wallet itself is excluded. With nothing extracted, a sender domain
+// that is itself a known merchant (an amazon.in refund email) is used.
+export function resolveMerchant(opts: {
+  extractedName: string | null | undefined;
+  extractedNormalized: string | null | undefined;
+  senderDomain: string;
+  bankName?: string | null;
+}): string | null {
+  const wallet = getWalletPaymentModeLabel(opts.senderDomain);
+  // For a bank transfer the model names the bank itself ("HDFC Bank"), which
+  // then shows up as a spending spike for a bank. The account's own bank is
+  // never the merchant.
+  const bankKey = opts.bankName ? merchantKey(opts.bankName) : null;
+  const isWallet = (name: string) => {
+    const key = merchantKey(name);
+    if (bankKey && (key === bankKey || key.includes(bankKey) || bankKey.includes(key))) return true;
+    if (!wallet) return false;
+    const known = findKnownMerchant(name);
+    return key === merchantKey(wallet) || (!!known && merchantKey(known) === merchantKey(wallet));
+  };
+  const name = opts.extractedName?.trim() || null;
+  const normalized = opts.extractedNormalized?.trim() || null;
+  const usableName = name && !isWallet(name) ? name : null;
+  const usableNormalized = normalized && !isWallet(normalized) ? normalized : null;
+
+  const fromExtraction = (usableName ? findKnownMerchant(usableName) : null)
+    ?? (usableNormalized ? findKnownMerchant(usableNormalized) : null)
+    ?? usableNormalized ?? usableName;
+  if (fromExtraction) return fromExtraction;
+  if (wallet) return null;
+
+  // mail.1mg.com → 1mg.com, so mailing subdomains still resolve.
+  const parts = opts.senderDomain.toLowerCase().split(".");
+  for (let i = 0; i < parts.length - 1; i++) {
+    const merchant = getMerchantFromDomain(parts.slice(i).join("."));
+    if (merchant) return merchant;
+  }
+  return null;
+}

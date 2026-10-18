@@ -5,8 +5,8 @@ import { embedAndStoreChunks, updateCommunicationEmbedding } from "@/lib/memory/
 import { classifySender, getSenderHint, shouldRunStage1, isKnownFinancialDomain } from "@/lib/finance/senders";
 import { enqueueOperationalState } from "@/lib/queues";
 import { extractFinancialTransaction } from "@/lib/ai/extractors/financial";
-import { normalizeMerchant, findKnownMerchant, getCategoryForMerchant, getWalletPaymentModeLabel } from "@/lib/finance/normalize";
-import { deduplicateRawTransactions, type TransactionRaw } from "@/lib/finance/dedup";
+import { getCategoryForMerchant, getWalletPaymentModeLabel, resolveMerchant } from "@/lib/finance/normalize";
+import { deduplicateRawTransactions, saveNormalizedGroups, type TransactionRaw } from "@/lib/finance/dedup";
 import { resolveFollowUpDeadline } from "@/lib/tasks/deadline";
 import { LOW_SIGNAL_CATEGORIES } from "@/lib/inbox/categories";
 import { shouldCreateTask } from "@/lib/tasks/gate";
@@ -291,7 +291,10 @@ function resolveTransactionDatetime(
   extracted: string | null,
   occurredAt: string | null
 ): string | null {
-  if (!extracted) return null;
+  // No date extracted: fall back to arrival, as for every other bad date. A
+  // null here kept the row out of every dedup window, so it never reached the
+  // finance tab - 65 transactions were stranded that way.
+  if (!extracted) return occurredAt;
   const parsed = new Date(extracted).getTime();
   if (Number.isNaN(parsed)) return occurredAt;
 
@@ -346,16 +349,14 @@ async function runFinancialExtraction(
   const senderDomain = senderEmail.includes("@") ? senderEmail.split("@")[1].toLowerCase() : "";
   const walletLabel = getWalletPaymentModeLabel(senderDomain);
 
-  // If the email is from a wallet/payment-mode sender, don't record it as a merchant
-  const merchantRaw = walletLabel ? null : (raw?.merchant_name ?? null);
-  // A known alias always wins. The old check treated a merchant as unknown when
-  // its canonical name equalled its title-case ("ZOMATO" -> "Zomato"), so the
-  // LLM's own casing was stored and one merchant split three ways. Unknown
-  // merchants keep the LLM's spelling; grouping compares them by merchantKey.
-  const nameSource = raw?.merchant_normalized?.trim() || merchantRaw?.trim() || null;
-  const merchantNormalized = walletLabel || !nameSource
-    ? null
-    : (merchantRaw ? findKnownMerchant(merchantRaw) : null) ?? findKnownMerchant(nameSource) ?? nameSource;
+  // Known aliases win and wallets are never the merchant; see resolveMerchant.
+  const merchantRaw = raw?.merchant_name?.trim() || null;
+  const merchantNormalized = resolveMerchant({
+    extractedName: merchantRaw,
+    extractedNormalized: raw?.merchant_normalized,
+    senderDomain,
+    bankName: raw?.bank_name,
+  });
   const paymentMethod = walletLabel ?? raw?.payment_method ?? null;
   const category = merchantNormalized
     ? (getCategoryForMerchant(merchantNormalized) ?? raw?.category ?? null)
@@ -366,6 +367,8 @@ async function runFinancialExtraction(
   const resolvedSenderType = LLM_ONLY_SENDER_TYPES.has(raw?.sender_type ?? "")
     ? raw!.sender_type!
     : senderType;
+
+  const transactionDatetime = resolveTransactionDatetime(raw?.transaction_datetime ?? null, occurredAt);
 
   await (supabase.from as any)("transactions_raw").upsert(
     {
@@ -381,10 +384,7 @@ async function runFinancialExtraction(
       merchant_normalized: merchantNormalized,
       bank_name: raw?.bank_name ?? null,
       payment_method: paymentMethod,
-      transaction_datetime: resolveTransactionDatetime(
-        raw?.transaction_datetime ?? null,
-        occurredAt
-      ),
+      transaction_datetime: transactionDatetime,
       due_date: raw?.due_date ?? null,
       transaction_id: raw?.transaction_id ?? null,
       reference_id: raw?.reference_id ?? null,
@@ -410,100 +410,34 @@ async function runFinancialExtraction(
       .eq("id", communicationId);
   }
 
-  if (!needsReview) {
-    await runDedup(supabase, userId);
+  if (!needsReview && transactionDatetime) {
+    await runDedup(supabase, userId, transactionDatetime);
   }
 }
 
-async function runDedup(supabase: any, userId: string) {
-  const now = new Date();
-  const since = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
+const DEDUP_WINDOW_MS = 24 * 60 * 60 * 1000;
 
-  const db = supabase as any;
+// The window is centred on the transaction just extracted, not on now. Anchored
+// on now, anything processed more than a day after it happened - every
+// backfill and reprocess - fell outside the window and was never normalized:
+// 135 transactions were missing from the finance tab.
+async function runDedup(supabase: any, userId: string, anchor: string) {
+  const at = new Date(anchor).getTime();
+  const from = new Date(at - DEDUP_WINDOW_MS).toISOString();
+  // Capped at now: extraction sometimes picks up a due or delivery date, and a
+  // future-dated row would otherwise join every window.
+  const to = new Date(Math.min(at + DEDUP_WINDOW_MS, Date.now())).toISOString();
 
-  const { data: rawRows } = await db
+  const { data: rawRows, error } = await supabase
     .from("transactions_raw")
     .select("*")
     .eq("user_id", userId)
     .eq("is_financial_email", true)
     .eq("needs_review", false)
-    .gte("transaction_datetime", since)
-    // Upper bound matters: extraction sometimes picks up a due/delivery date, so
-    // rows land in the future and would otherwise satisfy the lower bound on
-    // every single dedup run, forever.
-    .lte("transaction_datetime", now.toISOString());
-
+    .gte("transaction_datetime", from)
+    .lte("transaction_datetime", to);
+  if (error) throw new Error(`[dedup] raw scan failed: ${error.message}`);
   if (!rawRows?.length) return;
 
-  const normalized = deduplicateRawTransactions(rawRows as TransactionRaw[]);
-
-  for (const norm of normalized) {
-    // Fetch every match rather than using maybeSingle(): maybeSingle errors when
-    // 2+ rows match and returns null, which this code previously read as "not
-    // found" and inserted another copy - each duplicate then guaranteed another
-    // on the next run. Collapse to the oldest row and delete the rest so the
-    // table self-heals as this runs.
-    const { data: existing } = await db
-      .from("transactions_normalized")
-      .select("id")
-      .eq("user_id", userId)
-      .contains("communication_ids", norm.communication_ids)
-      .order("created_at", { ascending: true });
-
-    const matches = existing ?? [];
-
-    if (matches.length === 0) {
-      const { error: insertErr } = await db.from("transactions_normalized").insert({
-        ...norm,
-        created_at: now.toISOString(),
-        updated_at: now.toISOString(),
-      });
-
-      // A concurrent dedup run can win the race between the select above and
-      // this insert. The unique index on (user_id, communication_ids) rejects
-      // the loser with 23505; without this branch the transaction would be
-      // silently dropped, since supabase-js returns errors rather than throwing.
-      if (insertErr) {
-        if (insertErr.code !== "23505") {
-          console.error(`[dedup] Insert failed: ${insertErr.message}`);
-          continue;
-        }
-        const { data: raced } = await db
-          .from("transactions_normalized")
-          .select("id")
-          .eq("user_id", userId)
-          .contains("communication_ids", norm.communication_ids)
-          .order("created_at", { ascending: true });
-        if (raced?.length) {
-          await db
-            .from("transactions_normalized")
-            .update({ ...norm, updated_at: now.toISOString() })
-            .eq("id", raced[0].id);
-        }
-      }
-      continue;
-    }
-
-    const [keep, ...redundant] = matches;
-
-    const { error: updateErr } = await db
-      .from("transactions_normalized")
-      .update({ ...norm, updated_at: now.toISOString() })
-      .eq("id", keep.id);
-    if (updateErr) console.error(`[dedup] Update failed for ${keep.id}: ${updateErr.message}`);
-
-    if (redundant.length > 0) {
-      const { error: deleteErr } = await db
-        .from("transactions_normalized")
-        .delete()
-        .in("id", redundant.map((r: { id: string }) => r.id));
-      if (deleteErr) {
-        console.error(`[dedup] Failed to delete duplicates: ${deleteErr.message}`);
-      } else {
-        console.log(
-          `[dedup] Collapsed ${redundant.length} duplicate normalized rows into ${keep.id}`
-        );
-      }
-    }
-  }
+  await saveNormalizedGroups(supabase, userId, deduplicateRawTransactions(rawRows as TransactionRaw[]));
 }

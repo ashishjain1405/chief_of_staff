@@ -1,7 +1,7 @@
 import { Job } from "bullmq";
 import { createClient } from "@supabase/supabase-js";
 import { watchGmailInbox } from "@/lib/integrations/gmail";
-import { watchCalendar } from "@/lib/integrations/calendar";
+import { renewCalendarWatch } from "@/lib/integrations/calendar";
 
 export async function renewGmailWatches(_job: Job) {
   const supabase = createClient(
@@ -21,15 +21,13 @@ export async function renewGmailWatches(_job: Job) {
   for (const { user_id, external_account_id, metadata } of integrations) {
     const [gmailResult, calendarResult] = await Promise.allSettled([
       watchGmailInbox(user_id),
-      watchCalendar(user_id),
+      renewCalendarWatch(user_id, metadata),
     ]);
 
     const gmailMeta = gmailResult.status === "fulfilled"
       ? { last_history_id: gmailResult.value.historyId, watch_expires_at: new Date(Number(gmailResult.value.expiration)).toISOString() }
       : {};
-    const calendarMeta = calendarResult.status === "fulfilled"
-      ? { calendar_resource_id: calendarResult.value.resourceId, calendar_watch_expires_at: new Date(Number(calendarResult.value.expiration)).toISOString() }
-      : {};
+    const calendarMeta = calendarResult.status === "fulfilled" ? calendarResult.value : {};
 
     if (gmailResult.status === "rejected") console.error(`[renew-watches] ✗ ${external_account_id} gmail:`, (gmailResult.reason as any).message);
     if (calendarResult.status === "rejected") console.error(`[renew-watches] ✗ ${external_account_id} calendar:`, (calendarResult.reason as any).message);

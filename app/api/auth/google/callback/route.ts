@@ -34,28 +34,37 @@ export async function GET(request: NextRequest) {
   if (process.env.GOOGLE_CLOUD_PROJECT_ID) {
     try {
       const { watchGmailInbox } = await import("@/lib/integrations/gmail");
-      const { watchCalendar } = await import("@/lib/integrations/calendar");
+      const { renewCalendarWatch } = await import("@/lib/integrations/calendar");
       const { createServiceClient } = await import("@/lib/supabase/server");
       const serviceSupabase = await createServiceClient();
 
+      const { data: existing } = await serviceSupabase
+        .from("integrations")
+        .select("metadata")
+        .eq("user_id", user.id)
+        .eq("provider", "google")
+        .single();
+      const previous = (existing?.metadata ?? {}) as Record<string, unknown>;
+
       const [gmailResult, calendarResult] = await Promise.allSettled([
         watchGmailInbox(user.id),
-        watchCalendar(user.id),
+        renewCalendarWatch(user.id, previous),
       ]);
 
       const gmailMeta = gmailResult.status === "fulfilled"
         ? { last_history_id: gmailResult.value.historyId, watch_expires_at: new Date(Number(gmailResult.value.expiration)).toISOString() }
         : {};
-      const calendarMeta = calendarResult.status === "fulfilled"
-        ? { calendar_resource_id: calendarResult.value.resourceId, calendar_watch_expires_at: new Date(Number(calendarResult.value.expiration)).toISOString() }
-        : {};
+      const calendarMeta = calendarResult.status === "fulfilled" ? calendarResult.value : {};
 
       if (gmailResult.status === "rejected") console.error("Gmail watch setup failed:", gmailResult.reason);
       if (calendarResult.status === "rejected") console.error("Calendar watch setup failed:", calendarResult.reason);
 
       await serviceSupabase
         .from("integrations")
-        .update({ metadata: { ...gmailMeta, ...calendarMeta } })
+        // Merged, not replaced: replacing dropped calendar_sync_token, forcing a
+        // full re-sync on every reconnect. auth_error is cleared because the
+        // reconnect is what resolves it.
+        .update({ metadata: { ...previous, auth_error: undefined, ...gmailMeta, ...calendarMeta } })
         .eq("user_id", user.id)
         .eq("provider", "google");
     } catch (e) {
