@@ -747,7 +747,7 @@
     <div><strong>Category</strong>Personal AI assistant</div>
     <div><strong>Platform</strong>Next.js · Supabase · BullMQ</div>
     <div><strong>Status</strong>Early access · single user</div>
-    <div><strong>Reflects code at</strong><code style="color:inherit;background:none">main @ d83e5ae</code> · 18 Oct 2026</div>
+    <div><strong>Reflects code at</strong><code style="color:inherit;background:none">main @ 1f1fef5</code> · 18 Oct 2026</div>
   </div>
 </div>
 
@@ -891,8 +891,8 @@
     </div>
     <div class="feature-card">
       <div class="icon icon-rose">📊</div>
-      <h4>Daily Brief <span class="badge-sm badge-amber">Partial</span></h4>
-      <p>A morning summary written by GPT-4o at 08:00 IST and shown on the dashboard. It is also emailed via Resend once the Resend keys are set on the worker; today they are not.</p>
+      <h4>Daily Brief <span class="badge-sm badge-emerald">Live</span></h4>
+      <p>A morning summary written by GPT-4o at 08:00 IST, shown on the dashboard and emailed from your own Gmail to yourself — no separate email provider.</p>
     </div>
     <div class="feature-card">
       <div class="icon icon-violet">🤝</div>
@@ -1025,7 +1025,7 @@
       <tr><td>AI reply drafts &amp; send</td><td><span class="badge-sm badge-emerald">Live</span></td><td><code>/api/drafts</code>, <code>/api/actions/send-reply</code>; 0 drafts stored to date</td><td>Unused so far</td></tr>
       <tr><td>Operational insights</td><td><span class="badge-sm badge-emerald">Live</span></td><td>174 active insights after the 18 Oct recompute</td><td>Was frozen 10 Sep – 18 Oct by a stuck queue key; fixed</td></tr>
       <tr><td>Zoom transcripts &amp; meeting summaries</td><td><span class="badge-sm badge-rose">Not live</span></td><td>0 meetings with <code>source = 'zoom'</code></td><td>Job is enqueued on <code>summarize</code>, whose handler expects an email</td></tr>
-      <tr><td>Daily brief</td><td><span class="badge-sm badge-amber">Partial</span></td><td>Scheduled 08:00 IST from 18 Oct; first brief generated and saved that day</td><td>Email delivery: <code>RESEND_API_KEY</code> and <code>RESEND_FROM_EMAIL</code> are not set on Railway</td></tr>
+      <tr><td>Daily brief</td><td><span class="badge-sm badge-emerald">Live</span></td><td>Scheduled 08:00 IST; generated, saved and emailed on 18 Oct</td><td>One fixed time for all users; <code>preferences.digest_time</code> is not yet honoured</td></tr>
       <tr><td>Commitments</td><td><span class="badge-sm badge-rose">Not live</span></td><td>0 rows; <code>FEATURES.commitments = false</code></td><td>Sent-mail ingestion</td></tr>
       <tr><td>Relationships &amp; follow-up cadence</td><td><span class="badge-sm badge-rose">Not live</span></td><td>0 rows in <code>relationships</code></td><td>No code writes the table</td></tr>
       <tr><td>Slack</td><td><span class="badge-sm badge-rose">Not live</span></td><td>Webhook verifies and stores events</td><td>No worker consumes <code>slack-raw</code>; Settings card links to <code>#</code></td></tr>
@@ -1086,7 +1086,7 @@
     <div class="tech-card"><div class="tech-category">AI — reasoning</div><div class="tech-name">OpenAI GPT-4o</div><div class="tech-note">Ask AI answers (Vercel AI SDK 6, streaming), reply drafts, meeting summaries, daily brief</div></div>
     <div class="tech-card"><div class="tech-category">AI — classification</div><div class="tech-name">GPT-4o-mini</div><div class="tech-note">Email triage, financial and commitment extraction, intent classification</div></div>
     <div class="tech-card"><div class="tech-category">Embeddings</div><div class="tech-name">text-embedding-3-small</div><div class="tech-note">1 024 dimensions, 2 048-character chunks with 200 overlap</div></div>
-    <div class="tech-card"><div class="tech-category">Integrations</div><div class="tech-name">googleapis 171 · Zoom · Resend</div><div class="tech-note">Gmail (push watch, history, send), Calendar (push channel, sync token), Zoom S2S OAuth, Resend email</div></div>
+    <div class="tech-card"><div class="tech-category">Integrations</div><div class="tech-name">googleapis 171 · Zoom</div><div class="tech-note">Gmail (push watch, history, send — including the daily brief), Calendar (push channel, sync token), Zoom S2S OAuth</div></div>
     <div class="tech-card"><div class="tech-category">Hosting</div><div class="tech-name">Vercel · Railway</div><div class="tech-note">Web on Vercel; worker on Railway (Nixpacks, built from <code>main</code>); Node 24 pinned via <code>engines</code></div></div>
     <div class="tech-card"><div class="tech-category">Security</div><div class="tech-name">AES-256-GCM</div><div class="tech-note">OAuth tokens encrypted at rest with a 32-byte key; random 12-byte IV per value</div></div>
   </div>
@@ -1251,7 +1251,7 @@
       <tr><td>Answer synthesis<br><code>/api/ask</code></td><td><code>gpt-4o</code><br>1 024 tok · streaming (AI SDK)</td><td>Every Ask query</td><td>The one place output quality is directly user-visible and the reasoning is open-ended. Worth the cost.</td></tr>
       <tr><td>Reply draft<br><code>generateDraft</code></td><td><code>gpt-4o</code><br>1 024 tok · text</td><td>On request from the email view</td><td>User-visible prose sent under the user's name.</td></tr>
       <tr><td>Meeting summary<br><code>summarizeMeeting</code></td><td><code>gpt-4o</code><br>2 048 tok · JSON</td><td>Not live (see Processing)</td><td>Long-transcript synthesis. Not yet evaluated against a smaller model — a candidate for the same downgrade commitment extraction got.</td></tr>
-      <tr><td>Daily brief<br><code>generateDailyBrief</code></td><td><code>gpt-4o</code><br>2 048 tok · text</td><td>Daily at 08:00 IST, every onboarded user</td><td>Cross-domain synthesis into prose.</td></tr>
+      <tr><td>Daily brief<br><code>generateDailyBrief</code></td><td><code>gpt-4o</code><br>2 048 tok · text</td><td>Daily at 08:00 IST, every onboarded user; sent via Gmail</td><td>Cross-domain synthesis into prose.</td></tr>
       <tr><td>Embeddings<br><code>embedAndStoreChunks</code></td><td><code>text-embedding-3-small</code><br>1 024 dim</td><td>Every summary and chunk; every Ask query</td><td>1 024 rather than the default 1 536 to cut storage and index cost by a third on a tier where storage is the binding constraint.</td></tr>
     </tbody>
   </table>
@@ -1669,7 +1669,6 @@
       <tr><td><strong>Supabase</strong></td><td>Postgres, Auth, pgvector RPC</td><td>supabase-js (SSR, service-role and token clients); RPC <code>match_memory_chunks</code>, <code>get_category_counts</code></td><td><span class="badge-sm badge-emerald">Live</span></td></tr>
       <tr><td><strong>Redis</strong></td><td>BullMQ transport</td><td>ioredis from <code>REDIS_URL</code>; TLS for <code>rediss://</code></td><td><span class="badge-sm badge-emerald">Live</span></td></tr>
       <tr><td><strong>Zoom API</strong></td><td>Recording transcripts</td><td>Server-to-server OAuth (<code>account_credentials</code>); <code>GET /v2/meetings/{id}/recordings</code>; transcript download</td><td><span class="badge-sm badge-rose">Not live</span></td></tr>
-      <tr><td><strong>Resend</strong></td><td>Daily brief email</td><td><code>emails.send</code></td><td><span class="badge-sm badge-amber">Needs keys</span></td></tr>
       <tr><td><strong>Slack Web API</strong></td><td>DMs and mentions</td><td>Client wrappers exist; none called</td><td><span class="badge-sm badge-rose">Not live</span></td></tr>
     </tbody>
   </table>
@@ -1721,7 +1720,7 @@
     <tbody>
       <tr><td><code>renew-gmail-watches</code></td><td><code>0 */6 * * *</code> UTC</td><td>Re-registers the Gmail watch and a Calendar channel for every active Google integration</td></tr>
       <tr><td><code>reconcile-unprocessed</code></td><td><code>30 */6 * * *</code> UTC</td><td>For users with a live Gmail watch, re-enqueues up to 500 emails missing a summary or embedding — the safety net for write-then-enqueue</td></tr>
-      <tr><td><code>generate-daily-brief</code></td><td><code>0 8 * * *</code> Asia/Kolkata</td><td>Generates and saves a brief for every onboarded user; emails it when Resend is configured</td></tr>
+      <tr><td><code>generate-daily-brief</code></td><td><code>0 8 * * *</code> Asia/Kolkata</td><td>Generates and saves a brief for every onboarded user, then emails it from their Gmail to themselves</td></tr>
     </tbody>
   </table>
   </div>
@@ -1761,7 +1760,6 @@
       <tr><td>Queue</td><td><code>REDIS_URL</code></td><td>web (producers), worker</td></tr>
       <tr><td>Security</td><td><code>ENCRYPTION_KEY</code> (64 hex chars), <code>ADMIN_SECRET</code></td><td>web, worker</td></tr>
       <tr><td>App</td><td><code>NEXT_PUBLIC_APP_URL</code> (OAuth redirects, Calendar webhook address, brief links)</td><td>web, worker</td></tr>
-      <tr><td>Email (optional)</td><td><code>RESEND_API_KEY</code>, <code>RESEND_FROM_EMAIL</code> — worker; brief is emailed only when both are set</td><td>worker</td></tr>
       <tr><td>Not live</td><td><code>ZOOM_ACCOUNT_ID</code>, <code>ZOOM_CLIENT_ID</code>, <code>ZOOM_CLIENT_SECRET</code>, <code>ZOOM_WEBHOOK_SECRET_TOKEN</code>, <code>SLACK_BOT_TOKEN</code>, <code>SLACK_SIGNING_SECRET</code></td><td>worker, web</td></tr>
       <tr><td>Evals</td><td><code>EVAL_USER_ID</code>, <code>EVAL_USER_B_ID</code>, <code>EVAL_BASE_URL</code></td><td>evals</td></tr>
     </tbody>
@@ -1946,7 +1944,7 @@
   <table class="detail-table">
     <thead><tr><th>P</th><th>Issue</th><th>Consequence</th><th>Fix</th></tr></thead>
     <tbody>
-      <tr><td>2</td><td>Daily brief is not emailed</td><td>The brief is only visible on the dashboard</td><td>Set <code>RESEND_API_KEY</code> and <code>RESEND_FROM_EMAIL</code> on Railway; honour <code>preferences.digest_time</code> per user</td></tr>
+      <tr><td>3</td><td>Daily brief at one fixed time</td><td>Every user gets it at 08:00 IST</td><td>Honour <code>preferences.digest_time</code> and timezone per user</td></tr>
       <tr><td>2</td><td>Zoom summaries enqueued on the wrong queue; no <code>source = 'zoom'</code> meeting rows</td><td>Meeting decisions and action items never extracted</td><td>Enqueue on <code>meetings-summarize</code>; match Zoom meetings to calendar events by join URL</td></tr>
       <tr><td>2</td><td>Calendar sync reads one page of 50, ignores HTTP 410, leaks channels</td><td>Busy calendars miss events; an expired sync token stops sync; orphan channels accumulate</td><td>Page through results; on 410 clear the token and full-sync; store and stop the previous channel</td></tr>
       <tr><td>2</td><td>Connect callback overwrites <code>integrations.metadata</code></td><td>Reconnecting drops the Calendar sync token</td><td>Merge instead of replace</td></tr>
