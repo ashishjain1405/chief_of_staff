@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { appUrl } from "@/lib/utils";
 import { createServiceClient } from "@/lib/supabase/server";
 import { fetchHistorySince } from "@/lib/integrations/gmail";
 import { emailRawQueue } from "@/lib/queues";
@@ -24,7 +25,7 @@ async function rejectUnverifiedPush(request: NextRequest): Promise<string | null
   const header = request.headers.get("authorization") ?? "";
   const idToken = header.startsWith("Bearer ") ? header.slice(7) : "";
   if (!idToken) return "missing bearer token";
-  const audience = process.env.GMAIL_PUSH_AUDIENCE ?? `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/gmail`;
+  const audience = process.env.GMAIL_PUSH_AUDIENCE ?? appUrl("/api/webhooks/gmail");
   try {
     const ticket = await tokenVerifier.verifyIdToken({ idToken, audience });
     const payload = ticket.getPayload();

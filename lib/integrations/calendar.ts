@@ -1,4 +1,5 @@
 import { google } from "googleapis";
+import { appUrl } from "@/lib/utils";
 import { createHmac, timingSafeEqual } from "crypto";
 import { getAuthenticatedClient } from "./google";
 import { createServiceClient } from "@/lib/supabase/server";
@@ -31,7 +32,7 @@ export async function watchCalendar(userId: string): Promise<{ resourceId: strin
     requestBody: {
       id: channelId,
       type: "web_hook",
-      address: `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/calendar`,
+      address: appUrl("/api/webhooks/calendar"),
       token: calendarChannelToken(userId),
       expiration: String(Date.now() + 7 * 24 * 60 * 60 * 1000 - 60000), // 7 days - 1 min
     },

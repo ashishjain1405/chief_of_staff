@@ -1,4 +1,5 @@
 import { Job } from "bullmq";
+import { appUrl } from "@/lib/utils";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { generateDailyBrief } from "@/lib/ai/claude";
 import { searchMemory, getStructuredContext } from "@/lib/memory/search";
@@ -91,7 +92,7 @@ async function briefUser(supabase: SupabaseClient, userId: string) {
       <h2 style="color:#1a1a1a">Good morning, ${user.full_name?.split(" ")[0] ?? "there"} 👋</h2>
       <div style="white-space:pre-wrap;line-height:1.6">${briefMarkdown.replace(/\n/g, "<br>")}</div>
       <hr style="margin:24px 0;border:none;border-top:1px solid #eee">
-      <a href="${process.env.NEXT_PUBLIC_APP_URL}/dashboard" style="color:#6366f1">Open Dashboard →</a>
+      <a href="${appUrl("/dashboard")}" style="color:#6366f1">Open Dashboard →</a>
         </div>`,
   });
   await supabase
