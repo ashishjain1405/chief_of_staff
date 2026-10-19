@@ -414,7 +414,7 @@ async function runFinancialExtraction(
   // Only money that moved becomes a transaction. A bill due, renewal quote or
   // statement stays as a raw row for reference but is never normalized.
   if (!needsReview && transactionDatetime && raw?.event_kind === "completed") {
-    await runDedup(supabase, userId, transactionDatetime);
+    await runDedup(supabase, userId, transactionDatetime, [raw?.transaction_id, raw?.reference_id]);
   }
 }
 
@@ -424,7 +424,7 @@ const DEDUP_WINDOW_MS = 24 * 60 * 60 * 1000;
 // on now, anything processed more than a day after it happened - every
 // backfill and reprocess - fell outside the window and was never normalized:
 // 135 transactions were missing from the finance tab.
-async function runDedup(supabase: any, userId: string, anchor: string) {
+async function runDedup(supabase: any, userId: string, anchor: string, orderIds: (string | null | undefined)[] = []) {
   const at = new Date(anchor).getTime();
   const from = new Date(at - DEDUP_WINDOW_MS).toISOString();
   // Capped at now: extraction sometimes picks up a due or delivery date, and a
@@ -441,7 +441,26 @@ async function runDedup(supabase: any, userId: string, anchor: string) {
     .gte("transaction_datetime", from)
     .lte("transaction_datetime", to);
   if (error) throw new Error(`[dedup] raw scan failed: ${error.message}`);
-  if (!rawRows?.length) return;
 
-  await saveNormalizedGroups(supabase, userId, deduplicateRawTransactions(rawRows as TransactionRaw[]));
+  // The window misses an order's earlier emails - "delivered" arrives days
+  // after "placed" - so also fetch rows sharing this transaction's order IDs.
+  const ids = [...new Set(orderIds.map((v) => v?.trim()).filter((v): v is string => !!v && v.length >= 6))];
+  let orderRows: any[] = [];
+  if (ids.length) {
+    const quoted = ids.map((v) => `"${v.replace(/["\\]/g, "")}"`).join(",");
+    const { data, error: orderErr } = await supabase
+      .from("transactions_raw")
+      .select("*")
+      .eq("user_id", userId)
+      .eq("is_financial_email", true)
+      .eq("needs_review", false)
+      .eq("event_kind", "completed")
+      .or(`transaction_id.in.(${quoted}),reference_id.in.(${quoted})`);
+    if (orderErr) throw new Error(`[dedup] order scan failed: ${orderErr.message}`);
+    orderRows = data ?? [];
+  }
+
+  const rows = [...new Map([...(rawRows ?? []), ...orderRows].map((r) => [r.id, r])).values()];
+  if (!rows.length) return;
+  await saveNormalizedGroups(supabase, userId, deduplicateRawTransactions(rows as TransactionRaw[]));
 }

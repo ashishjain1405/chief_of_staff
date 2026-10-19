@@ -65,8 +65,37 @@ function merchantSimilarity(a: string | null, b: string | null): number {
   return 0;
 }
 
+const ORDER_WINDOW_MS = 45 * 24 * 60 * 60 * 1000;
+const ORDER_AMOUNT_TOLERANCE = 0.1;
+
+function idsOf(r: TransactionRaw): string[] {
+  return [r.transaction_id, r.reference_id].map((v) => v?.trim()).filter((v): v is string => !!v && v.length >= 6);
+}
+
+// An order's emails - placed, shipped, delivered - arrive days apart, outside
+// the 15-minute window, and each became its own transaction: one Tata 1mg
+// order was counted four times, 28 orders about ₹3.2 lakh twice or more. They
+// share an order or payment ID, so that ID (with the same merchant) identifies
+// one purchase. The amount may shift in between (Netmeds ₹262 placed, ₹239
+// delivered), hence the wider tolerance - but not too wide: Amazon charges
+// each shipment separately under one order ID (₹221 and ₹264). Refunds still
+// never merge with purchases, and recurring charges are excluded because a
+// mandate ID repeats on every monthly debit.
+function isSameOrder(a: TransactionRaw, b: TransactionRaw): boolean {
+  if (a.is_recurring || b.is_recurring) return false;
+  const bIds = new Set(idsOf(b));
+  if (!idsOf(a).some((id) => bIds.has(id))) return false;
+  if (merchantSimilarity(a.merchant_normalized, b.merchant_normalized) < 0.85) return false;
+  if ((a.transaction_type === "refund") !== (b.transaction_type === "refund")) return false;
+  const ta = a.transaction_datetime ? new Date(a.transaction_datetime).getTime() : 0;
+  const tb = b.transaction_datetime ? new Date(b.transaction_datetime).getTime() : 0;
+  if (Math.abs(ta - tb) > ORDER_WINDOW_MS) return false;
+  return Math.abs(a.amount! - b.amount!) / Math.max(a.amount!, b.amount!) <= ORDER_AMOUNT_TOLERANCE;
+}
+
 function areDuplicates(a: TransactionRaw, b: TransactionRaw): boolean {
   if (!a.amount || !b.amount) return false;
+  if (isSameOrder(a, b)) return true;
   if (!isSameAmount(a.amount, b.amount)) return false;
 
   const ta = a.transaction_datetime ? new Date(a.transaction_datetime).getTime() : 0;
@@ -120,9 +149,14 @@ export function deduplicateRawTransactions(rows: TransactionRaw[]): NormalizedTr
   }
 
   return groups.map((group) => {
+    // Highest-priority sender wins; among equals the latest email, whose
+    // amount is final (an order's delivered total, not the one first placed).
+    const time = (r: TransactionRaw) => (r.transaction_datetime ? new Date(r.transaction_datetime).getTime() : 0);
     const primary = group.reduce((best, cur) =>
-      priorityOf(cur) > priorityOf(best) ? cur : best
+      priorityOf(cur) > priorityOf(best) || (priorityOf(cur) === priorityOf(best) && time(cur) > time(best)) ? cur : best
     );
+    // Dated by when the money first moved - the order, not its delivery.
+    const earliest = group.reduce((a, b) => (time(b) < time(a) ? b : a));
 
     const isBankSource = (r: TransactionRaw) =>
       r.sender_type === "BANK" || r.sender_type === "CREDIT_CARD";
@@ -142,7 +176,7 @@ export function deduplicateRawTransactions(rows: TransactionRaw[]): NormalizedTr
       currency: primary.currency ?? "INR",
       category: primary.category ?? withMerchant?.category ?? null,
       transaction_type: primary.transaction_type,
-      transaction_datetime: primary.transaction_datetime ?? new Date().toISOString(),
+      transaction_datetime: earliest.transaction_datetime ?? primary.transaction_datetime ?? new Date().toISOString(),
       is_recurring: primary.is_recurring,
       recurring_frequency: primary.recurring_frequency,
       status: primary.status,
