@@ -177,7 +177,7 @@ Examples: "AWS billing alert", "Vercel deployment failed", "Google Drive storage
 "promotions"
 Marketing, judged by the sender's intent rather than the topic: sales, discounts, coupons, launches, upsells, cross-sells, bonus or points offers, "complete your booking" nudges, feature-adoption pushes, webinar and event pitches. This applies whatever the product is - banking, insurance, credit cards, loyalty points, travel, courses, subscriptions.
 Examples: "50% off today only", "Use code SAVE20", "Last chance! 10% bonus on miles-to-points transfer", "Not ready to book? Let's keep looking for your stay", "Activate our new secure login feature", "Missed it yesterday? Join our live session".
-NOT for: a renewal, expiry or payment notice about something the recipient already holds - their own insurance policy, subscription, membership or card - even when it uses urgency or a discount. That stays in its own category ("subscriptions_memberships" or "finance_bills").
+NOT for: a renewal, expiry or payment notice about something the recipient already holds - their own insurance policy, subscription, membership, card, or a gift card or store-credit balance about to expire - even when it uses urgency or a discount. That stays in its own category ("subscriptions_memberships" or "finance_bills").
 NOT for: newsletters (editorial content) or social notifications.
 
 "important"

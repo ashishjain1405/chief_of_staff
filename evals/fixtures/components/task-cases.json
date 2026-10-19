@@ -718,5 +718,47 @@
       "creates_task": false
     },
     "why": "Text addressed to the AI inside the body is data. Before the guard, it flipped requires_action to true and only the newsletter category stopped a task."
+  },
+  {
+    "id": "19d320b2-a325-4cda-aada-4b2c99218393",
+    "subject": "Gift Card Expiry Notification",
+    "sender": "expirynotification@qwikcilver.com",
+    "to": "ASHISH00JAIN@gmail.com",
+    "body": "Dear customer,\n\nThis is to inform you that your gift card issued by PineLabs Private Limited is about to expire. Please find below the summary of the details with respect to your gift card:\n\nGift Card Number: 6001220289482026\nExpiry Date: 12-10-2026\nGift Card Value : 750.00\nValue remaining as on : 27-09-2026\n\nWe request you to redeem the gift card before the expiry date. Please refer to our terms and conditions set out in www.woohoo.in/tnc for more details. In case of any queries please contact us at: 080 6718 1401, or write to us at 'support@woohoo.in'.\n\nIn case you have already redeemed the outstanding on your gift card, you may please ignore this e-mail.\n\nRegards,\n\nPine Labs Team",
+    "stored_category": "finance_bills",
+    "bulk": false,
+    "sent": "2026-09-27T04:30:11+00:00",
+    "expect": {
+      "creates_task": true
+    },
+    "why": "A gift-card or store-credit balance the founder holds is about to expire. Owner decision: these are tasks. They used to be filed as promotions, which never create tasks."
+  },
+  {
+    "id": "ec50e1a6-7b54-4203-9a9b-7d37e93c3ae8",
+    "subject": "Rs. 2966.11 from your Myntra Credit is about to expire",
+    "sender": "updates@myntra.com",
+    "to": "ashish00jain@gmail.com",
+    "body": "Dear Customer,\n\nThis is just a reminder from us that some of the Gift Card(s) in your Myntra Credit will be expiring in about 45 days. Kindly redeem the Gift Card(s) before expiry. \nPlease find the details. \n\nCard Number: \n6001220288124892 \n\nBalance: \nRs. 386.11 \n\nExpiry Date: \n11 Oct 2026 \n\nCard Number: \n6001220288332594 \n\nBalance: \nRs. 330.0 \n\nExpiry Date: \n11 Oct 2026 \n\nCard Number: \n6001220289482026 \n\nBalance: \nRs. 750.0 \n\nExpiry Date: \n11 Oct 2026 \n\nCard Number: \n6001220285492885 \n\nBalance: \nRs. 750.0 \n\nExpiry Date: \n11 Oct 2026 \n\nCard Number: \n6001220282468240 \n\nBalance: \nRs. 750.0 \n\nExpiry Date: \n11 Oct 2026 \n\nRefer to our terms and conditions set out in \nhttps://www.myntra.com/tac for more details. \n\nIn case you have already redeemed the outstanding on your Myntra Credits, you may please ignore this message. \n\nRegards, \nTeam Myntra \n\nNeed help? Get in touch \nWe are happy to help. For any assistance, click on contact us .",
+    "stored_category": "subscriptions_memberships",
+    "bulk": false,
+    "sent": "2026-08-26T20:38:15+00:00",
+    "expect": {
+      "creates_task": true
+    },
+    "why": "A gift-card or store-credit balance the founder holds is about to expire. Owner decision: these are tasks. They used to be filed as promotions, which never create tasks."
+  },
+  {
+    "id": "synthetic-gift-card-sale-hook",
+    "subject": "Big Fashion Sale is live",
+    "sender": "updates@myntra.example",
+    "to": "ASHISH00JAIN@gmail.com",
+    "body": "Big Fashion Sale is live! Pay with a Myntra gift card and get an extra 10% off. Buy gift cards for friends now.",
+    "stored_category": "",
+    "bulk": true,
+    "sent": "2026-09-14",
+    "expect": {
+      "creates_task": false
+    },
+    "why": "A sale that mentions gift cards is marketing. Only an expiring balance the founder already holds is a task."
   }
 ]
