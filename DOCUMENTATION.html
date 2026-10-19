@@ -867,7 +867,7 @@
     <div class="feature-card">
       <div class="icon icon-violet">✅</div>
       <h4>Tasks <span class="badge-sm badge-emerald">Live</span></h4>
-      <p>Emails that need the user become tasks, with a due date taken from the email and a priority from its importance. Marketing, alerts and repeat nudges are filtered out; one task per thread and per sender's ask.</p>
+      <p>Emails that need the user become tasks, with a due date taken from the email and a priority from its importance. Marketing, alerts, event reminders and repeat nudges are filtered out; one task per thread and per sender's ask. A task from an automated sender closes itself three days after its date.</p>
     </div>
     <div class="feature-card">
       <div class="icon icon-emerald">💰</div>
@@ -1183,8 +1183,9 @@
       <div class="pipe-content">
         <h4>Commitment &amp; task extraction <span class="badge-sm badge-violet" style="margin-left:6px">gpt-4o-mini · gated</span></h4>
         <p><strong>Commitments.</strong> <code>extractCommitments()</code> runs only on mail the user sent, never on low-signal categories, and only when <code>requires_action</code> is set; extracted commitments below 0.6 confidence are dropped. A commitment is a promise the user made, so running it on inbound mail extracted other people's words — 317 eligible emails produced zero real commitments. Since sent mail is not yet ingested, email commitment extraction is currently switched off behind a feature flag.</p>
-        <p><strong>Tasks.</strong> Whether an email is a task is a semantic decision, not a score threshold. A task is created when triage sets <code>requires_action</code> and the category allows it: low-signal categories (promotions, newsletters, news, entertainment, social, system notifications, other) never create tasks; transactions and account-security alerts create one only from a human sender, since an automated alert's only "action" is an "if this wasn't you" disclaimer; and the user's own mail never does. Importance only sets priority ("high" at ≥ 0.85, else "medium").</p>
+        <p><strong>Tasks.</strong> Whether an email is a task is a semantic decision, not a score threshold. A task is created when triage sets <code>requires_action</code> and the category allows it: low-signal categories (promotions, newsletters, news, entertainment, social, system notifications, other) never create tasks; transactions and account-security alerts create one only from a human sender, since an automated alert's only "action" is an "if this wasn't you" disclaimer; meetings and learning do the same, since from an automated sender they are event reminders — e-voting windows, AGMs, webinars — that belong on the calendar; and the user's own mail never does. A sender counts as automated if its address matches a no-reply/alerts/updates pattern (one leading segment allowed, as in <code>googleplay-noreply@</code>), the mail carries <code>List-Unsubscribe</code>, or the domain is a known financial sender. The triage prompt separately treats votes, AGMs, webinars and delivery windows as optional rights or events, not obligations, which covers the ones filed under finance. Importance only sets priority ("high" at ≥ 0.85, else "medium").</p>
         <p>A new task is skipped when the same email already has one, when another email in the same thread has an open task, or when the same sender has an open task with a similar title — so nine "renew your car insurance" countdowns from one broker become one task. Skipping rather than replacing preserves anything the user has already acted on.</p>
+        <p>A pending email task whose due date is more than three days past closes itself (status <code>dismissed</code>) when its source email is automated by the rule above: the vote has closed, the webinar has ended, the gift card has lapsed. Tasks from people, meeting tasks and undated tasks are never closed. The first dry run would close 15 of 17 overdue tasks; the two left are from a person and from <code>expirynotification@qwikcilver.com</code>, which the address pattern does not match.</p>
       </div>
     </div>
     <div class="pipe-step">
@@ -1706,7 +1707,7 @@
       <tr><td><code>email-raw</code></td><td><code>process-email</code> — fetch, parse, upsert contact and communication</td><td>Gmail webhook; <code>requeue-pending-emails</code></td><td>defaults</td></tr>
       <tr><td><code>summarize</code></td><td><code>summarize-communication</code> — triage, finance, embed, task gate</td><td><code>process-email</code>; Gmail backfill; admin backfill; reconcile (<code>jobId resummarize-&lt;id&gt;</code>); <code>reparse-bodies</code> — and, wrongly, the Zoom webhook</td><td>defaults</td></tr>
       <tr><td><code>compute-operational-state</code></td><td>Insights engine</td><td><code>summarize-communication</code>, <code>summarize-meeting</code></td><td>30 s delay, <code>jobId</code> and dedup id <code>ops-&lt;userId&gt;</code></td></tr>
-      <tr><td><code>scheduled</code></td><td>Dispatch on job name: <code>renew-gmail-watches</code>, <code>reconcile-unprocessed</code>, <code>generate-daily-brief</code></td><td>Repeat jobs registered at boot</td><td>see schedules</td></tr>
+      <tr><td><code>scheduled</code></td><td>Dispatch on job name: <code>renew-gmail-watches</code>, <code>reconcile-unprocessed</code>, <code>generate-daily-brief</code>, <code>expire-stale-tasks</code></td><td>Repeat jobs registered at boot</td><td>see schedules</td></tr>
       <tr><td><code>meetings-summarize</code></td><td><code>summarize-meeting</code></td><td><strong>Nothing</strong></td><td>—</td></tr>
       <tr><td><code>calendar-raw</code>, <code>zoom-raw</code>, <code>slack-raw</code>, <code>embed</code>, <code>reason</code>, <code>act</code></td><td><strong>No worker</strong></td><td>Only <code>slack-raw</code> has a producer</td><td>Declared, unused</td></tr>
     </tbody>
@@ -1721,6 +1722,7 @@
       <tr><td><code>renew-gmail-watches</code></td><td><code>0 */6 * * *</code> UTC</td><td>Re-registers the Gmail watch and a Calendar channel for every active Google integration</td></tr>
       <tr><td><code>reconcile-unprocessed</code></td><td><code>30 */6 * * *</code> UTC</td><td>For users with a live Gmail watch, re-enqueues up to 500 emails missing a summary or embedding — the safety net for write-then-enqueue</td></tr>
       <tr><td><code>generate-daily-brief</code></td><td><code>0 8 * * *</code> Asia/Kolkata</td><td>Generates and saves a brief for every onboarded user, then emails it from their Gmail to themselves</td></tr>
+      <tr><td><code>expire-stale-tasks</code></td><td><code>0 7 * * *</code> Asia/Kolkata</td><td>Closes pending tasks from automated senders more than three days past their due date — before the brief, so it never leads with a lapsed task</td></tr>
     </tbody>
   </table>
   </div>
@@ -1774,7 +1776,7 @@
   <table class="detail-table">
     <thead><tr><th>Suite</th><th>Command</th><th>What it asserts</th></tr></thead>
     <tbody>
-      <tr><td>Task creation</td><td><code>npm run eval:tasks</code></td><td>40 real emails: does a task appear, is the action first-person, is the category stable across re-runs. 40/40 at last run.</td></tr>
+      <tr><td>Task creation</td><td><code>npm run eval:tasks</code></td><td>51 real emails: does a task appear, is the action first-person, is the category stable across re-runs. 50/50 at last run, one known gap (a proxy vote).</td></tr>
       <tr><td>Financial extraction</td><td><code>npm run eval:extraction</code></td><td>Amounts, merchants, types and dates from real finance emails</td></tr>
       <tr><td>Email parsing</td><td><code>npm run eval:parsing</code></td><td>Body extraction from captured Gmail payloads</td></tr>
       <tr><td>Vector retrieval</td><td><code>npm run eval:retrieval</code></td><td>Calibration of the 0.4 similarity threshold</td></tr>
@@ -1858,6 +1860,11 @@
         <td>Payment requests counted as payments</td>
         <td>The extraction prompt defined payment reminders as financial emails and had no way to say money was owed rather than paid, so renewal quotes, statements, IPO launches and OTP prompts became transactions. 11 PolicyBazaar renewal reminders counted ₹44k of spending; a news headline counted ₹15 lakh.</td>
         <td>Extraction returns <code>event_kind</code>; only <code>completed</code> rows are normalized. Seven real emails added to the extraction eval (12/13 pass; FX1 fails as before). All 591 financial emails re-classified: 72 non-payments removed from transactions after each large removal was checked against the email.</td>
+      </tr>
+      <tr>
+        <td>Votes, AGMs and webinars became tasks</td>
+        <td>The action guidance blocked marketing but called a "compliance step on their own account" an action, so shareholder e-voting, AGM and postal-ballot notices, webinar reminders and delivery windows became tasks, and nothing closed them once their date passed: 17 of 80 open tasks were overdue, nearly all no longer doable.</td>
+        <td>A prompt rule for optional rights and events; meetings and learning blocked from automated senders, with the bulk header added to the automated test; a daily job closes automated tasks three days past their date. Eleven real emails added to the task eval — seven that must not create a task, four that must (a human asking to schedule a session, an EMI, a policy renewal). Baseline 47/51, now 50/50 with one known gap.</td>
       </tr>
       <tr>
         <td>One order counted once per email</td>
@@ -1975,6 +1982,8 @@
     <thead><tr><th>P</th><th>Issue</th><th>Consequence</th><th>Fix</th></tr></thead>
     <tbody>
       <tr><td>3</td><td>Daily brief at one fixed time</td><td>Every user gets it at 08:00 IST</td><td>Honour <code>preferences.digest_time</code> and timezone per user</td></tr>
+      <tr><td>2</td><td>Tasks created before the current rules stay open</td><td>56 of 80 open tasks date from the September backfill; <code>retriage-emails</code> only adds tasks, so promotions, review requests and repeat renewal nudges that the gate now rejects are still listed</td><td>A prune mode for retriage: re-run the gate on open tasks, dismiss the failures and merge similar titles per sender, dry run first</td></tr>
+      <tr><td>3</td><td>Proxy votes from a non-bulk address still become tasks</td><td>Triage files "Vote now! Oracle Annual Meeting" from <code>id@proxyvote.com</code> as important with an action despite the optional-rights rule, and the sender is not detectably automated</td><td>Treat known vote platforms (proxyvote, NSDL, CDSL e-voting) as automated senders</td></tr>
       <tr><td>2</td><td>A card alert and a merchant receipt for one purchase count twice</td><td>The bank's "payment made using your Credit Card" and Amazon's order email for the same ₹374 arrive hours apart and share no ID, so neither the 15-minute window nor order-ID merging joins them</td><td>Merge a card alert with a same-merchant, same-amount receipt within a day</td></tr>
       <tr><td>2</td><td>Follow-ups that point back by description are missed</td><td>"Was <em>the HDFC transaction</em> a single transaction" is not recognised as a follow-up, and context does not record which items the last answer used</td><td>Hybrid detection (rules plus classifier flag) and the last answer's items stored in context — see the follow-up taxonomy</td></tr>
       <tr><td>2</td><td>Zoom summaries enqueued on the wrong queue; no <code>source = 'zoom'</code> meeting rows</td><td>Meeting decisions and action items never extracted</td><td>Enqueue on <code>meetings-summarize</code>; match Zoom meetings to calendar events by join URL</td></tr>

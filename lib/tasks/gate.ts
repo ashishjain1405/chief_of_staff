@@ -14,13 +14,27 @@ const normalize = (email: string) => email.trim().toLowerCase();
 // human almost never sends. The narrow no-reply/alerts pattern let
 // info@account.netflix.com through, and "change your password if the new
 // device access was not authorized" is the same conditional disclaimer as a
-// bank alert.
+// bank alert. One leading segment is allowed - googleplay-noreply@,
+// order-update@, nps-alerts@ - which across 333 contacts matched 13 more
+// addresses, none of them a person.
 const AUTOMATED_LOCAL_PARTS =
-  /^(no-?reply|donotreply|do-?not-?reply|alerts?|notifications?|info|support|service|accounts?|updates?|hello|team|care|admin|mailer|bounce|news)([.+-]|$)/i;
+  /^([a-z0-9]+[.+-])?(no-?reply|donotreply|do-?not-?reply|alerts?|notifications?|info|support|service|accounts?|updates?|hello|team|care|admin|mailer|bounce|news)([.+-]|$)/i;
 
 export function isAutomatedSender(senderEmail: string): boolean {
   const local = senderEmail.split("@")[0] ?? "";
   return AUTOMATED_LOCAL_PARTS.test(local.trim());
+}
+
+// The local-part pattern misses senders like evoting@nsdl.com,
+// jfsinvestor@kfintech.com and hi@mail.outskill.com. All of them carry
+// List-Unsubscribe, which a person replying on a thread does not, so the bulk
+// header widens the net without catching human mail.
+export function isAutomatedMail(params: {
+  senderEmail: string;
+  isBulk?: boolean;
+  isFinancialDomain?: boolean;
+}): boolean {
+  return isAutomatedSender(params.senderEmail) || !!params.isBulk || !!params.isFinancialDomain;
 }
 
 export function taskCategoryAllowed(category: string, senderEmail: string): boolean {
@@ -48,8 +62,9 @@ export function shouldCreateTask(params: {
   senderEmail: string;
   founderEmail?: string | null;
   isFinancialDomain?: boolean;
+  isBulk?: boolean;
 }): boolean {
-  const { category, requiresAction, senderEmail, founderEmail, isFinancialDomain = false } = params;
+  const { category, requiresAction, senderEmail, founderEmail, isFinancialDomain = false, isBulk = false } = params;
   if (!requiresAction) return false;
 
   // Mail the founder wrote themselves. The backfill's Gmail query was not
@@ -64,7 +79,7 @@ export function shouldCreateTask(params: {
 
   if (NO_TASK_CATEGORIES.has(category)) return false;
   if (AUTOMATED_ONLY_NO_TASK_CATEGORIES.has(category)) {
-    return !(isAutomatedSender(senderEmail) || isFinancialDomain);
+    return !isAutomatedMail({ senderEmail, isBulk, isFinancialDomain });
   }
   return true;
 }

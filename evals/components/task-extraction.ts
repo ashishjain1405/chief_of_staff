@@ -97,6 +97,7 @@ async function main() {
       senderEmail: c.sender,
       founderEmail: founderAddress,
       isFinancialDomain: isKnownFinancialDomain(c.sender),
+      isBulk: c.bulk,
     });
 
     const decisionOk = creates === c.expect.creates_task;

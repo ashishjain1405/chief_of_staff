@@ -7,6 +7,7 @@ import { generateAndDeliverDailyBrief } from "./jobs/generate-daily-brief";
 import { computeOperationalState } from "./jobs/compute-operational-state";
 import { renewGmailWatches } from "./jobs/renew-gmail-watches";
 import { reconcileUnprocessedJob } from "./jobs/reconcile-unprocessed";
+import { expireStaleTasks } from "./jobs/expire-stale-tasks";
 
 function makeWorker(queueName: string, handler: (job: any) => Promise<void>) {
   const worker = new Worker(queueName, handler, {
@@ -57,6 +58,9 @@ makeWorker("scheduled", async (job) => {
   if (job.name === "reconcile-unprocessed") {
     await reconcileUnprocessedJob(job);
   }
+  if (job.name === "expire-stale-tasks") {
+    await expireStaleTasks();
+  }
 });
 
 // Register repeating jobs (idempotent — BullMQ deduplicates by repeat key).
@@ -95,6 +99,17 @@ scheduledQueue
   )
   .catch((err) => {
     console.error("Failed to register reconcile-unprocessed repeat job:", err.message);
+  });
+
+// Before the 08:00 brief, so the brief never leads with a task that has lapsed.
+scheduledQueue
+  .add(
+    "expire-stale-tasks",
+    {},
+    { repeat: { pattern: "0 7 * * *", tz: "Asia/Kolkata" }, jobId: "expire-stale-tasks" }
+  )
+  .catch((err) => {
+    console.error("Failed to register expire-stale-tasks repeat job:", err.message);
   });
 
 console.log("Worker process started. Listening for jobs...");

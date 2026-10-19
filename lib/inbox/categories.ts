@@ -72,7 +72,14 @@ export const NO_TASK_CATEGORIES: ReadonlySet<string> = new Set([
 // email in an investment thread saying "make the international wire transfer
 // as discussed" was classified "transactions", and a flat category block
 // silently dropped that genuine action.
+//
+// "meetings_calendar" and "learning" from an automated sender are event
+// reminders - e-voting windows, AGMs, webinars, mastermind sessions - which
+// belong on the calendar. From a person they are a real ask ("confirm Tuesday
+// or Wednesday at 2:30"), so they are conditioned the same way.
 export const AUTOMATED_ONLY_NO_TASK_CATEGORIES: ReadonlySet<string> = new Set([
   "transactions",
   "account_security",
+  "meetings_calendar",
+  "learning",
 ]);

@@ -213,6 +213,7 @@ async function main() {
         senderEmail,
         founderEmail: user.email,
         isFinancialDomain: isKnownFinancialDomain(senderEmail),
+        isBulk: !!(comm.channel_metadata as any)?.list_unsubscribe,
       });
 
       const threadKey = comm.thread_id ?? comm.id;

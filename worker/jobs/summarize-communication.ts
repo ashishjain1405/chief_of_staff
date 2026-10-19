@@ -260,6 +260,7 @@ export async function summarizeCommunication(job: Job) {
     senderEmail,
     founderEmail: user?.email ?? null,
     isFinancialDomain: isKnownFinancialDomain(senderEmail),
+    isBulk,
   });
 
   if (categoryAllowsTask && !alreadyTracked) {
