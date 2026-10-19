@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { redirect } from "next/navigation";
-import { countsAsSpend, isFailedTransaction } from "@/lib/finance/spend";
+import { countsAsSpend, isFailedTransaction, notSpendReason, spendAmount } from "@/lib/finance/spend";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 
@@ -52,12 +52,12 @@ export default async function InboxSpendPage({
   const all = (rows ?? []).filter((r) => !isFailedTransaction(r));
   // Totals count spending only; the list below still shows every row.
   const spend = all.filter(countsAsSpend);
-  const total = spend.reduce((s, r) => s + (r.amount ?? 0), 0);
+  const total = spend.reduce((s, r) => s + spendAmount(r), 0);
 
   const byCat: Record<string, number> = {};
   for (const r of spend) {
     const cat = r.category ?? "other";
-    byCat[cat] = (byCat[cat] ?? 0) + (r.amount ?? 0);
+    byCat[cat] = (byCat[cat] ?? 0) + spendAmount(r);
   }
 
   const maxCat = Math.max(...Object.values(byCat), 1);
@@ -139,7 +139,7 @@ export default async function InboxSpendPage({
                   <div className="min-w-0 space-y-0.5">
                     <p className="text-sm truncate">
                       {r.merchant_normalized ?? "—"}
-                      {!countsAsSpend(r) && <span className="ml-2 text-xs text-muted-foreground">card bill payment · not counted</span>}
+                      {notSpendReason(r) && <span className="ml-2 text-xs text-muted-foreground">{notSpendReason(r)} · not counted</span>}
                     </p>
                     <p className="text-xs text-muted-foreground capitalize">
                       {(r.category ?? "—").replace(/_/g, " ")} ·{" "}

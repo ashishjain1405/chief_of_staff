@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { createClient } from "@/lib/supabase/server";
-import { countsAsSpend, isFailedTransaction } from "@/lib/finance/spend";
+import { countsAsSpend, isFailedTransaction, notSpendReason, spendAmount } from "@/lib/finance/spend";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 
@@ -55,25 +55,25 @@ export default async function FinancePage({
 
   const weekly_total = spend
     .filter((r) => r.transaction_datetime >= weekAgo)
-    .reduce((s, r) => s + (r.amount ?? 0), 0);
+    .reduce((s, r) => s + spendAmount(r), 0);
 
   const monthly_total = spend
     .filter((r) => r.transaction_datetime >= monthAgo)
-    .reduce((s, r) => s + (r.amount ?? 0), 0);
+    .reduce((s, r) => s + spendAmount(r), 0);
 
   const byCat: Record<string, number> = {};
   for (const r of spend.filter((r) => r.transaction_datetime >= monthAgo)) {
     const c = r.category ?? "other";
-    byCat[c] = (byCat[c] ?? 0) + (r.amount ?? 0);
+    byCat[c] = (byCat[c] ?? 0) + spendAmount(r);
   }
 
   const monthlyTrend: Record<string, number> = {};
   for (const r of spend) {
     const month = (r.transaction_datetime as string).substring(0, 7);
-    monthlyTrend[month] = (monthlyTrend[month] ?? 0) + (r.amount ?? 0);
+    monthlyTrend[month] = (monthlyTrend[month] ?? 0) + spendAmount(r);
   }
 
-  const largestSpend = spend.reduce((max, r) => Math.max(max, r.amount ?? 0), 0);
+  const largestSpend = spend.reduce((max, r) => Math.max(max, spendAmount(r)), 0);
   const maxCat = Math.max(...Object.values(byCat), 1);
   const sortedCats = Object.entries(byCat).sort((a, b) => b[1] - a[1]);
   const sortedMonths = Object.entries(monthlyTrend).sort((a, b) => a[0].localeCompare(b[0]));
@@ -188,7 +188,7 @@ export default async function FinancePage({
                 <>
                   <span className="text-sm truncate">
                     {r.merchant_normalized ?? "—"}
-                    {!countsAsSpend(r) && <span className="ml-2 text-xs text-muted-foreground">card bill payment · not counted</span>}
+                    {notSpendReason(r) && <span className="ml-2 text-xs text-muted-foreground">{notSpendReason(r)} · not counted</span>}
                   </span>
                   <span className="px-4 text-xs text-muted-foreground capitalize">
                     {(r.category ?? "—").replace(/_/g, " ")}

@@ -1,5 +1,5 @@
 import type { AggregatedFinance } from "./types";
-import { countsAsSpend } from "@/lib/finance/spend";
+import { countsAsSpend, spendAmount } from "@/lib/finance/spend";
 import { merchantMatchFilter } from "@/lib/finance/normalize";
 
 export async function aggregateTransactions(
@@ -68,7 +68,7 @@ export async function aggregateTransactions(
     : "last 30 days";
 
   if (error || !data?.length) {
-    return { total: 0, by_category: {}, by_merchant: {}, by_currency: {}, weekly_trend: [], period: periodLabel, transaction_count: 0 };
+    return { total: 0, by_category: {}, by_merchant: {}, by_currency: {}, weekly_trend: [], largest_transactions: [], period: periodLabel, transaction_count: 0 };
   }
 
   // Same rule as the finance pages, so "how much did I spend" matches them.
@@ -82,8 +82,7 @@ export async function aggregateTransactions(
   let total = 0;
 
   for (const row of rows) {
-    const isRefund = row.transaction_type === "refund";
-    const signedAmount = isRefund ? -row.amount : row.amount;
+    const signedAmount = spendAmount(row);
 
     total += signedAmount;
 
@@ -118,6 +117,20 @@ export async function aggregateTransactions(
     by_merchant: Object.fromEntries(Object.entries(by_merchant).map(([k, v]) => [k, Math.round(v)])),
     by_currency: Object.fromEntries(Object.entries(by_currency).map(([k, v]) => [k, { total: Math.round(v.total), count: v.count }])),
     weekly_trend,
+    // Single transactions, largest first. The model only had totals, so "what
+    // was my largest spend" was answered with a merchant's 30-day total.
+    largest_transactions: rows
+      .filter((r) => spendAmount(r) > 0)
+      .sort((a, b) => b.amount - a.amount)
+      .slice(0, 5)
+      .map((r) => ({
+        merchant: r.merchant_normalized ?? "Unknown",
+        amount: Math.round(r.amount),
+        currency: r.currency ?? "INR",
+        date: r.transaction_datetime?.slice(0, 10) ?? null,
+        transaction_type: r.transaction_type,
+        category: r.category,
+      })),
     period: periodLabel,
     transaction_count: rows.length,
     ...(categoryFallback ? { category_fallback: categoryFallback } : {}),

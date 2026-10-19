@@ -71,6 +71,24 @@ function inferCategories(query: string): string[] {
   return matched;
 }
 
+// "last 30 days" is a rolling window, but the classifier mapped it to
+// last_month - the previous calendar month - so a question asked on 19 Oct
+// searched 1-30 Sep. Parsed here and preferred over the model's reading.
+const ROLLING_WINDOW = /\b(?:last|past|previous|over the (?:last|past)|in the (?:last|past))\s+(\d{1,3})\s+(day|week|month)s?\b/i;
+
+export function rollingWindow(query: string, now = new Date()): TemporalAnchor | null {
+  const m = ROLLING_WINDOW.exec(query);
+  if (!m) return null;
+  const n = Number(m[1]);
+  if (!n) return null;
+  const unit = m[2].toLowerCase();
+  const from = new Date(now);
+  if (unit === "day") from.setDate(from.getDate() - n);
+  else if (unit === "week") from.setDate(from.getDate() - 7 * n);
+  else from.setMonth(from.getMonth() - n);
+  return { type: "absolute", dateRange: { from: from.toISOString(), to: now.toISOString() } };
+}
+
 const TEMPORAL_PATTERNS: { pattern: RegExp; period: NonNullable<TemporalAnchor["relativePeriod"]> }[] = [
   { pattern: /\btoday\b/i,                           period: "today" },
   { pattern: /\bthis week\b/i,                       period: "this_week" },
@@ -290,7 +308,7 @@ function applyOverrides(query: string, result: IntentResult): IntentResult {
     ? people
     : result.entities.topics;
   const entities = { ...result.entities, categories, people, merchants, topics };
-  const temporal = result.temporal ?? inferTemporal(query);
+  const temporal = rollingWindow(query) ?? result.temporal ?? inferTemporal(query);
   let retrieval_weights = applyDeterministicOverrides(result.primary, query, result.retrieval_weights);
   // Structural catch-up detection: "What X?" with no specific target → daily brief
   // Only applies when LLM also classified as operational/productivity (no specific domain)
@@ -449,7 +467,7 @@ IMPORTANT: "show X spending", "how much did I spend on X", "X expenses" → inve
     amount: typeof parsed.entities?.amount === "number" ? parsed.entities.amount : null,
   };
 
-  const temporal: TemporalAnchor | null = parsed.temporal ?? inferTemporal(query);
+  const temporal: TemporalAnchor | null = rollingWindow(query) ?? parsed.temporal ?? inferTemporal(query);
 
   const llmWeights: RetrievalWeights = {
     operational_weight: typeof parsed.retrieval_weights?.operational_weight === "number"

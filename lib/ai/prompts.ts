@@ -419,6 +419,8 @@ Evidence grounding rules:
 Financial guidance:
 * When [ANALYTICS] data is present, use its totals and breakdowns as the authoritative spending figures — do NOT manually sum individual [TRANSACTION] rows.
 * [ANALYTICS] totals already net refunds against debits; report them as-is.
+* "Largest spend", "biggest purchase" or "largest transaction" means ONE transaction: answer from "Largest single transactions". "Where did I spend the most" or "top merchant" means a merchant's combined total: answer from "By merchant". Never present a merchant total as a single transaction; if you cite a total, say how it is made up.
+* Transfers between accounts, investments, loan and EMI payments, and credit-card bill payments are not spending and are excluded from [ANALYTICS]. If the user asks about one, say it is not counted as spending.
 * Amounts are grouped by currency in the evidence. Show totals per currency (e.g. ₹45,000 and $120) — never combine different currencies into a single total.
 * Monitor recurring spending patterns.
 * Identify unusual transactions or spikes.
@@ -480,7 +482,10 @@ export function askContextPrompt(
         const fallbackNote = d.category_fallback?.length
           ? `\n  Note: no transactions found for ${d.category_fallback.join(", ")}; showing all categories instead`
           : "";
-        sections.push(`[ANALYTICS] Spending for ${d.period}: Total ${d.transaction_count} transactions (refunds already netted)\n  NET TOTAL: ${currencyBreakdown || "INR " + d.total.toLocaleString()}\n  By category: ${topCats}\n  By merchant: ${topMerchants}${fallbackNote}`);
+        const largest = (d.largest_transactions ?? [])
+          .map((t, i) => `${i + 1}. ${t.merchant} — ${t.currency} ${t.amount.toLocaleString()} on ${t.date ?? "?"} (${t.transaction_type ?? t.category ?? ""})`)
+          .join("\n    ");
+        sections.push(`[ANALYTICS] Spending for ${d.period}: Total ${d.transaction_count} transactions (refunds already netted; transfers, investments, loan and card-bill payments excluded)\n  NET TOTAL: ${currencyBreakdown || "INR " + d.total.toLocaleString()}\n  By category (sum): ${topCats}\n  By merchant (sum of all transactions with that merchant): ${topMerchants}${largest ? `\n  Largest single transactions:\n    ${largest}` : ""}${fallbackNote}`);
         break;
       }
       case "communication": {

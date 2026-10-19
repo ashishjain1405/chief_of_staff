@@ -151,7 +151,11 @@ export function merchantMatchFilter(column: string, names: string[]): string {
   return names
     .map((n) => n.split(/[^\p{L}\p{N}]+/u).filter(Boolean).join("*"))
     .filter(Boolean)
-    .map((pattern) => `${column}.ilike."${pattern}"`)
+    // The exact name, or the name followed by more words: "HDFC" also finds
+    // "HDFC Bank" - the follow-up matched only a merchant named exactly "HDFC"
+    // and answered about a different ₹35,000 transaction. Whole words only, so
+    // "Apple" does not match "Applebees".
+    .flatMap((pattern) => [`${column}.ilike."${pattern}"`, `${column}.ilike."${pattern} *"`])
     .join(",");
 }
 

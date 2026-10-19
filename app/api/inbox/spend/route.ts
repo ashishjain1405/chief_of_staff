@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { countsAsSpend, isFailedTransaction } from "@/lib/finance/spend";
+import { countsAsSpend, isFailedTransaction, notSpendReason, spendAmount } from "@/lib/finance/spend";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
@@ -30,19 +30,19 @@ export async function GET(req: NextRequest) {
   const weeklyRows = spend.filter((r) => r.transaction_datetime >= weekAgo);
   const monthlyRows = spend.filter((r) => r.transaction_datetime >= monthAgo);
 
-  const weekly_total = weeklyRows.reduce((s, r) => s + (r.amount ?? 0), 0);
-  const monthly_total = monthlyRows.reduce((s, r) => s + (r.amount ?? 0), 0);
+  const weekly_total = weeklyRows.reduce((s, r) => s + spendAmount(r), 0);
+  const monthly_total = monthlyRows.reduce((s, r) => s + spendAmount(r), 0);
 
   const bySubCat: Record<string, number> = {};
   for (const r of monthlyRows) {
     const cat = r.category ?? "other";
-    bySubCat[cat] = (bySubCat[cat] ?? 0) + (r.amount ?? 0);
+    bySubCat[cat] = (bySubCat[cat] ?? 0) + spendAmount(r);
   }
 
   const monthly: Record<string, number> = {};
   for (const r of spend) {
     const month = (r.transaction_datetime as string).substring(0, 7);
-    monthly[month] = (monthly[month] ?? 0) + (r.amount ?? 0);
+    monthly[month] = (monthly[month] ?? 0) + spendAmount(r);
   }
 
   const transactions = all.slice(0, 200).map((r) => ({

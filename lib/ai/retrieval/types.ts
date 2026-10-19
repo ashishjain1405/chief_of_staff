@@ -50,6 +50,7 @@ export interface AggregatedFinance {
   by_merchant: Record<string, number>;
   by_currency: Record<string, { total: number; count: number }>;
   weekly_trend: { week: string; total: number }[];
+  largest_transactions: { merchant: string; amount: number; currency: string; date: string | null; transaction_type: string | null; category: string | null }[];
   period: string;
   transaction_count: number;
   category_fallback?: string[];
