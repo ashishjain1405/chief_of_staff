@@ -56,6 +56,9 @@ type Case = {
   body: string;
   stored_category: string;
   bulk?: boolean;
+  // When the email was sent. Real fixtures predate this field and run with
+  // "Email sent: unknown"; without it relative deadlines cannot be checked.
+  sent?: string;
   expect: { creates_task: boolean };
   why: string;
   // Set when a case is a documented pipeline limitation rather than a
@@ -88,7 +91,7 @@ async function main() {
   for (const c of cases) {
     const senderInfo = `<${c.sender}>`;
     const recipientInfo = `the founder's own address is ${founderAddress}; this email's To: ${c.to || "unknown"}`;
-    const triage = await triageEmail({}, senderInfo, c.body, recipientInfo, c.bulk);
+    const triage = await triageEmail({}, senderInfo, c.body, recipientInfo, c.bulk, c.sent);
     firstPass.set(c.id, triage.email_category);
 
     const creates = shouldCreateTask({
@@ -112,7 +115,7 @@ async function main() {
     // A deadline can never predate the email that asked for it. The resolver
     // nulls those; if it had to, triage produced an impossible date.
     const rawDeadline = triage.follow_up_deadline;
-    const resolved = resolveFollowUpDeadline(rawDeadline, new Date().toISOString());
+    const resolved = resolveFollowUpDeadline(rawDeadline, c.sent ?? new Date().toISOString());
     const deadlineOk = !rawDeadline || resolved !== null;
     if (!deadlineOk) badDeadline++;
 
@@ -139,7 +142,8 @@ async function main() {
       `<${c.sender}>`,
       c.body,
       `the founder's own address is ${founderAddress}; this email's To: ${c.to || "unknown"}`,
-      c.bulk
+      c.bulk,
+      c.sent
     );
     const same = again.email_category === firstPass.get(c.id);
     if (!same) unstable++;

@@ -17,7 +17,8 @@ export async function triageEmail(
   senderInfo: string,
   body: string,
   recipientInfo?: string,
-  isBulk?: boolean
+  isBulk?: boolean,
+  sentAt?: string | null
 ): Promise<EmailTriage> {
   const client = getClient();
 
@@ -38,7 +39,7 @@ export async function triageEmail(
     // not depending on the sample. classifyIntent already pins this to 0.
     temperature: 0,
     messages: [
-      { role: "user", content: emailTriagePrompt(businessContext, senderInfo, newContent, recipientInfo, isBulk) },
+      { role: "user", content: emailTriagePrompt(businessContext, senderInfo, newContent, recipientInfo, isBulk, sentAt) },
     ],
     response_format: {
       type: "json_schema",

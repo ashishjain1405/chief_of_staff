@@ -1165,7 +1165,7 @@
       <div class="pipe-dot">2</div>
       <div class="pipe-content">
         <h4>AI triage <span class="badge-sm badge-indigo" style="margin-left:6px">gpt-4o-mini · max_tokens 700</span></h4>
-        <p>Calls <code>triageEmail()</code> at temperature 0 with business context, sender, recipients, the new message (quoted reply chain stripped), and a <strong>bulk-mail signal</strong> — whether the email carries a <code>List-Unsubscribe</code> header. Returns a schema-constrained JSON object with: <code>summary</code>, <code>sentiment</code> (positive / neutral / negative / urgent), refined <code>importance_score</code>, <code>requires_action</code>, <code>action_description</code>, <code>follow_up_deadline</code>, <code>email_category</code> (one of 22), and <code>fallback_category</code>.</p>
+        <p>Calls <code>triageEmail()</code> at temperature 0 with business context, sender, recipients, the new message (quoted reply chain stripped), and a <strong>bulk-mail signal</strong> — whether the email carries a <code>List-Unsubscribe</code> header — and the date the email was sent, with its weekday, so relative deadlines ("this week", "tomorrow", a date with no year) resolve against it rather than a year the model remembers. The body is declared data: text in it addressed to an AI is ignored. Returns a schema-constrained JSON object with: <code>summary</code>, <code>sentiment</code> (positive / neutral / negative / urgent), refined <code>importance_score</code>, <code>requires_action</code>, <code>action_description</code>, <code>follow_up_deadline</code>, <code>email_category</code> (one of 22), and <code>fallback_category</code>.</p>
         <p>Categories are prioritised in a fixed order: Travel &gt; Account Security &gt; Promotions &gt; Finance Bills &gt; Transactions &gt; Subscriptions &gt; Receipts &gt; Legal &gt; Calendar &gt; Shipping &gt; Productivity Tools &gt; Career &gt; Social &gt; … &gt; Other. Promotions is judged by the sender's intent, not the topic: a points-transfer bonus from a hotel chain, a "complete your booking" nudge, or a push to adopt a bank's new login feature is a promotion even though it reads as finance, travel, or security. A renewal or payment notice for something the user already holds — their own insurance policy, subscription, or card — stays in its own category.</p>
       </div>
     </div>
@@ -1776,7 +1776,7 @@
   <table class="detail-table">
     <thead><tr><th>Suite</th><th>Command</th><th>What it asserts</th></tr></thead>
     <tbody>
-      <tr><td>Task creation</td><td><code>npm run eval:tasks</code></td><td>51 real emails: does a task appear, is the action first-person, is the category stable across re-runs. 50/50 at last run, one known gap (a proxy vote).</td></tr>
+      <tr><td>Task creation</td><td><code>npm run eval:tasks</code></td><td>55 emails (51 real, 4 synthetic): does a task appear, is the action first-person, is the category stable across re-runs. 54/54 at last run, one known gap (a proxy vote). Synthetic cases carry a sent date so relative deadlines are checked.</td></tr>
       <tr><td>Financial extraction</td><td><code>npm run eval:extraction</code></td><td>Amounts, merchants, types and dates from real finance emails</td></tr>
       <tr><td>Email parsing</td><td><code>npm run eval:parsing</code></td><td>Body extraction from captured Gmail payloads</td></tr>
       <tr><td>Vector retrieval</td><td><code>npm run eval:retrieval</code></td><td>Calibration of the 0.4 similarity threshold</td></tr>
@@ -1860,6 +1860,11 @@
         <td>Payment requests counted as payments</td>
         <td>The extraction prompt defined payment reminders as financial emails and had no way to say money was owed rather than paid, so renewal quotes, statements, IPO launches and OTP prompts became transactions. 11 PolicyBazaar renewal reminders counted ₹44k of spending; a news headline counted ₹15 lakh.</td>
         <td>Extraction returns <code>event_kind</code>; only <code>completed</code> rows are normalized. Seven real emails added to the extraction eval (12/13 pass; FX1 fails as before). All 591 financial emails re-classified: 72 non-payments removed from transactions after each large removal was checked against the email.</td>
+      </tr>
+      <tr>
+        <td>Bulk-sent renewals dropped; deadlines in the wrong year; injection followed</td>
+        <td>An external review of the triage prompt, checked against the real model, found three defects. The bulk-mail flag alone turned a renewal of the founder's own car insurance into no action (the same email without <code>List-Unsubscribe</code> was a task). Triage had no date, so "this week" came back as 2023-10-06. A "SYSTEM NOTE TO AI" in a newsletter body flipped <code>requires_action</code> to true.</td>
+        <td>Held-item reminders are actions "or to a mailing list"; an "Email sent" line with resolution rules for relative dates; a guard declaring the body data. Two broader wordings for the bulk fix were tried and dropped after they broke a points-bonus offer, a postal ballot and a broker disclosure. On 17 review cases every task decision is now right (2 wrong before); task eval 54/54 with four synthetic regression cases.</td>
       </tr>
       <tr>
         <td>Votes, AGMs and webinars became tasks</td>

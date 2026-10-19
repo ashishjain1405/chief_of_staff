@@ -75,7 +75,7 @@ export async function summarizeCommunication(job: Job) {
 
   // Stage 0: General email triage
   const isBulk = !!(comm.channel_metadata as any)?.list_unsubscribe;
-  const triage = await triageEmail(businessContext, senderInfo, comm.body ?? "", recipientInfo, isBulk);
+  const triage = await triageEmail(businessContext, senderInfo, comm.body ?? "", recipientInfo, isBulk, comm.occurred_at);
 
   const cappedScore = LOW_SIGNAL_CATEGORIES.has(triage.email_category)
     ? Math.min(triage.importance_score, 0.3)
