@@ -760,5 +760,19 @@
       "creates_task": false
     },
     "why": "A sale that mentions gift cards is marketing. Only an expiring balance the founder already holds is a task."
+  },
+  {
+    "id": "synthetic-emi-due-short",
+    "subject": "EMI due",
+    "sender": "cbsalerts.sbi@alerts.sbi.example",
+    "to": "ASHISH00JAIN@gmail.com",
+    "body": "EMI of Rs 12,450 for loan a/c XX5389 is due on 10/10/26. Please maintain sufficient balance.",
+    "stored_category": "",
+    "bulk": true,
+    "sent": "2026-10-05",
+    "expect": {
+      "creates_task": true
+    },
+    "why": "An EMI the founder owes. \"Please maintain sufficient balance\" read as a standing check once the decision-point rule against standing checks was added, dropping the action in 4 of 10 runs."
   }
 ]
