@@ -747,7 +747,7 @@
     <div><strong>Category</strong>Personal AI assistant</div>
     <div><strong>Platform</strong>Next.js · Supabase · BullMQ</div>
     <div><strong>Status</strong>Early access · single user</div>
-    <div><strong>Reflects code at</strong><code style="color:inherit;background:none">main @ 87f976b</code> · 18 Oct 2026</div>
+    <div><strong>Reflects code at</strong><code style="color:inherit;background:none">main @ 4e7c24b</code> · 18 Oct 2026</div>
   </div>
 </div>
 
@@ -1017,7 +1017,7 @@
       <tr><td>Gmail ingestion (push + backfill)</td><td><span class="badge-sm badge-emerald">Live</span></td><td>3 893 emails in <code>communications</code>; 870 <code>raw_events</code></td><td>A rejected Google token now marks the integration disconnected and the dashboard warns; pushes are signature-verified</td></tr>
       <tr><td>AI triage &amp; categories</td><td><span class="badge-sm badge-emerald">Live</span></td><td>Every stored email has a category and summary; 3 887 memory chunks</td><td>—</td></tr>
       <tr><td>Task creation</td><td><span class="badge-sm badge-emerald">Live</span></td><td>143 tasks: 80 pending, 2 done, 61 dismissed</td><td>—</td></tr>
-      <tr><td>Financial extraction &amp; dedup</td><td><span class="badge-sm badge-emerald">Live</span></td><td>Each financial email is classified by <code>event_kind</code>; 523 completed, 72 not (requests, quotes, offers). 510 normalised transactions, none stranded or double-counted</td><td>Totals exclude card-bill payments and failed attempts but still count investments and transfers</td></tr>
+      <tr><td>Financial extraction &amp; dedup</td><td><span class="badge-sm badge-emerald">Live</span></td><td>Each financial email is classified by <code>event_kind</code>; 523 completed, 72 not. 510 normalised transactions, none stranded or double-counted</td><td>Spending excludes transfers, investments, loan and card-bill payments and nets refunds (<code>spendAmount</code>); investments paid by UPI still count</td></tr>
       <tr><td>Ask AI (single turn)</td><td><span class="badge-sm badge-emerald">Live</span></td><td>Streaming answers over 8 retrieval sources</td><td>—</td></tr>
       <tr><td>Ask AI follow-ups</td><td><span class="badge-sm badge-emerald">Live</span></td><td>Context round-trips on message metadata; 7 live two-turn scenarios verified</td><td>Follow-up detection is rule-based; phrasings outside the rules start fresh</td></tr>
       <tr><td>Calendar sync</td><td><span class="badge-sm badge-emerald">Live</span></td><td>Pages through all events; recovers from an expired sync token; replaced channels are stopped</td><td>—</td></tr>
@@ -1850,6 +1850,11 @@
         <td>Grouping and lookups compare on a case- and separator-insensitive key; short aliases need a word boundary. A one-off cleanup collapsed 154 rows and refiled 4 misattributed payments.</td>
       </tr>
       <tr>
+        <td>A bank transfer named the "largest spend"</td>
+        <td>Ask AI answered "largest spend in the last 30 days" with HDFC Bank ₹3,06,220: September, not the last 30 days (the classifier mapped the phrase to last month); a merchant total, not a transaction (it had only totals); and five bank transfers, which were counted as spending. The follow-up then matched only a merchant named exactly "HDFC" and quoted an unrelated ₹35,000.</td>
+        <td>Rolling "last N days" windows; the five largest single transactions alongside totals, with a prompt rule separating "largest transaction" from "most spent at"; transfers, investments and loan payments excluded and refunds netted everywhere; whole-word prefix merchant matching. Replayed end to end with the real model before shipping.</td>
+      </tr>
+      <tr>
         <td>Payment requests counted as payments</td>
         <td>The extraction prompt defined payment reminders as financial emails and had no way to say money was owed rather than paid, so renewal quotes, statements, IPO launches and OTP prompts became transactions. 11 PolicyBazaar renewal reminders counted ₹44k of spending; a news headline counted ₹15 lakh.</td>
         <td>Extraction returns <code>event_kind</code>; only <code>completed</code> rows are normalized. Seven real emails added to the extraction eval (12/13 pass; FX1 fails as before). All 591 financial emails re-classified: 72 non-payments removed from transactions after each large removal was checked against the email.</td>
@@ -1965,7 +1970,8 @@
     <thead><tr><th>P</th><th>Issue</th><th>Consequence</th><th>Fix</th></tr></thead>
     <tbody>
       <tr><td>3</td><td>Daily brief at one fixed time</td><td>Every user gets it at 08:00 IST</td><td>Honour <code>preferences.digest_time</code> and timezone per user</td></tr>
-      <tr><td>2</td><td>Finance totals still count investments, transfers and income</td><td>Credit-card bill payments are excluded since 18 Oct (<code>countsAsSpend</code>; a <code>credit_card_payment</code> with no merchant or a bank as merchant — the extractor uses the same type for purchases made with the card), but investments, bank and P2P transfers, wallet top-ups and salary credits are still summed as spend, and refunds are netted only in Ask AI</td><td>Extend <code>countsAsSpend</code> to real spending only and net refunds everywhere; show transfers as their own line</td></tr>
+      <tr><td>2</td><td>Investments paid by UPI count as spending</td><td>An IPO application paid by UPI to NSE (₹23,205) is typed <code>upi_payment</code>, so <code>spendAmount</code> counts it</td><td>Classify UPI payees that are exchanges or brokers as investments</td></tr>
+      <tr><td>2</td><td>Follow-ups that point back by description are missed</td><td>"Was <em>the HDFC transaction</em> a single transaction" is not recognised as a follow-up, and context does not record which items the last answer used</td><td>Hybrid detection (rules plus classifier flag) and the last answer's items stored in context — see the follow-up taxonomy</td></tr>
       <tr><td>2</td><td>Zoom summaries enqueued on the wrong queue; no <code>source = 'zoom'</code> meeting rows</td><td>Meeting decisions and action items never extracted</td><td>Enqueue on <code>meetings-summarize</code>; match Zoom meetings to calendar events by join URL</td></tr>
       <tr><td>2</td><td>Extractor labels card purchases as <code>credit_card_payment</code></td><td>Spend totals rely on a merchant-based rule to tell purchases from bill payments</td><td>Clarify the type definitions in the extraction prompt, add eval cases, relabel existing rows</td></tr>
       <tr><td>3</td><td>No CI; evals run by hand</td><td>Regressions reach production — a classification regression already has</td><td>Run <code>tsc</code> and the component evals on every push to <code>main</code></td></tr>
