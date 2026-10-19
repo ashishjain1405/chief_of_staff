@@ -179,13 +179,23 @@ async function main() {
         migrations[key] = (migrations[key] ?? 0) + 1;
       }
 
+      const allowed = shouldCreateTask({
+        category: triage.email_category,
+        requiresAction: triage.requires_action,
+        senderEmail,
+        founderEmail: user.email,
+        isFinancialDomain: isKnownFinancialDomain(senderEmail),
+        isBulk: !!(comm.channel_metadata as any)?.list_unsubscribe,
+      });
+
       if (APPLY) {
         const { error: updateError } = await supabase
           .from("communications")
           .update({
             email_category: triage.email_category,
             importance_score: capped,
-            requires_action: triage.requires_action,
+            // The gate's answer, as in the worker - the brief and insights read it.
+            requires_action: allowed,
             category_processed: true,
             // Keep the old category so this run is reversible. Overwriting it
             // outright would leave no way back if the new classification reads
@@ -206,15 +216,6 @@ async function main() {
           continue;
         }
       }
-
-      const allowed = shouldCreateTask({
-        category: triage.email_category,
-        requiresAction: triage.requires_action,
-        senderEmail,
-        founderEmail: user.email,
-        isFinancialDomain: isKnownFinancialDomain(senderEmail),
-        isBulk: !!(comm.channel_metadata as any)?.list_unsubscribe,
-      });
 
       const threadKey = comm.thread_id ?? comm.id;
       if (!allowed || emailsWithTask.has(comm.id) || openThreads.has(threadKey)) continue;

@@ -220,7 +220,7 @@ PRIORITY ORDER (resolve conflicts by checking top-down):
 ACTION GUIDANCE:
 requires_action, action_description and follow_up_deadline drive task creation, so a false positive puts a chore on the founder's list that nobody asked for.
 
-Set requires_action = true ONLY when the recipient must personally do something that is not already done, and the matter stays unresolved until they do it.
+Set requires_action = true ONLY when the recipient must personally do something that is not already done, and the matter stays unresolved until they do it. A standing check or conditional safety line printed in every copy of a notice ("compare with your statement", "report any discrepancy", "report it if this wasn't you") is not something to do.
 
 Set requires_action = false for:
 - Confirmations of something that already happened: a debit that went through, a UPI payment that completed, an order that shipped, a refund that was issued. Nothing is pending.
@@ -236,7 +236,7 @@ Set requires_action = false for:
 
 action_description: an imperative the recipient themselves can carry out - "Reply to Kamal with the marketing plan", "Send the signed contract to Piyush". Never third person ("the customer should verify...", "the receiver needs to..."); if the only action you can describe is in third person, requires_action is false. Null whenever requires_action is false.
 
-follow_up_deadline: only a deadline for the recipient's OWN action, stated in or clearly implied by the email. It can never fall before the date this email was sent. Resolve relative phrases against "Email sent" above, never against a year you remember: "today" is the sent date, "tomorrow" the day after, a weekday name the next such day after the sent date, "this week" the Sunday of the sent date's week, "end of month" the last day of that month, and a day and month with no year the next such date on or after the sent date. If "Email sent" is unknown, use only a full date that includes the year, otherwise null. Do not reuse an unrelated date from the body - a compliance cutoff, a statement period, a policy effective date, a past due date from a prior cycle. Null when there is no deadline for this recipient.
+follow_up_deadline: only a deadline for the recipient's OWN action, stated in or clearly implied by the email. It can never fall before the date this email was sent: keep a stated date's day, month and year, written as YYYY-MM-DD, never change its year or day to make it fit, and if it is earlier than "Email sent" output null. Resolve relative phrases against "Email sent" above, never against a year you remember: "today" is the sent date, "tomorrow" the day after, a weekday name the next such day after the sent date, "this week" the Sunday of the sent date's week, "end of month" the last day of that month, and a day and month with no year the next such date on or after the sent date. If "Email sent" is unknown, use only a full date that includes the year, otherwise null. Do not reuse an unrelated date from the body - a compliance cutoff, a statement period, a policy effective date, a past due date from a prior cycle. Null when the email gives this recipient no date or time limit - never use the sent date as a default.
 
 IMPORTANCE SCORE GUIDANCE:
 - "news", "newsletters", "promotions", "entertainment", "social": importance_score <= 0.3

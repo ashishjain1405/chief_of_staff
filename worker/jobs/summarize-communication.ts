@@ -83,13 +83,37 @@ export async function summarizeCommunication(job: Job) {
 
   const existingMeta = (comm.channel_metadata as any) ?? {};
 
+  // Whether something is a task is a semantic question - is there an
+  // outstanding action the founder owns - so it is gated on requires_action
+  // and the category, not on importance_score.
+  //
+  // The old gate was `requires_action && cappedScore >= 0.7`, which made task
+  // creation hostage to a noisy magnitude. Tightening the action guidance in
+  // the prompt pulled importance down a notch as a side effect, and genuine
+  // "reply to Kamal about the marketing plan" emails came back action=true at
+  // 0.60 - dropping 6 of 8 real tasks while the intended noise was already
+  // handled by category. importance_score still sets priority below, which is
+  // what a magnitude is actually good for.
+  const categoryAllowsTask = shouldCreateTask({
+    category: triage.email_category,
+    requiresAction: triage.requires_action,
+    senderEmail,
+    founderEmail: user?.email ?? null,
+    isFinancialDomain: isKnownFinancialDomain(senderEmail),
+    isBulk,
+  });
+
   await supabase
     .from("communications")
     .update({
       body_summary: triage.summary,
       sentiment: triage.sentiment,
       importance_score: cappedScore,
-      requires_action: triage.requires_action,
+      // Stored as the gate's answer, not triage's raw flag. The daily brief and
+      // the follow-up insights read this column, so a bank alert whose "report
+      // it if this wasn't you" line triage took for an action - blocked as a
+      // task - still reached the brief as an email needing action.
+      requires_action: categoryAllowsTask,
       email_category: triage.email_category,
       category_processed: true,
       channel_metadata: existingMeta,
@@ -242,26 +266,6 @@ export async function summarizeCommunication(job: Job) {
   }
 
   const alreadyTracked = (sameEmailTasks ?? 0) > 0 || openThreadTasks > 0 || openSenderDuplicate;
-
-  // Whether something is a task is a semantic question - is there an
-  // outstanding action the founder owns - so it is gated on requires_action
-  // and the category, not on importance_score.
-  //
-  // The old gate was `requires_action && cappedScore >= 0.7`, which made task
-  // creation hostage to a noisy magnitude. Tightening the action guidance in
-  // the prompt pulled importance down a notch as a side effect, and genuine
-  // "reply to Kamal about the marketing plan" emails came back action=true at
-  // 0.60 - dropping 6 of 8 real tasks while the intended noise was already
-  // handled by category. importance_score still sets priority below, which is
-  // what a magnitude is actually good for.
-  const categoryAllowsTask = shouldCreateTask({
-    category: triage.email_category,
-    requiresAction: triage.requires_action,
-    senderEmail,
-    founderEmail: user?.email ?? null,
-    isFinancialDomain: isKnownFinancialDomain(senderEmail),
-    isBulk,
-  });
 
   if (categoryAllowsTask && !alreadyTracked) {
     await supabase.from("tasks").insert({
