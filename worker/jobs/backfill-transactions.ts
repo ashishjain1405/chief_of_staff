@@ -46,7 +46,8 @@ async function main() {
           senderEmail,
           senderType,
           comm.subject ?? "",
-          comm.body ?? ""
+          comm.body ?? "",
+          comm.occurred_at
         );
 
         if (!extraction.is_financial_email && extraction.transaction?.amount == null) {

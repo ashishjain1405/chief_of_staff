@@ -61,6 +61,14 @@ export const emailTriageSchema = z.object({
 
 export type EmailTriage = z.infer<typeof emailTriageSchema>;
 
+// "Email sent" line shared by prompts that resolve dates. Without it the model
+// filled in a year it remembered: "renew before 08 Nov" came back as 2023.
+export function formatSentDate(sentAt?: string | null): string {
+  const sent = sentAt ? new Date(sentAt) : null;
+  if (!sent || Number.isNaN(sent.getTime())) return "unknown";
+  return `${sent.toISOString().slice(0, 10)} (${sent.toLocaleDateString("en-US", { weekday: "long", timeZone: "UTC" })})`;
+}
+
 export function emailTriagePrompt(
   businessContext: any,
   senderInfo: string,
@@ -70,10 +78,7 @@ export function emailTriagePrompt(
   sentAt?: string | null
 ): string {
   const bulkLine = isBulk === undefined ? "unknown" : isBulk ? "yes (List-Unsubscribe header present)" : "no";
-  const sent = sentAt ? new Date(sentAt) : null;
-  const sentLine = sent && !Number.isNaN(sent.getTime())
-    ? `${sent.toISOString().slice(0, 10)} (${sent.toLocaleDateString("en-US", { weekday: "long", timeZone: "UTC" })})`
-    : "unknown";
+  const sentLine = formatSentDate(sentAt);
   return `You are an AI chief of staff for a founder. Analyze this email and return a JSON object.
 
 Business context: ${JSON.stringify(businessContext)}

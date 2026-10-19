@@ -336,7 +336,7 @@ async function runFinancialExtraction(
   occurredAt: string | null
 ) {
   const senderType = classifySender(senderEmail);
-  const extraction = await extractFinancialTransaction(senderEmail, senderType, subject, body);
+  const extraction = await extractFinancialTransaction(senderEmail, senderType, subject, body, occurredAt);
 
   // LLM says not financial and no amount — skip entirely
   if (!extraction.is_financial_email && extraction.transaction?.amount == null) return;

@@ -41,7 +41,9 @@ type Expect = {
 type Case = {
   id: string;
   note: string;
-  input: { sender: string; subject: string; body: string };
+  // sent: when the email arrived, for resolving dates with no year. Older
+  // cases predate it and run with "Email sent: unknown".
+  input: { sender: string; subject: string; body: string; sent?: string };
   expect: Expect;
 };
 
@@ -187,7 +189,8 @@ async function main() {
         c.input.sender,
         senderType,
         c.input.subject,
-        c.input.body
+        c.input.body,
+        c.input.sent
       );
       for (const chk of checkCase(c, result)) {
         if (!tally.has(chk.field)) tally.set(chk.field, { pass: 0, details: new Set() });
