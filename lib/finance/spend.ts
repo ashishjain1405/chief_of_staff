@@ -34,7 +34,7 @@ const BANK = /\bbank\b|^(sbi|pnb|icici|hdfc|axis|kotak|amex|american express|ind
 // instead, so NULL means "no failure noted".
 const FAILED = /^(failed|declined|cancell?ed|rejected|unsuccessful|reversed|(payment|transaction) (failed|declined))$/i;
 
-type Txn = { transaction_type?: string | null; merchant_normalized?: string | null; status?: string | null; amount?: number | string | null };
+type Txn = { transaction_type?: string | null; merchant_normalized?: string | null; status?: string | null; amount?: number | string | null; category?: string | null };
 
 export function isFailedTransaction(t: { status?: string | null }): boolean {
   return !!t.status && FAILED.test(t.status.trim());
@@ -49,6 +49,11 @@ export function isCardBillPayment(t: Txn): boolean {
 export function notSpendReason(t: Txn): string | null {
   if (isFailedTransaction(t)) return "failed";
   if (isCardBillPayment(t)) return "card bill payment";
+  // The type alone misses investments paid another way: an IPO application by
+  // UPI to NSE was a "upi_payment" and an ETF buy a "purchase", both counted as
+  // spending, and dividends typed "refund" were subtracted from it. Extraction
+  // gets the category right, so it decides.
+  if (t.category === "investments") return "investment";
   return NOT_SPEND[t.transaction_type ?? ""] ?? null;
 }
 
