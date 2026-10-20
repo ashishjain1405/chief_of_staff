@@ -24,6 +24,7 @@
     "eval:parsing": "npx tsx --env-file=.env.local --tsconfig tsconfig.json evals/components/email-parsing.ts",
     "eval:retrieval": "npx tsx --env-file=.env.local --tsconfig tsconfig.json evals/components/vector-retrieval.ts",
     "eval:tasks": "npx tsx --env-file=.env.local --tsconfig tsconfig.json evals/components/task-extraction.ts",
+    "eval:brief": "npx tsx --env-file=.env.local --tsconfig tsconfig.json evals/components/daily-brief.ts",
     "eval:answers": "npx tsx --env-file=.env.local --tsconfig tsconfig.json evals/components/answer-grounding.ts",
     "backup:db": "./scripts/backup-db.sh",
     "reparse:bodies": "npx tsx --env-file=.env.local --tsconfig tsconfig.json scripts/reparse-bodies.ts",

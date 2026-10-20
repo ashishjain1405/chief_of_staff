@@ -69,15 +69,15 @@ export async function getStructuredContext(userId: string) {
   const in7Days = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
   const past7Days = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
-  const [tasks, meetings, emails, commitments, followUps, transactions, subscriptions, travel] = await Promise.all([
-    getSupabase()
-      .from("tasks")
-      .select("title, description, due_date, priority, ai_reasoning")
-      .eq("user_id", userId)
-      .eq("status", "pending")
-      .lte("due_date", in3Days)
-      .order("due_date")
-      .limit(10),
+  // Three slices rather than one "due_date <= in 3 days, oldest first, 10":
+  // a backlog of old overdue tasks filled every slot ahead of tomorrow's bill,
+  // and undated tasks - human asks like "reply to Rajvi" - never appeared.
+  const taskFields = "title, description, due_date, priority, ai_reasoning";
+  const pendingTasksBase = () => getSupabase().from("tasks").select(taskFields).eq("user_id", userId).eq("status", "pending");
+  const [overdueTasks, upcomingTasks, undatedTasks, meetings, emails, commitments, followUps, transactions, subscriptions, travel] = await Promise.all([
+    pendingTasksBase().lt("due_date", now.toISOString()).order("due_date", { ascending: false }).limit(3),
+    pendingTasksBase().gte("due_date", now.toISOString()).lte("due_date", in3Days).order("due_date").limit(7),
+    pendingTasksBase().is("due_date", null).order("created_at", { ascending: false }).limit(3),
 
     getSupabase()
       .from("meetings")
@@ -140,7 +140,7 @@ export async function getStructuredContext(userId: string) {
   ]);
 
   return {
-    pendingTasks: tasks.data ?? [],
+    pendingTasks: [...(upcomingTasks.data ?? []), ...(overdueTasks.data ?? []), ...(undatedTasks.data ?? [])],
     upcomingMeetings: meetings.data ?? [],
     actionableEmails: emails.data ?? [],
     overdueCommitments: commitments.data ?? [],
