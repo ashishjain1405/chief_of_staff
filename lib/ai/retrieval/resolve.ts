@@ -10,7 +10,26 @@ export interface ResolvedEntities {
   temporalConfidence: number;
 }
 
-function relativeToDateRange(period: NonNullable<TemporalAnchor["relativePeriod"]>): { from: string; to: string } {
+// A date-only end ("2026-09-30") compared against a timestamp means midnight,
+// so "September" silently dropped the 30th: 232 of 238 transactions.
+function endOfDateOnly(to: string): string {
+  return /^\d{4}-\d{2}-\d{2}$/.test(to) ? `${to}T23:59:59.999Z` : to;
+}
+
+// The date range a temporal anchor covers, or null when it cannot be resolved
+// without a lookup (event-relative) or names a period the resolver does not
+// know. Shared with the classifier, which shows the previous turn's range to
+// the model so "the month before" can be computed from it.
+export function temporalToDateRange(temporal: TemporalAnchor | null): { from: string; to: string } | null {
+  if (!temporal) return null;
+  if (temporal.type === "absolute" && temporal.dateRange) {
+    return { from: temporal.dateRange.from, to: endOfDateOnly(temporal.dateRange.to) };
+  }
+  if (temporal.type === "relative" && temporal.relativePeriod) return relativeToDateRange(temporal.relativePeriod);
+  return null;
+}
+
+function relativeToDateRange(period: NonNullable<TemporalAnchor["relativePeriod"]>): { from: string; to: string } | null {
   const now = new Date();
   switch (period) {
     case "today":
@@ -41,6 +60,12 @@ function relativeToDateRange(period: NonNullable<TemporalAnchor["relativePeriod"
       const lastYear = subYears(now, 1);
       return { from: startOfYear(lastYear).toISOString(), to: endOfYear(lastYear).toISOString() };
     }
+    // The model invents values the prompt does not offer ("tomorrow",
+    // "next_week"). Falling through returned undefined, which meant no date
+    // filter at all - an all-time answer to "what's on tomorrow".
+    default:
+      console.warn(`[resolve] unknown relativePeriod: ${period}`);
+      return null;
   }
 }
 
@@ -86,11 +111,13 @@ export async function resolveEntities(
   // Resolve temporal anchor → dateRange
   if (temporal) {
     if (temporal.type === "absolute" && temporal.dateRange) {
-      resolvedDateRange = temporal.dateRange;
+      resolvedDateRange = temporalToDateRange(temporal);
       temporalConfidence = 1.0;
     } else if (temporal.type === "relative" && temporal.relativePeriod) {
       resolvedDateRange = relativeToDateRange(temporal.relativePeriod);
-      temporalConfidence = 0.95;
+      // An unknown period resolves to nothing; below 0.6 the answer prompt is
+      // told the time reference is ambiguous instead of answering for all time.
+      temporalConfidence = resolvedDateRange ? 0.95 : 0.5;
     } else if (temporal.type === "event_relative") {
       const anchorResult = await resolveEventAnchor(temporal, userId, contactIds, supabase as any);
       resolvedDateRange = anchorResult.dateRange;

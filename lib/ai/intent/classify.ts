@@ -3,6 +3,7 @@ import type { IntentType } from "../processors/types";
 import type { EntityContext, TemporalAnchor, RetrievalWeights, ConversationContext } from "../retrieval/types";
 import { INTENT_RULES } from "./rules";
 import { MERCHANT_DATA } from "../../finance/normalize";
+import { deterministicPeriod } from "./periods";
 
 export interface IntentResult {
   primary: IntentType;
@@ -66,7 +67,9 @@ function inferCategories(query: string): string[] {
   const lower = query.toLowerCase();
   const matched: string[] = [];
   for (const [category, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
-    if (keywords.some((kw) => lower.includes(kw))) matched.push(category);
+    // Matched at the start of a word, so plurals still count but "override" is
+    // no longer a ride (transport).
+    if (keywords.some((kw) => new RegExp(`\\b${kw}`).test(lower))) matched.push(category);
   }
   return matched;
 }
@@ -392,12 +395,11 @@ Return ONLY valid JSON:
 
 temporal can be:
 - null (no time reference)
-- {"type":"relative","relativePeriod":"last_month"} (this_week/last_week/this_month/last_month/last_quarter/today/this_year)
-- {"type":"absolute","dateRange":{"from":"YYYY-MM-01","to":"YYYY-MM-30"}} (use current year ${new Date().getFullYear()} unless the user specifies otherwise)
-- {"type":"event_relative","anchor_event":"salary_credit|travel_booking|named_meeting|named_contact_interaction","anchor_ref":"...","relative_window":"+7d"}
+- {"type":"relative","relativePeriod":"last_month"} (today/this_week/last_week/this_month/last_month/this_quarter/last_quarter/this_year/last_year - use ONLY these nine, and prefer one whenever it fits. For any other period, use an absolute dateRange computed from Today's date.)
+- {"type":"absolute","dateRange":{"from":"YYYY-MM-DD","to":"YYYY-MM-DD"}} (inclusive; a single day uses the same date for both; "to" is the last real day of the month, e.g. 31 or 28; use the year of Today's date unless the user specifies otherwise)- {"type":"event_relative","anchor_event":"salary_credit|travel_booking|named_meeting|named_contact_interaction","anchor_ref":"...","relative_window":"+7d"}
 
 entities guidance:
-- categories: spending/domain categories mentioned — e.g. "food" → ["food_delivery","groceries"], "travel" → ["travel"], "subscriptions" → ["subscriptions"], "entertainment" → ["entertainment"]. Always populate for spending queries.
+- categories: spending/domain categories mentioned — "food" ALWAYS → ["food_delivery","groceries"] (only "food delivery"/"takeaway" → ["food_delivery"]); e.g. "travel" → ["travel"], "subscriptions" → ["subscriptions"], "entertainment" → ["entertainment"]. Always populate for spending queries.
 - merchants: specific brand/service names — e.g. "Swiggy", "Netflix", "AWS"
 - people: person names mentioned — e.g. "John", "Rahul"
 - topics: subject matter — e.g. "insurance", "rent", "salary"
@@ -488,6 +490,27 @@ IMPORTANT: "show X spending", "how much did I spend on X", "X expenses" → inve
 const CLASSIFY_TIMEOUT_MS = 6000;
 
 export async function classifyIntent(
+  query: string,
+  context?: ConversationContext | null
+): Promise<IntentResult> {
+  const result = await classifyIntentRaw(query, context);
+  // Rolling windows ("last 30 days") are already resolved inside and are not
+  // matched by deterministicPeriod, so its precedence here only covers the
+  // phrases the model resolves badly.
+  const temporal = deterministicPeriod(query, context);
+  // "Food" means groceries too unless it is food delivery. The prompt says so,
+  // but the model often returned food_delivery alone, and a partial category
+  // match carries no fallback note - the answer quietly left groceries out.
+  const categories = result.entities.categories;
+  const food = /\bfood\b(?!\s+(delivery|order))/i.test(query) && categories.includes("food_delivery") && !categories.includes("groceries");
+  return {
+    ...result,
+    ...(temporal ? { temporal } : {}),
+    ...(food ? { entities: { ...result.entities, categories: [...categories, "groceries"] } } : {}),
+  };
+}
+
+async function classifyIntentRaw(
   query: string,
   context?: ConversationContext | null
 ): Promise<IntentResult> {
