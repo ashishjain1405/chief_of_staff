@@ -34,7 +34,8 @@ export default function GenerateDraftButton({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ communicationId }),
       });
-      const { draft } = await res.json();
+      const { draft, skipped } = await res.json();
+      if (skipped) toast.info(skipped);
       if (draft) {
         setDrafts((prev) => [draft, ...prev]);
         setEditing(draft.id);
@@ -57,14 +58,17 @@ export default function GenerateDraftButton({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ communicationId, draftId: draft.id, body }),
       });
-      if (!res.ok) throw new Error("Send failed");
+      if (!res.ok) {
+        const { error } = await res.json().catch(() => ({ error: null }));
+        throw new Error(error ?? "Failed to send reply");
+      }
       setDrafts((prev) =>
         prev.map((d) => (d.id === draft.id ? { ...d, status: "sent" } : d))
       );
       setEditing(null);
       toast.success("Reply sent");
-    } catch {
-      toast.error("Failed to send reply");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to send reply");
     } finally {
       setSending(null);
     }

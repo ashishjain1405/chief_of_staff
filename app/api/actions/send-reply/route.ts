@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { sendEmail } from "@/lib/integrations/gmail";
+import { findPlaceholder } from "@/lib/email/drafts";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
@@ -8,6 +9,14 @@ export async function POST(request: NextRequest) {
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { communicationId, draftId, body } = await request.json();
+
+  if (typeof body !== "string" || !body.trim()) {
+    return NextResponse.json({ error: "The reply is empty." }, { status: 400 });
+  }
+  const placeholder = findPlaceholder(body);
+  if (placeholder) {
+    return NextResponse.json({ error: `Replace "${placeholder}" before sending.` }, { status: 400 });
+  }
 
   const { data: comm } = await supabase
     .from("communications")
