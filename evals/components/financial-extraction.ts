@@ -29,6 +29,8 @@ type Expect = {
   merchant_contains?: string;
   category?: string[];
   transaction_type?: string[];
+  // YYYY-MM-DD, or null when the email states no payment due date.
+  due_date?: string | null;
   min_confidence?: number;
   max_confidence?: number;
   datetime_not_after_today?: boolean;
@@ -119,6 +121,11 @@ function checkCase(c: Case, result: any): Check[] {
       e.transaction_type.includes(txn.transaction_type),
       `expected one of [${e.transaction_type.join(", ")}], got ${txn.transaction_type}`
     );
+  }
+
+  if (e.due_date !== undefined) {
+    const got = txn.due_date ? String(txn.due_date).slice(0, 10) : null;
+    add("due_date", got === e.due_date, `expected ${e.due_date}, got ${got}`);
   }
 
   if (e.min_confidence !== undefined) {

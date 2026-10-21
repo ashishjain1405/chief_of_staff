@@ -52,6 +52,8 @@ type Case = {
   id: string;
   subject: string;
   sender: string;
+  // Display name, as the worker passes it ("Name <address>").
+  sender_name?: string;
   to: string;
   body: string;
   stored_category: string;
@@ -89,7 +91,7 @@ async function main() {
   const firstPass = new Map<string, string>();
 
   for (const c of cases) {
-    const senderInfo = `<${c.sender}>`;
+    const senderInfo = `${c.sender_name ? `${c.sender_name} ` : ""}<${c.sender}>`;
     const recipientInfo = `the founder's own address is ${founderAddress}; this email's To: ${c.to || "unknown"}`;
     const triage = await triageEmail({}, senderInfo, c.body, recipientInfo, c.bulk, c.sent);
     firstPass.set(c.id, triage.email_category);
