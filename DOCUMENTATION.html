@@ -1638,7 +1638,7 @@
       <tr><td><code>/dashboard</code></td><td>Pending tasks, latest daily brief, upcoming meetings, open action emails (commitments when flagged on)</td><td>—</td></tr>
       <tr><td><code>/inbox</code></td><td><code>get_category_counts</code> + communications</td><td>—</td></tr>
       <tr><td><code>/inbox/[id]</code></td><td>The email, sender, drafts; HTML body fetched live from Gmail (never stored)</td><td>Buttons call the action routes, drafts and send-reply</td></tr>
-      <tr><td><code>/inbox/spend</code>, <code>/finance</code></td><td><code>transactions_normalized</code> (6 months, ≤ 500 rows)</td><td>—</td></tr>
+      <tr><td><code>/inbox/spend</code>, <code>/finance</code></td><td><code>transactions_normalized</code> (6 months, all rows; <code>/finance</code> cards and categories cover the calendar month in IST, shown as stat tiles and vertical column charts from <code>components/finance/</code>)</td><td>—</td></tr>
       <tr><td><code>/tasks</code></td><td>Tasks with contact, excluding dismissed</td><td>Server action <code>updateTaskStatus</code></td></tr>
       <tr><td><code>/commitments</code></td><td>404 unless <code>FEATURES.commitments</code></td><td>Server action <code>markDone</code></td></tr>
       <tr><td><code>/meetings</code>, <code>/relationships</code></td><td><code>meetings</code>; <code>relationships</code> (empty)</td><td>—</td></tr>

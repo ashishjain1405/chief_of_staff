@@ -1,30 +1,18 @@
 export const dynamic = "force-dynamic";
 
 import { createClient } from "@/lib/supabase/server";
-import { countsAsSpend, isFailedTransaction, notSpendReason, spendAmount } from "@/lib/finance/spend";
+import { countsAsSpend, isFailedTransaction, spendAmount } from "@/lib/finance/spend";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { ArrowRight, CalendarDays, ReceiptText, TrendingUp, Wallet } from "lucide-react";
+import { StatTile } from "@/components/finance/stat-tile";
+import { ColumnChart, ChartTable, type Column } from "@/components/finance/column-chart";
+import { TransactionsTable, type TransactionRow } from "@/components/finance/transactions-table";
+import { categoryLabel, inr, istDate } from "@/components/finance/labels";
 
-const CAT_COLORS: Record<string, string> = {
-  groceries: "bg-green-500",
-  subscriptions: "bg-purple-500",
-  transport: "bg-blue-500",
-  food_delivery: "bg-orange-500",
-  travel: "bg-sky-500",
-  shopping: "bg-pink-500",
-  utilities: "bg-yellow-500",
-  banking: "bg-indigo-500",
-  telecom: "bg-cyan-500",
-  investments: "bg-emerald-500",
-  healthcare: "bg-red-500",
-  ecommerce: "bg-violet-500",
-  restaurants: "bg-amber-500",
-  other: "bg-muted-foreground",
-};
-
-function fmt(n: number) {
-  return n.toLocaleString("en-IN", { maximumFractionDigits: 0 });
-}
+// Columns past these fold into "Other" (fewer on phones, where seven labels
+// clip); the table view under the chart keeps every category.
+const CATEGORY_COLUMNS = { phone: 3, wide: 6 };
 
 const IST = "Asia/Kolkata";
 const istDay = (d: Date) => d.toLocaleDateString("en-CA", { timeZone: IST });
@@ -35,11 +23,14 @@ const istDay = (d: Date) => d.toLocaleDateString("en-CA", { timeZone: IST });
 // periods in IST: the 1st of the month and Monday of this week, from midnight.
 function periodStarts(now = new Date()) {
   const today = istDay(now);
+  const sixMonthsAgo = new Date(now.getTime() - 180 * 864e5).toISOString();
   const midnight = Date.parse(`${today}T00:00:00+05:30`);
   const weekday = (new Date(`${today}T00:00:00Z`).getUTCDay() + 6) % 7; // Monday = 0
   return {
     month: new Date(Date.parse(`${today.slice(0, 8)}01T00:00:00+05:30`)).toISOString(),
     week: new Date(midnight - weekday * 864e5).toISOString(),
+    sixMonthsAgo,
+    monthKey: today.slice(0, 7),
   };
 }
 
@@ -47,7 +38,7 @@ function periodStarts(now = new Date()) {
 // rows the oldest months were about to fall off the trend unannounced.
 async function loadSince(supabase: Awaited<ReturnType<typeof createClient>>, userId: string, since: string) {
   const PAGE = 1000;
-  const rows: any[] = [];
+  const rows: TransactionRow[] = [];
   for (let from = 0; ; from += PAGE) {
     const { data, error } = await supabase
       .from("transactions_normalized")
@@ -57,7 +48,7 @@ async function loadSince(supabase: Awaited<ReturnType<typeof createClient>>, use
       .order("transaction_datetime", { ascending: false })
       .range(from, from + PAGE - 1);
     if (error || !data?.length) break;
-    rows.push(...data);
+    rows.push(...(data as TransactionRow[]));
     if (data.length < PAGE) break;
   }
   return rows;
@@ -73,9 +64,8 @@ export default async function FinancePage({
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/auth/login");
 
-  const sixMonthsAgo = new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString();
-  const { month: monthStart, week: weekStart } = periodStarts();
-  const after = (r: any, start: string) => Date.parse(r.transaction_datetime) >= Date.parse(start);
+  const { month: monthStart, week: weekStart, sixMonthsAgo, monthKey: thisMonthKey } = periodStarts();
+  const after = (r: TransactionRow, start: string) => Date.parse(r.transaction_datetime) >= Date.parse(start);
 
   const rows = await loadSince(supabase, user.id, sixMonthsAgo);
 
@@ -104,156 +94,100 @@ export default async function FinancePage({
   }
 
   const largestSpend = monthSpend.reduce((max, r) => Math.max(max, spendAmount(r)), 0);
-  const maxCat = Math.max(...Object.values(byCat), 1);
   const sortedCats = Object.entries(byCat).sort((a, b) => b[1] - a[1]);
   const sortedMonths = Object.entries(monthlyTrend).sort((a, b) => a[0].localeCompare(b[0]));
-  const maxMonth = Math.max(...Object.values(monthlyTrend), 1);
 
   const filtered = cat ? all.filter((r) => r.category === cat) : all;
 
+  // Presentation only: shape the computed totals into chart columns.
+  const categoryColumns = (count: number): Column[] => {
+    const head = sortedCats.slice(0, count);
+    const tail = sortedCats.slice(count).reduce((sum, [, v]) => sum + v, 0);
+    return [
+      ...head.map(([c, value]) => ({
+        key: c,
+        label: categoryLabel(c),
+        value,
+        href: cat === c ? "/finance" : `/finance?cat=${c}`,
+        tone: cat ? (cat === c ? ("accent" as const) : ("soft" as const)) : ("default" as const),
+        showValue: cat ? cat === c : c === head[0]?.[0],
+      })),
+      ...(tail > 0 ? [{ key: "__other", label: "Other", value: tail, tone: cat ? ("soft" as const) : ("default" as const) }] : []),
+    ];
+  };
+  const allCategoryRows: Column[] = sortedCats.map(([c, value]) => ({ key: c, label: categoryLabel(c), value }));
+  const trendColumns: Column[] = sortedMonths.map(([m, value]) => ({
+    key: m,
+    label: new Date(`${m}-01T00:00:00+05:30`).toLocaleDateString("en-IN", { month: "short", timeZone: "Asia/Kolkata" }),
+    value,
+    tone: m === thisMonthKey ? "accent" : "soft",
+    showValue: m === thisMonthKey,
+  }));
+
   return (
-    <div className="flex-1 overflow-y-auto p-6 max-w-4xl space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-base font-semibold">Finance</h1>
-          <p className="text-xs text-muted-foreground mt-0.5">Cards and categories: this month · trend and list: last 6 months</p>
-        </div>
-        <Link
-          href="/inbox?cat=finance_bills"
-          className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-        >
-          View in inbox →
-        </Link>
-      </div>
-
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        {[
-          { label: "This Month", value: `₹${fmt(monthly_total)}` },
-          { label: "This Week", value: `₹${fmt(weekly_total)}` },
-          { label: "Transactions This Month", value: monthCount.toString() },
-          { label: "Largest This Month", value: `₹${fmt(largestSpend)}` },
-        ].map((card) => (
-          <div key={card.label} className="border rounded-lg p-4 space-y-1">
-            <p className="text-xs text-muted-foreground">{card.label}</p>
-            <p className="text-xl font-semibold tabular-nums">{card.value}</p>
+    <div className="flex-1 overflow-y-auto bg-slate-50/70 dark:bg-background">
+      <div className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:px-8 sm:py-10">
+        <header className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground">Finance</h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Your spending this month, with six months of history.
+            </p>
           </div>
-        ))}
-      </div>
+          <Link
+            href="/inbox?cat=finance_bills"
+            className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-card px-3.5 py-1.5 text-xs font-medium text-muted-foreground shadow-sm transition-colors hover:text-foreground"
+          >
+            View in inbox
+            <ArrowRight className="size-3.5" aria-hidden />
+          </Link>
+        </header>
 
-      {sortedCats.length > 0 && (
-        <div className="space-y-3">
-          <h2 className="text-sm font-medium">Spend by Category (this month)</h2>
-          <div className="space-y-2.5">
-            {sortedCats.map(([c, amount]) => (
-              <Link
-                key={c}
-                href={`/finance?cat=${c}`}
-                className="flex items-center gap-3 group"
-              >
-                <span className="text-xs text-muted-foreground w-28 shrink-0 capitalize group-hover:text-foreground transition-colors">
-                  {c.replace(/_/g, " ")}
-                </span>
-                <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                  <div
-                    className={`h-full rounded-full ${CAT_COLORS[c] ?? "bg-muted-foreground"}`}
-                    style={{ width: `${(amount / maxCat) * 100}%` }}
-                  />
-                </div>
-                <span className="text-xs tabular-nums text-muted-foreground w-20 text-right shrink-0">
-                  ₹{fmt(amount)}
-                </span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      )}
+        <section className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4" aria-label="This month at a glance">
+          <StatTile icon={Wallet} label="This month" value={inr(monthly_total)} caption={`Since ${istDate(monthStart)}`} />
+          <StatTile icon={CalendarDays} label="This week" value={inr(weekly_total)} caption={`Since ${istDate(weekStart, { weekday: "short", day: "numeric", month: "short" })}`} />
+          <StatTile icon={ReceiptText} label="Transactions" value={monthCount.toLocaleString("en-IN")} caption="This month, including transfers and bills" />
+          <StatTile icon={TrendingUp} label="Largest spend" value={inr(largestSpend)} caption="Single transaction this month" />
+        </section>
 
-      {sortedMonths.length > 0 && (
-        <div className="space-y-3">
-          <h2 className="text-sm font-medium">Monthly Trend</h2>
-          <div className="flex items-end gap-2" style={{ height: "96px" }}>
-            {sortedMonths.map(([month, amount]) => (
-              <div key={month} className="flex-1 flex flex-col items-center gap-1 min-w-0">
-                <div className="w-full flex items-end justify-center" style={{ height: "72px" }}>
-                  <div
-                    className="w-full bg-foreground/20 rounded-t"
-                    style={{ height: `${(amount / maxMonth) * 72}px` }}
-                    title={`₹${fmt(amount)}`}
-                  />
-                </div>
-                <span className="text-xs text-muted-foreground truncate w-full text-center">
-                  {month.substring(5)}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-medium">
-            Transactions
-            {cat && (
-              <span className="ml-2 text-xs font-normal text-muted-foreground capitalize">
-                — {cat.replace(/_/g, " ")}
-                <Link href="/finance" className="ml-2 hover:text-foreground">×</Link>
-              </span>
-            )}
-          </h2>
-          <span className="text-xs text-muted-foreground">{filtered.length} total</span>
-        </div>
-
-        <div className="border rounded-lg overflow-hidden">
-          <div className="grid grid-cols-[1fr_auto_auto_auto] text-xs text-muted-foreground px-4 py-2 border-b bg-muted/30">
-            <span>Merchant</span>
-            <span className="px-4">Category</span>
-            <span className="px-4">Date</span>
-            <span className="text-right">Amount</span>
-          </div>
-          <div className="divide-y">
-            {filtered.slice(0, 100).map((r) => {
-              const primaryCommId = r.communication_ids?.[0] ?? null;
-              const inner = (
+        <div className="grid gap-4 lg:grid-cols-5">
+          <section className="rounded-2xl border border-border/70 bg-card p-5 shadow-sm lg:col-span-3">
+            <h2 className="text-base font-semibold text-foreground">Spend by category</h2>
+            <p className="mt-0.5 text-xs text-muted-foreground">This month · select a column to filter the transactions below</p>
+            <div className="mt-6">
+              {sortedCats.length > 0 ? (
                 <>
-                  <span className="text-sm truncate">
-                    {r.merchant_normalized ?? "—"}
-                    {notSpendReason(r) && <span className="ml-2 text-xs text-muted-foreground">{notSpendReason(r)} · not counted</span>}
-                  </span>
-                  <span className="px-4 text-xs text-muted-foreground capitalize">
-                    {(r.category ?? "—").replace(/_/g, " ")}
-                  </span>
-                  <span className="px-4 text-xs text-muted-foreground whitespace-nowrap">
-                    {new Date(r.transaction_datetime).toLocaleDateString("en-IN", {
-                      day: "numeric",
-                      month: "short",
-                      timeZone: IST,
-                    })}
-                  </span>
-                  <span className="text-sm font-medium tabular-nums text-right whitespace-nowrap">
-                    {r.currency ?? "INR"} {fmt(r.amount ?? 0)}
-                  </span>
+                  <div className="sm:hidden">
+                    <ColumnChart columns={categoryColumns(CATEGORY_COLUMNS.phone)} label="Spending by category this month" />
+                  </div>
+                  <div className="hidden sm:block">
+                    <ColumnChart columns={categoryColumns(CATEGORY_COLUMNS.wide)} label="Spending by category this month" />
+                  </div>
+                  <ChartTable columns={allCategoryRows} valueHeader="Spending by category this month" />
                 </>
-              );
-              return primaryCommId ? (
-                <Link
-                  key={r.id}
-                  href={`/inbox/${primaryCommId}`}
-                  className="grid grid-cols-[1fr_auto_auto_auto] items-center px-4 py-3 hover:bg-muted/40 transition-colors"
-                >
-                  {inner}
-                </Link>
               ) : (
-                <div
-                  key={r.id}
-                  className="grid grid-cols-[1fr_auto_auto_auto] items-center px-4 py-3"
-                >
-                  {inner}
-                </div>
-              );
-            })}
-          </div>
+                <p className="py-16 text-center text-sm text-muted-foreground">No spending recorded this month yet.</p>
+              )}
+            </div>
+          </section>
+
+          <section className="rounded-2xl border border-border/70 bg-card p-5 shadow-sm lg:col-span-2">
+            <h2 className="text-base font-semibold text-foreground">Monthly trend</h2>
+            <p className="mt-0.5 text-xs text-muted-foreground">Spending per month, last 6 months</p>
+            <div className="mt-6">
+              {trendColumns.length > 0 ? (
+                <>
+                  <ColumnChart columns={trendColumns} label="Spending per month over the last six months" />
+                  <ChartTable columns={trendColumns} valueHeader="Spending per month" />
+                </>
+              ) : (
+                <p className="py-16 text-center text-sm text-muted-foreground">No history yet.</p>
+              )}
+            </div>
+          </section>
         </div>
+
+        <TransactionsTable rows={filtered} category={cat} />
       </div>
     </div>
   );
