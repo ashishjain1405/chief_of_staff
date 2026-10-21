@@ -11,6 +11,10 @@ import { askSystemPrompt, askContextPrompt } from "@/lib/ai/prompts";
 import { streamText, generateText, convertToModelMessages, type UIMessage } from "ai";
 import { openai } from "@ai-sdk/openai";
 
+// Answers carry figures the user acts on; at the default 1.0 wording and
+// emphasis moved from run to run on the same evidence.
+const ASK_TEMPERATURE = 0.2;
+
 export async function POST(request: Request) {
   const startTime = Date.now();
   const isEvalMode = new URL(request.url).searchParams.get("eval") === "true";
@@ -130,6 +134,7 @@ export async function POST(request: Request) {
         system: `${systemPrompt}\n\n${contextBlock}`,
         messages: modelMessages,
         maxOutputTokens: 1024,
+        temperature: ASK_TEMPERATURE,
       });
       return Response.json({ response: text, trace });
     }
@@ -139,6 +144,7 @@ export async function POST(request: Request) {
       system: `${systemPrompt}\n\n${contextBlock}`,
       messages: modelMessages,
       maxOutputTokens: 1024,
+      temperature: ASK_TEMPERATURE,
     });
 
     // Context rides on the assistant message's metadata, which useChat keeps and

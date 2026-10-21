@@ -4,6 +4,7 @@ import type { EntityContext, TemporalAnchor, RetrievalWeights, ConversationConte
 import { INTENT_RULES } from "./rules";
 import { MERCHANT_DATA } from "../../finance/normalize";
 import { deterministicPeriod } from "./periods";
+import { istDate } from "../prompts";
 
 export interface IntentResult {
   primary: IntentType;
@@ -351,7 +352,7 @@ async function classifyWithLLM(
       })}`
     : "";
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = istDate();
   const prompt = `Classify this query and extract retrieval parameters.
 
 Today's date: ${today}
@@ -396,7 +397,8 @@ Return ONLY valid JSON:
 temporal can be:
 - null (no time reference)
 - {"type":"relative","relativePeriod":"last_month"} (today/this_week/last_week/this_month/last_month/this_quarter/last_quarter/this_year/last_year - use ONLY these nine, and prefer one whenever it fits. For any other period, use an absolute dateRange computed from Today's date.)
-- {"type":"absolute","dateRange":{"from":"YYYY-MM-DD","to":"YYYY-MM-DD"}} (inclusive; a single day uses the same date for both; "to" is the last real day of the month, e.g. 31 or 28; use the year of Today's date unless the user specifies otherwise)- {"type":"event_relative","anchor_event":"salary_credit|travel_booking|named_meeting|named_contact_interaction","anchor_ref":"...","relative_window":"+7d"}
+- {"type":"absolute","dateRange":{"from":"YYYY-MM-DD","to":"YYYY-MM-DD"}} (inclusive; a single day uses the same date for both; "to" is the last real day of the month, e.g. 31 or 28; use the year of Today's date unless the user specifies otherwise)
+- {"type":"event_relative","anchor_event":"salary_credit|travel_booking|named_meeting|named_contact_interaction","anchor_ref":"...","relative_window":"+7d"}
 
 entities guidance:
 - categories: spending/domain categories mentioned — "food" ALWAYS → ["food_delivery","groceries"] (only "food delivery"/"takeaway" → ["food_delivery"]); e.g. "travel" → ["travel"], "subscriptions" → ["subscriptions"], "entertainment" → ["entertainment"]. Always populate for spending queries.

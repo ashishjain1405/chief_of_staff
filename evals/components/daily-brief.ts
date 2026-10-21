@@ -7,7 +7,10 @@
  * before the fixes the brief was headed "Morning Brief for [Date]", made a
  * webinar that had ended its top priority ("starting in 1 hour"), turned
  * background memory snippets into to-dos, invented "relevant teams", and left a
- * bill due tomorrow out of the top three. Money the user really owes - an
+ * bill due tomorrow out of the top three. In B2 the third slot is a judgment
+ * call - Rajvi's pending reply or a bill due within five days - and the model
+ * goes both ways, so only Piyush and tomorrow's bill are pinned to the top
+ * three and Rajvi must merely appear. Money the user really owes - an
  * overdue EMI, a friend to repay - must still lead.
  *
  * Dates are relative to the day the eval runs, as in production, so fixtures
@@ -53,7 +56,7 @@ const CASES: { id: string; ctx: any; checks: Check[] }[] = [
         e("Maintenance and R & R Funds Bill", "October maintenance bill of Rs 4,200, payable within 5 days quoting the flat number."),
       ],
       relevantMemory: ["Kamal asked for the marketing plan before Thursday's call.", "Jatin shared a Chrome extension build for testing."] },
-    checks: [NO_FENCE, HEADINGS, NO_PLACEHOLDER, NO_INVENTION, NO_SEND, has(/Piyush/, "Piyush not in top 3", top), has(/electricity/i, "electricity bill not in top 3", top), has(/Rajvi/, "Rajvi not in top 3", top), lacks(/webinar|workshop/i, "lapsed webinar in top 3", top), lacks(/Kamal|Chrome extension/i, "memory snippet promoted"), has(/4,200|maintenance/i, "maintenance bill dropped"), lacks(/(high|urgent|priority)[^\n]{0,60}\$?5,000/i, "wire listed as a priority", top)] },
+    checks: [NO_FENCE, HEADINGS, NO_PLACEHOLDER, NO_INVENTION, NO_SEND, has(/Piyush/, "Piyush not in top 3", top), has(/electricity/i, "electricity bill not in top 3", top), has(/Rajvi/, "Rajvi's pending reply dropped"), lacks(/webinar|workshop/i, "lapsed webinar in top 3", top), lacks(/Kamal|Chrome extension/i, "memory snippet promoted"), has(/4,200|maintenance/i, "maintenance bill dropped"), lacks(/(high|urgent|priority)[^\n]{0,60}\$?5,000/i, "wire listed as a priority", top)] },
   { id: "B3 overdue EMI", ctx: { ...empty,
       pendingTasks: [t("Make the EMI payment for loan XX5389", day(-10)), t("Renew the motor insurance policy", day(19))],
       actionableEmails: [e("Follow up", "Rajvi asks the founder to confirm Tuesday or Wednesday at 2:30 for the next session.")] },

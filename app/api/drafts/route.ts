@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
   });
 
   const draftText = await generateDraft(prompt);
-  if (draftText.trim() === NO_REPLY_NEEDED) {
+  if (draftText.trim().replace(/[.\s]+$/, "") === NO_REPLY_NEEDED) {
     return NextResponse.json({ skipped: "This email does not need a reply." });
   }
 
