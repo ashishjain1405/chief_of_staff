@@ -26,6 +26,43 @@ function fmt(n: number) {
   return n.toLocaleString("en-IN", { maximumFractionDigits: 0 });
 }
 
+const IST = "Asia/Kolkata";
+const istDay = (d: Date) => d.toLocaleDateString("en-CA", { timeZone: IST });
+
+// "This Month" was the last 30 days and "This Week" the last 7, so on 21 Oct
+// the month card showed Rs 2.56 lakh against Rs 1.16 lakh since 1 October, and
+// Ask AI's "this month" (the calendar month) disagreed with it. Calendar
+// periods in IST: the 1st of the month and Monday of this week, from midnight.
+function periodStarts(now = new Date()) {
+  const today = istDay(now);
+  const midnight = Date.parse(`${today}T00:00:00+05:30`);
+  const weekday = (new Date(`${today}T00:00:00Z`).getUTCDay() + 6) % 7; // Monday = 0
+  return {
+    month: new Date(Date.parse(`${today.slice(0, 8)}01T00:00:00+05:30`)).toISOString(),
+    week: new Date(midnight - weekday * 864e5).toISOString(),
+  };
+}
+
+// PostgREST returns at most 1,000 rows, and the page asked for 500 - at 498
+// rows the oldest months were about to fall off the trend unannounced.
+async function loadSince(supabase: Awaited<ReturnType<typeof createClient>>, userId: string, since: string) {
+  const PAGE = 1000;
+  const rows: any[] = [];
+  for (let from = 0; ; from += PAGE) {
+    const { data, error } = await supabase
+      .from("transactions_normalized")
+      .select("*")
+      .eq("user_id", userId)
+      .gte("transaction_datetime", since)
+      .order("transaction_datetime", { ascending: false })
+      .range(from, from + PAGE - 1);
+    if (error || !data?.length) break;
+    rows.push(...data);
+    if (data.length < PAGE) break;
+  }
+  return rows;
+}
+
 export default async function FinancePage({
   searchParams,
 }: {
@@ -37,43 +74,36 @@ export default async function FinancePage({
   if (!user) redirect("/auth/login");
 
   const sixMonthsAgo = new Date(Date.now() - 180 * 24 * 60 * 60 * 1000).toISOString();
-  const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-  const monthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  const { month: monthStart, week: weekStart } = periodStarts();
+  const after = (r: any, start: string) => Date.parse(r.transaction_datetime) >= Date.parse(start);
 
-  const { data: rows } = await supabase
-    .from("transactions_normalized")
-    .select("*")
-    .eq("user_id", user.id)
-    .gte("transaction_datetime", sixMonthsAgo)
-    .order("transaction_datetime", { ascending: false })
-    .limit(500);
+  const rows = await loadSince(supabase, user.id, sixMonthsAgo);
 
   // Failed attempts are dropped here rather than in SQL, where != also drops NULL.
-  const all = (rows ?? []).filter((r) => !isFailedTransaction(r));
+  const all = rows.filter((r) => !isFailedTransaction(r));
   // Totals and charts count spending only; the list below still shows every row.
   const spend = all.filter(countsAsSpend);
 
+  const monthSpend = spend.filter((r) => after(r, monthStart));
   const weekly_total = spend
-    .filter((r) => r.transaction_datetime >= weekAgo)
+    .filter((r) => after(r, weekStart))
     .reduce((s, r) => s + spendAmount(r), 0);
-
-  const monthly_total = spend
-    .filter((r) => r.transaction_datetime >= monthAgo)
-    .reduce((s, r) => s + spendAmount(r), 0);
+  const monthly_total = monthSpend.reduce((s, r) => s + spendAmount(r), 0);
+  const monthCount = all.filter((r) => after(r, monthStart)).length;
 
   const byCat: Record<string, number> = {};
-  for (const r of spend.filter((r) => r.transaction_datetime >= monthAgo)) {
+  for (const r of monthSpend) {
     const c = r.category ?? "other";
     byCat[c] = (byCat[c] ?? 0) + spendAmount(r);
   }
 
   const monthlyTrend: Record<string, number> = {};
   for (const r of spend) {
-    const month = (r.transaction_datetime as string).substring(0, 7);
+    const month = istDay(new Date(r.transaction_datetime)).substring(0, 7);
     monthlyTrend[month] = (monthlyTrend[month] ?? 0) + spendAmount(r);
   }
 
-  const largestSpend = spend.reduce((max, r) => Math.max(max, spendAmount(r)), 0);
+  const largestSpend = monthSpend.reduce((max, r) => Math.max(max, spendAmount(r)), 0);
   const maxCat = Math.max(...Object.values(byCat), 1);
   const sortedCats = Object.entries(byCat).sort((a, b) => b[1] - a[1]);
   const sortedMonths = Object.entries(monthlyTrend).sort((a, b) => a[0].localeCompare(b[0]));
@@ -86,7 +116,7 @@ export default async function FinancePage({
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-base font-semibold">Finance</h1>
-          <p className="text-xs text-muted-foreground mt-0.5">Last 6 months</p>
+          <p className="text-xs text-muted-foreground mt-0.5">Cards and categories: this month · trend and list: last 6 months</p>
         </div>
         <Link
           href="/inbox?cat=finance_bills"
@@ -100,8 +130,8 @@ export default async function FinancePage({
         {[
           { label: "This Month", value: `₹${fmt(monthly_total)}` },
           { label: "This Week", value: `₹${fmt(weekly_total)}` },
-          { label: "Transactions", value: all.length.toString() },
-          { label: "Largest Spend", value: `₹${fmt(largestSpend)}` },
+          { label: "Transactions This Month", value: monthCount.toString() },
+          { label: "Largest This Month", value: `₹${fmt(largestSpend)}` },
         ].map((card) => (
           <div key={card.label} className="border rounded-lg p-4 space-y-1">
             <p className="text-xs text-muted-foreground">{card.label}</p>
@@ -197,6 +227,7 @@ export default async function FinancePage({
                     {new Date(r.transaction_datetime).toLocaleDateString("en-IN", {
                       day: "numeric",
                       month: "short",
+                      timeZone: IST,
                     })}
                   </span>
                   <span className="text-sm font-medium tabular-nums text-right whitespace-nowrap">
