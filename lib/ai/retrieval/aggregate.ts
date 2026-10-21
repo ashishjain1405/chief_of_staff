@@ -1,6 +1,9 @@
 import type { AggregatedFinance } from "./types";
-import { countsAsSpend, spendAmount } from "@/lib/finance/spend";
+import { countsAsSpend, spendAmount, isCardBillPayment } from "@/lib/finance/spend";
+import { istDate } from "@/lib/ai/prompts";
 import { merchantMatchFilter } from "@/lib/finance/normalize";
+
+const ALL_TRANSACTIONS_LIMIT = 25;
 
 export async function aggregateTransactions(
   userId: string,
@@ -111,6 +114,12 @@ export async function aggregateTransactions(
     .sort((a, b) => a[0].localeCompare(b[0]))
     .map(([week, wTotal]) => ({ week, total: Math.round(wTotal) }));
 
+  // The extractor types a purchase made with a card credit_card_payment; the
+  // spend rules already treat it as a purchase, and the label has to agree or
+  // the answer calls Zomato orders "credit card payments".
+  const typeLabel = (r: (typeof rows)[number]) =>
+    r.transaction_type === "credit_card_payment" && !isCardBillPayment(r) ? "card purchase" : r.transaction_type;
+
   return {
     total: Math.round(total),
     by_category: Object.fromEntries(Object.entries(by_category).map(([k, v]) => [k, Math.round(v)])),
@@ -127,10 +136,24 @@ export async function aggregateTransactions(
         merchant: r.merchant_normalized ?? "Unknown",
         amount: Math.round(r.amount),
         currency: r.currency ?? "INR",
-        date: r.transaction_datetime?.slice(0, 10) ?? null,
-        transaction_type: r.transaction_type,
+        date: r.transaction_datetime ? istDate(new Date(r.transaction_datetime)) : null,
+        transaction_type: typeLabel(r),
         category: r.category,
       })),
+    // Every transaction when the set is small. With only the five largest in
+    // the evidence, "what are the transactions for these" listed those five as
+    // if they were all ten, and they did not add up to the total.
+    ...(rows.length <= ALL_TRANSACTIONS_LIMIT ? {
+      transactions: [...rows]
+        .sort((a, b) => (b.transaction_datetime ?? "").localeCompare(a.transaction_datetime ?? ""))
+        .map((r) => ({
+          merchant: r.merchant_normalized ?? "Unknown",
+          amount: Math.round(spendAmount(r) * 100) / 100,
+          currency: r.currency ?? "INR",
+          date: r.transaction_datetime ? istDate(new Date(r.transaction_datetime)) : null,
+          transaction_type: typeLabel(r),
+        })),
+    } : {}),
     period: periodLabel,
     transaction_count: rows.length,
     ...(categoryFallback ? { category_fallback: categoryFallback } : {}),
