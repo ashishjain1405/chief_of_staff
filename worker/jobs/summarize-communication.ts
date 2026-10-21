@@ -9,7 +9,7 @@ import { getCategoryForMerchant, getWalletPaymentModeLabel, resolveMerchant } fr
 import { deduplicateRawTransactions, saveNormalizedGroups, type TransactionRaw } from "@/lib/finance/dedup";
 import { resolveFollowUpDeadline } from "@/lib/tasks/deadline";
 import { LOW_SIGNAL_CATEGORIES } from "@/lib/inbox/categories";
-import { shouldCreateTask } from "@/lib/tasks/gate";
+import { shouldCreateTask, ccOnlyWithoutAsk } from "@/lib/tasks/gate";
 import { isSimilarTaskTitle } from "@/lib/tasks/similar";
 import { FEATURES } from "@/lib/features";
 
@@ -50,7 +50,7 @@ export async function summarizeCommunication(job: Job) {
 
   const { data: user } = await supabase
     .from("users")
-    .select("business_context, email")
+    .select("business_context, email, full_name")
     .eq("id", userId)
     .single();
 
@@ -66,9 +66,11 @@ export async function summarizeCommunication(job: Job) {
   // "directly addressed" versus "merely copied" stays unanswerable until
   // ingest stores it.
   const recipients = String((comm.channel_metadata as any)?.to ?? "").trim();
+  const ccRecipients = String((comm.channel_metadata as any)?.cc ?? "").trim();
   const recipientInfo = [
     user?.email ? `the founder's own address is ${user.email}` : null,
     recipients ? `this email's To: ${recipients}` : "no recipient recorded",
+    ccRecipients ? `Cc: ${ccRecipients}` : null,
   ]
     .filter(Boolean)
     .join("; ");
@@ -101,6 +103,13 @@ export async function summarizeCommunication(job: Job) {
     founderEmail: user?.email ?? null,
     isFinancialDomain: isKnownFinancialDomain(senderEmail),
     isBulk,
+    ccOnlyWithoutAsk: ccOnlyWithoutAsk({
+      to: recipients,
+      cc: ccRecipients,
+      founderEmail: user?.email,
+      founderFirstName: user?.full_name?.trim().split(/\s+/)[0],
+      body: comm.body ?? "",
+    }),
   });
 
   await supabase

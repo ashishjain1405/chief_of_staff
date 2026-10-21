@@ -124,7 +124,16 @@ export async function POST(request: Request) {
       : undefined;
 
     const systemPrompt = askSystemPrompt(userData?.business_context ?? {}, clarificationNote);
-    const contextBlock = askContextPrompt(rankedItems, intent);
+    const SOURCE_ITEM: Record<string, string> = {
+      sql_tasks: "task", sql_communications: "communication", sql_meetings: "meeting",
+      sql_transactions: "transaction", operational_insights: "insight", sql_commitments: "commitment", vector_search: "vector",
+    };
+    const found: Record<string, number> = {};
+    for (const [source, rows] of Object.entries(rawResults)) {
+      const type = SOURCE_ITEM[source];
+      if (type && Array.isArray(rows)) found[type] = (found[type] ?? 0) + rows.length;
+    }
+    const contextBlock = askContextPrompt(rankedItems, intent, found);
 
     const modelMessages = await convertToModelMessages(messages);
 

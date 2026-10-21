@@ -37,6 +37,26 @@ export function isAutomatedMail(params: {
   return isAutomatedSender(params.senderEmail) || !!params.isBulk || !!params.isFinancialDomain;
 }
 
+// Founder decision: being on Cc is not an ask. "Piyush, please test the
+// extension" with the founder copied became the founder's task, and no
+// wording of the triage prompt stopped it. Applies only when Cc was captured
+// (ingest stores it from now on) and the founder is not named in the body.
+export function ccOnlyWithoutAsk(params: {
+  to: string;
+  cc: string | null | undefined;
+  founderEmail: string | null | undefined;
+  founderFirstName: string | null | undefined;
+  body: string;
+}): boolean {
+  const founder = params.founderEmail?.trim().toLowerCase();
+  const name = params.founderFirstName?.trim();
+  if (!founder || !name || !params.cc) return false;
+  const onCc = params.cc.toLowerCase().includes(founder);
+  const onTo = params.to.toLowerCase().includes(founder);
+  const named = new RegExp(`\\b${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i").test(params.body);
+  return onCc && !onTo && !named;
+}
+
 export function taskCategoryAllowed(category: string, senderEmail: string): boolean {
   if (NO_TASK_CATEGORIES.has(category)) return false;
 
@@ -63,9 +83,11 @@ export function shouldCreateTask(params: {
   founderEmail?: string | null;
   isFinancialDomain?: boolean;
   isBulk?: boolean;
+  ccOnlyWithoutAsk?: boolean;
 }): boolean {
   const { category, requiresAction, senderEmail, founderEmail, isFinancialDomain = false, isBulk = false } = params;
   if (!requiresAction) return false;
+  if (params.ccOnlyWithoutAsk) return false;
 
   // Mail the founder wrote themselves. The backfill's Gmail query was not
   // scoped to the inbox, so it pulled in 12 of the founder's own messages and

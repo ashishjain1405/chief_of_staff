@@ -27,6 +27,7 @@ export async function processEmail(job: Job) {
 
   const from = extractHeader(headers, "from");
   const to = extractHeader(headers, "to");
+  const cc = extractHeader(headers, "cc");
   const subject = extractHeader(headers, "subject");
   const date = extractHeader(headers, "date");
   const threadId = message.threadId ?? undefined;
@@ -74,7 +75,7 @@ export async function processEmail(job: Job) {
         subject,
         body: body.substring(0, 10000), // cap raw body
         direction: "inbound",
-        channel_metadata: { from, to, labels, list_unsubscribe: listUnsubscribe || null },
+        channel_metadata: { from, to, cc: cc || null, labels, list_unsubscribe: listUnsubscribe || null },
         occurred_at: date ? new Date(date).toISOString() : new Date().toISOString(),
         importance_score: importanceScore,
       },

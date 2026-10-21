@@ -777,11 +777,10 @@
   },
   {
     "id": "review9-cc-other-person",
-    "known_gap": "Cc is not stored at ingest, and no wording of the recipients rule changed this in testing; needs Cc captured plus a code rule.",
     "subject": "Chrome extension build",
     "sender": "shridhar@example.com",
     "sender_name": "Shridhar",
-    "to": "piyush@example.com; cc: ASHISH00JAIN@gmail.com",
+    "to": "piyush@example.com",
     "body": "Piyush, please test the Chrome extension build and report back to me by Thursday.",
     "stored_category": "",
     "bulk": false,
@@ -789,14 +788,15 @@
     "expect": {
       "creates_task": false
     },
-    "why": "Work for another person; the founder is only on Cc. Final-scorecard review (round 9)."
+    "why": "Founder decision: on Cc without being asked by name is not a task. Final-scorecard review (round 9).",
+    "cc": "ASHISH00JAIN@gmail.com"
   },
   {
     "id": "review9-cc-founder-asked",
     "subject": "Invoice approval",
     "sender": "kamal@example.com",
     "sender_name": "Kamal",
-    "to": "piyush@example.com; cc: ASHISH00JAIN@gmail.com",
+    "to": "piyush@example.com",
     "body": "Piyush, FYI. Ashish, please approve the vendor invoice by Friday.",
     "stored_category": "",
     "bulk": false,
@@ -804,7 +804,8 @@
     "expect": {
       "creates_task": true
     },
-    "why": "On Cc, but asked by name: still the founder's task. Final-scorecard review (round 9)."
+    "why": "On Cc, but asked by name: still the founder's task. Final-scorecard review (round 9).",
+    "cc": "ASHISH00JAIN@gmail.com"
   },
   {
     "id": "review9-agm-notice",
@@ -899,6 +900,7 @@
   },
   {
     "id": "review9-points-expiring",
+    "known_gap": "Borderline: the identical prompt gave requires_action=true in 4 of 4 runs and false in 3 of 3 a minute later. A realistic points notice with a value or a redeem link is a task every run; this bare one-liner is not reliably.",
     "subject": "Reward points expiring",
     "sender": "rewards@bank.example",
     "sender_name": "Bank Rewards",
@@ -908,9 +910,9 @@
     "bulk": true,
     "sent": "2026-10-19",
     "expect": {
-      "creates_task": false
+      "creates_task": true
     },
-    "why": "Points are not a held balance like a gift card; financial extraction calls them promotional. Final-scorecard review (round 9)."
+    "why": "Founder decision: an expiring reward-points balance the founder holds is a task, like a gift card. Final-scorecard review (round 9)."
   },
   {
     "id": "review9-display-name-injection",
@@ -956,5 +958,35 @@
       "creates_task": true
     },
     "why": "A real compliance step; the 2024 date is past, so the deadline must be null. Final-scorecard review (round 9)."
+  },
+  {
+    "id": "synthetic-cashback-expiring",
+    "subject": "Your cashback expires soon",
+    "sender": "updates@paytm.example",
+    "sender_name": "Paytm",
+    "to": "ASHISH00JAIN@gmail.com",
+    "body": "Your Rs 350 cashback balance expires on 31 Oct 2026. Use it before it lapses.",
+    "stored_category": "",
+    "bulk": true,
+    "sent": "2026-10-19",
+    "expect": {
+      "creates_task": true
+    },
+    "why": "Founder decision: an expiring cashback balance the founder holds is a task."
+  },
+  {
+    "id": "synthetic-cashback-offer",
+    "subject": "Cashback offer",
+    "sender": "offers@paytm.example",
+    "sender_name": "Paytm",
+    "to": "ASHISH00JAIN@gmail.com",
+    "body": "Get 10% cashback up to Rs 100 on your next UPI payment. Offer valid till Sunday.",
+    "stored_category": "",
+    "bulk": true,
+    "sent": "2026-10-19",
+    "expect": {
+      "creates_task": false
+    },
+    "why": "An offer to earn cashback is marketing, not a balance the founder holds."
   }
 ]

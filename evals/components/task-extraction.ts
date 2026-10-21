@@ -33,9 +33,12 @@
 import * as fs from "fs";
 import * as path from "path";
 import { triageEmail } from "@/lib/ai/claude";
-import { shouldCreateTask } from "@/lib/tasks/gate";
+import { shouldCreateTask, ccOnlyWithoutAsk } from "@/lib/tasks/gate";
 import { isKnownFinancialDomain } from "@/lib/finance/senders";
 import { resolveFollowUpDeadline } from "@/lib/tasks/deadline";
+
+// The fixtures' founder (ASHISH00JAIN@gmail.com), for the Cc rule's "asked by name".
+const FOUNDER_FIRST_NAME = "Ashish";
 
 const FIXTURES = path.join(__dirname, "../fixtures/components/task-cases.json");
 
@@ -54,6 +57,7 @@ type Case = {
   sender: string;
   // Display name, as the worker passes it ("Name <address>").
   sender_name?: string;
+  cc?: string;
   to: string;
   body: string;
   stored_category: string;
@@ -92,7 +96,7 @@ async function main() {
 
   for (const c of cases) {
     const senderInfo = `${c.sender_name ? `${c.sender_name} ` : ""}<${c.sender}>`;
-    const recipientInfo = `the founder's own address is ${founderAddress}; this email's To: ${c.to || "unknown"}`;
+    const recipientInfo = `the founder's own address is ${founderAddress}; this email's To: ${c.to || "unknown"}${c.cc ? `; Cc: ${c.cc}` : ""}`;
     const triage = await triageEmail({}, senderInfo, c.body, recipientInfo, c.bulk, c.sent);
     firstPass.set(c.id, triage.email_category);
 
@@ -103,6 +107,7 @@ async function main() {
       founderEmail: founderAddress,
       isFinancialDomain: isKnownFinancialDomain(c.sender),
       isBulk: c.bulk,
+      ccOnlyWithoutAsk: ccOnlyWithoutAsk({ to: c.to, cc: c.cc, founderEmail: founderAddress, founderFirstName: FOUNDER_FIRST_NAME, body: c.body }),
     });
 
     const decisionOk = creates === c.expect.creates_task;

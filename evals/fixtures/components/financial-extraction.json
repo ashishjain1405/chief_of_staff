@@ -389,7 +389,7 @@
   },
   {
     "id": "FX24-total-after-cut",
-    "note": "Known gap: the body is cut at 3,000 characters before the prompt, so the total at the end never reaches the model. The total sits after the 3,000-character cut. Final-scorecard review (round 9).",
+    "note": "The total sits after the first 3,000 characters; head-and-tail keeps it. Final-scorecard review (round 9).",
     "input": {
       "sender": "statements@hdfcbank.example",
       "subject": "Credit card statement",

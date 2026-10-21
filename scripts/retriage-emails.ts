@@ -27,7 +27,7 @@ import { createClient } from "@supabase/supabase-js";
 import { triageEmail } from "@/lib/ai/claude";
 import { getSenderHint, isKnownFinancialDomain } from "@/lib/finance/senders";
 import { LOW_SIGNAL_CATEGORIES } from "@/lib/inbox/categories";
-import { shouldCreateTask } from "@/lib/tasks/gate";
+import { shouldCreateTask, ccOnlyWithoutAsk } from "@/lib/tasks/gate";
 import { resolveFollowUpDeadline } from "@/lib/tasks/deadline";
 
 const APPLY = process.argv.includes("--apply");
@@ -77,7 +77,7 @@ async function mapLimit<T, R>(items: T[], limit: number, fn: (item: T) => Promis
 }
 
 async function main() {
-  const { data: users } = await supabase.from("users").select("id, email, business_context");
+  const { data: users } = await supabase.from("users").select("id, email, full_name, business_context");
   const user = users?.[0];
   if (!user) throw new Error("no user");
 
@@ -186,6 +186,13 @@ async function main() {
         founderEmail: user.email,
         isFinancialDomain: isKnownFinancialDomain(senderEmail),
         isBulk: !!(comm.channel_metadata as any)?.list_unsubscribe,
+        ccOnlyWithoutAsk: ccOnlyWithoutAsk({
+          to: String((comm.channel_metadata as any)?.to ?? ""),
+          cc: (comm.channel_metadata as any)?.cc,
+          founderEmail: user.email,
+          founderFirstName: user.full_name?.trim().split(/\s+/)[0],
+          body: comm.body ?? "",
+        }),
       });
 
       if (APPLY) {
