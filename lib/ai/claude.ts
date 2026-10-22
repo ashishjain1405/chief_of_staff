@@ -5,6 +5,7 @@ import { z } from "zod";
 import { emailTriagePrompt, emailTriageSchema, type EmailTriage } from "./prompts";
 import { meetingSummaryPrompt, meetingSummarySchema, type MeetingSummary } from "./prompts";
 import { commitmentExtractionPrompt, commitmentExtractionSchema } from "./prompts";
+import { dailyBriefJsonSchema, dailyBriefSchema, type DailyBriefJudgement } from "./prompts";
 
 function getClient() {
   return new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -109,15 +110,26 @@ export async function generateDraft(prompt: string): Promise<string> {
   return response.choices[0].message.content ?? "";
 }
 
-export async function generateDailyBrief(prompt: string): Promise<string> {
+// Null when the reply does not parse; the brief then falls back to ranking by
+// due date rather than going out empty.
+export async function generateDailyBrief(prompt: string): Promise<DailyBriefJudgement | null> {
   const client = getClient();
   const response = await client.chat.completions.create({
     model: "gpt-4o",
-    max_tokens: 2048,
+    max_tokens: 1500,
     // At the default 1.0 the same inputs gave a different top three, and now
     // and then an invented "accounts team", from one run to the next.
-    temperature: 0.3,
+    temperature: 0.2,
     messages: [{ role: "user", content: prompt }],
+    response_format: {
+      type: "json_schema",
+      json_schema: { name: "daily_brief", strict: true, schema: dailyBriefJsonSchema as Record<string, unknown> },
+    },
   });
-  return response.choices[0].message.content ?? "";
+  try {
+    const parsed = dailyBriefSchema.safeParse(JSON.parse(response.choices[0].message.content ?? "{}"));
+    return parsed.success ? parsed.data : null;
+  } catch {
+    return null;
+  }
 }

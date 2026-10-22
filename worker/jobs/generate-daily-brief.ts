@@ -1,9 +1,9 @@
 import { Job } from "bullmq";
 import { appUrl } from "@/lib/utils";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import { generateDailyBrief } from "@/lib/ai/claude";
-import { searchMemory, getStructuredContext } from "@/lib/memory/search";
-import { dailyBriefPrompt } from "@/lib/ai/prompts";
+import { gatherBriefData } from "@/lib/brief/data";
+import { buildBrief } from "@/lib/brief/build";
+import { briefSubject, renderHtml, renderMarkdown, renderText } from "@/lib/brief/render";
 import { sendEmail } from "@/lib/integrations/gmail";
 
 
@@ -38,40 +38,13 @@ async function briefUser(supabase: SupabaseClient, userId: string) {
 
   if (!user) return;
 
-  const structured = await getStructuredContext(userId);
+  const brief = await buildBrief(await gatherBriefData(supabase, userId, user.business_context ?? {}));
 
-  // Get relevant memory for context
-  const memoryChunks = await searchMemory({
-    userId,
-    query: "priorities tasks follow-ups commitments",
-    matchCount: 10,
-    daysBack: 7,
-    matchThreshold: 0.6,
-  });
-
-  const prompt = dailyBriefPrompt({
-    ...structured,
-    businessContext: user.business_context ?? {},
-    relevantMemory: memoryChunks.map((c) => c.chunk_text),
-  });
-
-  const briefMarkdown = await generateDailyBrief(prompt);
-
-  const today = new Date().toISOString().split("T")[0];
-
-  // Save to database
+  // content holds the structured brief, whose keys tomorrow's brief compares
+  // against for "New" and "done since yesterday"; raw_markdown feeds the
+  // dashboard card. brief_date is the IST day, not the UTC one.
   await supabase.from("daily_briefs").upsert(
-    {
-      user_id: userId,
-      brief_date: today,
-      raw_markdown: briefMarkdown,
-      content: {
-        top_priorities: structured.pendingTasks.slice(0, 3),
-        follow_ups: structured.overdueFollowUps,
-        meetings_today: structured.upcomingMeetings,
-        commitments_due: structured.overdueCommitments,
-      },
-    },
+    { user_id: userId, brief_date: brief.date, raw_markdown: renderMarkdown(brief), content: brief },
     { onConflict: "user_id,brief_date" }
   );
 
@@ -80,15 +53,12 @@ async function briefUser(supabase: SupabaseClient, userId: string) {
   // than a separate email provider: no extra account, key or sender domain for
   // one message a day. Self-sent mail carries the SENT label, which the push
   // webhook skips, so the brief does not come back in as an inbox email.
-  const dateLabel = new Date().toLocaleDateString("en-US", {
-    weekday: "long", month: "long", day: "numeric", timeZone: "Asia/Kolkata",
-  });
   try {
     await sendEmail(userId, {
       to: user.email,
-      // ASCII only: sendEmail writes headers raw, without RFC 2047 encoding.
-      subject: `Your Daily Brief - ${dateLabel}`,
-      body: `${briefMarkdown}\n\nOpen the dashboard: ${appUrl("/dashboard")}`,
+      subject: briefSubject(brief),
+      body: renderText(brief, appUrl),
+      html: renderHtml(brief, appUrl),
     });
   } catch (err) {
     console.error(`[daily-brief] ${userId}: saved; email failed:`, (err as Error).message);
@@ -98,6 +68,6 @@ async function briefUser(supabase: SupabaseClient, userId: string) {
     .from("daily_briefs")
     .update({ delivered_at: new Date().toISOString() })
     .eq("user_id", userId)
-    .eq("brief_date", today);
+    .eq("brief_date", brief.date);
   console.log(`[daily-brief] ${userId}: saved and emailed`);
 }

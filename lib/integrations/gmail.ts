@@ -153,18 +153,46 @@ export async function stopGmailWatch(userId: string) {
   await gmail.users.stop({ userId: "me" });
 }
 
+// Headers are 7-bit: a subject with "₹" or "·" goes out as an RFC 2047
+// encoded word, and plain ASCII subjects are written as they always were.
+const encodeHeader = (value: string) =>
+  /[^\x20-\x7e]/.test(value) ? `=?UTF-8?B?${Buffer.from(value).toString("base64")}?=` : value;
+const base64Lines = (text: string) => Buffer.from(text).toString("base64").replace(/.{76}/g, "$&\r\n");
+
+// With html, the message is multipart/alternative and body is its plain-text
+// part; without it, the plain-text message is unchanged.
 export async function sendEmail(
   userId: string,
-  { to, subject, body, threadId }: { to: string; subject: string; body: string; threadId?: string }
+  { to, subject, body, html, threadId }: { to: string; subject: string; body: string; html?: string; threadId?: string }
 ) {
   const gmail = await getGmailClient(userId);
-  const message = [
-    `To: ${to}`,
-    `Subject: ${subject}`,
-    "Content-Type: text/plain; charset=utf-8",
-    "",
-    body,
-  ].join("\n");
+  const boundary = `alt_${Date.now().toString(36)}${Math.random().toString(36).slice(2)}`;
+  const message = html
+    ? [
+        `To: ${to}`,
+        `Subject: ${encodeHeader(subject)}`,
+        "MIME-Version: 1.0",
+        `Content-Type: multipart/alternative; boundary="${boundary}"`,
+        "",
+        `--${boundary}`,
+        "Content-Type: text/plain; charset=utf-8",
+        "Content-Transfer-Encoding: base64",
+        "",
+        base64Lines(body),
+        `--${boundary}`,
+        "Content-Type: text/html; charset=utf-8",
+        "Content-Transfer-Encoding: base64",
+        "",
+        base64Lines(html),
+        `--${boundary}--`,
+      ].join("\r\n")
+    : [
+        `To: ${to}`,
+        `Subject: ${encodeHeader(subject)}`,
+        "Content-Type: text/plain; charset=utf-8",
+        "",
+        body,
+      ].join("\n");
 
   const encoded = Buffer.from(message).toString("base64url");
   await gmail.users.messages.send({
