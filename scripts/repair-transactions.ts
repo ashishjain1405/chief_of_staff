@@ -35,6 +35,9 @@
  * F. Known merchants typed as transfers (an Uber Cash ride), and rides typed
  *    food_order.
  *
+ * H. (with B) Dates with no time, stored as midnight UTC - "05:30" - move to
+ *    the email's arrival time when it arrived that day.
+ *
  * G. Shipping updates counted as purchases. Each is relabelled "shipping"; its
  *    own row is removed when an earlier payment covers it and kept when it is
  *    the only record of the purchase.
@@ -94,6 +97,7 @@ function statedTime(body: string): number | null {
   return null;
 }
 
+const istDay = (iso: string) => new Date(iso).toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
 const ist = (iso: string) =>
   new Date(iso).toLocaleString("en-IN", { timeZone: "Asia/Kolkata", day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: false });
 
@@ -209,7 +213,12 @@ async function planTimes(): Promise<Plan["times"]> {
     else buckets["over 5h45 after"]++;
     const said = stated.get(r.communication_id);
     const lateAlert = said != null && Math.abs((Date.parse(r.transaction_datetime) - said) / 60000 - IST_OFFSET_MIN) <= 2;
-    if ((delta >= SHIFTED_MIN.from && delta <= SHIFTED_MIN.to) || lateAlert) {
+    // H. A date with no time, stored as midnight UTC, on the day the email
+    // arrived: the arrival time, as the worker now does.
+    const dateOnly = /T00:00:00(\.0+)?(\+00:00|Z)$/.test(r.transaction_datetime) && istDay(at) === istDay(r.transaction_datetime);
+    if (dateOnly) {
+      shifted.push({ id: r.id, from: r.transaction_datetime, deltaMin: Math.round(delta), to: new Date(at).toISOString(), merchant: r.merchant_normalized, amount: r.amount });
+    } else if ((delta >= SHIFTED_MIN.from && delta <= SHIFTED_MIN.to) || lateAlert) {
       shifted.push({
         id: r.id, from: r.transaction_datetime, deltaMin: Math.round(delta),
         to: new Date(Date.parse(r.transaction_datetime) - IST_OFFSET_MIN * 60000).toISOString(),

@@ -297,6 +297,8 @@ export async function summarizeCommunication(job: Job) {
 // are wrong by years, not by weeks.
 const MAX_BACKDATE_MS = 90 * 24 * 60 * 60 * 1000;
 
+const istDay = (iso: string) => new Date(iso).toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
+
 // A transaction cannot have happened in the future, but extraction sometimes
 // picks up a due date, delivery date, or expiry instead. Those rows then skewed
 // the finance tab and sat permanently inside the dedup window. Falls back to when
@@ -314,6 +316,11 @@ function resolveTransactionDatetime(
   // 5h30m late, often on the next day: 168 transactions. A time with no zone
   // is IST.
   const trimmed = extracted.trim();
+  // A date with no time was stored as midnight UTC - "05:30" on 148 rows - so a
+  // receipt could never match the bank alert from later that day. On the day
+  // the email arrived, its arrival time is the better guess.
+  const dateOnly = /^(\d{4}-\d{2}-\d{2})(?:[T ]00:00(?::00(?:\.0+)?)?)?$/.exec(trimmed)?.[1];
+  if (dateOnly && occurredAt && istDay(occurredAt) === dateOnly) return occurredAt;
   if (/[T ]\d{2}:\d{2}(:\d{2}(\.\d+)?)?$/.test(trimmed)) extracted = `${trimmed.replace(" ", "T")}+05:30`;
   const parsed = new Date(extracted).getTime();
   if (Number.isNaN(parsed)) return occurredAt;
