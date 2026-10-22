@@ -309,6 +309,12 @@ function resolveTransactionDatetime(
   // null here kept the row out of every dedup window, so it never reached the
   // finance tab - 65 transactions were stranded that way.
   if (!extracted) return occurredAt;
+  // Bank alerts give a local time with no zone ("19-10-2026 21:25:36") and
+  // extraction passes it on as "2026-10-19T21:25:36", which was stored as UTC -
+  // 5h30m late, often on the next day: 168 transactions. A time with no zone
+  // is IST.
+  const trimmed = extracted.trim();
+  if (/[T ]\d{2}:\d{2}(:\d{2}(\.\d+)?)?$/.test(trimmed)) extracted = `${trimmed.replace(" ", "T")}+05:30`;
   const parsed = new Date(extracted).getTime();
   if (Number.isNaN(parsed)) return occurredAt;
 

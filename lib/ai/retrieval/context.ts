@@ -165,7 +165,7 @@ function swapsOneSlot(query: string): boolean {
   return FOLLOW_UP_LEAD.test(query) || TIME_ONLY.test(query);
 }
 
-const SPEND_CATEGORIES = [...new Set(Object.values(MERCHANT_DATA).map((m) => m.category))];
+const SPEND_CATEGORIES = [...new Set(Object.values(MERCHANT_DATA).flatMap((m) => (m.category ? [m.category] : [])))];
 
 // The new value in "what about transport?" replaces the slot it belongs to.
 // Left to gap-filling, the previous turn's food category survived and the

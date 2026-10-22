@@ -16,6 +16,7 @@ async function main() {
   // Build alias → { canonical, category } lookup (same as normalize.ts)
   const aliasMap: Record<string, { canonical: string; category: string }> = {};
   for (const [canonical, data] of Object.entries(MERCHANT_DATA)) {
+    if (!data.category) continue;
     for (const alias of data.aliases) {
       aliasMap[alias.toUpperCase()] = { canonical, category: data.category };
     }

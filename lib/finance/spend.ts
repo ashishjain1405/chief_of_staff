@@ -28,6 +28,12 @@ const CREDITS = new Set(["refund", "cashback"]);
 // match took "HDFC ERGO GIC", an insurance premium, for the bank.
 const BANK = /\bbank\b|^(sbi|pnb|icici|hdfc|axis|kotak|amex|american express|indusind|idfc|rbl)$/i;
 
+// Buying a gift voucher only moves money into a balance, like a wallet top-up.
+// It is spent when the voucher is: an Uber voucher from GYFTR became Uber Cash
+// rides, which count as transport. Counting both put about ₹52k of Aug-Oct
+// spending in twice.
+const VOUCHER_SELLERS = new Set(["GYFTR"]);
+
 // status is free text from extraction, so a failure arrives as "failed",
 // "declined", "Cancelled"… The pages filtered with .neq("status", "failed"),
 // which in SQL also drops every row whose status is NULL. Matched in code
@@ -49,6 +55,7 @@ export function isCardBillPayment(t: Txn): boolean {
 export function notSpendReason(t: Txn): string | null {
   if (isFailedTransaction(t)) return "failed";
   if (isCardBillPayment(t)) return "card bill payment";
+  if (VOUCHER_SELLERS.has(t.merchant_normalized?.trim() ?? "")) return "gift voucher";
   // The type alone misses investments paid another way: an IPO application by
   // UPI to NSE was a "upi_payment" and an ETF buy a "purchase", both counted as
   // spending, and dividends typed "refund" were subtracted from it. Extraction

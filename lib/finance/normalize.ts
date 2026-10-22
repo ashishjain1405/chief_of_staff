@@ -1,4 +1,6 @@
-export const MERCHANT_DATA: Record<string, { aliases: string[]; domain: string; category: string }> = {
+// category null: the name is known but not what was bought, so extraction's
+// category stands. domain "": the merchant only reaches you through bank alerts.
+export const MERCHANT_DATA: Record<string, { aliases: string[]; domain: string; category: string | null }> = {
   "Amazon":            { domain: "amazon.in",          category: "ecommerce",            aliases: ["AMAZON","AMAZON IN","AMAZON INDIA","AMAZON SELLER SERVICES","AMZN","AMZN MKTPLACE","AMZN MKTP","AMAZON RETAIL","AMAZON PRIME","WWW AMAZON IN"] },
   "Flipkart":          { domain: "flipkart.com",        category: "ecommerce",            aliases: ["FLIPKART","FKRT","FKRT INTERNET","FLIPKART INTERNET","FLIPKART INDIA"] },
   "Myntra":            { domain: "myntra.com",          category: "fashion",              aliases: ["MYNTRA","MYNTRA DESIGNS","MYNTRA.COM"] },
@@ -51,6 +53,15 @@ export const MERCHANT_DATA: Record<string, { aliases: string[]; domain: string; 
   "Prime Video":       { domain: "primevideo.com",      category: "subscriptions",        aliases: ["PRIME VIDEO","AMAZON PRIME","AMZN PRIME"] },
   "Disney+ Hotstar":   { domain: "hotstar.com",         category: "subscriptions",        aliases: ["HOTSTAR","DISNEY HOTSTAR","DISNEY+ HOTSTAR"] },
   "JioCinema":         { domain: "jiocinema.com",       category: "subscriptions",        aliases: ["JIOCINEMA","JIO CINEMA"] },
+  "BookMyShow":        { domain: "bookmyshow.com",      category: "entertainment",        aliases: ["BOOKMYSHOW","BOOK MY SHOW","BIGTREE ENTERTAINMENT"] },
+  "PVR INOX":          { domain: "pvrinox.com",         category: "entertainment",        aliases: ["PVR","PVR LIMITED","PVR LTD","PVR INOX","PVR INOX LIMITED","PVRINOX","INOX LEISURE","INOX LEISURE LIMITED"] },
+  "Honey Dough":       { domain: "",                    category: "restaurants",          aliases: ["HONEY DOUGH","WLI*HONEY DOUGH","WLI_HONEY_DOUGH"] },
+  "Indus Flavour":     { domain: "",                    category: "restaurants",          aliases: ["INDUS FLAVOUR","INDUS_FLAVOUR"] },
+  "Bata":              { domain: "bata.in",             category: "fashion",              aliases: ["BATA","BATA INDIA","BATA INDIA LIMITED"] },
+  "Mediscape Imaging": { domain: "",                    category: "healthcare",           aliases: ["MEDISCAPE","MEDISCAPE IMAGING"] },
+  "The Whole Truth Foods": { domain: "thewholetruthfoods.com", category: "groceries",     aliases: ["THE WHOLE TRUTH","THE_WHOLE_TRUTH"] },
+  "GYFTR":             { domain: "gyftr.com",           category: null,                   aliases: ["GYFTR"] },
+  "Svaras":            { domain: "",                    category: null,                   aliases: ["SVARAS","RAZ*SVARAS"] },
   "Apple":             { domain: "apple.com",           category: "technology",           aliases: ["APPLE","APPLE.COM","APPLE SERVICES","APPLE BILL","APPLE ONLINE"] },
   "Google":            { domain: "google.com",          category: "technology",           aliases: ["GOOGLE","GOOGLE CLOUD","GOOGLE STORAGE","GOOGLE PLAY","GOOGLE ADS","GOOGLE *SERVICES"] },
   "Microsoft":         { domain: "microsoft.com",       category: "technology",           aliases: ["MICROSOFT","MSFT","MICROSOFT 365","AZURE","XBOX"] },
@@ -113,7 +124,7 @@ for (const [canonical, data] of Object.entries(MERCHANT_DATA)) {
 
 const DOMAIN_LOOKUP: Record<string, string> = {};
 for (const [canonical, data] of Object.entries(MERCHANT_DATA)) {
-  DOMAIN_LOOKUP[data.domain] = canonical;
+  if (data.domain) DOMAIN_LOOKUP[data.domain] = canonical;
 }
 
 // Longest first, so "AMAZON PRIME VIDEO" resolves via "AMAZON PRIME" before "AMAZON".
