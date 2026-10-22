@@ -1,4 +1,4 @@
-import { merchantKey } from "@/lib/finance/normalize";
+import { MERCHANT_DATA, getCategoryForMerchant, getDomainForMerchant, merchantKey } from "@/lib/finance/normalize";
 
 export type TransactionRaw = {
   id: string;
@@ -18,6 +18,7 @@ export type TransactionRaw = {
   recurring_frequency: string | null;
   status: string | null;
   merchant_name: string | null;
+  raw_sender?: string | null;
 };
 
 export type NormalizedTransaction = {
@@ -93,6 +94,58 @@ function isSameOrder(a: TransactionRaw, b: TransactionRaw): boolean {
   return Math.abs(a.amount! - b.amount!) / Math.max(a.amount!, b.amount!) <= ORDER_AMOUNT_TOLERANCE;
 }
 
+// A shipping update - "picked up", "out for delivery", "delivered" - repeats a
+// purchase already paid for. Courier mail carries a tracking number, not the
+// order ID, so the order rule never joined it: one ₹525 Svaras order was
+// counted six times. Such a row is stored as event_kind "shipping", kept out
+// of dedup windows, and counts only when nothing paid for it.
+const SHIPPING_SUBJECT = /\b(shipped|dispatched|picked up|out for delivery|delivered|in transit|on (its|the) way|arriving|has left)\b/i;
+export function isShippingUpdate(subject: string): boolean {
+  return SHIPPING_SUBJECT.test(subject);
+}
+
+// Couriers name themselves where the shop should be ("Velocity").
+const COURIERS = /^(velocity|delhivery|blue ?dart|shiprocket|ekart|xpressbees|dtdc|ecom express|shadowfax)\b/i;
+const SHIPPING_LOOKBACK_MS = 14 * 24 * 60 * 60 * 1000;
+
+type Dated = { merchant_normalized: string | null; amount: number | null; transaction_datetime: string | null };
+
+// Whether `payment` is the purchase `shipping` reports on: in the two weeks
+// before it, the same merchant within the order tolerance - or, when only a
+// courier is named, the same amount.
+export function isPaymentForShipping(payment: Dated, shipping: Dated): boolean {
+  if (!payment.amount || !shipping.amount || !payment.transaction_datetime || !shipping.transaction_datetime) return false;
+  const tp = Date.parse(payment.transaction_datetime), ts = Date.parse(shipping.transaction_datetime);
+  if (tp > ts + 60 * 60 * 1000 || tp < ts - SHIPPING_LOOKBACK_MS) return false;
+  const gap = Math.abs(payment.amount - shipping.amount) / Math.max(payment.amount, shipping.amount);
+  if (!shipping.merchant_normalized || COURIERS.test(shipping.merchant_normalized)) return Math.abs(payment.amount - shipping.amount) <= 0.5;
+  return merchantSimilarity(payment.merchant_normalized, shipping.merchant_normalized) >= 0.85 && gap <= ORDER_AMOUNT_TOLERANCE;
+}
+
+const ALERT_SOURCES = new Set(["BANK", "CREDIT_CARD", "UPI", "WALLET"]);
+const RECEIPT_WINDOW_MS = 3 * 60 * 60 * 1000;
+const senderDomain = (r: TransactionRaw) => (r.raw_sender ?? "").split("@")[1]?.toLowerCase() ?? "";
+
+// A card alert names whoever charged the card - "ZOMATO", "RELIANCE DIGITAL"
+// for a Netmeds order - and the receipt names the restaurant or the brand, so
+// the merchants never matched and 14 payments were counted twice. An alert
+// and a receipt for exactly the same amount within 15 minutes are one payment
+// whatever the names; within 3 hours, and the usual tolerance, when the
+// receipt came from the alert's merchant itself, as Zomato's order email
+// arrives with the food. Near amounts are not enough without the names: a
+// ₹5,000 voucher and the ₹4,952 order it paid for are two events. Two alerts
+// never match this way: they are two payments.
+function isAlertAndReceipt(a: TransactionRaw, b: TransactionRaw, gapMs: number): boolean {
+  const aAlert = ALERT_SOURCES.has(a.sender_type ?? "");
+  if (aAlert === ALERT_SOURCES.has(b.sender_type ?? "")) return false;
+  if (gapMs <= WINDOW_MS && Math.abs(a.amount! - b.amount!) <= 0.5) return true;
+  if (gapMs > RECEIPT_WINDOW_MS) return false;
+  const [alert, receipt] = aAlert ? [a, b] : [b, a];
+  const domain = getDomainForMerchant(alert.merchant_normalized);
+  const from = senderDomain(receipt);
+  return !!domain && (from === domain || from.endsWith(`.${domain}`));
+}
+
 function areDuplicates(a: TransactionRaw, b: TransactionRaw): boolean {
   if (!a.amount || !b.amount) return false;
   if (isSameOrder(a, b)) return true;
@@ -100,6 +153,8 @@ function areDuplicates(a: TransactionRaw, b: TransactionRaw): boolean {
 
   const ta = a.transaction_datetime ? new Date(a.transaction_datetime).getTime() : 0;
   const tb = b.transaction_datetime ? new Date(b.transaction_datetime).getTime() : 0;
+  const refundMismatch = (a.transaction_type === "refund") !== (b.transaction_type === "refund");
+  if (!refundMismatch && isAlertAndReceipt(a, b, Math.abs(ta - tb))) return true;
   if (Math.abs(ta - tb) > WINDOW_MS) return false;
 
   // Refunds never merge with non-refunds
@@ -166,7 +221,17 @@ export function deduplicateRawTransactions(rows: TransactionRaw[]): NormalizedTr
     // The bank alert wins on priority but usually names no merchant; the
     // receipt in the same group does. Taking only the primary's left the
     // transaction merchant-less even though the group knew it.
-    const withMerchant = [primary, ...group].find((r) => r.merchant_normalized);
+    // The alert may name the company ("RELIANCE DIGITAL") where the receipt,
+    // sent by the merchant itself, names the brand ("Netmeds"); that wins, then
+    // any name the dictionary knows - "Zomato" over the restaurant it paid.
+    const known = (r: TransactionRaw) => !!r.merchant_normalized && r.merchant_normalized in MERCHANT_DATA;
+    const selfSent = (r: TransactionRaw) => {
+      const domain = getDomainForMerchant(r.merchant_normalized);
+      const from = senderDomain(r);
+      return !!domain && (from === domain || from.endsWith(`.${domain}`));
+    };
+    const withMerchant = group.find(selfSent) ?? [primary, ...group].find(known) ?? [primary, ...group].find((r) => r.merchant_normalized);
+    const knownCategory = withMerchant?.merchant_normalized ? getCategoryForMerchant(withMerchant.merchant_normalized) : null;
 
     return {
       user_id: primary.user_id,
@@ -174,7 +239,7 @@ export function deduplicateRawTransactions(rows: TransactionRaw[]): NormalizedTr
       merchant_normalized: withMerchant?.merchant_normalized ?? null,
       amount: primary.amount ?? 0,
       currency: primary.currency ?? "INR",
-      category: primary.category ?? withMerchant?.category ?? null,
+      category: knownCategory ?? primary.category ?? withMerchant?.category ?? null,
       transaction_type: primary.transaction_type,
       transaction_datetime: earliest.transaction_datetime ?? primary.transaction_datetime ?? new Date().toISOString(),
       is_recurring: primary.is_recurring,

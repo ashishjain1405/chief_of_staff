@@ -5,8 +5,8 @@ import { embedAndStoreChunks, updateCommunicationEmbedding } from "@/lib/memory/
 import { classifySender, getSenderHint, shouldRunStage1, isKnownFinancialDomain } from "@/lib/finance/senders";
 import { enqueueOperationalState } from "@/lib/queues";
 import { extractFinancialTransaction } from "@/lib/ai/extractors/financial";
-import { getCategoryForMerchant, getWalletPaymentModeLabel, resolveMerchant } from "@/lib/finance/normalize";
-import { deduplicateRawTransactions, saveNormalizedGroups, type TransactionRaw } from "@/lib/finance/dedup";
+import { getCategoryForMerchant, getWalletPaymentModeLabel, resolveMerchant, resolveTransactionType } from "@/lib/finance/normalize";
+import { deduplicateRawTransactions, isPaymentForShipping, isShippingUpdate, saveNormalizedGroups, type TransactionRaw } from "@/lib/finance/dedup";
 import { resolveFollowUpDeadline } from "@/lib/tasks/deadline";
 import { LOW_SIGNAL_CATEGORIES } from "@/lib/inbox/categories";
 import { shouldCreateTask, ccOnlyWithoutAsk } from "@/lib/tasks/gate";
@@ -390,13 +390,20 @@ async function runFinancialExtraction(
 
   const transactionDatetime = resolveTransactionDatetime(raw?.transaction_datetime ?? null, occurredAt);
 
+  // See isShippingUpdate. An update sharing an order ID with another email
+  // stays "completed": the order rule already joins it, and a delivered total
+  // can be the final amount.
+  const shipping = raw?.event_kind === "completed" && isShippingUpdate(subject)
+    && !(await sharesOrderId(supabase, userId, communicationId, [raw?.transaction_id, raw?.reference_id]));
+  const eventKind = shipping ? "shipping" : (raw?.event_kind ?? null);
+
   await (supabase.from as any)("transactions_raw").upsert(
     {
       user_id: userId,
       communication_id: communicationId,
       is_financial_email: extraction.is_financial_email,
       confidence: extraction.confidence,
-      transaction_type: raw?.transaction_type ?? null,
+      transaction_type: resolveTransactionType(raw?.transaction_type, merchantNormalized),
       category,
       amount: raw?.amount ?? null,
       currency: raw?.currency ?? "INR",
@@ -415,7 +422,7 @@ async function runFinancialExtraction(
       status: raw?.status ?? null,
       sender_type: resolvedSenderType,
       raw_sender: senderEmail,
-      event_kind: raw?.event_kind ?? null,
+      event_kind: eventKind,
       needs_review: needsReview,
       extracted_at: new Date().toISOString(),
     },
@@ -433,9 +440,53 @@ async function runFinancialExtraction(
 
   // Only money that moved becomes a transaction. A bill due, renewal quote or
   // statement stays as a raw row for reference but is never normalized.
-  if (!needsReview && transactionDatetime && raw?.event_kind === "completed") {
+  if (!needsReview && transactionDatetime && eventKind === "completed") {
     await runDedup(supabase, userId, transactionDatetime, [raw?.transaction_id, raw?.reference_id]);
+  } else if (!needsReview && transactionDatetime && shipping) {
+    await countShippingIfUnpaid(supabase, userId, communicationId, {
+      merchant_normalized: merchantNormalized, amount: raw?.amount ?? null, transaction_datetime: transactionDatetime,
+    });
   }
+}
+
+const orderIdsOf = (values: (string | null | undefined)[]) =>
+  [...new Set(values.map((v) => v?.trim()).filter((v): v is string => !!v && v.length >= 6))];
+const quoteIds = (ids: string[]) => ids.map((v) => `"${v.replace(/["\\]/g, "")}"`).join(",");
+
+async function sharesOrderId(supabase: any, userId: string, communicationId: string, values: (string | null | undefined)[]): Promise<boolean> {
+  const ids = orderIdsOf(values);
+  if (!ids.length) return false;
+  const { data, error } = await supabase
+    .from("transactions_raw")
+    .select("id")
+    .eq("user_id", userId)
+    .neq("communication_id", communicationId)
+    .or(`transaction_id.in.(${quoteIds(ids)}),reference_id.in.(${quoteIds(ids)})`)
+    .limit(1);
+  if (error) throw new Error(`[shipping] order lookup failed: ${error.message}`);
+  return (data ?? []).length > 0;
+}
+
+// The only record of a purchase still counts: a Myntra order whose
+// confirmation never reached the inbox shows up only as "out for delivery".
+async function countShippingIfUnpaid(
+  supabase: any,
+  userId: string,
+  communicationId: string,
+  shipping: { merchant_normalized: string | null; amount: number | null; transaction_datetime: string }
+) {
+  const at = new Date(shipping.transaction_datetime).getTime();
+  const { data: candidates, error } = await supabase
+    .from("transactions_normalized")
+    .select("merchant_normalized, amount, transaction_datetime")
+    .eq("user_id", userId)
+    .gte("transaction_datetime", new Date(at - 14 * 24 * 60 * 60 * 1000).toISOString())
+    .lte("transaction_datetime", new Date(at + 60 * 60 * 1000).toISOString());
+  if (error) throw new Error(`[shipping] payment lookup failed: ${error.message}`);
+  if ((candidates ?? []).some((p: any) => isPaymentForShipping(p, shipping))) return;
+
+  const { data: row } = await supabase.from("transactions_raw").select("*").eq("communication_id", communicationId).single();
+  if (row) await saveNormalizedGroups(supabase, userId, deduplicateRawTransactions([row as TransactionRaw]));
 }
 
 const DEDUP_WINDOW_MS = 24 * 60 * 60 * 1000;

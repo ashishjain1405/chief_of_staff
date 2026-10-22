@@ -65,9 +65,17 @@ function extractDomain(email: string): string {
   return at >= 0 ? email.slice(at + 1).toLowerCase() : email.toLowerCase();
 }
 
+// Banks moved their mail to RBI's .bank.in domains (hdfcbank.bank.in,
+// axis.bank.in), which the list above predates: every alert from them was an
+// UNKNOWN sender, so dedup could not tell a card alert from a receipt. The
+// domain is reserved for regulated banks.
+function isBankDomain(domain: string): boolean {
+  return BANK_DOMAINS.has(domain) || domain.endsWith(".bank.in");
+}
+
 export function classifySender(email: string): SenderType {
   const domain = extractDomain(email);
-  if (BANK_DOMAINS.has(domain)) return "BANK";
+  if (isBankDomain(domain)) return "BANK";
   if (UPI_DOMAINS.has(domain)) return "UPI";
   if (WALLET_DOMAINS.has(domain)) return "WALLET";
   if (PAYMENT_GATEWAY_DOMAINS.has(domain)) return "PAYMENT_GATEWAY";
@@ -78,7 +86,7 @@ export function classifySender(email: string): SenderType {
 export function isKnownFinancialDomain(email: string): boolean {
   const domain = extractDomain(email);
   return (
-    BANK_DOMAINS.has(domain) ||
+    isBankDomain(domain) ||
     UPI_DOMAINS.has(domain) ||
     WALLET_DOMAINS.has(domain) ||
     PAYMENT_GATEWAY_DOMAINS.has(domain) ||

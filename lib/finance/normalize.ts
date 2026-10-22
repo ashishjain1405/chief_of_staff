@@ -17,7 +17,7 @@ export const MERCHANT_DATA: Record<string, { aliases: string[]; domain: string; 
   "Swiggy":            { domain: "swiggy.in",           category: "food_delivery",        aliases: ["SWIGGY","SWIGGY LIMITED","SWIGGY INSTAMART","SWIGGY ONLINE","BUNDL TECHNOLOGIES","SWIGGY FOOD"] },
   "Zomato":            { domain: "zomato.com",          category: "food_delivery",        aliases: ["ZOMATO","ZOMATO LIMITED","ZOMATO ONLINE","ZOMATO MEDIA"] },
   "EatSure":           { domain: "eatsure.com",         category: "food_delivery",        aliases: ["EATSURE","EAT SURE"] },
-  "Domino's":          { domain: "dominos.co.in",       category: "restaurants",          aliases: ["DOMINOS","DOMINO'S","PIZZAONLINE DOMINOS"] },
+  "Domino's":          { domain: "dominos.co.in",       category: "restaurants",          aliases: ["DOMINOS","DOMINO'S","PIZZAONLINE DOMINOS","JUBILANT FOODWORKS"] },
   "McDelivery":        { domain: "mcdelivery.co.in",    category: "restaurants",          aliases: ["MCDELIVERY","MCDONALDS","MC DONALDS"] },
   "Burger King":       { domain: "burgerking.in",       category: "restaurants",          aliases: ["BURGER KING","BURGERKING"] },
   "KFC":               { domain: "kfc.co.in",           category: "restaurants",          aliases: ["KFC","KFC INDIA"] },
@@ -59,7 +59,8 @@ export const MERCHANT_DATA: Record<string, { aliases: string[]; domain: string; 
   "Indus Flavour":     { domain: "",                    category: "restaurants",          aliases: ["INDUS FLAVOUR","INDUS_FLAVOUR"] },
   "Bata":              { domain: "bata.in",             category: "fashion",              aliases: ["BATA","BATA INDIA","BATA INDIA LIMITED"] },
   "Mediscape Imaging": { domain: "",                    category: "healthcare",           aliases: ["MEDISCAPE","MEDISCAPE IMAGING"] },
-  "The Whole Truth Foods": { domain: "thewholetruthfoods.com", category: "groceries",     aliases: ["THE WHOLE TRUTH","THE_WHOLE_TRUTH"] },
+  "The Whole Truth Foods": { domain: "thewholetruthfoods.com", category: "groceries",     aliases: ["THE WHOLE TRUTH","THE_WHOLE_TRUTH","FITSHIT HEALTH SOLUTIONS"] },
+  "HP Gas":            { domain: "hpcl.co.in",          category: "utilities",            aliases: ["HP GAS","HINDUSTAN PETROLEUM"] },
   "GYFTR":             { domain: "gyftr.com",           category: null,                   aliases: ["GYFTR"] },
   "Svaras":            { domain: "",                    category: null,                   aliases: ["SVARAS","RAZ*SVARAS"] },
   "Apple":             { domain: "apple.com",           category: "technology",           aliases: ["APPLE","APPLE.COM","APPLE SERVICES","APPLE BILL","APPLE ONLINE"] },
@@ -172,6 +173,21 @@ export function merchantMatchFilter(column: string, names: string[]): string {
 
 export function getCategoryForMerchant(normalized: string): string | null {
   return MERCHANT_DATA[normalized]?.category ?? null;
+}
+
+// Money is never "transferred" to Uber or BookMyShow - it is spent there. The
+// model typed an Uber Cash ride p2p_transfer, uncounted, on one of eight
+// identical receipts. Payment apps and brokers are excluded: sending money
+// through them is a transfer.
+const TRANSFER_TYPES = new Set(["bank_transfer", "p2p_transfer"]);
+export function resolveTransactionType(type: string | null | undefined, merchantNormalized: string | null): string | null {
+  const category = merchantNormalized ? MERCHANT_DATA[merchantNormalized]?.category : undefined;
+  if (TRANSFER_TYPES.has(type ?? "") && category !== undefined && category !== "payments" && category !== "investments") return "purchase";
+  return type ?? null;
+}
+
+export function getDomainForMerchant(normalized: string | null | undefined): string | null {
+  return (normalized && MERCHANT_DATA[normalized]?.domain) || null;
 }
 
 export function getMerchantFromDomain(domain: string): string | null {

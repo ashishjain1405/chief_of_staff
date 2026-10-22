@@ -1,7 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { classifySender, shouldRunStage1 } from "@/lib/finance/senders";
 import { extractFinancialTransaction } from "@/lib/ai/extractors/financial";
-import { getCategoryForMerchant, resolveMerchant } from "@/lib/finance/normalize";
+import { getCategoryForMerchant, resolveMerchant, resolveTransactionType } from "@/lib/finance/normalize";
 import { deduplicateRawTransactions, saveNormalizedGroups, type TransactionRaw } from "@/lib/finance/dedup";
 
 async function main() {
@@ -82,7 +82,7 @@ async function main() {
             communication_id: comm.id,
             is_financial_email: extraction.is_financial_email,
             confidence: extraction.confidence,
-            transaction_type: raw?.transaction_type ?? null,
+            transaction_type: resolveTransactionType(raw?.transaction_type, merchantNormalized),
             category,
             amount: raw?.amount ?? null,
             currency: raw?.currency ?? "INR",
