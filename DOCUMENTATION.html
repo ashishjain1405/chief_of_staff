@@ -1635,7 +1635,7 @@
   <table class="detail-table">
     <thead><tr><th>Route</th><th>Loads</th><th>Mutations</th></tr></thead>
     <tbody>
-      <tr><td><code>/dashboard</code></td><td>Pending tasks, latest daily brief, upcoming meetings, open action emails (commitments when flagged on)</td><td>—</td></tr>
+      <tr><td><code>/dashboard</code></td><td>Sections, each with one way in: at-a-glance tiles, priorities, today's schedule, emails needing action, an Explore panel linking every area, and the latest daily brief rendered from its markdown (commitments when flagged on); greeting and dates in IST</td><td>—</td></tr>
       <tr><td><code>/inbox</code></td><td><code>get_category_counts</code> + communications</td><td>—</td></tr>
       <tr><td><code>/inbox/[id]</code></td><td>The email, sender, drafts; HTML body fetched live from Gmail (never stored)</td><td>Buttons call the action routes, drafts and send-reply</td></tr>
       <tr><td><code>/inbox/spend</code>, <code>/finance</code></td><td><code>transactions_normalized</code> (6 months, all rows; <code>/finance</code> cards and categories cover the calendar month in IST, shown as stat tiles and vertical column charts from <code>components/finance/</code>)</td><td>—</td></tr>

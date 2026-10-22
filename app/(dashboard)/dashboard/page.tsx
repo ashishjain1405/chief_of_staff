@@ -3,9 +3,15 @@ export const dynamic = "force-dynamic";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AlertTriangle, CalendarDays, Handshake, Inbox, ListChecks, Newspaper, Sparkles, Compass } from "lucide-react";
 import { FEATURES } from "@/lib/features";
+import { SectionCard, EmptyState } from "@/components/dashboard/section-card";
+import { StatLink } from "@/components/dashboard/stat-link";
+import { TaskList, MeetingList, EmailList, CommitmentList } from "@/components/dashboard/lists";
+import { Brief } from "@/components/dashboard/brief";
+import { Explore } from "@/components/dashboard/explore";
+
+const IST = "Asia/Kolkata";
 
 // Slots in the Top Priorities card.
 const TASK_SLOTS = 5;
@@ -101,7 +107,7 @@ export default async function DashboardPage() {
   const ingestionWarning = !google
     ? null
     : !google.is_active
-      ? `Google is disconnected${google.metadata?.auth_error?.at ? ` since ${new Date(google.metadata.auth_error.at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}` : ""} — Gmail and Calendar have stopped syncing.`
+      ? `Google is disconnected${google.metadata?.auth_error?.at ? ` since ${new Date(google.metadata.auth_error.at).toLocaleDateString("en-IN", { day: "numeric", month: "short", timeZone: IST })}` : ""} — Gmail and Calendar have stopped syncing.`
       : hoursSinceEmail !== null && hoursSinceEmail >= 24
         ? `No new email in ${hoursSinceEmail} hours — Gmail sync may have stopped.`
         : null;
@@ -147,244 +153,93 @@ export default async function DashboardPage() {
       ).data ?? []
     : [];
 
-  const priorityColor = (p: string) =>
-    p === "high" ? "destructive" : p === "medium" ? "secondary" : "outline";
-
-  const stats = [
-    {
-      label: "Action needed",
-      value: actionEmails.length,
-      href: "/inbox?cat=important",
-      cta: "Review inbox",
-      border: "border-l-red-400",
-      dot: "bg-red-400",
-    },
-    {
-      label: "Due soon or overdue",
-      value: dueSoonCountRes.count ?? 0,
-      href: "/tasks",
-      cta: "View tasks",
-      border: "border-l-amber-400",
-      dot: "bg-amber-400",
-    },
-    {
-      label: "Meetings today",
-      value: meetings.length,
-      href: "/meetings",
-      cta: "See schedule",
-      border: "border-l-blue-400",
-      dot: "bg-blue-400",
-    },
-    ...(FEATURES.commitments
-      ? [{
-          label: "Pending commitments",
-          value: commitments.length,
-          href: "/commitments",
-          cta: "Check commitments",
-          border: "border-l-violet-400",
-          dot: "bg-violet-400",
-        }]
-      : []),
-  ];
+  // Presentation only below. The needs-action query is capped at 5 rows, so a
+  // full list means "at least five", not five.
+  const today = new Date().toLocaleDateString("en-CA", { timeZone: IST });
+  const dateLine = new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", timeZone: IST });
+  const actionCount = actionEmails.length >= 5 ? "5+" : String(actionEmails.length);
 
   return (
-    <div className="p-6 space-y-6 max-w-5xl">
-      {ingestionWarning && (
-        <div className="flex items-center justify-between gap-4 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-          <span>{ingestionWarning}</span>
-          <a href="/api/auth/google" className="shrink-0 font-semibold underline underline-offset-2">Reconnect Google</a>
-        </div>
-      )}
-
-      {/* Header */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-xl font-bold text-gray-900">Good {greeting()}</h1>
-          <p className="text-gray-500 text-sm mt-0.5">
-            {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}
-          </p>
-        </div>
-        <Link
-          href="/ask"
-          className="bg-blue-600 text-white text-sm px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
-        >
-          Ask AI
-        </Link>
-      </div>
-
-      {/* Stats row */}
-      <div className={`grid grid-cols-2 gap-4 ${FEATURES.commitments ? "sm:grid-cols-4" : "sm:grid-cols-3"}`}>
-        {stats.map((stat) => (
-          <Link key={stat.label} href={stat.href}>
-            <div className={`border ${stat.border} border-l-4 rounded-lg p-4 bg-white hover:bg-gray-50 transition-colors cursor-pointer space-y-2`}>
-              <div className="text-3xl font-bold text-gray-900">{stat.value}</div>
-              <div className="text-xs text-gray-500">{stat.label}</div>
-              <div className="text-xs font-medium text-blue-600">{stat.cta} →</div>
-            </div>
-          </Link>
-        ))}
-      </div>
-
-      <div className={`grid gap-6 ${FEATURES.commitments ? "grid-cols-2" : "grid-cols-1"}`}>
-        {/* Top Tasks */}
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-semibold text-gray-900">Top Priorities</CardTitle>
-              <Link href="/tasks" className="text-xs font-medium text-blue-600 hover:text-blue-700">
-                Open →
-              </Link>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {tasks.length === 0 ? (
-              <div className="text-center py-4">
-                <p className="text-sm text-gray-400 mb-2">No pending tasks</p>
-                <Link href="/tasks" className="text-xs font-medium text-blue-600 hover:text-blue-700">Add a task →</Link>
-              </div>
-            ) : (
-              tasks.map((task) => (
-                <Link key={task.id} href="/tasks" className="flex items-start gap-3 py-1.5 px-2 -mx-2 rounded-lg hover:bg-gray-50 transition-colors group">
-                  <Badge variant={priorityColor(task.priority) as any} className="mt-0.5 shrink-0 text-xs">
-                    {task.priority}
-                  </Badge>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm text-gray-900 truncate">{task.title}</p>
-                    {task.due_date && (
-                      <p className="text-xs text-gray-400 mt-0.5">
-                        Due {new Date(task.due_date).toLocaleDateString()}
-                      </p>
-                    )}
-                  </div>
-                  <span className="text-gray-300 group-hover:text-gray-500 text-xs shrink-0 mt-0.5">→</span>
-                </Link>
-              ))
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Today's Meetings */}
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-semibold text-gray-900">Today&apos;s Meetings</CardTitle>
-              <Link href="/meetings" className="text-xs font-medium text-blue-600 hover:text-blue-700">
-                Open →
-              </Link>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {meetings.length === 0 ? (
-              <div className="text-center py-4">
-                <p className="text-sm text-gray-400">No meetings today</p>
-              </div>
-            ) : (
-              meetings.map((m) => (
-                <div key={m.id} className="py-1.5 px-2 -mx-2 rounded-lg hover:bg-gray-50 transition-colors space-y-0.5">
-                  <p className="text-sm font-medium text-gray-900">{m.title}</p>
-                  <p className="text-xs text-gray-400">
-                    {new Date(m.start_time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                    {" — "}
-                    {new Date(m.end_time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                    {" · "}
-                    {(m.attendees as any[])?.length ?? 0} attendees
-                  </p>
-                </div>
-              ))
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Emails needing action */}
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-semibold text-gray-900">Needs Action</CardTitle>
-              <Link href="/inbox?cat=important" className="text-xs font-medium text-blue-600 hover:text-blue-700">
-                Open →
-              </Link>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-1">
-            {actionEmails.length === 0 ? (
-              <div className="text-center py-4">
-                <p className="text-sm text-gray-400">All clear! 🎉</p>
-              </div>
-            ) : (
-              actionEmails.map((email) => (
-                <Link
-                  key={email.id}
-                  href={`/inbox/${email.id}`}
-                  className="flex items-start gap-2 py-1.5 px-2 -mx-2 rounded-lg hover:bg-gray-50 transition-colors group"
-                >
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-gray-900 truncate">{email.subject}</p>
-                    {email.body_summary && (
-                      <p className="text-xs text-gray-400 line-clamp-1 mt-0.5">{email.body_summary}</p>
-                    )}
-                  </div>
-                  <span className="text-gray-300 group-hover:text-gray-500 text-xs shrink-0 mt-0.5">→</span>
-                </Link>
-              ))
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Upcoming Commitments */}
-        {FEATURES.commitments && (
-        <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-semibold text-gray-900">Commitments Due</CardTitle>
-              <Link href="/commitments" className="text-xs font-medium text-blue-600 hover:text-blue-700">
-                Open →
-              </Link>
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-1">
-            {commitments.length === 0 ? (
-              <div className="text-center py-4">
-                <p className="text-sm text-gray-400">No commitments due soon</p>
-              </div>
-            ) : (
-              commitments.map((c) => (
-                <div key={c.id} className="flex items-start justify-between gap-3 py-1.5 px-2 -mx-2 rounded-lg hover:bg-gray-50 transition-colors">
-                  <p className="text-sm text-gray-900 flex-1 leading-snug">{c.description}</p>
-                  {c.due_date && (
-                    <span className={`text-xs shrink-0 font-medium ${c.status === "overdue" ? "text-red-500" : "text-gray-400"}`}>
-                      {c.status === "overdue" ? "Overdue" : new Date(c.due_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                    </span>
-                  )}
-                </div>
-              ))
-            )}
-          </CardContent>
-        </Card>
+    <div className="min-h-full bg-slate-50/70 dark:bg-background">
+      <div className="mx-auto max-w-6xl space-y-6 px-4 py-6 sm:px-8 sm:py-10">
+        {ingestionWarning && (
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-3.5 text-sm text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
+            <span className="flex items-center gap-2">
+              <AlertTriangle className="size-4 shrink-0" aria-hidden />
+              {ingestionWarning}
+            </span>
+            <a href="/api/auth/google" className="shrink-0 font-semibold underline underline-offset-2">Reconnect Google</a>
+          </div>
         )}
-      </div>
 
-      {/* Daily Brief */}
-      {brief && (
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-semibold text-gray-900">
-              Daily Brief — {new Date(brief.brief_date).toLocaleDateString("en-US", { month: "long", day: "numeric" })}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-sm text-gray-500 whitespace-pre-wrap leading-relaxed">
-              {brief.raw_markdown?.substring(0, 800)}
-              {(brief.raw_markdown?.length ?? 0) > 800 && "…"}
+        <header className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground">Good {greeting()}</h1>
+            <p className="mt-1 text-sm text-muted-foreground">{dateLine} · here is what needs you today.</p>
+          </div>
+          <Link
+            href="/ask"
+            className="inline-flex items-center gap-2 rounded-full bg-sky-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-sky-700"
+          >
+            <Sparkles className="size-4" aria-hidden />
+            Ask AI
+          </Link>
+        </header>
+
+        <section aria-label="At a glance" className={`grid grid-cols-1 gap-3 sm:gap-4 ${FEATURES.commitments ? "sm:grid-cols-2 lg:grid-cols-4" : "sm:grid-cols-3"}`}>
+          <StatLink icon={Inbox} label="Needs your action" value={actionCount} caption="Review inbox" href="/inbox?cat=important" />
+          <StatLink icon={ListChecks} label="Due soon or overdue" value={String(dueSoonCountRes.count ?? 0)} caption="View tasks" href="/tasks" />
+          <StatLink icon={CalendarDays} label="Meetings today" value={String(meetings.length)} caption="See schedule" href="/meetings" />
+          {FEATURES.commitments && (
+            <StatLink icon={Handshake} label="Pending commitments" value={String(commitments.length)} caption="Check commitments" href="/commitments" />
+          )}
+        </section>
+
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
+          <SectionCard icon={ListChecks} title="Priorities" description="Overdue first, then what is due soonest" href="/tasks" linkLabel="All tasks" className="lg:col-span-3">
+            <TaskList tasks={tasks} today={today} />
+          </SectionCard>
+          <SectionCard icon={CalendarDays} title="Today's schedule" description="Meetings in the next 24 hours" href="/meetings" linkLabel="Calendar" className="lg:col-span-2">
+            <MeetingList meetings={meetings} />
+          </SectionCard>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
+          <SectionCard icon={Inbox} title="Needs your action" description="Emails waiting on a reply or a decision" href="/inbox?cat=important" linkLabel="Inbox" className="lg:col-span-3">
+            <EmailList emails={actionEmails} />
+          </SectionCard>
+          <SectionCard icon={Compass} title="Explore" description="Every area, one click away" className="lg:col-span-2">
+            <Explore />
+          </SectionCard>
+        </div>
+
+        {FEATURES.commitments && (
+          <SectionCard icon={Handshake} title="Commitments due" description="Promises due in the next 7 days" href="/commitments" linkLabel="All commitments">
+            <CommitmentList commitments={commitments} />
+          </SectionCard>
+        )}
+
+        <SectionCard
+          icon={Newspaper}
+          title="Daily brief"
+          description={brief ? `Prepared ${new Date(brief.brief_date).toLocaleDateString("en-IN", { day: "numeric", month: "long", timeZone: IST })}` : "Prepared every morning at 8:00"}
+        >
+          {brief?.raw_markdown ? (
+            <div className="lg:columns-2 lg:gap-10 [&_h3]:break-after-avoid">
+              <Brief markdown={brief.raw_markdown} />
             </div>
-          </CardContent>
-        </Card>
-      )}
+          ) : (
+            <EmptyState>Your brief is prepared every morning at 8:00.</EmptyState>
+          )}
+        </SectionCard>
+      </div>
     </div>
   );
 }
 
+// The server runs in UTC, so its clock said "morning" until 17:30 IST.
 function greeting() {
-  const h = new Date().getHours();
+  const h = Number(new Date().toLocaleString("en-GB", { hour: "2-digit", hour12: false, timeZone: IST }));
   if (h < 12) return "morning";
   if (h < 17) return "afternoon";
   return "evening";
