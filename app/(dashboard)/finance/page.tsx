@@ -7,8 +7,10 @@ import Link from "next/link";
 import { ArrowRight, CalendarDays, ReceiptText, TrendingUp, Wallet } from "lucide-react";
 import { StatTile } from "@/components/finance/stat-tile";
 import { ColumnChart, ChartTable, type Column } from "@/components/finance/column-chart";
-import { TransactionsTable, type TransactionRow } from "@/components/finance/transactions-table";
-import { categoryLabel, inr, istDate } from "@/components/finance/labels";
+import { TransactionsTable } from "@/components/finance/transactions-table";
+import type { TransactionRow } from "@/components/finance/types";
+import { categoryLabel, inr, istDate, merchantLabel } from "@/components/finance/labels";
+import { matchesFor, type Rule } from "@/lib/finance/rules";
 
 // Columns past these fold into "Other" (fewer on phones, where seven labels
 // clip); the table view under the chart keeps every category.
@@ -67,7 +69,15 @@ export default async function FinancePage({
   const { month: monthStart, week: weekStart, sixMonthsAgo, monthKey: thisMonthKey } = periodStarts();
   const after = (r: TransactionRow, start: string) => Date.parse(r.transaction_datetime) >= Date.parse(start);
 
-  const rows = await loadSince(supabase, user.id, sixMonthsAgo);
+  const [rows, { data: ruleRows }] = await Promise.all([
+    loadSince(supabase, user.id, sixMonthsAgo),
+    supabase.from("transaction_rules").select("id, match_type, match_key, label, category, counted").eq("user_id", user.id).order("created_at"),
+  ]);
+  const rules = (ruleRows ?? []) as Rule[];
+  // How many transactions share each merchant or UPI payee, for "This and all
+  // BookMyShow transactions (6 so far)".
+  const counts: Record<string, number> = {};
+  for (const r of rows) for (const m of matchesFor(r, merchantLabel)) counts[`${m.type}:${m.key}`] = (counts[`${m.type}:${m.key}`] ?? 0) + 1;
 
   // Failed attempts are dropped here rather than in SQL, where != also drops NULL.
   const all = rows.filter((r) => !isFailedTransaction(r));
@@ -187,7 +197,7 @@ export default async function FinancePage({
           </section>
         </div>
 
-        <TransactionsTable rows={filtered} category={cat} />
+        <TransactionsTable rows={filtered} category={cat} rules={rules} counts={counts} />
       </div>
     </div>
   );

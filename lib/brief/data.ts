@@ -22,7 +22,7 @@ export type BriefSpend = {
 
 type Contact = { name: string | null; email: string | null };
 type Joined = Contact | Contact[] | null;
-type SpendRow = { amount: number | null; transaction_type: string | null; merchant_normalized: string | null; status: string | null; category: string | null; transaction_datetime: string };
+type SpendRow = { amount: number | null; transaction_type: string | null; merchant_normalized: string | null; status: string | null; category: string | null; transaction_datetime: string; counted_override: boolean | null };
 type EmailRow = { id: string; subject: string | null; body_summary: string | null; occurred_at: string; contacts: Joined };
 type FollowUpRow = { follow_up_due: string; contacts: Joined };
 
@@ -58,7 +58,7 @@ async function loadSpend(db: SupabaseClient, userId: string, now: Date): Promise
   const rows: SpendRow[] = [];
   for (let from = 0; ; from += 1000) {
     const { data, error } = await db.from("transactions_normalized")
-      .select("amount, transaction_type, merchant_normalized, status, category, transaction_datetime")
+      .select("amount, transaction_type, merchant_normalized, status, category, transaction_datetime, counted_override")
       .eq("user_id", userId).gte("transaction_datetime", prev.toISOString()).lte("transaction_datetime", now.toISOString())
       .order("transaction_datetime").range(from, from + 999);
     if (error) throw new Error(`[brief] spend: ${error.message}`);

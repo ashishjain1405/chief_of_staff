@@ -40,7 +40,9 @@ const VOUCHER_SELLERS = new Set(["GYFTR"]);
 // instead, so NULL means "no failure noted".
 const FAILED = /^(failed|declined|cancell?ed|rejected|unsuccessful|reversed|(payment|transaction) (failed|declined))$/i;
 
-type Txn = { transaction_type?: string | null; merchant_normalized?: string | null; status?: string | null; amount?: number | string | null; category?: string | null };
+// counted_override is the founder's decision (lib/finance/rules): null leaves
+// it to the rules below.
+type Txn = { transaction_type?: string | null; merchant_normalized?: string | null; status?: string | null; amount?: number | string | null; category?: string | null; counted_override?: boolean | null };
 
 export function isFailedTransaction(t: { status?: string | null }): boolean {
   return !!t.status && FAILED.test(t.status.trim());
@@ -53,7 +55,11 @@ export function isCardBillPayment(t: Txn): boolean {
 
 // Why a row is left out of spending, or null if it counts.
 export function notSpendReason(t: Txn): string | null {
+  // "Don't count" always excludes; "Count" includes a transfer, investment or
+  // gift voucher, but a failed payment moved no money and never counts.
+  if (t.counted_override === false) return "excluded by you";
   if (isFailedTransaction(t)) return "failed";
+  if (t.counted_override === true) return null;
   if (isCardBillPayment(t)) return "card bill payment";
   if (VOUCHER_SELLERS.has(t.merchant_normalized?.trim() ?? "")) return "gift voucher";
   // The type alone misses investments paid another way: an IPO application by

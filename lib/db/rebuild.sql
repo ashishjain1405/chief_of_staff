@@ -691,3 +691,36 @@ BEGIN
     CREATE POLICY "transactions_normalized_own" ON transactions_normalized FOR ALL USING (auth.uid() = user_id);
   END IF;
 END $$;
+
+-- ─────────────────────────────────────────
+-- Founder categories and counting (migrations/add-transaction-rules.sql)
+-- ─────────────────────────────────────────
+ALTER TABLE transactions_normalized ADD COLUMN IF NOT EXISTS category_auto text;
+ALTER TABLE transactions_normalized ADD COLUMN IF NOT EXISTS category_source text NOT NULL DEFAULT 'auto';
+ALTER TABLE transactions_normalized ADD COLUMN IF NOT EXISTS counted_override boolean;
+ALTER TABLE transactions_normalized ADD COLUMN IF NOT EXISTS counted_source text;
+ALTER TABLE transactions_normalized ADD COLUMN IF NOT EXISTS upi_key text;
+UPDATE transactions_normalized SET category_auto = category WHERE category_auto IS NULL;
+
+CREATE TABLE IF NOT EXISTS transaction_rules (
+  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id     uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  match_type  text NOT NULL CHECK (match_type IN ('merchant', 'upi', 'recipient')),
+  match_key   text NOT NULL,
+  label       text NOT NULL,   -- shown in "Your rules": "BookMyShow", "UPI …4694@ybl"
+  category    text,            -- null: the rule does not set the category
+  counted     boolean,         -- null: the rule does not set counting
+  created_at  timestamptz DEFAULT now(),
+  updated_at  timestamptz DEFAULT now(),
+  UNIQUE (user_id, match_type, match_key)
+);
+
+ALTER TABLE transaction_rules ENABLE ROW LEVEL SECURITY;
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'transaction_rules' AND policyname = 'transaction_rules_own') THEN
+    CREATE POLICY "transaction_rules_own" ON transaction_rules FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'transaction_rules_updated_at') THEN
+    CREATE TRIGGER transaction_rules_updated_at BEFORE UPDATE ON transaction_rules FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+  END IF;
+END $$;

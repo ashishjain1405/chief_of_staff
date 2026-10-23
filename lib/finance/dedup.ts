@@ -1,4 +1,5 @@
 import { MERCHANT_DATA, getCategoryForMerchant, getDomainForMerchant, merchantKey } from "@/lib/finance/normalize";
+import { matchesFor, resolve, upiKey, type Overrides, type Rule } from "@/lib/finance/rules";
 
 export type TransactionRaw = {
   id: string;
@@ -19,6 +20,7 @@ export type TransactionRaw = {
   status: string | null;
   merchant_name: string | null;
   raw_sender?: string | null;
+  upi_id?: string | null;
 };
 
 export type NormalizedTransaction = {
@@ -37,6 +39,7 @@ export type NormalizedTransaction = {
   communication_ids: string[];
   merchant_email_present: boolean;
   bank_email_present: boolean;
+  upi_key: string | null;
 };
 
 const SENDER_PRIORITY: Record<string, number> = {
@@ -253,6 +256,7 @@ export function deduplicateRawTransactions(rows: TransactionRaw[]): NormalizedTr
       communication_ids: [...new Set(group.map((r) => r.communication_id))].sort(),
       merchant_email_present: group.some(isMerchantSource),
       bank_email_present: group.some(isBankSource),
+      upi_key: group.map((r) => upiKey(r.upi_id)).find(Boolean) ?? upiKey(withMerchant?.merchant_normalized) ?? null,
     };
   });
 }
@@ -262,18 +266,41 @@ export function deduplicateRawTransactions(rows: TransactionRaw[]): NormalizedTr
 // email for a purchase arrived, "contains" found nothing and inserted a second
 // row beside the first, counting the purchase twice. The oldest overlapping
 // row is kept and updated; the rest are deleted.
+//
+// The group's category is the automatic one (category_auto). What is written
+// as category and counted_override follows the founder: a choice made on any
+// of the rows being merged survives - regrouping once split the Zomato pair
+// and rewrote its fields - and otherwise their rules apply (lib/finance/rules).
 export async function saveNormalizedGroups(
   db: any,
   userId: string,
   groups: NormalizedTransaction[]
 ): Promise<{ inserted: number; updated: number; collapsed: number }> {
   const stats = { inserted: 0, updated: 0, collapsed: 0 };
+  const { data: ruleRows, error: rulesError } = await db
+    .from("transaction_rules")
+    .select("match_type, match_key, label, category, counted")
+    .eq("user_id", userId);
+  if (rulesError) throw new Error(`[dedup] rules lookup failed: ${rulesError.message}`);
+  const rules = (ruleRows ?? []) as Rule[];
+  const withChoices = (norm: NormalizedTransaction, prior: PriorRow[]) => {
+    const userCategory = prior.find((r) => r.category_source === "user");
+    const userCounted = prior.find((r) => r.counted_source === "user");
+    const current: Partial<Overrides> = {
+      category: userCategory?.category ?? null,
+      category_source: userCategory ? "user" : "auto",
+      counted_override: userCounted?.counted_override ?? null,
+      counted_source: userCounted ? "user" : null,
+    };
+    return { ...norm, category_auto: norm.category, ...resolve(current, norm.category, rules, matchesFor(norm, (n) => n)) };
+  };
+
   for (const norm of groups) {
     const now = new Date().toISOString();
     let matches = await overlappingRows(db, userId, norm.communication_ids);
 
     if (matches.length === 0) {
-      const { error } = await db.from("transactions_normalized").insert({ ...norm, created_at: now, updated_at: now });
+      const { error } = await db.from("transactions_normalized").insert({ ...withChoices(norm, []), created_at: now, updated_at: now });
       if (!error) {
         stats.inserted++;
         continue;
@@ -301,7 +328,7 @@ export async function saveNormalizedGroups(
 
     const { error: updateErr } = await db
       .from("transactions_normalized")
-      .update({ ...norm, updated_at: now })
+      .update({ ...withChoices(norm, matches), updated_at: now })
       .eq("id", keep.id);
     if (updateErr) console.error(`[dedup] update failed for ${keep.id}: ${updateErr.message}`);
     else stats.updated++;
@@ -309,10 +336,12 @@ export async function saveNormalizedGroups(
   return stats;
 }
 
-async function overlappingRows(db: any, userId: string, communicationIds: string[]): Promise<{ id: string }[]> {
+type PriorRow = { id: string } & Partial<Overrides>;
+
+async function overlappingRows(db: any, userId: string, communicationIds: string[]): Promise<PriorRow[]> {
   const { data, error } = await db
     .from("transactions_normalized")
-    .select("id")
+    .select("id, category, category_source, counted_override, counted_source")
     .eq("user_id", userId)
     .overlaps("communication_ids", communicationIds)
     .order("created_at", { ascending: true });

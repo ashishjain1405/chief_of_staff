@@ -86,7 +86,7 @@ export async function computeOperationalState(job: Job) {
 
     supabase
       .from("transactions_normalized")
-      .select("id, amount, currency, merchant_normalized, category, transaction_type, transaction_datetime, is_recurring, status")
+      .select("id, amount, currency, merchant_normalized, category, transaction_type, transaction_datetime, is_recurring, status, counted_override")
       .eq("user_id", userId)
       .gte("transaction_datetime", past30d)
       .order("transaction_datetime", { ascending: false })
@@ -94,7 +94,7 @@ export async function computeOperationalState(job: Job) {
 
     supabase
       .from("transactions_normalized")
-      .select("id, amount, currency, merchant_normalized, category, transaction_type, transaction_datetime, is_recurring, status")
+      .select("id, amount, currency, merchant_normalized, category, transaction_type, transaction_datetime, is_recurring, status, counted_override")
       .eq("user_id", userId)
       .gte("transaction_datetime", past60d)
       .lt("transaction_datetime", past30d)
