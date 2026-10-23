@@ -28,6 +28,7 @@ import { triageEmail } from "@/lib/ai/claude";
 import { getSenderHint, isKnownFinancialDomain } from "@/lib/finance/senders";
 import { LOW_SIGNAL_CATEGORIES } from "@/lib/inbox/categories";
 import { shouldCreateTask, ccOnlyWithoutAsk } from "@/lib/tasks/gate";
+import { taskPriority } from "@/lib/tasks/priority";
 import { resolveFollowUpDeadline } from "@/lib/tasks/deadline";
 
 const APPLY = process.argv.includes("--apply");
@@ -239,7 +240,10 @@ async function main() {
           source_id: comm.id,
           contact_id: comm.contact_id,
           due_date: resolveFollowUpDeadline(triage.follow_up_deadline, comm.occurred_at),
-          priority: capped >= 0.85 ? "high" : "medium",
+          priority: taskPriority({
+            title: triage.action_description ?? `Reply to: ${comm.subject}`, importance: capped, senderEmail,
+            isBulk: !!(comm.channel_metadata as any)?.list_unsubscribe, isFinancialDomain: isKnownFinancialDomain(senderEmail),
+          }),
           ai_reasoning: `Importance: ${capped.toFixed(2)}. ${triage.summary}`,
         });
       }

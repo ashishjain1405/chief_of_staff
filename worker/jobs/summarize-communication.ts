@@ -10,6 +10,7 @@ import { deduplicateRawTransactions, isPaymentForShipping, isShippingUpdate, sav
 import { resolveFollowUpDeadline } from "@/lib/tasks/deadline";
 import { LOW_SIGNAL_CATEGORIES } from "@/lib/inbox/categories";
 import { shouldCreateTask, ccOnlyWithoutAsk } from "@/lib/tasks/gate";
+import { taskPriority } from "@/lib/tasks/priority";
 import { isSimilarTaskTitle } from "@/lib/tasks/similar";
 import { FEATURES } from "@/lib/features";
 
@@ -284,7 +285,7 @@ export async function summarizeCommunication(job: Job) {
       source_id: communicationId,
       contact_id: comm.contact_id,
       due_date: resolveFollowUpDeadline(triage.follow_up_deadline, comm.occurred_at),
-      priority: cappedScore >= 0.85 ? "high" : "medium",
+      priority: taskPriority({ title: taskTitle, importance: cappedScore, senderEmail, isBulk, isFinancialDomain: isKnownFinancialDomain(senderEmail) }),
       ai_reasoning: `Importance: ${cappedScore.toFixed(2)}. ${triage.summary}`,
     });
   }

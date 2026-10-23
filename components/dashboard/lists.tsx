@@ -9,7 +9,7 @@ const time = (iso: string) => new Date(iso).toLocaleTimeString("en-IN", { hour: 
 
 // Due dates as the founder reads them - "Overdue", "Today", "Tomorrow" - on
 // IST calendar days rather than the server's UTC clock.
-function dueChip(due: string | null, today: string) {
+export function dueChip(due: string | null, today: string) {
   if (!due) return { text: "No date", className: "bg-muted text-muted-foreground" };
   const day = istDay(new Date(due));
   const tomorrow = istDay(new Date(Date.parse(`${today}T12:00:00+05:30`) + 864e5));

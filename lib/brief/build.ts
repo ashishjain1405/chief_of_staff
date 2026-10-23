@@ -1,4 +1,5 @@
 import { generateDailyBrief } from "@/lib/ai/claude";
+import { STALE_DAYS, reviewReason } from "@/lib/tasks/priority";
 import { dailyBriefPrompt, type DailyBriefJudgement } from "@/lib/ai/prompts";
 import { IST, istDate, type BriefData, type BriefEmail, type BriefSpend, type BriefTask } from "./data";
 
@@ -31,14 +32,11 @@ type Candidate = {
   emailId?: string;
 };
 
-// A task tied to a date that has passed can no longer be done - the gift card
-// lapsed, the webinar ended - yet the brief made "redeem the gift card
-// immediately" a top priority ten days after it expired. Those, and anything
-// long overdue, go to Clean up: still shown, never ranked.
-const LAPSED = /\b(redeem|attend|join|register|vote|webinar|claim|expir\w*)\b/i;
-// Replies sent from Gmail are not ingested, so an email stays "waiting" after
-// it was answered: the Investment Memo led the brief at 44 days.
-const STALE_DAYS = 14;
+// Lapsed and long-overdue tasks go to Clean up: still shown, never ranked. The
+// brief once made "redeem the gift card immediately" a top priority ten days
+// after it expired. Emails waiting over STALE_DAYS go there too - replies sent
+// from Gmail are not ingested, so an email stays "waiting" after it was
+// answered: the Investment Memo led the brief at 44 days.
 const UNDATED = 3;
 const EMAILS = 6;
 
@@ -69,8 +67,9 @@ export function prepare(data: BriefData) {
     const due = task.due_date ? istDate(task.due_date) : null;
     const d = due ? days(today, due) : null;
     const stale = { key: `task:${task.id}`, action: title(task.title), href: "/tasks" };
-    if (due && d! < 0 && LAPSED.test(task.title)) cleanup.push({ ...stale, note: `Its date passed on ${shortDate(due)}. Close it?`, rank: 0 });
-    else if (due && d! < -STALE_DAYS) cleanup.push({ ...stale, note: `${-d!} days overdue. Still needed?`, rank: 2 });
+    const review = reviewReason(task.title, d);
+    if (review === "lapsed") cleanup.push({ ...stale, note: `Its date passed on ${shortDate(due!)}. Close it?`, rank: 0 });
+    else if (review === "stale") cleanup.push({ ...stale, note: `${-d!} days overdue. Still needed?`, rank: 2 });
     else if (due && d! <= 7) dated.push({ task, d: d!, due });
     else if (!due) undated.push(task);
   }
