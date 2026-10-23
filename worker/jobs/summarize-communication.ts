@@ -9,9 +9,9 @@ import { getCategoryForMerchant, getWalletPaymentModeLabel, resolveMerchant, res
 import { deduplicateRawTransactions, isPaymentForShipping, isShippingUpdate, saveNormalizedGroups, type TransactionRaw } from "@/lib/finance/dedup";
 import { resolveFollowUpDeadline } from "@/lib/tasks/deadline";
 import { LOW_SIGNAL_CATEGORIES } from "@/lib/inbox/categories";
-import { shouldCreateTask, ccOnlyWithoutAsk } from "@/lib/tasks/gate";
+import { shouldCreateTask, ccOnlyWithoutAsk, hasMessageText } from "@/lib/tasks/gate";
 import { isPersonalSender, owesMoney, taskPriority } from "@/lib/tasks/priority";
-import { isSimilarTaskTitle } from "@/lib/tasks/similar";
+import { conversationSubject, isSimilarTaskTitle } from "@/lib/tasks/similar";
 import { FEATURES } from "@/lib/features";
 
 export async function summarizeCommunication(job: Job) {
@@ -84,6 +84,13 @@ export async function summarizeCommunication(job: Job) {
     ? Math.min(triage.importance_score, 0.3)
     : triage.importance_score;
 
+  // With nothing written, triage still writes a summary, and invents one:
+  // "reaching out regarding a matter that requires his attention" for an
+  // attachment-only email. Say what is actually there instead.
+  const summary = hasMessageText(comm.body ?? "")
+    ? triage.summary
+    : `No message text - only the subject "${comm.subject ?? ""}" and any attachment.`;
+
   const existingMeta = (comm.channel_metadata as any) ?? {};
 
   // Whether something is a task is a semantic question - is there an
@@ -113,12 +120,13 @@ export async function summarizeCommunication(job: Job) {
     }),
     title: triage.action_description,
     subject: comm.subject,
+    body: comm.body ?? "",
   });
 
   await supabase
     .from("communications")
     .update({
-      body_summary: triage.summary,
+      body_summary: summary,
       sentiment: triage.sentiment,
       importance_score: cappedScore,
       // Stored as the gate's answer, not triage's raw flag. The daily brief and
@@ -147,7 +155,7 @@ export async function summarizeCommunication(job: Job) {
     userId,
     sourceType: "communication",
     sourceId: communicationId,
-    text: `${comm.subject}\n\n${triage.summary}`,
+    text: `${comm.subject}\n\n${summary}`,
     metadata: {
       occurred_at: comm.occurred_at,
       entities: triage.entities_mentioned,
@@ -155,7 +163,7 @@ export async function summarizeCommunication(job: Job) {
     },
   });
 
-  await updateCommunicationEmbedding(communicationId, triage.summary);
+  await updateCommunicationEmbedding(communicationId, summary);
 
   // Reprocessing the same email must not create a second set of commitments or
   // tasks. Both are plain inserts keyed only by source_id, so a re-run (body
@@ -274,10 +282,19 @@ export async function summarizeCommunication(job: Job) {
   const company = !isPersonalSender(senderEmail);
   let openSenderDuplicate = false;
   if (comm.contact_id || company) {
-    let open = supabase.from("tasks").select("title").eq("user_id", userId).in("status", ["pending", "snoozed"]);
+    let open = supabase.from("tasks").select("title, source_id").eq("user_id", userId).in("status", ["pending", "snoozed"]);
     if (!company) open = open.eq("contact_id", comm.contact_id);
     const { data: openTasks } = await open;
     openSenderDuplicate = (openTasks ?? []).some((t: { title: string }) => isSimilarTaskTitle(t.title, taskTitle));
+
+    // A person's conversation under a new subject line ("Indian Express SEO",
+    // then "... - Doc 2") is the same conversation: one open task for it.
+    const sourceIds = (openTasks ?? []).map((t: { source_id: string | null }) => t.source_id).filter(Boolean);
+    if (!company && !openSenderDuplicate && sourceIds.length && comm.subject) {
+      const { data: sources } = await supabase.from("communications").select("subject").in("id", sourceIds);
+      const here = conversationSubject(comm.subject);
+      openSenderDuplicate = (sources ?? []).some((s: { subject: string | null }) => !!s.subject && conversationSubject(s.subject) === here);
+    }
   }
 
   const alreadyTracked = (sameEmailTasks ?? 0) > 0 || openThreadTasks > 0 || openSenderDuplicate;
@@ -308,7 +325,7 @@ export async function summarizeCommunication(job: Job) {
       contact_id: comm.contact_id,
       due_date: resolveFollowUpDeadline(triage.follow_up_deadline, comm.occurred_at),
       priority,
-      ai_reasoning: `Importance: ${cappedScore.toFixed(2)}. ${learned}${triage.summary}`,
+      ai_reasoning: `Importance: ${cappedScore.toFixed(2)}. ${learned}${summary}`,
     });
   }
 

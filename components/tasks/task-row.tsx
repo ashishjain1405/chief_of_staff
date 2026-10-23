@@ -18,7 +18,10 @@ function sender(c: TaskRowData["contacts"]) {
 
 const button = "rounded-full px-3 py-1.5 text-xs font-medium transition-colors";
 
-export function TaskRow({ task, today, onStatus }: { task: TaskRowData; today: string; onStatus: (id: string, status: TaskStatus) => void }) {
+export function TaskRow({ task, today, onStatus }: { task: TaskRowData; today: string; onStatus: (ids: string[], status: TaskStatus) => void }) {
+  // A grouped row stands for its whole conversation: Done and Dismiss close every task in it.
+  const ids = [task.id, ...(task.related ?? []).map((r) => r.id)];
+  const others = task.related ?? [];
   const closed = task.status === "done" || task.status === "dismissed" || task.status === "expired";
   const chip = task.due_date && !task.note && !closed ? dueChip(task.due_date, today) : null;
   const from = sender(task.contacts);
@@ -53,19 +56,36 @@ export function TaskRow({ task, today, onStatus }: { task: TaskRowData; today: s
           )}
         </div>
         {detail && !closed && <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-muted-foreground sm:line-clamp-1">{detail}</p>}
+        {others.length > 0 && (
+          <details className="group/thread mt-2">
+            <summary className="cursor-pointer list-none text-xs font-medium text-sky-700 hover:underline dark:text-sky-300">
+              +{others.length} more from this conversation
+            </summary>
+            <ul className="mt-1.5 space-y-1 border-l-2 border-border pl-3">
+              {others.map((r) => (
+                <li key={r.id} className="text-xs text-muted-foreground">
+                  {title(r.title)}
+                  {r.source_id && (
+                    <Link href={`/inbox/${r.source_id}`} className="ml-1.5 font-medium text-sky-700 hover:underline dark:text-sky-300">Open email</Link>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </details>
+        )}
       </div>
       <div className="flex shrink-0 items-center gap-2">
         {closed ? (
-          <button type="button" onClick={() => onStatus(task.id, "pending")} className={`${button} text-muted-foreground hover:bg-muted hover:text-foreground`}>
+          <button type="button" onClick={() => onStatus([task.id], "pending")} className={`${button} text-muted-foreground hover:bg-muted hover:text-foreground`}>
             Restore
           </button>
         ) : (
           <>
-            <button type="button" onClick={() => onStatus(task.id, "done")} className={`${button} border border-border bg-background px-3.5 text-foreground shadow-sm hover:bg-muted`}>
-              Done
+            <button type="button" onClick={() => onStatus(ids, "done")} className={`${button} border border-border bg-background px-3.5 text-foreground shadow-sm hover:bg-muted`}>
+              {others.length ? `Done (${ids.length})` : "Done"}
             </button>
-            <button type="button" onClick={() => onStatus(task.id, "dismissed")} className={`${button} text-muted-foreground hover:bg-muted hover:text-foreground`}>
-              Dismiss
+            <button type="button" onClick={() => onStatus(ids, "dismissed")} className={`${button} text-muted-foreground hover:bg-muted hover:text-foreground`}>
+              {others.length ? `Dismiss (${ids.length})` : "Dismiss"}
             </button>
           </>
         )}

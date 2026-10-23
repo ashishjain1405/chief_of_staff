@@ -4,6 +4,8 @@
  * 43 of 70 open tasks dated from the September backfill, before the task gate,
  * the same-sender duplicate check and auto-expiry existed - those apply only
  * to new mail. This runs the same shared rules over what is already open:
+ *   - no message text (lib/tasks/gate hasMessageText): an attachment-only email
+ *     or a reply that only quotes
  *   - not a task (lib/tasks/gate noiseReason): one-time codes; votes, events,
  *     courses, surveys, donations and offers from companies; conditional notices
  *   - date passed on a date-bound task from a company (reviewReason "lapsed")
@@ -23,7 +25,7 @@
  */
 
 import { createClient } from "@supabase/supabase-js";
-import { isPersonalSender, isShareholderVote, noiseReason } from "@/lib/tasks/gate";
+import { hasMessageText, isPersonalSender, isShareholderVote, noiseReason } from "@/lib/tasks/gate";
 import { owesMoney, reviewReason } from "@/lib/tasks/priority";
 import { isSimilarTaskTitle } from "@/lib/tasks/similar";
 
@@ -42,8 +44,9 @@ async function main() {
   if (error) throw error;
   const rows = (data ?? []) as Row[];
   const email = (t: Row) => emailOf(t.contacts);
-  const { data: sources } = await db.from("communications").select("id, subject").in("id", rows.map((t) => t.source_id).filter((id): id is string => !!id));
+  const { data: sources } = await db.from("communications").select("id, subject, body").in("id", rows.map((t) => t.source_id).filter((id): id is string => !!id));
   const subject = new Map((sources ?? []).map((c) => [c.id, (c.subject ?? "") as string]));
+  const noText = new Set((sources ?? []).filter((c) => !hasMessageText(c.body ?? "")).map((c) => c.id));
   const today = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
   const daysUntil = (t: Row) => (t.due_date ? Math.round((Date.parse(new Date(t.due_date).toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" })) - Date.parse(today)) / 864e5) : null);
 
@@ -52,7 +55,8 @@ async function main() {
     const from = email(t);
     const person = isPersonalSender(from);
     const noise = noiseReason(t.title, from, subject.get(t.source_id ?? "") ?? "");
-    if (noise) close.set(t.id, noise);
+    if (t.source_id && noText.has(t.source_id)) close.set(t.id, "no message text");
+    else if (noise) close.set(t.id, noise);
     else if (!person && !owesMoney(t.title) && reviewReason(t.title, daysUntil(t)) === "lapsed") close.set(t.id, "date passed");
   }
 
@@ -82,9 +86,10 @@ async function main() {
   }
   console.log(`${rows.length} open email tasks: close ${close.size}, keep ${rows.length - close.size}\n`);
   for (const [why, list] of Object.entries(groups)) console.log(`${why.toUpperCase()} (${list.length})\n${list.map((l) => `  ${l}`).join("\n")}\n`);
-  const { data: flagged } = await db.from("communications").select("id, subject, contacts(email)").eq("requires_action", true).eq("action_taken", false);
-  const votes = (flagged ?? []).filter((c) => !isPersonalSender(emailOf(c.contacts as Contact)) && isShareholderVote(c.subject ?? ""));
-  console.log(`SHAREHOLDER-VOTE EMAILS no longer "needs your action" (${votes.length})\n${votes.map((c) => `  ${(c.subject ?? "").slice(0, 80)}`).join("\n")}\n`);
+  const { data: flagged } = await db.from("communications").select("id, subject, body, contacts(email)").eq("requires_action", true).eq("action_taken", false);
+  const votes = (flagged ?? []).filter((c) =>
+    (!isPersonalSender(emailOf(c.contacts as Contact)) && isShareholderVote(c.subject ?? "")) || !hasMessageText(c.body ?? ""));
+  console.log(`VOTE AND NO-TEXT EMAILS no longer "needs your action" (${votes.length})\n${votes.map((c) => `  ${(c.subject ?? "").slice(0, 80)}`).join("\n")}\n`);
   console.log(`KEPT (${rows.length - close.size})\n${rows.filter((t) => !close.has(t.id)).map((t) => `  ${(t.priority ?? "").padEnd(6)} ${t.title.slice(0, 80)}`).join("\n")}\n`);
   if (!APPLY) return console.log("Dry run - nothing written. Re-run with --apply.");
 
@@ -94,7 +99,7 @@ async function main() {
     const { error: flagError } = await db.from("communications").update({ requires_action: false }).in("id", votes.map((c) => c.id));
     if (flagError) throw flagError;
   }
-  console.log(`Closed ${close.size} tasks as expired; cleared "needs your action" on ${votes.length} vote emails.`);
+  console.log(`Closed ${close.size} tasks as expired; cleared "needs your action" on ${votes.length} vote or no-text emails.`);
 }
 
 main().catch((e) => { console.error(e); process.exit(1); });

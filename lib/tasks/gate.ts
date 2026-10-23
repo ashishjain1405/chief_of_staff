@@ -2,6 +2,7 @@ import {
   NO_TASK_CATEGORIES,
   AUTOMATED_ONLY_NO_TASK_CATEGORIES,
 } from "@/lib/inbox/categories";
+import { replyHead } from "@/lib/email/quoted";
 
 const normalize = (email: string) => email.trim().toLowerCase();
 
@@ -92,6 +93,23 @@ export function noiseReason(title: string, senderEmail: string, subject = ""): "
   return null;
 }
 
+// An email with nothing written in it is not an ask. Muskan's "Indian Express
+// SEO - Doc 2" had an empty body and an attachment; triage invented "a matter
+// that requires his attention" and it became a high-priority task, while her
+// "Doc 1" a minute earlier was judged no action. Gmail leaves inline
+// attachments as "[image: Guide.png]", and a reply's quoted history is not the
+// sender's words.
+const ATTACHMENT_PLACEHOLDER = /\[(image|cid|file|attachment)[^\]]*\]/gi;
+const DEVICE_SIGNOFF = /^\s*(sent from my|get outlook for)\b.*$/gim;
+// A forward is the exception: the forwarded email is the message - the
+// founder's Aadhaar task came from a bare "Fwd:" of Sushil's request.
+const FORWARDED = /^\s*-{2,}\s*Forwarded message\s*-{2,}/im;
+export function hasMessageText(body: string): boolean {
+  const words = (text: string) => /\p{L}{2,}/u.test(text.replace(ATTACHMENT_PLACEHOLDER, " ").replace(DEVICE_SIGNOFF, " "));
+  if (FORWARDED.test(body)) return words(body.replace(FORWARDED, " ").replace(/^\s*(from|date|subject|to|cc):.*$/gim, " "));
+  return words(replyHead(body));
+}
+
 export function taskCategoryAllowed(category: string, senderEmail: string): boolean {
   if (NO_TASK_CATEGORIES.has(category)) return false;
 
@@ -119,14 +137,16 @@ export function shouldCreateTask(params: {
   isFinancialDomain?: boolean;
   isBulk?: boolean;
   ccOnlyWithoutAsk?: boolean;
-  // triage's action_description, the task's title-to-be, and the email's subject.
+  // triage's action_description, the task's title-to-be, and the email's subject and body.
   title?: string | null;
   subject?: string | null;
+  body?: string | null;
 }): boolean {
   const { category, requiresAction, senderEmail, founderEmail, isFinancialDomain = false, isBulk = false } = params;
   if (!requiresAction) return false;
   if (params.ccOnlyWithoutAsk) return false;
   if (noiseReason(params.title ?? "", senderEmail, params.subject ?? "")) return false;
+  if (typeof params.body === "string" && !hasMessageText(params.body)) return false;
 
   // Mail the founder wrote themselves. The backfill's Gmail query was not
   // scoped to the inbox, so it pulled in 12 of the founder's own messages and

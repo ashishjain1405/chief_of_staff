@@ -18,6 +18,10 @@ export type TaskRowData = {
   updated_at: string | null;
   contacts: { name: string | null; email: string | null } | null;
   note?: string;
+  // The conversation the task came from (set by the page); tasks sharing one
+  // are shown as a single row, the rest listed under it.
+  group?: string;
+  related?: TaskRowData[];
 };
 
 const IST = "Asia/Kolkata";
@@ -37,9 +41,18 @@ export function groupTasks(rows: TaskRowData[], today: string) {
     (RANK[a.priority ?? "medium"] ?? 1) - (RANK[b.priority ?? "medium"] ?? 1) ||
     (a.due_date && b.due_date ? Date.parse(a.due_date) - Date.parse(b.due_date) : Date.parse(b.created_at) - Date.parse(a.created_at));
 
+  // One row per conversation: the most important task leads, the others ride
+  // under it. A conversation used to fill the list with a row per email.
+  const open = rows.filter((t) => t.status === "pending" || t.status === "snoozed");
+  const byGroup = new Map<string, TaskRowData[]>();
+  for (const t of open) byGroup.set(t.group ?? t.id, [...(byGroup.get(t.group ?? t.id) ?? []), t]);
+  const leads = [...byGroup.values()].map((list) => {
+    const [lead, ...related] = [...list].sort(byPriority);
+    return related.length ? { ...lead, related } : lead;
+  });
+
   const g = { overdue: [] as TaskRowData[], week: [] as TaskRowData[], later: [] as TaskRowData[], undated: [] as TaskRowData[], review: [] as TaskRowData[], low: [] as TaskRowData[] };
-  for (const t of rows) {
-    if (t.status !== "pending" && t.status !== "snoozed") continue;
+  for (const t of leads) {
     const d = daysUntil(t);
     const review = reviewReason(t.title, d);
     if (review) g.review.push({ ...t, note: review === "lapsed" ? `Date passed ${shortDate(istDay(t.due_date!))}` : `${-d!} days overdue` });
@@ -51,7 +64,6 @@ export function groupTasks(rows: TaskRowData[], today: string) {
   }
   Object.values(g).forEach((list) => list.sort(byPriority));
   const latest = (...statuses: TaskStatus[]) => rows.filter((t) => statuses.includes(t.status)).sort((a, b) => changedAt(b) - changedAt(a));
-  const open = rows.filter((t) => t.status === "pending" || t.status === "snoozed");
   return {
     ...g,
     done: latest("done").slice(0, 10),

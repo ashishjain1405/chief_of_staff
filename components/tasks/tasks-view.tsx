@@ -7,7 +7,7 @@ import { StatLink } from "@/components/dashboard/stat-link";
 import { TaskRow } from "@/components/tasks/task-row";
 import { groupTasks, type TaskRowData, type TaskStatus } from "@/lib/tasks/view";
 
-type Change = { id: string; status: TaskStatus; at: string };
+type Change = { ids: string[]; status: TaskStatus; at: string };
 
 // Done and Dismiss move a task at once: the change is applied to the list
 // before the server confirms it, and the save runs in a transition. When the
@@ -15,15 +15,15 @@ type Change = { id: string; status: TaskStatus; at: string };
 // the task reappears where it was.
 export function TasksView({ rows, today, action }: { rows: TaskRowData[]; today: string; action: (formData: FormData) => Promise<void> }) {
   const [tasks, applyChange] = useOptimistic(rows, (state: TaskRowData[], c: Change) =>
-    state.map((t) => (t.id === c.id ? { ...t, status: c.status, updated_at: c.at } : t))
+    state.map((t) => (c.ids.includes(t.id) ? { ...t, status: c.status, updated_at: c.at } : t))
   );
   const [, startTransition] = useTransition();
-  const setStatus = (id: string, status: TaskStatus) => {
+  const setStatus = (ids: string[], status: TaskStatus) => {
     const at = new Date().toISOString();
     startTransition(async () => {
-      applyChange({ id, status, at });
+      applyChange({ ids, status, at });
       const form = new FormData();
-      form.set("id", id);
+      ids.forEach((id) => form.append("id", id));
       form.set("status", status);
       await action(form);
     });

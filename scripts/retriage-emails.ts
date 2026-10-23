@@ -196,6 +196,7 @@ async function main() {
         }),
         title: triage.action_description,
         subject: comm.subject,
+        body: comm.body ?? "",
       });
 
       if (APPLY) {

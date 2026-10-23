@@ -41,6 +41,18 @@ function keywords(title: string): Set<string> {
 // marketing plan" (exactly 0.5) stay separate asks.
 const THRESHOLD = 0.5;
 
+// One conversation under several subjects: "Indian Express SEO", "Indian
+// Express SEO - Doc 2" and "Re: Indian express SEO" were three Gmail threads.
+// Only used for people - a company reuses one subject for every alert ("A
+// payment was made using your credit card" covered 23 transactions).
+export function conversationSubject(subject: string): string {
+  return subject.toLowerCase()
+    .replace(/^\s*((re|fwd?|fw|aw)\s*:\s*)+/i, "")
+    .replace(/\s*[-–:|]\s*(doc|part|v|version|draft|attachment)?\s*\d+\s*$/i, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 export function isSimilarTaskTitle(a: string, b: string): boolean {
   if (differs(a, b)) return false;
   const ka = keywords(a);

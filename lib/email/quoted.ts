@@ -27,16 +27,21 @@ const CUT_PATTERNS: RegExp[] = [
   /^\s*>/m,
 ];
 
-export function stripQuotedReply(body: string): string {
-  if (!body) return body;
+// What the sender wrote above the quoted history, with no fallback - empty
+// when a reply only quotes.
+export function replyHead(body: string): string {
+  if (!body) return "";
   const text = body.replace(/\r\n/g, "\n");
-
   let cut = text.length;
   for (const pattern of CUT_PATTERNS) {
     const match = pattern.exec(text);
     if (match && match.index < cut) cut = match.index;
   }
+  return text.slice(0, cut).trim();
+}
 
-  const head = text.slice(0, cut).trim();
+export function stripQuotedReply(body: string): string {
+  if (!body) return body;
+  const head = replyHead(body);
   return head.replace(/\s/g, "").length >= MIN_REMAINING_CHARS ? head : body;
 }

@@ -33,8 +33,8 @@
 import * as fs from "fs";
 import * as path from "path";
 import { triageEmail } from "@/lib/ai/claude";
-import { shouldCreateTask, ccOnlyWithoutAsk, noiseReason } from "@/lib/tasks/gate";
-import { isSimilarTaskTitle } from "@/lib/tasks/similar";
+import { shouldCreateTask, ccOnlyWithoutAsk, noiseReason, hasMessageText } from "@/lib/tasks/gate";
+import { conversationSubject, isSimilarTaskTitle } from "@/lib/tasks/similar";
 import { taskPriority } from "@/lib/tasks/priority";
 import { isKnownFinancialDomain } from "@/lib/finance/senders";
 import { resolveFollowUpDeadline } from "@/lib/tasks/deadline";
@@ -112,6 +112,7 @@ async function main() {
       ccOnlyWithoutAsk: ccOnlyWithoutAsk({ to: c.to, cc: c.cc, founderEmail: founderAddress, founderFirstName: FOUNDER_FIRST_NAME, body: c.body }),
       title: triage.action_description,
       subject: c.subject,
+      body: c.body,
     });
 
     const decisionOk = creates === c.expect.creates_task;
@@ -151,6 +152,10 @@ async function main() {
     ["one-time code is never a task", noiseReason("Provide the OTP 202728 to the delivery agent", "shipment@shipping.amazon.in") === "one-time code"],
     ["a company's proxy vote is not a task", noiseReason("Vote on Tesla, Inc.'s annual meeting matters by December 2", "id@proxyvote.com") === "shareholder vote"],
     ["a person asking for a vote is a task", noiseReason("Vote on the board resolution by Friday", "kamal@gmail.com") === null],
+    ["an attachment-only email is not a task", !shouldCreateTask({ category: "important", requiresAction: true, senderEmail: "muskanb93@gmail.com", title: "Respond to Muskan regarding the matter", body: "" })],
+    ["a reply that only quotes is not a task", !hasMessageText("On Sun, Oct 11, 2026 at 2:54 PM Ashish Jain <a@b.com> wrote:\n\n> [image: Guide.png]")],
+    ["a short real ask is a task", hasMessageText("Please review")],
+    ["a renamed subject is the same conversation", conversationSubject("Indian Express SEO - Doc 2") === conversationSubject("Re: Indian express SEO")],
     ["an EGM notice is caught by its subject", noiseReason("Attend the meeting and review the notice", "evoting@nsdl.com", "XYZ LIMITED : Notice of Extraordinary General Meeting") === "shareholder vote"],
     ["a postal ballot is caught by its subject", noiseReason("Review the notice", "evoting@nsdl.com", "HDFC BANK LIMITED : Postal Ballot Notice") === "shareholder vote"],
     ["a company's conditional notice is not a task", noiseReason("Contact Myntra if you need to reschedule the pickup", "updates@myntra.com") === "conditional notice"],
