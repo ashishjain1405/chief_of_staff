@@ -15,8 +15,9 @@ export type Rule = { id?: string; match_type: MatchType; match_key: string; labe
 export type Match = { type: MatchType; key: string; label: string };
 export type Overrides = { category: string | null; category_source: Source; counted_override: boolean | null; counted_source: "rule" | "user" | null };
 
-// The categories a transaction can be moved to: the ones extraction and the
-// merchant dictionary already use. No new categories (founder decision).
+// The built-in categories: the ones extraction and the merchant dictionary
+// use. The founder can add their own (user_categories), stored with a
+// "custom_" key so they never collide with these.
 export const CATEGORY_OPTIONS = [
   "food_delivery", "restaurants", "groceries", "ecommerce", "shopping", "fashion", "electronics", "furniture",
   "transport", "travel", "fuel", "entertainment", "subscriptions", "gaming", "fitness", "beauty", "eyewear",
@@ -25,6 +26,23 @@ export const CATEGORY_OPTIONS = [
   "professional_network", "unknown",
 ] as const;
 export const isCategoryOption = (c: string) => (CATEGORY_OPTIONS as readonly string[]).includes(c);
+
+export type UserCategory = { id: string; key: string; label: string };
+export const CUSTOM_PREFIX = "custom_";
+export const isCustomCategory = (c: string | null | undefined) => !!c?.startsWith(CUSTOM_PREFIX);
+export const CATEGORY_NAME_MAX = 40;
+// "  office   supplies " -> "office supplies"; null when empty or too long.
+export function cleanCategoryName(name: unknown): string | null {
+  const n = typeof name === "string" ? name.replace(/\s+/g, " ").trim() : "";
+  return n && n.length <= CATEGORY_NAME_MAX ? n : null;
+}
+// "Office supplies" -> "custom_office_supplies", numbered when taken.
+export function customCategoryKey(name: string, taken: Set<string>): string {
+  const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "").slice(0, CATEGORY_NAME_MAX) || "category";
+  let key = CUSTOM_PREFIX + slug;
+  for (let n = 2; taken.has(key); n++) key = `${CUSTOM_PREFIX}${slug}_${n}`;
+  return key;
+}
 
 // A UPI handle as one payee. Banks mask the front of a numbered handle, so
 // "******4694@ybl" and "9773774694@ybl", or "******2985@ybl" and
@@ -93,6 +111,11 @@ export function resolve(current: Partial<Overrides>, autoCategory: string | null
   }
   return out;
 }
+
+// The rules once a category is deleted: one that only filed into it goes; one
+// that also decides counting keeps that part.
+export const rulesWithout = (rules: Rule[], key: string): Rule[] =>
+  rules.filter((r) => r.category !== key || r.counted !== null).map((r) => (r.category === key ? { ...r, category: null } : r));
 
 // ── Planning a change: pure, so the table can show it at once and the server
 // action can save exactly the same thing.

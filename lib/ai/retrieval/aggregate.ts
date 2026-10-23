@@ -14,6 +14,13 @@ export async function aggregateTransactions(
   },
   supabase: any
 ): Promise<AggregatedFinance> {
+  // The founder's own categories: "how much on Family" filters on its key, and
+  // the totals name it instead of showing "custom_family".
+  const { data: mine } = await supabase.from("user_categories").select("key, label").eq("user_id", userId);
+  const keyOf = new Map<string, string>(((mine ?? []) as { key: string; label: string }[]).map((c) => [c.label.toLowerCase(), c.key]));
+  const labelOf = new Map<string, string>(((mine ?? []) as { key: string; label: string }[]).map((c) => [c.key, c.label]));
+  const categories = filters.categories?.map((c) => keyOf.get(c.toLowerCase().replace(/_/g, " ")) ?? c);
+
   let query = (supabase as any)
     .from("transactions_normalized")
     .select("amount, currency, category, merchant_normalized, transaction_datetime, transaction_type, status, counted_override")
@@ -30,8 +37,8 @@ export async function aggregateTransactions(
     query = query.gte("transaction_datetime", since);
   }
 
-  if (filters.categories?.length) {
-    query = query.in("category", filters.categories);
+  if (categories?.length) {
+    query = query.in("category", categories);
   }
 
   if (filters.merchantNames?.length) {
@@ -42,7 +49,7 @@ export async function aggregateTransactions(
   let categoryFallback: string[] | undefined;
 
   // Retry without category filter if over-specific filter returned nothing
-  if (!error && !data?.length && filters.categories?.length) {
+  if (!error && !data?.length && categories?.length) {
     let retryQuery = supabase
       .from("transactions_normalized")
       .select("amount, currency, category, merchant_normalized, transaction_datetime, transaction_type, status, counted_override")
@@ -94,7 +101,7 @@ export async function aggregateTransactions(
     by_currency[currency].total += signedAmount;
     by_currency[currency].count += 1;
 
-    const cat = row.category ?? "other";
+    const cat = row.category ? labelOf.get(row.category) ?? row.category : "other";
     by_category[cat] = (by_category[cat] ?? 0) + signedAmount;
 
     const merchant = row.merchant_normalized ?? "Unknown";

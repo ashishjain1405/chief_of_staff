@@ -1,4 +1,5 @@
 import { MERCHANT_DATA } from "@/lib/finance/normalize";
+import { CATEGORY_OPTIONS } from "@/lib/finance/rules";
 
 // Display names only - the stored category keys are unchanged. Everything in
 // the finance view uses sentence case ("Food delivery", not "Food Delivery").
@@ -9,11 +10,21 @@ const CATEGORY_NAMES: Record<string, string> = {
   other: "Other",
 };
 
-export function categoryLabel(key: string | null | undefined): string {
+// `names` holds the founder's own categories; without it a custom key still
+// reads well ("custom_office_supplies" -> "Office supplies").
+export function categoryLabel(key: string | null | undefined, names?: Record<string, string>): string {
   if (!key) return "Uncategorised";
+  if (names?.[key]) return names[key];
   if (CATEGORY_NAMES[key]) return CATEGORY_NAMES[key];
-  const words = key.replace(/_/g, " ").trim().toLowerCase();
+  const words = key.replace(/^custom_/, "").replace(/_/g, " ").trim().toLowerCase();
   return words.charAt(0).toUpperCase() + words.slice(1);
+}
+
+// The built-in category a typed name means, if any: "groceries" -> "groceries",
+// "uncategorised" -> "unknown".
+export function builtInCategory(name: string): string | null {
+  const n = name.trim().toLowerCase();
+  return CATEGORY_OPTIONS.find((c) => categoryLabel(c).toLowerCase() === n) ?? null;
 }
 
 const squash = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");

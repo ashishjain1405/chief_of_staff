@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { countsAsSpend, isFailedTransaction, notSpendReason, spendAmount } from "@/lib/finance/spend";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
+import { categoryLabel } from "@/components/finance/labels";
 
 const CAT_COLORS: Record<string, string> = {
   groceries: "bg-green-500",
@@ -40,13 +41,17 @@ export default async function InboxSpendPage({
   const monthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
   const since = period === "week" ? weekAgo : monthAgo;
 
-  const { data: rows } = await supabase
-    .from("transactions_normalized")
-    .select("*")
-    .eq("user_id", user.id)
-    .gte("transaction_datetime", since)
-    .order("transaction_datetime", { ascending: false })
-    .limit(200);
+  const [{ data: rows }, { data: categoryRows }] = await Promise.all([
+    supabase
+      .from("transactions_normalized")
+      .select("*")
+      .eq("user_id", user.id)
+      .gte("transaction_datetime", since)
+      .order("transaction_datetime", { ascending: false })
+      .limit(200),
+    supabase.from("user_categories").select("key, label").eq("user_id", user.id),
+  ]);
+  const names = Object.fromEntries((categoryRows ?? []).map((c) => [c.key, c.label]));
 
   // Failed attempts are dropped here rather than in SQL, where != also drops NULL.
   const all = (rows ?? []).filter((r) => !isFailedTransaction(r));
@@ -111,7 +116,7 @@ export default async function InboxSpendPage({
             {sortedCats.map(([cat, amount]) => (
               <div key={cat} className="flex items-center gap-3">
                 <span className="text-xs text-muted-foreground w-28 shrink-0 capitalize">
-                  {cat.replace(/_/g, " ")}
+                  {categoryLabel(cat, names)}
                 </span>
                 <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
                   <div
@@ -142,7 +147,7 @@ export default async function InboxSpendPage({
                       {notSpendReason(r) && <span className="ml-2 text-xs text-muted-foreground">{notSpendReason(r)} · not counted</span>}
                     </p>
                     <p className="text-xs text-muted-foreground capitalize">
-                      {(r.category ?? "—").replace(/_/g, " ")} ·{" "}
+                      {r.category ? categoryLabel(r.category, names) : "—"} ·{" "}
                       {new Date(r.transaction_datetime).toLocaleDateString("en-IN", {
                         day: "numeric",
                         month: "short",

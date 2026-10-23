@@ -4,10 +4,13 @@ import Link from "next/link";
 import { useEffect, useOptimistic, useState, useTransition } from "react";
 import { ArrowUpRight, ChevronDown, X } from "lucide-react";
 import { notSpendReason } from "@/lib/finance/spend";
-import { matchesFor, planChange, recompute, type Rule, type Snapshot } from "@/lib/finance/rules";
-import { changeTransaction, deleteRule, resetTransaction, undoChange, type ChangeResult, type Undo } from "@/app/(dashboard)/finance/actions";
+import { matchesFor, planChange, recompute, rulesWithout, type Rule, type Snapshot, type UserCategory } from "@/lib/finance/rules";
+import {
+  changeTransaction, deleteCategory, deleteRule, renameCategory, resetTransaction, undoChange, type ChangeResult, type Undo,
+} from "@/app/(dashboard)/finance/actions";
 import { categoryLabel, istDate, merchantLabel } from "./labels";
 import { TransactionEditor } from "./transaction-editor";
+import { YourCategories, YourRules } from "./your-choices";
 import type { TransactionRow } from "./types";
 
 const SHOWN = 100;
@@ -18,20 +21,24 @@ const TRANSFERS = new Set(["bank_transfer", "p2p_transfer"]);
 const displayName = (r: TransactionRow) =>
   r.recipient_label && (!r.merchant_normalized || TRANSFERS.has(r.transaction_type ?? "")) ? `Transfer · ${r.recipient_label}` : merchantLabel(r.merchant_normalized);
 const sourceNote = (s: string | null | undefined) => (s === "user" ? "set by you" : s === "rule" ? "your rule" : null);
+const FAILED = "That change could not be saved, so nothing was changed. Try again.";
 
 // The founder's corrections apply at once: the change is shown before the
 // server confirms it, and Undo puts back exactly what the action changed.
-export function TransactionsTable({ rows, category, rules, counts }: {
-  rows: TransactionRow[]; category?: string; rules: Rule[]; counts: Record<string, number>;
+export function TransactionsTable({ rows, category, rules, categories, counts }: {
+  rows: TransactionRow[]; category?: string; rules: Rule[]; categories: UserCategory[]; counts: Record<string, number>;
 }) {
   const [view, apply] = useOptimistic(rows, (state: TransactionRow[], changes: Snapshot[]) => {
     const byId = new Map(changes.map((c) => [c.id, c]));
     return state.map((r) => (byId.has(r.id) ? { ...r, ...byId.get(r.id) } : r));
   });
+  const [cats, applyCats] = useOptimistic(categories, (state: UserCategory[], c: { id: string; label: string | null }) =>
+    c.label === null ? state.filter((x) => x.id !== c.id) : state.map((x) => (x.id === c.id ? { ...x, label: c.label! } : x)));
+  const names = Object.fromEntries(cats.map((c) => [c.key, c.label]));
   const [, startTransition] = useTransition();
   const [open, setOpen] = useState<string | null>(null);
-  const [toast, setToast] = useState<{ message: string; undo: Undo } | null>(null);
-  const [failed, setFailed] = useState(false);
+  const [toast, setToast] = useState<{ message: string; undo?: Undo } | null>(null);
+  const [failed, setFailed] = useState<string | null>(null);
 
   useEffect(() => {
     if (!toast) return;
@@ -39,28 +46,42 @@ export function TransactionsTable({ rows, category, rules, counts }: {
     return () => clearTimeout(t);
   }, [toast]);
 
-  const run = (optimistic: Snapshot[], action: () => Promise<ChangeResult>, message: (n: number) => string) => {
+  const run = (optimistic: Snapshot[], action: () => Promise<Partial<ChangeResult> & { changed: number }>, message: (n: number) => string) => {
     setOpen(null);
-    setFailed(false);
+    setFailed(null);
     startTransition(async () => {
       apply(optimistic);
       try {
         const result = await action();
         setToast({ message: message(result.changed), undo: result.undo });
       } catch {
-        setFailed(true);
+        setFailed(FAILED);
       }
     });
   };
 
   const undo = () => {
-    if (!toast) return;
+    if (!toast?.undo) return;
     const { undo: u } = toast;
     setToast(null);
     startTransition(async () => {
       apply(u.rows);
-      await undoChange(u).catch(() => setFailed(true));
+      await undoChange(u).catch(() => setFailed(FAILED));
     });
+  };
+
+  const rename = (c: UserCategory, label: string) => {
+    setFailed(null);
+    startTransition(async () => {
+      applyCats({ id: c.id, label });
+      const result = await renameCategory(c.id, label).catch(() => ({ error: FAILED }));
+      if (result.error) setFailed(result.error);
+    });
+  };
+  const remove = (c: UserCategory) => {
+    applyCats({ id: c.id, label: null });
+    run(recompute(view, rulesWithout(rules, c.key), (r) => ({ category: r.category === c.key })).after, () => deleteCategory(c.id),
+      (n) => `Deleted ${c.label}${n ? ` · ${plural(n, "transaction")} back to automatic` : ""}`);
   };
 
   return (
@@ -69,9 +90,9 @@ export function TransactionsTable({ rows, category, rules, counts }: {
         <div className="flex items-center gap-2">
           <h2 className="text-base font-semibold text-foreground">Transactions</h2>
           {category && (
-            <Link href="/finance" scroll={false} aria-label={`Clear the ${categoryLabel(category)} filter`}
+            <Link href="/finance" scroll={false} aria-label={`Clear the ${categoryLabel(category, names)} filter`}
               className="inline-flex items-center gap-1 rounded-full bg-sky-50 px-2.5 py-0.5 text-xs font-medium text-sky-700 transition-colors hover:bg-sky-100 dark:bg-sky-500/10 dark:text-sky-300">
-              {categoryLabel(category)}
+              {categoryLabel(category, names)}
               <X className="size-3" aria-hidden />
             </Link>
           )}
@@ -81,7 +102,7 @@ export function TransactionsTable({ rows, category, rules, counts }: {
         </p>
       </header>
 
-      {failed && <p className="mx-5 mb-3 rounded-lg bg-rose-50 px-3 py-2 text-xs text-rose-700 dark:bg-rose-500/10 dark:text-rose-300">That change could not be saved, so nothing was changed. Try again.</p>}
+      {failed && <p className="mx-5 mb-3 rounded-lg bg-rose-50 px-3 py-2 text-xs text-rose-700 dark:bg-rose-500/10 dark:text-rose-300">{failed}</p>}
 
       {view.length === 0 ? (
         <p className="px-5 pb-8 text-sm text-muted-foreground">No transactions here yet.</p>
@@ -98,7 +119,7 @@ export function TransactionsTable({ rows, category, rules, counts }: {
               const pill = (
                 <button type="button" onClick={toggle} aria-expanded={open === r.id}
                   className="inline-flex max-w-full items-center gap-1 rounded-full bg-muted/70 px-2.5 py-0.5 text-xs text-muted-foreground transition-colors hover:bg-sky-50 hover:text-sky-800 dark:hover:bg-sky-500/10 dark:hover:text-sky-200">
-                  <span className="truncate">{categoryLabel(r.category)}</span>
+                  <span className="truncate">{categoryLabel(r.category, names)}</span>
                   {sourceNote(r.category_source) && <span className="shrink-0 text-[10px] opacity-75">· {sourceNote(r.category_source)}</span>}
                   <ChevronDown className="size-3 shrink-0 opacity-60" aria-hidden />
                 </button>
@@ -139,12 +160,13 @@ export function TransactionsTable({ rows, category, rules, counts }: {
                         row={r}
                         match={match}
                         sharing={match ? counts[`${match.type}:${match.key}`] ?? 1 : 1}
+                        categories={cats}
                         onClose={() => setOpen(null)}
                         onReset={() => run(recompute([r], rules, () => ({ category: true, counted: true })).after, () => resetTransaction(r.id), () => "Reset to automatic")}
                         onConfirm={(choice, scope) => {
                           const input = { id: r.id, field: choice.field, value: choice.value, scope, match: scope === "all" ? match ?? undefined : undefined };
                           run(planChange(view, rules, input).after, () => changeTransaction(input), (n) =>
-                            choice.field === "category" ? `Moved ${plural(n, "transaction")} to ${categoryLabel(choice.value as string)}`
+                            choice.field === "category" ? `Moved ${plural(n, "transaction")} to ${categoryLabel(choice.value as string, names)}`
                               : `${choice.value ? "Counting" : "Not counting"} ${plural(n, "transaction")} as spend`);
                         }}
                       />
@@ -157,34 +179,15 @@ export function TransactionsTable({ rows, category, rules, counts }: {
         </div>
       )}
 
-      {rules.length > 0 && (
-        <div className="border-t border-border/60 px-5 py-4">
-          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Your rules ({rules.length})</p>
-          <ul className="mt-2 divide-y divide-border/60">
-            {rules.map((rule) => (
-              <li key={rule.id ?? `${rule.match_type}:${rule.match_key}`} className="flex items-center justify-between gap-3 py-2 text-sm">
-                <span className="min-w-0 text-foreground">
-                  <span className="font-medium">{rule.label}</span>
-                  <span className="text-muted-foreground">
-                    {rule.category ? ` → ${categoryLabel(rule.category)}` : ""}
-                    {rule.counted !== null ? ` · ${rule.counted ? "always counted" : "never counted"}` : ""}
-                  </span>
-                </span>
-                <button type="button" disabled={!rule.id}
-                  onClick={() => rule.id && run(recompute(view, rules.filter((x) => x.id !== rule.id), () => ({})).after, () => deleteRule(rule.id!), (n) => `Removed the rule for ${rule.label}${n ? ` · ${plural(n, "transaction")} back to automatic` : ""}`)}
-                  className="shrink-0 rounded-full px-3 py-1 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground">
-                  Remove
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+      <YourCategories categories={cats} counts={counts} onRename={rename} onDelete={remove} />
+      <YourRules rules={rules} names={names}
+        onRemove={(rule) => rule.id && run(recompute(view, rules.filter((x) => x.id !== rule.id), () => ({})).after, () => deleteRule(rule.id!),
+          (n) => `Removed the rule for ${rule.label}${n ? ` · ${plural(n, "transaction")} back to automatic` : ""}`)} />
 
       {toast && (
         <div role="status" className="fixed inset-x-4 bottom-6 z-50 mx-auto flex max-w-md items-center justify-between gap-4 rounded-full bg-foreground px-5 py-3 text-sm text-background shadow-lg">
           <span className="truncate">{toast.message}</span>
-          <button type="button" onClick={undo} className="shrink-0 font-semibold text-sky-300 hover:text-sky-200">Undo</button>
+          {toast.undo && <button type="button" onClick={undo} className="shrink-0 font-semibold text-sky-300 hover:text-sky-200">Undo</button>}
         </div>
       )}
     </section>

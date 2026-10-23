@@ -10,7 +10,7 @@ import { ColumnChart, ChartTable, type Column } from "@/components/finance/colum
 import { TransactionsTable } from "@/components/finance/transactions-table";
 import type { TransactionRow } from "@/components/finance/types";
 import { categoryLabel, inr, istDate, merchantLabel } from "@/components/finance/labels";
-import { matchesFor, type Rule } from "@/lib/finance/rules";
+import { matchesFor, type Rule, type UserCategory } from "@/lib/finance/rules";
 
 // Columns past these fold into "Other" (fewer on phones, where seven labels
 // clip); the table view under the chart keeps every category.
@@ -69,15 +69,22 @@ export default async function FinancePage({
   const { month: monthStart, week: weekStart, sixMonthsAgo, monthKey: thisMonthKey } = periodStarts();
   const after = (r: TransactionRow, start: string) => Date.parse(r.transaction_datetime) >= Date.parse(start);
 
-  const [rows, { data: ruleRows }] = await Promise.all([
+  const [rows, { data: ruleRows }, { data: categoryRows }] = await Promise.all([
     loadSince(supabase, user.id, sixMonthsAgo),
     supabase.from("transaction_rules").select("id, match_type, match_key, label, category, counted").eq("user_id", user.id).order("created_at"),
+    supabase.from("user_categories").select("id, key, label").eq("user_id", user.id),
   ]);
   const rules = (ruleRows ?? []) as Rule[];
+  const categories = (categoryRows ?? []) as UserCategory[];
+  const names = Object.fromEntries(categories.map((c) => [c.key, c.label]));
   // How many transactions share each merchant or UPI payee, for "This and all
-  // BookMyShow transactions (6 so far)".
+  // BookMyShow transactions (6 so far)", and are in each category.
   const counts: Record<string, number> = {};
-  for (const r of rows) for (const m of matchesFor(r, merchantLabel)) counts[`${m.type}:${m.key}`] = (counts[`${m.type}:${m.key}`] ?? 0) + 1;
+  const add = (key: string) => (counts[key] = (counts[key] ?? 0) + 1);
+  for (const r of rows) {
+    for (const m of matchesFor(r, merchantLabel)) add(`${m.type}:${m.key}`);
+    if (r.category) add(`category:${r.category}`);
+  }
 
   // Failed attempts are dropped here rather than in SQL, where != also drops NULL.
   const all = rows.filter((r) => !isFailedTransaction(r));
@@ -116,7 +123,7 @@ export default async function FinancePage({
     return [
       ...head.map(([c, value]) => ({
         key: c,
-        label: categoryLabel(c),
+        label: categoryLabel(c, names),
         value,
         href: cat === c ? "/finance" : `/finance?cat=${c}`,
         tone: cat ? (cat === c ? ("accent" as const) : ("soft" as const)) : ("default" as const),
@@ -125,7 +132,7 @@ export default async function FinancePage({
       ...(tail > 0 ? [{ key: "__other", label: "Other", value: tail, tone: cat ? ("soft" as const) : ("default" as const) }] : []),
     ];
   };
-  const allCategoryRows: Column[] = sortedCats.map(([c, value]) => ({ key: c, label: categoryLabel(c), value }));
+  const allCategoryRows: Column[] = sortedCats.map(([c, value]) => ({ key: c, label: categoryLabel(c, names), value }));
   const trendColumns: Column[] = sortedMonths.map(([m, value]) => ({
     key: m,
     label: new Date(`${m}-01T00:00:00+05:30`).toLocaleDateString("en-IN", { month: "short", timeZone: "Asia/Kolkata" }),
@@ -197,7 +204,7 @@ export default async function FinancePage({
           </section>
         </div>
 
-        <TransactionsTable rows={filtered} category={cat} rules={rules} counts={counts} />
+        <TransactionsTable rows={filtered} category={cat} rules={rules} categories={categories} counts={counts} />
       </div>
     </div>
   );
