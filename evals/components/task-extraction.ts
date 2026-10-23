@@ -33,7 +33,9 @@
 import * as fs from "fs";
 import * as path from "path";
 import { triageEmail } from "@/lib/ai/claude";
-import { shouldCreateTask, ccOnlyWithoutAsk } from "@/lib/tasks/gate";
+import { shouldCreateTask, ccOnlyWithoutAsk, noiseReason } from "@/lib/tasks/gate";
+import { isSimilarTaskTitle } from "@/lib/tasks/similar";
+import { taskPriority } from "@/lib/tasks/priority";
 import { isKnownFinancialDomain } from "@/lib/finance/senders";
 import { resolveFollowUpDeadline } from "@/lib/tasks/deadline";
 
@@ -108,6 +110,8 @@ async function main() {
       isFinancialDomain: isKnownFinancialDomain(c.sender),
       isBulk: c.bulk,
       ccOnlyWithoutAsk: ccOnlyWithoutAsk({ to: c.to, cc: c.cc, founderEmail: founderAddress, founderFirstName: FOUNDER_FIRST_NAME, body: c.body }),
+      title: triage.action_description,
+      subject: c.subject,
     });
 
     const decisionOk = creates === c.expect.creates_task;
@@ -140,6 +144,30 @@ async function main() {
     if (!deadlineOk) console.log(`        \x1b[33mimpossible deadline:\x1b[0m ${rawDeadline}`);
   }
 
+  // ── Rules: no model involved, so these must hold every time. Each pins a
+  // kind of noise that once filled the task list (October task clean-up).
+  console.log(`\nRULES - noise, duplicates, priority`);
+  const RULES: [string, boolean][] = [
+    ["one-time code is never a task", noiseReason("Provide the OTP 202728 to the delivery agent", "shipment@shipping.amazon.in") === "one-time code"],
+    ["a company's proxy vote is not a task", noiseReason("Vote on Tesla, Inc.'s annual meeting matters by December 2", "id@proxyvote.com") === "shareholder vote"],
+    ["a person asking for a vote is a task", noiseReason("Vote on the board resolution by Friday", "kamal@gmail.com") === null],
+    ["an EGM notice is caught by its subject", noiseReason("Attend the meeting and review the notice", "evoting@nsdl.com", "XYZ LIMITED : Notice of Extraordinary General Meeting") === "shareholder vote"],
+    ["a postal ballot is caught by its subject", noiseReason("Review the notice", "evoting@nsdl.com", "HDFC BANK LIMITED : Postal Ballot Notice") === "shareholder vote"],
+    ["a company's conditional notice is not a task", noiseReason("Contact Myntra if you need to reschedule the pickup", "updates@myntra.com") === "conditional notice"],
+    ["a company's survey is not a task", noiseReason("Fill out the survey on Employer Branding", "events@ethrworld.com") === "not a task"],
+    ["synonyms are the same ask", isSimilarTaskTitle("Let Rajvi know when to book the next session", "Reply to Rajvi to schedule the next session")],
+    ["a different topic is a different ask", !isSimilarTaskTitle("Respond to Rajvi regarding the call", "Reply to Rajvi to schedule the next session")],
+    ["a different month is a different bill", !isSimilarTaskTitle("Pay the electricity bill for September 2026", "Pay the electricity bill for October 2026")],
+    ["a bill is high priority", taskPriority({ title: "Pay the water bill", importance: 0.5, senderEmail: "oecabilling@gmail.com" }) === "high"],
+    ["a donation appeal is low priority", taskPriority({ title: "Consider making a donation to flood relief", importance: 0.8, senderEmail: "hello@wfp.sharethemeal.org" }) === "low"],
+    ["renewing before the due date is not a bill", taskPriority({ title: "Renew the insurance for the Hyundai I20 before the due date", importance: 0.6, senderEmail: "noreply@policybazaar.com" }) !== "high"],
+  ];
+  let ruleFailures = 0;
+  for (const [name, ok] of RULES) {
+    if (!ok) ruleFailures++;
+    console.log(`  ${ok ? "\x1b[32m✓\x1b[0m" : "\x1b[31m✗\x1b[0m"} ${name}`);
+  }
+
   // ── Stability: same email, same category
   console.log(`\nSTABILITY - re-triaging ${STABILITY_SAMPLE} cases, category must not move`);
   let unstable = 0;
@@ -169,6 +197,7 @@ async function main() {
 
   const failures = [
     wrongDecision > 0 && `${wrongDecision} wrong task decision(s)`,
+    ruleFailures > 0 && `${ruleFailures} noise/duplicate/priority rule(s) broken`,
     thirdPerson > 0 && `${thirdPerson} action(s) written in third person`,
     // temperature 0 lowers variance but is not a determinism guarantee - the
     // API still batches - so a single borderline case flipping is expected and

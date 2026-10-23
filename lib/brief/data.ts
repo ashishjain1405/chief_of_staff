@@ -98,7 +98,7 @@ async function loadPrevious(db: SupabaseClient, userId: string, now: Date) {
 
   const ids = (prefix: string) => keys.filter((k) => k.startsWith(prefix)).map((k) => k.slice(prefix.length));
   const [tasks, emails] = await Promise.all([
-    ids("task:").length ? db.from("tasks").select("id").in("id", ids("task:")).neq("status", "pending") : { data: [] },
+    ids("task:").length ? db.from("tasks").select("id").in("id", ids("task:")).in("status", ["done", "dismissed"]) : { data: [] },
     ids("email:").length ? db.from("communications").select("id").in("id", ids("email:")).or("action_taken.eq.true,requires_action.eq.false") : { data: [] },
   ]);
   return { previousKeys: keys, doneSinceYesterday: (tasks.data?.length ?? 0) + (emails.data?.length ?? 0) };

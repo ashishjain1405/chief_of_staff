@@ -1,4 +1,6 @@
-import { isAutomatedMail } from "@/lib/tasks/gate";
+import { isAutomatedMail, isPersonalSender } from "@/lib/tasks/gate";
+
+export { isPersonalSender };
 
 export type TaskPriority = "high" | "medium" | "low";
 
@@ -13,14 +15,7 @@ const OPTIONAL = /\b(vote|voting|e-?voting|postal ballot|annual (general )?meeti
 
 // Money the founder owes. "dues", not "due": "renew before the due date" is not a bill.
 const OWED = /\b(pay|payment|bill|emi|repay|dues)\b/i;
-
-// A person writes from a personal mailbox; a company domain that is not
-// flagged as automated is still a company (surveys, proxy votes, memberships).
-const PERSONAL_DOMAINS = new Set([
-  "gmail.com", "googlemail.com", "yahoo.com", "yahoo.co.in", "yahoo.in", "outlook.com", "hotmail.com",
-  "live.com", "icloud.com", "me.com", "proton.me", "protonmail.com", "rediffmail.com",
-]);
-export const isPersonalSender = (email: string) => PERSONAL_DOMAINS.has((email.split("@")[1] ?? "").toLowerCase());
+export const owesMoney = (title: string) => OWED.test(title);
 
 export function taskPriority(params: { title: string; importance: number; senderEmail: string; isBulk?: boolean; isFinancialDomain?: boolean }): TaskPriority {
   const { title, importance, senderEmail } = params;

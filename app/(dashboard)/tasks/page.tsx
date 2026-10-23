@@ -30,12 +30,12 @@ export default async function TasksPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/auth/login");
 
-  const closed = (status: string, limit: number) =>
-    supabase.from("tasks").select(SELECT).eq("user_id", user.id).eq("status", status).order("updated_at", { ascending: false }).limit(limit);
+  const closed = (statuses: string[], limit: number) =>
+    supabase.from("tasks").select(SELECT).eq("user_id", user.id).in("status", statuses).order("updated_at", { ascending: false }).limit(limit);
   const [open, done, dismissed] = await Promise.all([
     supabase.from("tasks").select(SELECT).eq("user_id", user.id).in("status", ["pending", "snoozed"]),
-    closed("done", 10),
-    closed("dismissed", 20),
+    closed(["done"], 10),
+    closed(["dismissed", "expired"], 20),
   ]);
   const rows = [...(open.data ?? []), ...(done.data ?? []), ...(dismissed.data ?? [])].map((t) => ({
     ...t,

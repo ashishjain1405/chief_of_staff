@@ -194,6 +194,8 @@ async function main() {
           founderFirstName: user.full_name?.trim().split(/\s+/)[0],
           body: comm.body ?? "",
         }),
+        title: triage.action_description,
+        subject: comm.subject,
       });
 
       if (APPLY) {

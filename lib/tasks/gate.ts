@@ -57,6 +57,41 @@ export function ccOnlyWithoutAsk(params: {
   return onCc && !onTo && !named;
 }
 
+// A person writes from a personal mailbox; a company domain that is not
+// flagged as automated is still a company (surveys, proxy votes, memberships).
+const PERSONAL_DOMAINS = new Set([
+  "gmail.com", "googlemail.com", "yahoo.com", "yahoo.co.in", "yahoo.in", "outlook.com", "hotmail.com",
+  "live.com", "icloud.com", "me.com", "proton.me", "protonmail.com", "rediffmail.com",
+]);
+export const isPersonalSender = (email: string) => PERSONAL_DOMAINS.has((email.split("@")[1] ?? "").toLowerCase());
+
+// Asks that are never the founder's task, whatever triage decides. Founder
+// decision: votes, AGMs and webinars are not tasks - yet a Tesla proxy vote
+// still became one on 19 Oct, so the prompt needs a backstop. One-time codes
+// expire in minutes. Events, votes, surveys and offers count only from
+// companies: a person asking for a board vote is a real ask.
+const ONE_TIME_CODE = /\b(otp|verification code|one[- ]time (password|code))\b/i;
+// Checked on the email's subject as well as the task title: "Attend the EGM"
+// says neither "vote" nor "AGM". Narrow on purpose - the founder's decision is
+// about shareholder votes and meetings, and the subject of a colleague's mail
+// ("Re: survey results") must not block a real ask.
+const SHAREHOLDER_VOTE = /\b(vote|voting|e-?voting|postal ballot|proxy|agm|egm|(annual|extraordinary) general meeting|annual meeting|shareholders?'? meeting)\b/i;
+const COMPANY_NOT_A_TASK = /\b(webinar|mastermind|masterclass|register (on|for)|enrol+|enroll|course|survey|share your feedback|donat\w*|sharing meals|upgrade to|premium subscription|consider investing)\b/i;
+export const isShareholderVote = (text: string) => SHAREHOLDER_VOTE.test(text);
+// "Contact Myntra if you need to reschedule", "reset your password if you did
+// not authorise this": a company's conditional notice, not an ask - 2 of the 4
+// tasks created between 20 and 23 Oct.
+const CONDITIONAL = /\bif you (need|did not|didn'?t|have not|haven'?t|want|wish|did)\b/i;
+
+export function noiseReason(title: string, senderEmail: string, subject = ""): "one-time code" | "shareholder vote" | "not a task" | "conditional notice" | null {
+  if (ONE_TIME_CODE.test(title)) return "one-time code";
+  if (isPersonalSender(senderEmail)) return null;
+  if (SHAREHOLDER_VOTE.test(title) || SHAREHOLDER_VOTE.test(subject)) return "shareholder vote";
+  if (COMPANY_NOT_A_TASK.test(title)) return "not a task";
+  if (CONDITIONAL.test(title)) return "conditional notice";
+  return null;
+}
+
 export function taskCategoryAllowed(category: string, senderEmail: string): boolean {
   if (NO_TASK_CATEGORIES.has(category)) return false;
 
@@ -84,10 +119,14 @@ export function shouldCreateTask(params: {
   isFinancialDomain?: boolean;
   isBulk?: boolean;
   ccOnlyWithoutAsk?: boolean;
+  // triage's action_description, the task's title-to-be, and the email's subject.
+  title?: string | null;
+  subject?: string | null;
 }): boolean {
   const { category, requiresAction, senderEmail, founderEmail, isFinancialDomain = false, isBulk = false } = params;
   if (!requiresAction) return false;
   if (params.ccOnlyWithoutAsk) return false;
+  if (noiseReason(params.title ?? "", senderEmail, params.subject ?? "")) return false;
 
   // Mail the founder wrote themselves. The backfill's Gmail query was not
   // scoped to the inbox, so it pulled in 12 of the founder's own messages and

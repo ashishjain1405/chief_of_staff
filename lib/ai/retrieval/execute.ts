@@ -185,7 +185,9 @@ async function executeStep(
           .from("tasks")
           .select("id, title, status, priority, due_date, created_at")
           .eq("user_id", userId)
-          .not("status", "eq", "done");
+          // Open tasks only: "not done" also returned dismissed and expired
+          // ones, which Ask AI then listed as still to do.
+          .in("status", ["pending", "snoozed"]);
         if (f.dateRange) q = q.lte("due_date", f.dateRange.to);
         return q;
       };

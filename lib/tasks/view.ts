@@ -3,7 +3,8 @@ import { reviewReason } from "@/lib/tasks/priority";
 // Shared by the Tasks page (server) and its interactive view (client), so it
 // lives in a plain module: a "use client" file cannot export to a server one.
 
-export type TaskStatus = "pending" | "snoozed" | "done" | "dismissed";
+// "expired" is closed by the daily job or a clean-up, "dismissed" by the founder.
+export type TaskStatus = "pending" | "snoozed" | "done" | "dismissed" | "expired";
 export type TaskRowData = {
   id: string;
   title: string;
@@ -38,7 +39,7 @@ export function groupTasks(rows: TaskRowData[], today: string) {
 
   const g = { overdue: [] as TaskRowData[], week: [] as TaskRowData[], later: [] as TaskRowData[], undated: [] as TaskRowData[], review: [] as TaskRowData[], low: [] as TaskRowData[] };
   for (const t of rows) {
-    if (t.status === "done" || t.status === "dismissed") continue;
+    if (t.status !== "pending" && t.status !== "snoozed") continue;
     const d = daysUntil(t);
     const review = reviewReason(t.title, d);
     if (review) g.review.push({ ...t, note: review === "lapsed" ? `Date passed ${shortDate(istDay(t.due_date!))}` : `${-d!} days overdue` });
@@ -49,12 +50,12 @@ export function groupTasks(rows: TaskRowData[], today: string) {
     else g.later.push(t);
   }
   Object.values(g).forEach((list) => list.sort(byPriority));
-  const latest = (status: TaskStatus) => rows.filter((t) => t.status === status).sort((a, b) => changedAt(b) - changedAt(a));
+  const latest = (...statuses: TaskStatus[]) => rows.filter((t) => statuses.includes(t.status)).sort((a, b) => changedAt(b) - changedAt(a));
   const open = rows.filter((t) => t.status === "pending" || t.status === "snoozed");
   return {
     ...g,
     done: latest("done").slice(0, 10),
-    dismissed: latest("dismissed").slice(0, 20),
+    dismissed: latest("dismissed", "expired").slice(0, 20),
     open: open.length,
     high: open.filter((t) => t.priority === "high" && !g.review.some((r) => r.id === t.id)).length,
   };

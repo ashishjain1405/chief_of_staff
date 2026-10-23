@@ -100,7 +100,7 @@ export function TasksView({ rows, today, action }: { rows: TaskRowData[]; today:
         )}
 
         {g.dismissed.length > 0 && (
-          <SectionCard icon={Archive} title={`Dismissed (${g.dismissed.length})`} description="Closed without doing - restore one if it still matters">
+          <SectionCard icon={Archive} title={`Dismissed (${g.dismissed.length})`} description="Closed without doing, by you or automatically - restore one if it still matters">
             {folded("dismissed", g.dismissed)}
           </SectionCard>
         )}

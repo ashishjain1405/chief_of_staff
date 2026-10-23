@@ -10,7 +10,7 @@ import { deduplicateRawTransactions, isPaymentForShipping, isShippingUpdate, sav
 import { resolveFollowUpDeadline } from "@/lib/tasks/deadline";
 import { LOW_SIGNAL_CATEGORIES } from "@/lib/inbox/categories";
 import { shouldCreateTask, ccOnlyWithoutAsk } from "@/lib/tasks/gate";
-import { taskPriority } from "@/lib/tasks/priority";
+import { isPersonalSender, owesMoney, taskPriority } from "@/lib/tasks/priority";
 import { isSimilarTaskTitle } from "@/lib/tasks/similar";
 import { FEATURES } from "@/lib/features";
 
@@ -111,6 +111,8 @@ export async function summarizeCommunication(job: Job) {
       founderFirstName: user?.full_name?.trim().split(/\s+/)[0],
       body: comm.body ?? "",
     }),
+    title: triage.action_description,
+    subject: comm.subject,
   });
 
   await supabase
@@ -263,21 +265,41 @@ export async function summarizeCommunication(job: Job) {
   // Same sender, still open, same ask: separate threads restating one thing.
   // PolicyBazaar sent nine "renew your i20 insurance" countdowns, each its own
   // thread, and every one became a task. Skips rather than updates, as above.
+  //
+  // A company's reminder is also compared with open tasks from any sender:
+  // PolicyBazaar and Tata AIG chased the same Hyundai renewal from separate
+  // addresses. People are left to the same-sender check - two people asking
+  // for "the deck" are two asks.
   const taskTitle = triage.action_description ?? `Reply to: ${comm.subject}`;
+  const company = !isPersonalSender(senderEmail);
   let openSenderDuplicate = false;
-  if (comm.contact_id) {
-    const { data: senderTasks } = await supabase
-      .from("tasks")
-      .select("title")
-      .eq("user_id", userId)
-      .eq("contact_id", comm.contact_id)
-      .in("status", ["pending", "snoozed"]);
-    openSenderDuplicate = (senderTasks ?? []).some((t: { title: string }) => isSimilarTaskTitle(t.title, taskTitle));
+  if (comm.contact_id || company) {
+    let open = supabase.from("tasks").select("title").eq("user_id", userId).in("status", ["pending", "snoozed"]);
+    if (!company) open = open.eq("contact_id", comm.contact_id);
+    const { data: openTasks } = await open;
+    openSenderDuplicate = (openTasks ?? []).some((t: { title: string }) => isSimilarTaskTitle(t.title, taskTitle));
   }
 
   const alreadyTracked = (sameEmailTasks ?? 0) > 0 || openThreadTasks > 0 || openSenderDuplicate;
 
   if (categoryAllowsTask && !alreadyTracked) {
+    let priority = taskPriority({ title: taskTitle, importance: cappedScore, senderEmail, isBulk, isFinancialDomain: isKnownFinancialDomain(senderEmail) });
+    let learned = "";
+    // Learning from the founder's own clicks, not a trained model: if they
+    // dismissed two or more of this company's tasks in the last 30 days and
+    // completed none, the next one starts low and says why. People and money
+    // owed are never demoted. Automatic closures are "expired", not
+    // "dismissed", so they do not count.
+    if (company && comm.contact_id && priority !== "low" && !owesMoney(taskTitle)) {
+      const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+      const { data: recent } = await supabase.from("tasks").select("status")
+        .eq("user_id", userId).eq("contact_id", comm.contact_id).in("status", ["dismissed", "done"]).gte("updated_at", since);
+      const dismissed = (recent ?? []).filter((t: { status: string }) => t.status === "dismissed").length;
+      if (dismissed >= 2 && !(recent ?? []).some((t: { status: string }) => t.status === "done")) {
+        priority = "low";
+        learned = `Low: you dismissed ${dismissed} recent tasks from this sender. `;
+      }
+    }
     await supabase.from("tasks").insert({
       user_id: userId,
       title: taskTitle,
@@ -285,8 +307,8 @@ export async function summarizeCommunication(job: Job) {
       source_id: communicationId,
       contact_id: comm.contact_id,
       due_date: resolveFollowUpDeadline(triage.follow_up_deadline, comm.occurred_at),
-      priority: taskPriority({ title: taskTitle, importance: cappedScore, senderEmail, isBulk, isFinancialDomain: isKnownFinancialDomain(senderEmail) }),
-      ai_reasoning: `Importance: ${cappedScore.toFixed(2)}. ${triage.summary}`,
+      priority,
+      ai_reasoning: `Importance: ${cappedScore.toFixed(2)}. ${learned}${triage.summary}`,
     });
   }
 

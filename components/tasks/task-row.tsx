@@ -19,7 +19,7 @@ function sender(c: TaskRowData["contacts"]) {
 const button = "rounded-full px-3 py-1.5 text-xs font-medium transition-colors";
 
 export function TaskRow({ task, today, onStatus }: { task: TaskRowData; today: string; onStatus: (id: string, status: TaskStatus) => void }) {
-  const closed = task.status === "done" || task.status === "dismissed";
+  const closed = task.status === "done" || task.status === "dismissed" || task.status === "expired";
   const chip = task.due_date && !task.note && !closed ? dueChip(task.due_date, today) : null;
   const from = sender(task.contacts);
   const detail = summary(task.ai_reasoning);
@@ -37,6 +37,9 @@ export function TaskRow({ task, today, onStatus }: { task: TaskRowData; today: s
           )}
           {task.note && !closed && (
             <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-800 dark:bg-amber-500/10 dark:text-amber-300">{task.note}</span>
+          )}
+          {task.status === "expired" && (
+            <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">Closed automatically</span>
           )}
           {task.priority === "high" && !closed && (
             <span className="rounded-full bg-foreground/[0.06] px-2 py-0.5 text-[11px] font-semibold text-foreground">High priority</span>

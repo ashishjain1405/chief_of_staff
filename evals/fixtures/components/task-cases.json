@@ -569,8 +569,7 @@
     "expect": {
       "creates_task": false
     },
-    "why": "Proxy vote for a US holding via the broker. Optional right; lands in a non-blocked category from a sender isAutomatedSender does not match, without List-Unsubscribe, so only the action guidance can stop it.",
-    "known_gap": "Triage reads the 'Vote now, your vote counts' body (mostly filler characters) as important with an action, even with the optional-rights rule; a prompt tweak naming those phrases did not move it."
+    "why": "Proxy vote for a US holding via the broker. Optional right; lands in a non-blocked category from a sender isAutomatedSender does not match, without List-Unsubscribe, so only the action guidance can stop it."
   },
   {
     "id": "491d326d-d6c2-4bfd-b73e-9a5be7607f65",
