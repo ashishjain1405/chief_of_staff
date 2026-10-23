@@ -153,6 +153,37 @@ function isAlertAndReceipt(a: TransactionRaw, b: TransactionRaw, gapMs: number):
   return !!domain && (from === domain || from.endsWith(`.${domain}`));
 }
 
+// One transfer, several bank emails. Both ends report it - HDFC's debit and
+// Axis's credit for a move between the founder's own accounts - and HDFC sends
+// an RTGS "initiated" and a "completed" notice: the ₹2,60,000 loan payment on
+// 1 September was three rows. Two alerts are otherwise never merged.
+const TRANSFER_TYPES = new Set(["bank_transfer", "p2p_transfer", "salary_credit"]);
+const TRANSFER_REF_WINDOW_MS = 3 * 24 * 60 * 60 * 1000;
+const refsOf = (r: TransactionRaw) => [r.transaction_id, r.reference_id].map((v) => v?.trim() ?? "").filter((v) => v.length >= 8);
+
+// The bank reference (UTR, IMPS number) is quoted on both ends, sometimes
+// inside a longer string: Axis's "IMPS/P2A/626039800226/ASHISHJA" carries
+// HDFC's "626039800226".
+function sharesTransferRef(a: TransactionRaw, b: TransactionRaw): boolean {
+  if (!TRANSFER_TYPES.has(a.transaction_type ?? "") || !TRANSFER_TYPES.has(b.transaction_type ?? "")) return false;
+  if (Math.abs(a.amount! - b.amount!) > 0.5) return false;
+  const ra = refsOf(a), rb = refsOf(b);
+  return ra.some((x) => rb.some((y) => x === y || (x.length >= 10 && y.includes(x)) || (y.length >= 10 && x.includes(y))));
+}
+
+// An initiation and its confirmation: same sender, exactly the same amount,
+// minutes apart. One names the payee, the other gives the account, so the
+// recipients must not contradict - two different accounts, or two different
+// names, are two transfers.
+function isSameTransferNotice(a: TransactionRaw, b: TransactionRaw, gapMs: number): boolean {
+  const transfer = (r: TransactionRaw) => r.transaction_type === "bank_transfer" || r.transaction_type === "p2p_transfer";
+  if (!transfer(a) || !transfer(b) || gapMs > WINDOW_MS) return false;
+  if (!a.raw_sender || a.raw_sender.toLowerCase() !== b.raw_sender?.toLowerCase()) return false;
+  if (Math.abs(a.amount! - b.amount!) > 0.5) return false;
+  const [ka, kb] = [a.recipient_key, b.recipient_key];
+  return !(ka && kb && ka !== kb && ka.split(":")[0] === kb.split(":")[0]);
+}
+
 function areDuplicates(a: TransactionRaw, b: TransactionRaw): boolean {
   if (!a.amount || !b.amount) return false;
   if (isSameOrder(a, b)) return true;
@@ -160,6 +191,8 @@ function areDuplicates(a: TransactionRaw, b: TransactionRaw): boolean {
 
   const ta = a.transaction_datetime ? new Date(a.transaction_datetime).getTime() : 0;
   const tb = b.transaction_datetime ? new Date(b.transaction_datetime).getTime() : 0;
+  if (Math.abs(ta - tb) <= TRANSFER_REF_WINDOW_MS && sharesTransferRef(a, b)) return true;
+  if (isSameTransferNotice(a, b, Math.abs(ta - tb))) return true;
   const refundMismatch = (a.transaction_type === "refund") !== (b.transaction_type === "refund");
   if (!refundMismatch && isAlertAndReceipt(a, b, Math.abs(ta - tb))) return true;
   if (Math.abs(ta - tb) > WINDOW_MS) return false;
@@ -214,8 +247,14 @@ export function deduplicateRawTransactions(rows: TransactionRaw[]): NormalizedTr
     // Highest-priority sender wins; among equals the latest email, whose
     // amount is final (an order's delivered total, not the one first placed).
     const time = (r: TransactionRaw) => (r.transaction_datetime ? new Date(r.transaction_datetime).getTime() : 0);
+    // Between equal senders, the debit side of a transfer leads: Axis files
+    // the credit end of a move from HDFC as "salary_credit", which is not what
+    // the transfer was.
+    const debitSide = (r: TransactionRaw) => (r.transaction_type === "salary_credit" ? 0 : 1);
     const primary = group.reduce((best, cur) =>
-      priorityOf(cur) > priorityOf(best) || (priorityOf(cur) === priorityOf(best) && time(cur) > time(best)) ? cur : best
+      priorityOf(cur) > priorityOf(best) ||
+      (priorityOf(cur) === priorityOf(best) && (debitSide(cur) > debitSide(best) || (debitSide(cur) === debitSide(best) && time(cur) > time(best))))
+        ? cur : best
     );
     // Dated by when the money first moved - the order, not its delivery.
     const earliest = group.reduce((a, b) => (time(b) < time(a) ? b : a));
@@ -337,9 +376,17 @@ export async function saveNormalizedGroups(
       else stats.collapsed += redundant.length;
     }
 
+    // Regrouping only ever adds emails to a row. A run sees part of the data -
+    // a 24-hour window, plus rows sharing an order ID - and a partial group
+    // used to overwrite the row with fewer emails: Axis repeats BookMyShow's
+    // merchant ID "89098526" in every alert, so a new booking pulled in older
+    // alerts without their ticket receipts, and the receipts fell out of the
+    // finance tab.
+    const union = (key: "communication_ids" | "raw_transaction_ids") =>
+      [...new Set([...norm[key], ...matches.flatMap((m) => m[key] ?? [])])].sort();
     const { error: updateErr } = await db
       .from("transactions_normalized")
-      .update({ ...withChoices(norm, matches), updated_at: now })
+      .update({ ...withChoices(norm, matches), communication_ids: union("communication_ids"), raw_transaction_ids: union("raw_transaction_ids"), updated_at: now })
       .eq("id", keep.id);
     if (updateErr) console.error(`[dedup] update failed for ${keep.id}: ${updateErr.message}`);
     else stats.updated++;
@@ -347,12 +394,12 @@ export async function saveNormalizedGroups(
   return stats;
 }
 
-type PriorRow = { id: string } & Partial<Overrides>;
+type PriorRow = { id: string; communication_ids?: string[]; raw_transaction_ids?: string[] } & Partial<Overrides>;
 
 async function overlappingRows(db: any, userId: string, communicationIds: string[]): Promise<PriorRow[]> {
   const { data, error } = await db
     .from("transactions_normalized")
-    .select("id, category, category_source, counted_override, counted_source")
+    .select("id, communication_ids, raw_transaction_ids, category, category_source, counted_override, counted_source")
     .eq("user_id", userId)
     .overlaps("communication_ids", communicationIds)
     .order("created_at", { ascending: true });
