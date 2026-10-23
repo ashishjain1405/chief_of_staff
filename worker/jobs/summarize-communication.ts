@@ -12,6 +12,7 @@ import { LOW_SIGNAL_CATEGORIES } from "@/lib/inbox/categories";
 import { shouldCreateTask, ccOnlyWithoutAsk, hasMessageText } from "@/lib/tasks/gate";
 import { isPersonalSender, owesMoney, taskPriority } from "@/lib/tasks/priority";
 import { conversationSubject, isSimilarTaskTitle } from "@/lib/tasks/similar";
+import { transferRecipient } from "@/lib/finance/recipient";
 import { FEATURES } from "@/lib/features";
 
 export async function summarizeCommunication(job: Job) {
@@ -443,6 +444,7 @@ async function runFinancialExtraction(
   const shipping = raw?.event_kind === "completed" && isShippingUpdate(subject)
     && !(await sharesOrderId(supabase, userId, communicationId, [raw?.transaction_id, raw?.reference_id]));
   const eventKind = shipping ? "shipping" : (raw?.event_kind ?? null);
+  const recipient = transferRecipient(body);
 
   await (supabase.from as any)("transactions_raw").upsert(
     {
@@ -470,6 +472,9 @@ async function runFinancialExtraction(
       sender_type: resolvedSenderType,
       raw_sender: senderEmail,
       event_kind: eventKind,
+      // Who a transfer went to or came from, for rules on "every transfer to account …5389".
+      recipient_key: recipient?.key ?? null,
+      recipient_label: recipient?.label ?? null,
       needs_review: needsReview,
       extracted_at: new Date().toISOString(),
     },

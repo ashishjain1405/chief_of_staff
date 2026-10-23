@@ -6,12 +6,12 @@ import { findKnownMerchant, merchantKey } from "@/lib/finance/normalize";
 // "use client" file cannot export to a server one.
 //
 // Precedence, highest first: the founder's choice on one transaction ("user"),
-// a rule for its UPI payee, a rule for its merchant, then the automatic
-// category from extraction and the merchant dictionary.
+// a rule for its UPI payee, for its transfer recipient, for its merchant, then
+// the automatic category from extraction and the merchant dictionary.
 
-export type MatchType = "merchant" | "upi";
+export type MatchType = "merchant" | "upi" | "recipient";
 export type Source = "auto" | "rule" | "user";
-export type Rule = { id?: string; match_type: MatchType | "recipient"; match_key: string; label: string; category: string | null; counted: boolean | null };
+export type Rule = { id?: string; match_type: MatchType; match_key: string; label: string; category: string | null; counted: boolean | null };
 export type Match = { type: MatchType; key: string; label: string };
 export type Overrides = { category: string | null; category_source: Source; counted_override: boolean | null; counted_source: "rule" | "user" | null };
 
@@ -47,11 +47,16 @@ export function merchantRuleKey(name: string | null | undefined): string | null 
 }
 
 // What a transaction can be matched on, most specific first. A payee that
-// arrives as a bare handle ("q470388412@ybl") is a UPI match, not a merchant.
-export function matchesFor(row: { merchant_normalized: string | null; upi_key?: string | null }, merchantLabel: (n: string) => string): Match[] {
+// arrives as a bare handle ("q470388412@ybl") is a UPI match, not a merchant;
+// a transfer is matched on who it went to (lib/finance/recipient).
+export function matchesFor(
+  row: { merchant_normalized: string | null; upi_key?: string | null; recipient_key?: string | null; recipient_label?: string | null },
+  merchantLabel: (n: string) => string
+): Match[] {
   const out: Match[] = [];
   const upi = row.upi_key ?? upiKey(row.merchant_normalized);
   if (upi) out.push({ type: "upi", key: upi, label: upiLabel(upi) });
+  if (row.recipient_key) out.push({ type: "recipient", key: row.recipient_key, label: row.recipient_label ?? row.recipient_key });
   const name = row.merchant_normalized;
   if (name && !name.includes("@")) {
     const key = merchantRuleKey(name);
@@ -92,7 +97,7 @@ export function resolve(current: Partial<Overrides>, autoCategory: string | null
 // ── Planning a change: pure, so the table can show it at once and the server
 // action can save exactly the same thing.
 
-export type RowLike = { id: string; merchant_normalized: string | null; upi_key?: string | null; category_auto?: string | null } & Partial<Overrides>;
+export type RowLike = { id: string; merchant_normalized: string | null; upi_key?: string | null; recipient_key?: string | null; recipient_label?: string | null; category_auto?: string | null } & Partial<Overrides>;
 export type Snapshot = { id: string } & Overrides;
 export type ChangeInput = { id: string; field: "category" | "counted"; value: string | boolean; scope: "one" | "all"; match?: Match };
 

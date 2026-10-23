@@ -724,3 +724,11 @@ DO $$ BEGIN
     CREATE TRIGGER transaction_rules_updated_at BEFORE UPDATE ON transaction_rules FOR EACH ROW EXECUTE FUNCTION update_updated_at();
   END IF;
 END $$;
+
+-- ─────────────────────────────────────────
+-- Transfer recipients (migrations/add-transfer-recipient.sql)
+-- ─────────────────────────────────────────
+ALTER TABLE transactions_raw        ADD COLUMN IF NOT EXISTS recipient_key text;
+ALTER TABLE transactions_raw        ADD COLUMN IF NOT EXISTS recipient_label text;
+ALTER TABLE transactions_normalized ADD COLUMN IF NOT EXISTS recipient_key text;
+ALTER TABLE transactions_normalized ADD COLUMN IF NOT EXISTS recipient_label text;

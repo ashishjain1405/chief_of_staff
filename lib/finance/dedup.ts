@@ -21,6 +21,8 @@ export type TransactionRaw = {
   merchant_name: string | null;
   raw_sender?: string | null;
   upi_id?: string | null;
+  recipient_key?: string | null;
+  recipient_label?: string | null;
 };
 
 export type NormalizedTransaction = {
@@ -40,6 +42,8 @@ export type NormalizedTransaction = {
   merchant_email_present: boolean;
   bank_email_present: boolean;
   upi_key: string | null;
+  recipient_key: string | null;
+  recipient_label: string | null;
 };
 
 const SENDER_PRIORITY: Record<string, number> = {
@@ -257,6 +261,13 @@ export function deduplicateRawTransactions(rows: TransactionRaw[]): NormalizedTr
       merchant_email_present: group.some(isMerchantSource),
       bank_email_present: group.some(isBankSource),
       upi_key: group.map((r) => upiKey(r.upi_id)).find(Boolean) ?? upiKey(withMerchant?.merchant_normalized) ?? null,
+      // The account where one email gives it: an RTGS "transfer to payee SBI
+      // Home Loan Account" and its confirmation "credited to A/c ending 5389"
+      // are one transfer, and the account is what later transfers share.
+      ...(() => {
+        const r = group.find((x) => x.recipient_key?.startsWith("account:")) ?? group.find((x) => x.recipient_key);
+        return { recipient_key: r?.recipient_key ?? null, recipient_label: r?.recipient_label ?? null };
+      })(),
     };
   });
 }

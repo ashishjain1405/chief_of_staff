@@ -13,7 +13,7 @@ type Row = RowLike & { id: string };
 export type Undo = { rows: Snapshot[]; rule: { match: Match; before: Rule | null } | null };
 export type ChangeResult = { changed: number; undo: Undo };
 
-const FIELDS = "id, merchant_normalized, upi_key, category, category_auto, category_source, counted_override, counted_source";
+const FIELDS = "id, merchant_normalized, upi_key, recipient_key, recipient_label, category, category_auto, category_source, counted_override, counted_source";
 const SOURCES = new Set(["auto", "rule", "user"]);
 
 async function session() {

@@ -12,6 +12,11 @@ import type { TransactionRow } from "./types";
 
 const SHOWN = 100;
 const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
+// A transfer is shown by who it went to: its "merchant" is usually the bank,
+// the founder, or nothing ("Unknown merchant").
+const TRANSFERS = new Set(["bank_transfer", "p2p_transfer"]);
+const displayName = (r: TransactionRow) =>
+  r.recipient_label && (!r.merchant_normalized || TRANSFERS.has(r.transaction_type ?? "")) ? `Transfer · ${r.recipient_label}` : merchantLabel(r.merchant_normalized);
 const sourceNote = (s: string | null | undefined) => (s === "user" ? "set by you" : s === "rule" ? "your rule" : null);
 
 // The founder's corrections apply at once: the change is shown before the
@@ -103,7 +108,7 @@ export function TransactionsTable({ rows, category, rules, counts }: {
                   <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-5 py-3 sm:grid-cols-[minmax(0,1fr)_11rem_5rem_7rem]">
                     <span className="min-w-0">
                       <span className="flex items-center gap-1.5">
-                        <span className="truncate text-sm font-medium text-foreground">{merchantLabel(r.merchant_normalized)}</span>
+                        <span className="truncate text-sm font-medium text-foreground">{displayName(r)}</span>
                         {r.communication_ids?.[0] && (
                           <Link href={`/inbox/${r.communication_ids[0]}`} aria-label="Open the email" className="shrink-0 text-muted-foreground hover:text-foreground">
                             <ArrowUpRight className="size-3.5" aria-hidden />

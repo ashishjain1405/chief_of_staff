@@ -27,7 +27,9 @@ export function TransactionEditor({ row, match, sharing, onConfirm, onReset, onC
 
   if (choice) {
     const title = choice.field === "category" ? `Move to ${categoryLabel(choice.value)}` : choice.value ? "Count this as spend" : "Don't count this as spend";
-    const all = match?.type === "upi" ? `This and all payments to ${match.label}` : `This and all ${match?.label} transactions`;
+    const all = match?.type === "upi" ? `This and all payments to ${match.label}`
+      : match?.type === "recipient" ? `This and all transfers to or from ${match.label}`
+      : `This and all ${match?.label} transactions`;
     return (
       <div className="space-y-3">
         <p className="text-sm font-semibold text-foreground">{title}</p>

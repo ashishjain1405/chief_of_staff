@@ -17,4 +17,6 @@ export type TransactionRow = {
   counted_override?: boolean | null;
   counted_source?: "rule" | "user" | null;
   upi_key?: string | null;
+  recipient_key?: string | null;
+  recipient_label?: string | null;
 };
