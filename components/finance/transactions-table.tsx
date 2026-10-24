@@ -25,8 +25,8 @@ const FAILED = "That change could not be saved, so nothing was changed. Try agai
 
 // The founder's corrections apply at once: the change is shown before the
 // server confirms it, and Undo puts back exactly what the action changed.
-export function TransactionsTable({ rows, category, rules, categories, counts }: {
-  rows: TransactionRow[]; category?: string; rules: Rule[]; categories: UserCategory[]; counts: Record<string, number>;
+export function TransactionsTable({ rows, filter, rules, categories, counts }: {
+  rows: TransactionRow[]; filter?: string; rules: Rule[]; categories: UserCategory[]; counts: Record<string, number>;
 }) {
   const [view, apply] = useOptimistic(rows, (state: TransactionRow[], changes: Snapshot[]) => {
     const byId = new Map(changes.map((c) => [c.id, c]));
@@ -89,10 +89,10 @@ export function TransactionsTable({ rows, category, rules, categories, counts }:
       <header className="flex flex-wrap items-center justify-between gap-3 px-5 pt-5 pb-4">
         <div className="flex items-center gap-2">
           <h2 className="text-base font-semibold text-foreground">Transactions</h2>
-          {category && (
-            <Link href="/finance" scroll={false} aria-label={`Clear the ${categoryLabel(category, names)} filter`}
+          {filter && (
+            <Link href="/finance" scroll={false} aria-label={`Clear the ${filter} filter`}
               className="inline-flex items-center gap-1 rounded-full bg-sky-50 px-2.5 py-0.5 text-xs font-medium text-sky-700 transition-colors hover:bg-sky-100 dark:bg-sky-500/10 dark:text-sky-300">
-              {categoryLabel(category, names)}
+              {filter}
               <X className="size-3" aria-hidden />
             </Link>
           )}

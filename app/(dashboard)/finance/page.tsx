@@ -59,9 +59,11 @@ async function loadSince(supabase: Awaited<ReturnType<typeof createClient>>, use
 export default async function FinancePage({
   searchParams,
 }: {
-  searchParams: Promise<{ cat?: string }>;
+  searchParams: Promise<{ cat?: string; other?: string }>;
 }) {
-  const { cat } = await searchParams;
+  const { cat, other } = await searchParams;
+  // "Other" folds every category past the first N columns; ?other=N filters to those.
+  const top = Object.values(CATEGORY_COLUMNS).find((n) => String(n) === other) ?? null;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/auth/login");
@@ -98,9 +100,11 @@ export default async function FinancePage({
   const monthly_total = monthSpend.reduce((s, r) => s + spendAmount(r), 0);
   const monthCount = all.filter((r) => after(r, monthStart)).length;
 
+  // A transaction with no category is Uncategorised, in the chart and the filter alike.
+  const categoryOf = (r: TransactionRow) => r.category ?? "unknown";
   const byCat: Record<string, number> = {};
   for (const r of monthSpend) {
-    const c = r.category ?? "other";
+    const c = categoryOf(r);
     byCat[c] = (byCat[c] ?? 0) + spendAmount(r);
   }
 
@@ -114,22 +118,35 @@ export default async function FinancePage({
   const sortedCats = Object.entries(byCat).sort((a, b) => b[1] - a[1]);
   const sortedMonths = Object.entries(monthlyTrend).sort((a, b) => a[0].localeCompare(b[0]));
 
-  const filtered = cat ? all.filter((r) => r.category === cat) : all;
+  const otherCats = top && sortedCats.length > top ? new Set(sortedCats.slice(top).map(([c]) => c)) : null;
+  const filtered = otherCats ? all.filter((r) => otherCats.has(categoryOf(r)))
+    : cat ? all.filter((r) => categoryOf(r) === cat) : all;
+  const filtering = !!(otherCats || cat);
+  const filterLabel = otherCats ? `Other · ${otherCats.size} ${otherCats.size === 1 ? "category" : "categories"}`
+    : cat ? categoryLabel(cat, names) : undefined;
 
   // Presentation only: shape the computed totals into chart columns.
   const categoryColumns = (count: number): Column[] => {
     const head = sortedCats.slice(0, count);
     const tail = sortedCats.slice(count).reduce((sum, [, v]) => sum + v, 0);
+    const otherActive = !!otherCats && top === count;
     return [
       ...head.map(([c, value]) => ({
         key: c,
         label: categoryLabel(c, names),
         value,
         href: cat === c ? "/finance" : `/finance?cat=${c}`,
-        tone: cat ? (cat === c ? ("accent" as const) : ("soft" as const)) : ("default" as const),
-        showValue: cat ? cat === c : c === head[0]?.[0],
+        tone: filtering ? (cat === c ? ("accent" as const) : ("soft" as const)) : ("default" as const),
+        showValue: filtering ? cat === c : c === head[0]?.[0],
       })),
-      ...(tail > 0 ? [{ key: "__other", label: "Other", value: tail, tone: cat ? ("soft" as const) : ("default" as const) }] : []),
+      ...(tail > 0 ? [{
+        key: "__other",
+        label: "Other",
+        value: tail,
+        href: otherActive ? "/finance" : `/finance?other=${count}`,
+        tone: filtering ? (otherActive ? ("accent" as const) : ("soft" as const)) : ("default" as const),
+        showValue: otherActive,
+      }] : []),
     ];
   };
   const allCategoryRows: Column[] = sortedCats.map(([c, value]) => ({ key: c, label: categoryLabel(c, names), value }));
@@ -204,7 +221,7 @@ export default async function FinancePage({
           </section>
         </div>
 
-        <TransactionsTable rows={filtered} category={cat} rules={rules} categories={categories} counts={counts} />
+        <TransactionsTable rows={filtered} filter={filterLabel} rules={rules} categories={categories} counts={counts} />
       </div>
     </div>
   );
