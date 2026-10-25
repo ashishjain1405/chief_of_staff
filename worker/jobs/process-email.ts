@@ -1,14 +1,14 @@
 import { Job } from "bullmq";
 import { createClient } from "@supabase/supabase-js";
 import { fetchEmailById, parseEmailBody, extractHeader } from "@/lib/integrations/gmail";
-import { summarizeQueue } from "@/lib/queues";
+import { IMPORT_PRIORITY, summarizeQueue } from "@/lib/queues";
 
 export async function processEmail(job: Job) {
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
-  const { rawEventId } = job.data;
+  const { rawEventId, imported } = job.data;
 
   const { data: rawEvent } = await supabase
     .from("raw_events")
@@ -75,7 +75,7 @@ export async function processEmail(job: Job) {
         subject,
         body: body.substring(0, 10000), // cap raw body
         direction: "inbound",
-        channel_metadata: { from, to, cc: cc || null, labels, list_unsubscribe: listUnsubscribe || null },
+        channel_metadata: { from, to, cc: cc || null, labels, list_unsubscribe: listUnsubscribe || null, ...(imported ? { imported: true } : {}) },
         occurred_at: date ? new Date(date).toISOString() : new Date().toISOString(),
         importance_score: importanceScore,
       },
@@ -90,11 +90,11 @@ export async function processEmail(job: Job) {
     .update({ processed: true })
     .eq("id", rawEventId);
 
-  // Enqueue summarization
+  // Enqueue summarization. Imported history stays behind newly arrived mail.
   if (comm?.id) {
     await summarizeQueue.add("summarize-communication", {
       communicationId: comm.id,
       userId,
-    });
+    }, imported ? { priority: IMPORT_PRIORITY } : undefined);
   }
 }

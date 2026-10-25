@@ -72,6 +72,15 @@ export async function GET(request: NextRequest) {
     }
   }
 
+  // The last 90 days of mail, read in the background so Finance and Tasks are
+  // not empty on day one. A failure here must not fail the connection.
+  try {
+    const { enqueueGmailImport } = await import("@/lib/queues");
+    await enqueueGmailImport(user.id);
+  } catch (e) {
+    console.error("Gmail history import could not be queued:", e);
+  }
+
   // Check if onboarding is complete to redirect appropriately
   const { data: profile } = await supabase
     .from("users")

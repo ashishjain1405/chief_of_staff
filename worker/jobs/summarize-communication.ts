@@ -7,7 +7,7 @@ import { enqueueOperationalState } from "@/lib/queues";
 import { extractFinancialTransaction } from "@/lib/ai/extractors/financial";
 import { getCategoryForMerchant, getWalletPaymentModeLabel, resolveMerchant, resolveTransactionType } from "@/lib/finance/normalize";
 import { deduplicateRawTransactions, isPaymentForShipping, isShippingUpdate, saveNormalizedGroups, type TransactionRaw } from "@/lib/finance/dedup";
-import { resolveFollowUpDeadline } from "@/lib/tasks/deadline";
+import { resolveFollowUpDeadline, stillActionable } from "@/lib/tasks/deadline";
 import { LOW_SIGNAL_CATEGORIES } from "@/lib/inbox/categories";
 import { shouldCreateTask, ccOnlyWithoutAsk, hasMessageText } from "@/lib/tasks/gate";
 import { isPersonalSender, owesMoney, taskPriority } from "@/lib/tasks/priority";
@@ -123,6 +123,11 @@ export async function summarizeCommunication(job: Job) {
     subject: comm.subject,
     body: comm.body ?? "",
   });
+  // Imported history (import-gmail-history) is marked on the row, not the job,
+  // so a reconcile pass or retry treats it the same way.
+  const imported = !!(comm.channel_metadata as any)?.imported;
+  const due = resolveFollowUpDeadline(triage.follow_up_deadline, comm.occurred_at);
+  const needsAction = categoryAllowsTask && (!imported || stillActionable(comm.occurred_at, due));
 
   await supabase
     .from("communications")
@@ -134,7 +139,7 @@ export async function summarizeCommunication(job: Job) {
       // the follow-up insights read this column, so a bank alert whose "report
       // it if this wasn't you" line triage took for an action - blocked as a
       // task - still reached the brief as an email needing action.
-      requires_action: categoryAllowsTask,
+      requires_action: needsAction,
       email_category: triage.email_category,
       category_processed: true,
       channel_metadata: existingMeta,
@@ -300,7 +305,7 @@ export async function summarizeCommunication(job: Job) {
 
   const alreadyTracked = (sameEmailTasks ?? 0) > 0 || openThreadTasks > 0 || openSenderDuplicate;
 
-  if (categoryAllowsTask && !alreadyTracked) {
+  if (needsAction && !alreadyTracked) {
     let priority = taskPriority({ title: taskTitle, importance: cappedScore, senderEmail, isBulk, isFinancialDomain: isKnownFinancialDomain(senderEmail) });
     let learned = "";
     // Learning from the founder's own clicks, not a trained model: if they
@@ -324,7 +329,7 @@ export async function summarizeCommunication(job: Job) {
       source_type: "email",
       source_id: communicationId,
       contact_id: comm.contact_id,
-      due_date: resolveFollowUpDeadline(triage.follow_up_deadline, comm.occurred_at),
+      due_date: due,
       priority,
       ai_reasoning: `Importance: ${cappedScore.toFixed(2)}. ${learned}${summary}`,
     });

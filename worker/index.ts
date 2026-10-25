@@ -8,6 +8,7 @@ import { computeOperationalState } from "./jobs/compute-operational-state";
 import { renewGmailWatches } from "./jobs/renew-gmail-watches";
 import { reconcileUnprocessedJob } from "./jobs/reconcile-unprocessed";
 import { expireStaleTasks } from "./jobs/expire-stale-tasks";
+import { importGmailHistory } from "./jobs/import-gmail-history";
 
 function makeWorker(queueName: string, handler: (job: any) => Promise<void>) {
   const worker = new Worker(queueName, handler, {
@@ -60,6 +61,9 @@ makeWorker("scheduled", async (job) => {
   }
   if (job.name === "expire-stale-tasks") {
     await expireStaleTasks();
+  }
+  if (job.name === "import-gmail-history") {
+    await importGmailHistory(job);
   }
 });
 

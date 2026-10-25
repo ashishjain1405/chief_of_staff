@@ -26,3 +26,19 @@ export function resolveFollowUpDeadline(
   endOfDueDay.setUTCHours(23, 59, 59, 999);
   return endOfDueDay.getTime() < reference ? null : extracted;
 }
+
+// Mail imported from the 90 days before Gmail was connected is history: sent
+// mail is not read, so there is no telling whether it was already answered.
+// It counts as needing action - a task, "Waiting on you" in the brief - only if
+// it arrived in the last week or its due date is still ahead. Older mail still
+// feeds spending, Ask AI and people.
+export const IMPORT_ACTION_DAYS = 7;
+export function stillActionable(occurredAt: string | null, due: string | null, now = Date.now()): boolean {
+  if (due) {
+    const endOfDueDay = new Date(due);
+    endOfDueDay.setUTCHours(23, 59, 59, 999);
+    if (endOfDueDay.getTime() >= now) return true;
+  }
+  const at = occurredAt ? Date.parse(occurredAt) : NaN;
+  return !Number.isNaN(at) && now - at <= IMPORT_ACTION_DAYS * 864e5;
+}

@@ -51,6 +51,24 @@ export const actQueue = makeQueue("act");
 export const scheduledQueue = makeQueue("scheduled");
 export const operationalQueue = makeQueue("compute-operational-state");
 
+// BullMQ runs every job without a priority before any job with one, so mail
+// imported from history never holds up mail that just arrived.
+export const IMPORT_PRIORITY = 10;
+export const IMPORT_DAYS = 90;
+const IMPORT_DEDUP_MS = 60 * 60 * 1000;
+
+// The 90 days before Gmail was connected, read once in the background
+// (worker/jobs/import-gmail-history). A reconnect within the hour adds nothing;
+// a later one fills any gap, skipping mail already imported.
+export function enqueueGmailImport(userId: string, days = IMPORT_DAYS) {
+  const after = Math.floor((Date.now() - days * 864e5) / 1000);
+  return scheduledQueue.add(
+    "import-gmail-history",
+    { userId, after },
+    { deduplication: { id: `gmail-import-${userId}`, ttl: IMPORT_DEDUP_MS } }
+  );
+}
+
 const OPS_DEBOUNCE_MS = 30_000;
 
 // Collapses a burst of processed emails into one recompute. Deliberately no
