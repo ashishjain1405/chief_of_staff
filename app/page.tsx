@@ -93,10 +93,10 @@ export default async function Home() {
               Works with Gmail and Google Calendar
             </p>
             <h1 className="text-4xl font-semibold leading-tight tracking-tight text-foreground sm:text-5xl">
-              Know where your money went and what&apos;s due next.
+              Know where your money went and what&apos;s coming up.
             </h1>
             <p className="text-lg leading-relaxed text-muted-foreground">
-              Chief of Staff reads your Gmail for you. Bank alerts and UPI receipts become a spending tracker, emails that need you become a to-do list with deadlines, and you can ask about any of it in plain words.
+              Your spending, tasks and everything coming up, straight from Gmail and Calendar. Just ask.
             </p>
             <div className="flex flex-wrap items-center gap-3">
               <Link href="/auth/login" className={cta}>Connect Gmail, free →</Link>
