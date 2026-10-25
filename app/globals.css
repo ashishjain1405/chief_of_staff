@@ -128,3 +128,8 @@
     @apply font-sans;
   }
 }
+/* Landing hero: the active tab fills while its slide is shown. */
+@keyframes hero-progress {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}

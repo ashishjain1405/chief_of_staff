@@ -1,7 +1,81 @@
+import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import LandingNavbar from "@/components/landing/Navbar";
+import { HeroShowcase } from "@/components/landing/HeroShowcase";
+import { SpendPreview } from "@/components/landing/SpendPreview";
+import { AskPreview } from "@/components/landing/AskPreview";
+import { TasksPreview } from "@/components/landing/TasksPreview";
+import { BriefPreview } from "@/components/landing/BriefPreview";
+
+export const metadata: Metadata = {
+  title: "Chief of Staff · Your spending and deadlines, tracked from Gmail",
+  description: "Turns the bank alerts, UPI receipts, bills and requests in your Gmail into a spending tracker and a to-do list with due dates. Ask about any of it in plain words. No bank login.",
+};
+
+// Everything here is something the product does today; Gmail and Google
+// Calendar are the only live integrations.
+const MONEY = [
+  { title: "Counted once", desc: "A Zomato order sends a bank alert and a receipt. You see one transaction, not two." },
+  { title: "Recategorise once", desc: "Move one payment and every other payment to that merchant or UPI ID follows, including future ones." },
+  { title: "You decide what counts", desc: "Card bill or transfer? Choose what counts as spending, and add categories of your own." },
+  { title: "Built for UPI", desc: "Reads Indian bank alerts and UPI payments, and remembers each payee by their UPI ID." },
+];
+
+const QUESTIONS = [
+  "How much did I spend on Swiggy last month?",
+  "When is my car insurance due?",
+  "What did I promise Priya?",
+  "What's on my calendar tomorrow?",
+];
+
+const DEADLINES = [
+  { title: "Due dates, found for you", desc: "“Pay by 28 Oct” in an email becomes a task due 28 Oct. Overdue, today and tomorrow are flagged." },
+  { title: "Ranked by what's at stake", desc: "Money you owe and people waiting on you come first. Newsletters and promotions are filtered out." },
+  { title: "One task per conversation", desc: "A long email thread shows up as one task, not ten. Done or dismiss it in one tap." },
+  { title: "Cleans up after itself", desc: "Expired reminders close on their own. Dismiss a sender's tasks twice and the next ones drop to low priority." },
+];
+
+const STEPS = [
+  { title: "Connect Gmail", desc: "Sign in with Google. No bank login, no SMS access." },
+  { title: "Every email is read", desc: "Payments are filed into categories with duplicates merged. Emails that need something from you become tasks with due dates." },
+  { title: "Your brief at 8 am", desc: "What's due today, yesterday's spend by merchant, and who is waiting on you." },
+];
+
+const PRIVACY = [
+  "Sign in with Google. No bank passwords, no SMS access.",
+  "Nothing is sent from your Gmail unless you press Send.",
+  "Your data is private to your account.",
+  "Revoke access any time from your Google account.",
+];
+
+const cta = "inline-flex items-center justify-center rounded-full bg-sky-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-sky-700";
+const card = "rounded-2xl border border-border/70 bg-card p-5 shadow-sm";
+const eyebrow = "text-xs font-semibold uppercase tracking-wide text-sky-700 dark:text-sky-300";
+
+function SectionHeader({ label, title, desc }: { label: string; title: string; desc: string }) {
+  return (
+    <div className="mx-auto mb-10 max-w-2xl text-center">
+      <p className={eyebrow}>{label}</p>
+      <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">{title}</h2>
+      <p className="mt-2 text-sm text-muted-foreground sm:text-base">{desc}</p>
+    </div>
+  );
+}
+
+function Cards({ items }: { items: { title: string; desc: string }[] }) {
+  return (
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {items.map((p) => (
+        <div key={p.title} className={card}>
+          <h3 className="font-semibold text-foreground">{p.title}</h3>
+          <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{p.desc}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default async function Home() {
   const supabase = await createClient();
@@ -9,193 +83,119 @@ export default async function Home() {
   if (user) redirect("/dashboard");
 
   return (
-    <>
+    <div className="bg-slate-50/70 dark:bg-background">
       <LandingNavbar />
 
-      {/* Hero */}
-      <section className="py-20 px-4 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-6">
-              <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-600 text-xs font-semibold px-3 py-1.5 rounded-full">
-                <span className="w-1.5 h-1.5 rounded-full bg-blue-600 inline-block" />
-                AI-powered for founders
-              </div>
-
-              <h1 className="text-5xl font-bold tracking-tight text-gray-900 leading-tight">
-                Never drop the ball again.
-              </h1>
-
-              <p className="text-lg text-gray-500 leading-relaxed">
-                Your AI chief of staff tracks emails, meetings, commitments, and relationships — so you can focus on building.
-              </p>
-
-              <div className="flex items-center gap-3 pt-2">
-                <Link
-                  href="/auth/login"
-                  className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors text-sm"
-                >
-                  Get Started free →
-                </Link>
-                <a
-                  href="#how-it-works"
-                  className="border border-gray-200 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-50 transition-colors text-sm"
-                >
-                  See how it works
-                </a>
-              </div>
+      <section className="px-4 pt-14 pb-16 sm:pt-20">
+        <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-2">
+          <div className="space-y-6">
+            <p className="inline-flex items-center gap-2 rounded-full bg-sky-50 px-3 py-1.5 text-xs font-semibold text-sky-700 dark:bg-sky-500/10 dark:text-sky-300">
+              Works with Gmail and Google Calendar
+            </p>
+            <h1 className="text-4xl font-semibold leading-tight tracking-tight text-foreground sm:text-5xl">
+              Know where your money went and what&apos;s due next.
+            </h1>
+            <p className="text-lg leading-relaxed text-muted-foreground">
+              Chief of Staff reads your Gmail for you. Bank alerts and UPI receipts become a spending tracker, emails that need you become a to-do list with deadlines, and you can ask about any of it in plain words.
+            </p>
+            <div className="flex flex-wrap items-center gap-3">
+              <Link href="/auth/login" className={cta}>Connect Gmail, free →</Link>
+              <a href="#how-it-works" className="rounded-full px-5 py-3 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground">
+                See how it works
+              </a>
             </div>
-
-            {/* Dashboard mockup */}
-            <div className="hidden lg:block">
-              <div className="border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
-                <div className="bg-gray-50 border-b border-gray-200 px-4 py-3 flex items-center gap-2">
-                  <div className="flex gap-1.5">
-                    <div className="w-3 h-3 rounded-full bg-gray-200" />
-                    <div className="w-3 h-3 rounded-full bg-gray-200" />
-                    <div className="w-3 h-3 rounded-full bg-gray-200" />
-                  </div>
-                  <div className="flex-1 bg-white rounded-md h-5 mx-4" />
-                </div>
-                <div className="bg-white p-5 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="h-4 w-32 bg-gray-900 rounded font-bold" />
-                      <div className="h-3 w-24 bg-gray-200 rounded mt-1.5" />
-                    </div>
-                    <div className="h-8 w-20 bg-blue-600 rounded-lg" />
-                  </div>
-                  <div className="grid grid-cols-4 gap-3">
-                    {["border-l-red-400", "border-l-amber-400", "border-l-blue-400", "border-l-violet-400"].map((c) => (
-                      <div key={c} className={`border ${c} border-l-4 rounded-lg p-3 space-y-1`}>
-                        <div className="h-5 w-8 bg-gray-900 rounded" />
-                        <div className="h-2.5 w-full bg-gray-100 rounded" />
-                        <div className="h-2 w-12 bg-blue-200 rounded" />
-                      </div>
-                    ))}
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    {[0, 1].map((i) => (
-                      <div key={i} className="border border-gray-100 rounded-xl p-4 space-y-2.5">
-                        <div className="h-3 w-24 bg-gray-900 rounded" />
-                        {[0, 1, 2].map((j) => (
-                          <div key={j} className="flex items-center gap-2">
-                            <div className="w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0" />
-                            <div className="h-2.5 flex-1 bg-gray-100 rounded" />
-                          </div>
-                        ))}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
+            <p className="text-xs text-muted-foreground">No bank login · No SMS access · Nothing sent without you</p>
           </div>
+          <HeroShowcase slides={[
+            { label: "Spending", content: <SpendPreview /> },
+            { label: "Ask AI", content: <AskPreview /> },
+            { label: "Tasks", content: <TasksPreview /> },
+          ]} />
         </div>
       </section>
 
-      {/* How it works */}
-      <section id="how-it-works" className="py-16 px-4 bg-gray-50 border-y border-gray-100">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-10">
-            <h2 className="text-2xl font-bold text-gray-900 tracking-tight mb-2">Up and running in minutes</h2>
-            <p className="text-gray-500 text-sm">Connect once. Let AI do the heavy lifting.</p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
-            {[
-              {
-                step: "1",
-                title: "Connect Gmail",
-                desc: "OAuth in one click. Your emails are synced and processed in real time.",
-              },
-              {
-                step: "2",
-                title: "AI triages everything",
-                desc: "Each email is categorized, scored for importance, and financial data is extracted automatically.",
-              },
-              {
-                step: "3",
-                title: "Dashboard surfaces what matters",
-                desc: "Priorities, commitments, meetings — all in one place, ready for action.",
-              },
-            ].map((s) => (
-              <div key={s.step} className="flex gap-4">
-                <div className="w-8 h-8 rounded-full bg-blue-600 text-white text-sm font-bold flex items-center justify-center shrink-0">
-                  {s.step}
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-1">{s.title}</h3>
-                  <p className="text-sm text-gray-500 leading-relaxed">{s.desc}</p>
-                </div>
-              </div>
+      <section className="px-4 py-16">
+        <div className="mx-auto max-w-6xl">
+          <SectionHeader label="Spending" title="Spending you can trust" desc="One payment often shows up in two or three emails. It is counted once." />
+          <Cards items={MONEY} />
+        </div>
+      </section>
+
+      <section className="border-y border-border/60 bg-card px-4 py-16">
+        <div className="mx-auto max-w-6xl">
+          <SectionHeader label="Ask AI" title="Ask about anything in your inbox" desc="Spending, deadlines, promises and meetings. Ask in plain words and get an answer from your own emails and receipts." />
+          <ul className="mx-auto flex max-w-3xl flex-wrap justify-center gap-2.5">
+            {QUESTIONS.map((q) => (
+              <li key={q} className="rounded-full border border-border bg-background px-4 py-2 text-sm text-foreground shadow-sm">“{q}”</li>
             ))}
-          </div>
+          </ul>
         </div>
       </section>
 
-      {/* Feature cards */}
-      <section className="py-16 px-4 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-10">
-            <h2 className="text-2xl font-bold text-gray-900 tracking-tight mb-2">Everything a founder needs to stay on top</h2>
-            <p className="text-gray-500 text-sm">Built for speed. Designed to get out of your way.</p>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-            <div className="flex flex-col gap-3 bg-blue-50/60 rounded-xl p-6 border-l-4 border-blue-500">
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600">
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 9v.906a2.25 2.25 0 01-1.183 1.981l-6.478 3.488M2.25 9v.906a2.25 2.25 0 001.183 1.981l6.478 3.488m8.839 2.51-4.66-2.51m0 0-1.023-.55a2.25 2.25 0 00-2.134 0l-1.022.55m0 0-4.661 2.51m16.5 1.615a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V8.844a2.25 2.25 0 011.183-1.98l7.5-4.04a2.25 2.25 0 012.134 0l7.5 4.04a2.25 2.25 0 011.183 1.98V19.5z" />
-                </svg>
-              </div>
-              <div>
-                <div className="text-lg font-bold text-blue-600 mb-0.5">Inbox Intelligence</div>
-                <div className="text-sm font-semibold text-gray-800 mb-1">AI-triaged email</div>
-                <p className="text-xs text-gray-500 leading-relaxed">Importance scoring, auto-categorization into 8 categories, one-click draft replies, and unsubscribe detection.</p>
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-3 bg-violet-50/60 rounded-xl p-6 border-l-4 border-violet-400">
-              <div className="w-10 h-10 bg-violet-100 rounded-lg flex items-center justify-center text-violet-600">
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z" />
-                </svg>
-              </div>
-              <div>
-                <div className="text-lg font-bold text-violet-600 mb-0.5">Commitment Tracking</div>
-                <div className="text-sm font-semibold text-gray-800 mb-1">Never forget what you promised</div>
-                <p className="text-xs text-gray-500 leading-relaxed">AI extracts commitments from every email and meeting. Due dates, who you owe, and follow-up alerts — automatically.</p>
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-3 bg-indigo-50/60 rounded-xl p-6 border-l-4 border-indigo-400">
-              <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600">
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
-                </svg>
-              </div>
-              <div>
-                <div className="text-lg font-bold text-indigo-600 mb-0.5">Finance Overview</div>
-                <div className="text-sm font-semibold text-gray-800 mb-1">Spend tracking from your inbox</div>
-                <p className="text-xs text-gray-500 leading-relaxed">Weekly and monthly spend totals, sub-category breakdowns, and a full transaction history — all extracted from your emails.</p>
-              </div>
-            </div>
-          </div>
+      <section className="px-4 py-16">
+        <div className="mx-auto max-w-6xl">
+          <SectionHeader label="Tasks and deadlines" title="Every deadline in your inbox, on one list" desc="Bills, renewals, replies and promises become tasks with due dates, ranked by what's at stake." />
+          <Cards items={DEADLINES} />
+          <p className="mt-6 text-center text-sm text-muted-foreground">
+            Plus the commitments you&apos;ve made, people waiting on a reply, today&apos;s meetings, suggested replies and one-click unsubscribe.
+          </p>
         </div>
       </section>
 
-      {/* Footer CTA strip */}
-      <section className="py-14 px-4 bg-blue-600">
-        <div className="max-w-6xl mx-auto text-center">
-          <h2 className="text-2xl font-bold text-white mb-2 tracking-tight">Your AI chief of staff is ready.</h2>
-          <p className="text-blue-100 text-sm mb-6">Takes 2 minutes to connect your Gmail.</p>
-          <Link
-            href="/auth/login"
-            className="inline-block bg-white text-blue-600 px-8 py-3.5 rounded-lg font-semibold hover:bg-blue-50 transition-colors text-sm"
-          >
-            Get Started →
+      <section id="how-it-works" className="scroll-mt-20 border-y border-border/60 bg-card px-4 py-16">
+        <div className="mx-auto max-w-6xl">
+          <SectionHeader label="How it works" title="Connect once. It keeps up from there." desc="No forms to fill in, no receipts to forward." />
+          <ol className="grid gap-8 sm:grid-cols-3">
+            {STEPS.map((s, i) => (
+              <li key={s.title} className="flex gap-4">
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-sky-600 text-sm font-semibold text-white">{i + 1}</span>
+                <div>
+                  <h3 className="font-semibold text-foreground">{s.title}</h3>
+                  <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{s.desc}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      <section className="px-4 py-16">
+        <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-2">
+          <div className="space-y-4">
+            <p className={eyebrow}>Daily brief</p>
+            <h2 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">One email every morning</h2>
+            <p className="leading-relaxed text-muted-foreground">
+              At 8 am you get the day in one read: your top three things to do, today&apos;s meetings, who is waiting on you, and what you spent yesterday, merchant by merchant.
+            </p>
+            <p className="leading-relaxed text-muted-foreground">Each to-do links straight to the email behind it, so acting on it takes one tap.</p>
+          </div>
+          <BriefPreview />
+        </div>
+      </section>
+
+      <section className="px-4 pb-16">
+        <div className={`${card} mx-auto max-w-3xl p-6 sm:p-8`}>
+          <h2 className="text-xl font-semibold tracking-tight text-foreground">Your inbox stays yours</h2>
+          <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+            {PRIVACY.map((line) => (
+              <li key={line} className="flex gap-2.5 text-sm leading-relaxed text-muted-foreground">
+                <span className="mt-2 size-1.5 shrink-0 rounded-full bg-sky-600" aria-hidden />
+                {line}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
+      <section className="bg-sky-600 px-4 py-14">
+        <div className="mx-auto max-w-6xl text-center">
+          <h2 className="text-2xl font-semibold tracking-tight text-white">Stay on top of your money and your deadlines.</h2>
+          <p className="mt-2 text-sm text-sky-100">Connect Gmail once. Your brief arrives every morning at 8 am.</p>
+          <Link href="/auth/login" className="mt-6 inline-flex rounded-full bg-white px-8 py-3.5 text-sm font-semibold text-sky-700 transition-colors hover:bg-sky-50">
+            Connect Gmail, free →
           </Link>
         </div>
       </section>
-    </>
+    </div>
   );
 }
