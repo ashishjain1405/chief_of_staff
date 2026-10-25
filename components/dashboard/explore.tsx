@@ -1,12 +1,11 @@
 import Link from "next/link";
-import { CalendarDays, Inbox, ListChecks, MessageSquareText, Users, Wallet, type LucideIcon } from "lucide-react";
+import { CalendarDays, Inbox, ListChecks, MessageSquareText, Wallet, type LucideIcon } from "lucide-react";
 
 const AREAS: { href: string; icon: LucideIcon; title: string; description: string }[] = [
   { href: "/finance", icon: Wallet, title: "Finance", description: "Spending this month and the trend" },
   { href: "/inbox", icon: Inbox, title: "Inbox", description: "Email sorted by what it needs" },
   { href: "/tasks", icon: ListChecks, title: "Tasks", description: "Everything you owe, by due date" },
   { href: "/meetings", icon: CalendarDays, title: "Meetings", description: "Your calendar and summaries" },
-  { href: "/relationships", icon: Users, title: "Relationships", description: "People to follow up with" },
   { href: "/ask", icon: MessageSquareText, title: "Ask AI", description: "Questions about any of it" },
 ];
 

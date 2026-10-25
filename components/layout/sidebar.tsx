@@ -10,7 +10,6 @@ import {
   Zap,
   Inbox,
   Calendar,
-  Users,
   ClipboardList,
   CheckSquare,
   Sparkles,
@@ -23,7 +22,6 @@ const navItems = [
   { href: "/dashboard",      label: "Dashboard",     icon: Zap },
   { href: "/inbox",          label: "Inbox",         icon: Inbox },
   { href: "/meetings",       label: "Meetings",      icon: Calendar },
-  { href: "/relationships",  label: "Relationships", icon: Users },
   ...(FEATURES.commitments
     ? [{ href: "/commitments", label: "Commitments", icon: ClipboardList }]
     : []),
