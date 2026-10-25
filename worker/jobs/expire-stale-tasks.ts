@@ -2,6 +2,7 @@ import { createClient } from "@supabase/supabase-js";
 import { isAutomatedMail, isPersonalSender } from "@/lib/tasks/gate";
 import { isKnownFinancialDomain } from "@/lib/finance/senders";
 import { owesMoney, reviewReason } from "@/lib/tasks/priority";
+import { syncEmailsWithTasks } from "@/lib/tasks/email-flags";
 
 const GRACE_DAYS = 3;
 const AGE_OUT_DAYS = 14;
@@ -62,6 +63,7 @@ export async function expireStaleTasks({ apply = true } = {}): Promise<string[]>
   if (apply && reasons.size > 0) {
     const { error: updateError } = await supabase.from("tasks").update({ status: "expired" }).in("id", [...reasons.keys()]);
     if (updateError) throw updateError;
+    await syncEmailsWithTasks(supabase, [...reasons.keys()], "expired");
   }
   for (const r of reasons.values()) console.log(`[expire-stale-tasks] ${apply ? "closed" : "would close"} (${r.why}): ${r.title}`);
   console.log(`[expire-stale-tasks] ${apply ? "closed" : "would close"} ${reasons.size} of ${candidates.length} candidate task(s)`);

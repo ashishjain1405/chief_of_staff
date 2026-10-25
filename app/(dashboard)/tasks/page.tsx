@@ -7,6 +7,7 @@ import { TasksView } from "@/components/tasks/tasks-view";
 import type { TaskRowData } from "@/lib/tasks/view";
 import { isPersonalSender } from "@/lib/tasks/gate";
 import { conversationSubject } from "@/lib/tasks/similar";
+import { syncEmailsWithTasks } from "@/lib/tasks/email-flags";
 
 const TASK_STATUSES = new Set(["pending", "snoozed", "done", "dismissed"]);
 const SELECT = "id, title, priority, status, due_date, ai_reasoning, source_type, source_id, contact_id, created_at, updated_at, contacts(name, email)";
@@ -24,6 +25,7 @@ async function updateTaskStatus(formData: FormData) {
   const supabase = await createClient();
   const { error } = await supabase.from("tasks").update({ status, updated_at: new Date().toISOString() }).in("id", ids);
   if (error) throw new Error("Could not update the task");
+  await syncEmailsWithTasks(supabase, ids, status as "pending" | "snoozed" | "done" | "dismissed");
   revalidatePath("/tasks");
   revalidatePath("/dashboard");
 }
