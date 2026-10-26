@@ -114,8 +114,29 @@ export default async function FinancePage({
   for (const r of periodSpend) byCat[categoryOf(r)] = (byCat[categoryOf(r)] ?? 0) + spendAmount(r);
   const sortedCats = Object.entries(byCat).sort((a, b) => b[1] - a[1]);
   // The biggest of the chosen categories, or of all of them.
-  const topCat = sortedCats.find(([c]) => !chosen.size || chosen.has(c));
-  const topShare = topCat && spent > 0 ? Math.round((topCat[1] / spent) * 100) : null;
+  // With categories chosen, the tile names the selection - "Other" for the
+  // categories its column holds - and its share of all spending; without, the
+  // biggest category. It used to show the biggest of the chosen, so choosing
+  // Other with Entertainment still read "Entertainment".
+  const periodTotal = total(periodSpend);
+  const share = (v: number) => (periodTotal > 0 ? ` · ${Math.round((v / periodTotal) * 100)}% of all spending` : "");
+  const topCat = sortedCats[0];
+  const tailKeys = sortedCats.slice(CATEGORY_COLUMNS.wide).map(([c]) => c);
+  const otherChosen = tailKeys.length > 0 && tailKeys.every((c) => chosen.has(c));
+  const selectionParts = [
+    ...sortedCats.filter(([c]) => chosen.has(c) && !(otherChosen && tailKeys.includes(c))).map(([c]) => categoryLabel(c, names)),
+    ...filters.cats.filter((c) => !byCat[c]).map((c) => categoryLabel(c, names)),
+    ...(otherChosen ? ["Other"] : []),
+  ];
+  const categoryTile = chosen.size
+    ? {
+        label: selectionParts.length > 1 ? "Selected categories" : "Selected category",
+        value: selectionParts.length <= 2 ? selectionParts.join(" + ") : plural(chosen.size, "category", "categories"),
+        caption: `${inr(spent)}${share(spent)}`,
+      }
+    : topCat
+      ? { label: "Highest spend category", value: categoryLabel(topCat[0], names), caption: `${inr(topCat[1])}${share(topCat[1])}` }
+      : { label: "Highest spend category", value: "—", caption: "No spending in this period" };
   const categoryOptions = [
     ...sortedCats.map(([c, v]) => ({ key: c, label: categoryLabel(c, names), total: inr(v) })),
     ...filters.cats.filter((c) => !byCat[c]).map((c) => ({ key: c, label: categoryLabel(c, names), total: inr(0) })),
@@ -187,8 +208,8 @@ export default async function FinancePage({
           <div className="col-span-2 sm:col-span-1 [&>*]:h-full">
             <StatTile icon={Wallet} label="Spent" value={inr(spent)} caption={spentCaption} />
           </div>
-          <StatTile icon={Tag} label={<><span className="sm:hidden">Top category</span><span className="hidden sm:inline">Highest spend category</span></>} value={topCat ? categoryLabel(topCat[0], names) : "—"}
-            caption={topCat ? `${inr(topCat[1])}${topShare !== null ? ` · ${topShare}% of spending` : ""}` : "No spending in this period"} />
+          <StatTile icon={Tag} value={categoryTile.value} caption={categoryTile.caption}
+            label={chosen.size ? categoryTile.label : <><span className="sm:hidden">Top category</span><span className="hidden sm:inline">{categoryTile.label}</span></>} />
           <StatTile icon={TrendingUp} label="Largest spend" value={inr(largest)} caption="Single transaction" />
         </section>
 
