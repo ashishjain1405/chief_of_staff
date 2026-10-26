@@ -6,7 +6,7 @@ import { classifySender, getSenderHint, shouldRunStage1, isKnownFinancialDomain 
 import { enqueueOperationalState } from "@/lib/queues";
 import { extractFinancialTransaction } from "@/lib/ai/extractors/financial";
 import { getCategoryForMerchant, getWalletPaymentModeLabel, resolveMerchant, resolveTransactionType } from "@/lib/finance/normalize";
-import { deduplicateRawTransactions, isPaymentForShipping, isShippingUpdate, saveNormalizedGroups, settleShippingRows, type TransactionRaw } from "@/lib/finance/dedup";
+import { REFUND_WINDOW_MS, deduplicateRawTransactions, isPaymentForShipping, isShippingUpdate, saveNormalizedGroups, settleShippingRows, type TransactionRaw } from "@/lib/finance/dedup";
 import { resolveFollowUpDeadline, stillActionable } from "@/lib/tasks/deadline";
 import { LOW_SIGNAL_CATEGORIES } from "@/lib/inbox/categories";
 import { shouldCreateTask, ccOnlyWithoutAsk, hasMessageText } from "@/lib/tasks/gate";
@@ -499,7 +499,7 @@ async function runFinancialExtraction(
   // Only money that moved becomes a transaction. A bill due, renewal quote or
   // statement stays as a raw row for reference but is never normalized.
   if (!needsReview && transactionDatetime && eventKind === "completed") {
-    await runDedup(supabase, userId, transactionDatetime, [raw?.transaction_id, raw?.reference_id]);
+    await runDedup(supabase, userId, transactionDatetime, [raw?.transaction_id, raw?.reference_id], raw?.transaction_type === "refund");
     await settleShippingRows(supabase, userId, transactionDatetime);
   } else if (!needsReview && transactionDatetime && shipping) {
     await countShippingIfUnpaid(supabase, userId, communicationId, {
@@ -556,7 +556,7 @@ const DEDUP_WINDOW_MS = 24 * 60 * 60 * 1000;
 // on now, anything processed more than a day after it happened - every
 // backfill and reprocess - fell outside the window and was never normalized:
 // 135 transactions were missing from the finance tab.
-async function runDedup(supabase: any, userId: string, anchor: string, orderIds: (string | null | undefined)[] = []) {
+async function runDedup(supabase: any, userId: string, anchor: string, orderIds: (string | null | undefined)[] = [], refund = false) {
   const at = new Date(anchor).getTime();
   const from = new Date(at - DEDUP_WINDOW_MS).toISOString();
   // Capped at now: extraction sometimes picks up a due or delivery date, and a
@@ -592,7 +592,24 @@ async function runDedup(supabase: any, userId: string, anchor: string, orderIds:
     orderRows = data ?? [];
   }
 
-  const rows = [...new Map([...(rawRows ?? []), ...orderRows].map((r) => [r.id, r])).values()];
+  // A refund's second notice can come days after the first (isSameRefund).
+  let refundRows: any[] = [];
+  if (refund) {
+    const { data, error: refundErr } = await supabase
+      .from("transactions_raw")
+      .select("*")
+      .eq("user_id", userId)
+      .eq("is_financial_email", true)
+      .eq("needs_review", false)
+      .eq("event_kind", "completed")
+      .eq("transaction_type", "refund")
+      .gte("transaction_datetime", new Date(at - REFUND_WINDOW_MS).toISOString())
+      .lte("transaction_datetime", new Date(Math.min(at + REFUND_WINDOW_MS, Date.now())).toISOString());
+    if (refundErr) throw new Error(`[dedup] refund scan failed: ${refundErr.message}`);
+    refundRows = data ?? [];
+  }
+
+  const rows = [...new Map([...(rawRows ?? []), ...orderRows, ...refundRows].map((r) => [r.id, r])).values()];
   if (!rows.length) return;
   await saveNormalizedGroups(supabase, userId, deduplicateRawTransactions(rows as TransactionRaw[]));
 }

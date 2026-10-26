@@ -32,11 +32,12 @@ async function all<T>(table: string, select: string): Promise<T[]> {
   }
 }
 
-type Raw = { id: string; user_id: string; communication_id: string; event_kind: string | null; transaction_id: string | null; reference_id: string | null };
-type Norm = { id: string; user_id: string; merchant_normalized: string | null; amount: number | null; transaction_datetime: string; raw_transaction_ids: string[] | null };
+type Raw = { id: string; user_id: string; communication_id: string; event_kind: string | null; transaction_id: string | null; reference_id: string | null; payment_method: string | null };
+type Norm = { id: string; user_id: string; merchant_normalized: string | null; amount: number | null; transaction_type: string | null; transaction_datetime: string; raw_transaction_ids: string[] | null };
 
 async function main() {
-  const raws = await all<Raw>("transactions_raw", "id, user_id, communication_id, event_kind, transaction_id, reference_id");
+  const raws = await all<Raw>("transactions_raw", "id, user_id, communication_id, event_kind, transaction_id, reference_id, payment_method");
+  const methodOf = new Map(raws.map((r) => [r.id, r.payment_method]));
   const subjects = new Map<string, string>();
   const commIds = raws.filter((r) => r.event_kind === "completed").map((r) => r.communication_id);
   for (let i = 0; i < commIds.length; i += 200) {
@@ -55,12 +56,16 @@ async function main() {
 
   // Pass 2, on the kinds as they will be.
   const kind = new Map(raws.map((r) => [r.id, relabel.some((x) => x.id === r.id) ? "shipping" : r.event_kind]));
-  const norms = await all<Norm>("transactions_normalized", "id, user_id, merchant_normalized, amount, transaction_datetime, raw_transaction_ids");
+  // Refunds pay for nothing, as in settleShippingRows.
+  const norms = (await all<Norm>("transactions_normalized", "id, user_id, merchant_normalized, amount, transaction_type, transaction_datetime, raw_transaction_ids"))
+    .filter((n) => n.transaction_type !== "refund");
   const drop: Norm[] = [];
   for (const userId of new Set(norms.map((n) => n.user_id))) {
     const mine = norms.filter((n) => n.user_id === userId);
     const ids = new Set(unneededShippingRows(mine.map((n) => ({
-      ...n, shippingOnly: (n.raw_transaction_ids ?? []).length > 0 && (n.raw_transaction_ids ?? []).every((id) => kind.get(id) === "shipping"),
+      ...n,
+      shippingOnly: (n.raw_transaction_ids ?? []).length > 0 && (n.raw_transaction_ids ?? []).every((id) => kind.get(id) === "shipping"),
+      methods: (n.raw_transaction_ids ?? []).map((id) => methodOf.get(id) ?? null),
     }))));
     drop.push(...mine.filter((n) => ids.has(n.id)));
   }

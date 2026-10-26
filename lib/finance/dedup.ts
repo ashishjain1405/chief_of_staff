@@ -106,7 +106,9 @@ function isSameOrder(a: TransactionRaw, b: TransactionRaw): boolean {
 // order ID, so the order rule never joined it: one ₹525 Svaras order was
 // counted six times. Such a row is stored as event_kind "shipping", kept out
 // of dedup windows, and counts only when nothing paid for it.
-const SHIPPING_SUBJECT = /\b(shipped|dispatched|picked up|out for delivery|delivered|in transit|on (its|the) way|arriving|has left)\b/i;
+// "There is A Slight Delay In Your Order" is status too: it and the "out for
+// delivery" after it made a ₹1,078 Myntra order count twice.
+const SHIPPING_SUBJECT = /\b(shipped|dispatched|picked up|out for delivery|delivered|in transit|on (its|the) way|arriving|has left|slight delay|delay in your order|order (is |has been )?delayed)\b/i;
 export function isShippingUpdate(subject: string): boolean {
   return SHIPPING_SUBJECT.test(subject);
 }
@@ -129,7 +131,31 @@ export function isPaymentForShipping(payment: Dated, shipping: Dated): boolean {
   return merchantSimilarity(payment.merchant_normalized, shipping.merchant_normalized) >= 0.85 && gap <= ORDER_AMOUNT_TOLERANCE;
 }
 
-type ShippingCandidate = Dated & { id: string; shippingOnly: boolean };
+type ShippingCandidate = Dated & { id: string; shippingOnly: boolean; methods?: (string | null)[] };
+
+// Card, store credit, cash on delivery...: an item's email says how it was
+// paid, and only an order paid the same way can hold it.
+const methodFamily = (m: string | null | undefined) => {
+  const s = (m ?? "").toLowerCase().trim();
+  if (!s) return null;
+  if (/card/.test(s)) return "card";
+  if (/credit|wallet|gift|balance|store/.test(s)) return "credit";
+  if (/cod|cash/.test(s)) return "cash";
+  if (/upi/.test(s)) return "upi";
+  return s;
+};
+const samePaymentMethod = (a: ShippingCandidate, b: ShippingCandidate) => {
+  const fa = new Set((a.methods ?? []).map(methodFamily).filter(Boolean));
+  const fb = new Set((b.methods ?? []).map(methodFamily).filter(Boolean));
+  return !fa.size || !fb.size || [...fa].some((f) => fb.has(f));
+};
+// An item's update shows that item's price, not the order's: the four items
+// of a ₹4,610.80 Myntra order came to ₹4,610.81 and were counted on top of it.
+// It belongs to a recent order from the same shop, paid the same way, with
+// room left for it. Couriers name no shop, so they still need the exact amount.
+const holdsItem = (order: ShippingCandidate, item: ShippingCandidate, room: number) =>
+  !!item.merchant_normalized && !COURIERS.test(item.merchant_normalized) && isPaymentForShipping({ ...order, amount: item.amount }, item)
+  && samePaymentMethod(order, item) && room + 1 >= (item.amount ?? 0);
 
 // Removing a counted row needs the exact amount as well: the 10% order
 // tolerance took a ₹1,691 Myntra item for a repeat of a ₹1,780 one.
@@ -140,12 +166,24 @@ const coversShipping = (payment: Dated, shipping: Dated) =>
 // covers, and of several for the same unpaid order, all but the first.
 export function unneededShippingRows(rows: ShippingCandidate[]): string[] {
   const payments = rows.filter((r) => !r.shippingOnly);
+  const room = new Map(payments.map((p) => [p.id, p.amount ?? 0]));
   const kept: ShippingCandidate[] = [];
+  const held: ShippingCandidate[] = [];
   const drop: string[] = [];
-  const updates = rows.filter((r) => r.shippingOnly).sort((a, b) => (a.transaction_datetime ?? "").localeCompare(b.transaction_datetime ?? ""));
+  const time = (r: Dated) => r.transaction_datetime ?? "";
+  const updates = rows.filter((r) => r.shippingOnly).sort((a, b) => time(a).localeCompare(time(b)));
   for (const s of updates) {
-    if (payments.some((p) => coversShipping(p, s)) || kept.some((k) => coversShipping(k, s))) drop.push(s.id);
-    else kept.push(s);
+    // The whole order, or a repeat of an update already placed.
+    if (payments.some((p) => coversShipping(p, s)) || [...kept, ...held].some((k) => coversShipping(k, s))) {
+      drop.push(s.id);
+      continue;
+    }
+    const order = payments.filter((p) => holdsItem(p, s, room.get(p.id)!)).sort((a, b) => time(b).localeCompare(time(a)))[0];
+    if (order) {
+      room.set(order.id, room.get(order.id)! - (s.amount ?? 0));
+      held.push(s);
+      drop.push(s.id);
+    } else kept.push(s);
   }
   return drop;
 }
@@ -160,18 +198,22 @@ export async function settleShippingRows(db: any, userId: string, around: string
     .from("transactions_normalized")
     .select("id, merchant_normalized, amount, transaction_datetime, raw_transaction_ids")
     .eq("user_id", userId)
+    // A refund pays for nothing (a ₹1,295 cancellation was taken for an order).
+    .or("transaction_type.is.null,transaction_type.neq.refund")
     .gte("transaction_datetime", new Date(at - 2 * SHIPPING_LOOKBACK_MS).toISOString())
     .lte("transaction_datetime", new Date(at + 2 * SHIPPING_LOOKBACK_MS).toISOString());
   if (error) throw new Error(`[shipping] settle lookup failed: ${error.message}`);
   const rawIds: string[] = (rows ?? []).flatMap((r: { raw_transaction_ids: string[] | null }) => r.raw_transaction_ids ?? []);
-  const kind = new Map<string, string | null>();
+  const raw = new Map<string, { event_kind: string | null; payment_method: string | null }>();
   for (let i = 0; i < rawIds.length; i += 200) {
-    const { data, error: kindError } = await db.from("transactions_raw").select("id, event_kind").in("id", rawIds.slice(i, i + 200));
+    const { data, error: kindError } = await db.from("transactions_raw").select("id, event_kind, payment_method").in("id", rawIds.slice(i, i + 200));
     if (kindError) throw new Error(`[shipping] settle lookup failed: ${kindError.message}`);
-    for (const r of data ?? []) kind.set(r.id, r.event_kind);
+    for (const r of data ?? []) raw.set(r.id, r);
   }
   const drop = unneededShippingRows((rows ?? []).map((r: any) => ({
-    ...r, shippingOnly: (r.raw_transaction_ids ?? []).length > 0 && r.raw_transaction_ids.every((id: string) => kind.get(id) === "shipping"),
+    ...r,
+    shippingOnly: (r.raw_transaction_ids ?? []).length > 0 && r.raw_transaction_ids.every((id: string) => raw.get(id)?.event_kind === "shipping"),
+    methods: (r.raw_transaction_ids ?? []).map((id: string) => raw.get(id)?.payment_method ?? null),
   })));
   if (!drop.length) return 0;
   const { error: deleteError } = await db.from("transactions_normalized").delete().in("id", drop);
@@ -234,6 +276,21 @@ function isSameTransferNotice(a: TransactionRaw, b: TransactionRaw, gapMs: numbe
   return !(ka && kb && ka !== kb && ka.split(":")[0] === kb.split(":")[0]);
 }
 
+// A refund is announced twice - "initiated", then "processed" a day or two
+// later - and the second often carries only the bank's ARN, not the return ID:
+// one ₹1,399 Myntra return was subtracted twice. Same shop, the same amount
+// within three days, and no two different IDs. The first email named the
+// seller ("Pepe Jeans") and the second Myntra, so the shop's own sender counts
+// as the shop - never a bank's, which sends refunds for every merchant.
+export const REFUND_WINDOW_MS = 3 * 24 * 60 * 60 * 1000;
+function isSameRefund(a: TransactionRaw, b: TransactionRaw, gapMs: number): boolean {
+  if (a.transaction_type !== "refund" || b.transaction_type !== "refund" || gapMs > REFUND_WINDOW_MS) return false;
+  if (Math.abs(a.amount! - b.amount!) > 0.5) return false;
+  const shopSender = (r: TransactionRaw) => (ALERT_SOURCES.has(r.sender_type ?? "") ? "" : senderDomain(r));
+  const sameShop = merchantSimilarity(a.merchant_normalized, b.merchant_normalized) >= 0.85 || (!!shopSender(a) && shopSender(a) === shopSender(b));
+  return sameShop && !(a.transaction_id && b.transaction_id && a.transaction_id !== b.transaction_id);
+}
+
 function areDuplicates(a: TransactionRaw, b: TransactionRaw): boolean {
   if (!a.amount || !b.amount) return false;
   if (isSameOrder(a, b)) return true;
@@ -245,6 +302,7 @@ function areDuplicates(a: TransactionRaw, b: TransactionRaw): boolean {
   if (isSameTransferNotice(a, b, Math.abs(ta - tb))) return true;
   const refundMismatch = (a.transaction_type === "refund") !== (b.transaction_type === "refund");
   if (!refundMismatch && isAlertAndReceipt(a, b, Math.abs(ta - tb))) return true;
+  if (isSameRefund(a, b, Math.abs(ta - tb))) return true;
   if (Math.abs(ta - tb) > WINDOW_MS) return false;
 
   // Refunds never merge with non-refunds
