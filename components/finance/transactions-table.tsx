@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useOptimistic, useState, useTransition } from "react";
 import { ArrowUpRight, ChevronDown } from "lucide-react";
-import { notSpendReason, orderValue } from "@/lib/finance/spend";
+import { isCredit, notSpendReason, orderValue } from "@/lib/finance/spend";
 import { matchesFor, planChange, recompute, rulesWithout, type Rule, type Snapshot, type UserCategory } from "@/lib/finance/rules";
 import {
   changeTransaction, deleteCategory, deleteRule, renameCategory, resetTransaction, undoChange, type ChangeResult, type Undo,
@@ -150,6 +150,9 @@ export function TransactionsTable({ rows, summary, hidden, rules, categories, co
                         ) : r.counted_override ? (
                           <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-300">Counted · {sourceNote(r.counted_source)}</span>
                         ) : null}
+                        {isCredit(r) && (
+                          <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-300">{r.transaction_type === "cashback" ? "Cashback" : "Refund"}</span>
+                        )}
                         {orderValue(r) > (r.amount ?? 0) && (
                           <span className="text-[11px]">₹{Math.round(orderValue(r) - (r.amount ?? 0)).toLocaleString("en-IN")} from store credit or wallet</span>
                         )}
@@ -157,8 +160,9 @@ export function TransactionsTable({ rows, summary, hidden, rules, categories, co
                     </span>
                     <span className="hidden min-w-0 sm:block">{pill}</span>
                     <span className="hidden whitespace-nowrap text-xs text-muted-foreground sm:block">{istDate(r.transaction_datetime)}</span>
-                    <span className="whitespace-nowrap text-right text-sm font-medium tabular-nums text-foreground">
-                      {r.currency && r.currency !== "INR" ? `${r.currency} ` : "₹"}{Math.round(orderValue(r)).toLocaleString("en-IN")}
+                    {/* Money back reads as money back: refunds looked like purchases. */}
+                    <span className={`whitespace-nowrap text-right text-sm font-medium tabular-nums ${isCredit(r) ? "text-emerald-700 dark:text-emerald-300" : "text-foreground"}`}>
+                      {isCredit(r) ? "−" : ""}{r.currency && r.currency !== "INR" ? `${r.currency} ` : "₹"}{Math.round(orderValue(r)).toLocaleString("en-IN")}
                     </span>
                   </div>
                   {open === r.id && (

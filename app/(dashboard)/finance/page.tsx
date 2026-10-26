@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { createClient } from "@/lib/supabase/server";
-import { countsAsSpend, isFailedTransaction, spendAmount } from "@/lib/finance/spend";
+import { countsAsSpend, isCredit, isFailedTransaction, spendAmount } from "@/lib/finance/spend";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight, Tag, TrendingUp, Wallet } from "lucide-react";
@@ -103,6 +103,8 @@ export default async function FinancePage({
   // From the first email, so "Last 6 months" does not claim months before it.
   const from = Math.max(p.start, coverageMs ?? p.start);
   const spent = total(selectedSpend);
+  // Refunds are already netted out of spent; the list says by how much.
+  const refunded = -selectedSpend.filter(isCredit).reduce((s, r) => s + spendAmount(r), 0);
   const largest = selectedSpend.reduce((max, r) => Math.max(max, spendAmount(r)), 0);
   // Compared only when the data reaches back over the whole previous period.
   const prevSpent = p.prev && coverageMs !== null && coverageMs <= p.prev.start ? total(between(p.prev.start, p.prev.end).filter(countsAsSpend).filter(inCats)) : null;
@@ -254,7 +256,7 @@ export default async function FinancePage({
 
         <TransactionsTable
           rows={listed}
-          summary={`${plural(listed.length, "transaction")} · ${inr(spent)} spent`}
+          summary={`${plural(listed.length, "transaction")} · ${inr(spent)} spent${refunded > 0 ? ` after ${inr(refunded)} refunded` : ""}`}
           hidden={hidden ? { count: hidden, href: hrefWith({ show: "all" }) } : undefined}
           rules={rules}
           categories={categories}

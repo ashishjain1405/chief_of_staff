@@ -19,6 +19,7 @@ const NOT_SPEND: Record<string, string> = {
 
 // Money coming back reduces spending rather than adding to it.
 const CREDITS = new Set(["refund", "cashback"]);
+export const isCredit = (t: { transaction_type?: string | null }) => CREDITS.has(t.transaction_type ?? "");
 
 // Paying a credit-card bill settles purchases already counted when they were
 // made. But the extractor labels a purchase made WITH the card ("debited from
