@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { countsAsSpend, isFailedTransaction, spendAmount } from "@/lib/finance/spend";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { ArrowRight, CalendarDays, ReceiptText, TrendingUp, Wallet } from "lucide-react";
+import { ArrowRight, Tag, TrendingUp, Wallet } from "lucide-react";
 import { StatTile } from "@/components/finance/stat-tile";
 import { ColumnChart, ChartTable, type Column } from "@/components/finance/column-chart";
 import { TransactionsTable } from "@/components/finance/transactions-table";
@@ -100,10 +100,8 @@ export default async function FinancePage({
   const listed = inPeriod.filter(inCats).filter((r) => filters.show === "all" || countsAsSpend(r));
   const hidden = filters.show === "spend" ? inPeriod.filter(inCats).filter((r) => !countsAsSpend(r)).length : 0;
 
-  // Days the data actually covers, so the 6-month average is not diluted by
-  // months before the first email.
+  // From the first email, so "Last 6 months" does not claim months before it.
   const from = Math.max(p.start, coverageMs ?? p.start);
-  const days = Math.max(1, Math.ceil((Math.min(p.end, now) - from) / DAY));
   const spent = total(selectedSpend);
   const largest = selectedSpend.reduce((max, r) => Math.max(max, spendAmount(r)), 0);
   // Compared only when the data reaches back over the whole previous period.
@@ -115,6 +113,9 @@ export default async function FinancePage({
   const byCat: Record<string, number> = {};
   for (const r of periodSpend) byCat[categoryOf(r)] = (byCat[categoryOf(r)] ?? 0) + spendAmount(r);
   const sortedCats = Object.entries(byCat).sort((a, b) => b[1] - a[1]);
+  // The biggest of the chosen categories, or of all of them.
+  const topCat = sortedCats.find(([c]) => !chosen.size || chosen.has(c));
+  const topShare = topCat && spent > 0 ? Math.round((topCat[1] / spent) * 100) : null;
   const categoryOptions = [
     ...sortedCats.map(([c, v]) => ({ key: c, label: categoryLabel(c, names), total: inr(v) })),
     ...filters.cats.filter((c) => !byCat[c]).map((c) => ({ key: c, label: categoryLabel(c, names), total: inr(0) })),
@@ -124,21 +125,20 @@ export default async function FinancePage({
   // adds its category to the filter or takes it out; Other adds all it holds.
   const hrefWith = (next: Partial<Filters>) => filtersHref({ ...filters, ...next });
   const tone = (on: boolean) => (chosen.size ? (on ? ("accent" as const) : ("soft" as const)) : ("default" as const));
-  // Chosen categories always get their own column, so a small one picked from
-  // the menu is not hidden inside Other.
+  // The columns stay the biggest categories whatever is chosen, so Other always
+  // holds the same ones: one click filters to exactly those, a second clears
+  // them. Pinning chosen categories as columns moved them out of Other, so
+  // each click on it meant something different.
   const categoryColumns = (count: number): Column[] => {
-    const picked = sortedCats.filter(([c]) => chosen.has(c)).slice(0, count);
-    const keep = new Set([...picked, ...sortedCats.filter(([c]) => !chosen.has(c)).slice(0, count - picked.length)].map(([c]) => c));
-    const head = sortedCats.filter(([c]) => keep.has(c));
-    const rest = sortedCats.filter(([c]) => !keep.has(c));
-    const tailKeys = rest.map(([c]) => c);
-    const tail = rest.reduce((sum, [, v]) => sum + v, 0);
-    const otherOn = tailKeys.length > 0 && tailKeys.every((c) => chosen.has(c));
+    const head = sortedCats.slice(0, count);
+    const tailKeys = sortedCats.slice(count).map(([c]) => c);
+    const tail = sortedCats.slice(count).reduce((sum, [, v]) => sum + v, 0);
+    const otherAll = tailKeys.length > 0 && tailKeys.every((c) => chosen.has(c));
     return [
       ...head.map(([c, value]) => ({ key: c, label: categoryLabel(c, names), value, href: hrefWith({ cats: toggleCategory(filters.cats, c) }), tone: tone(chosen.has(c)) })),
       ...(tail > 0 ? [{
-        key: "__other", label: "Other", value: tail, tone: tone(otherOn),
-        href: hrefWith({ cats: otherOn ? filters.cats.filter((c) => !tailKeys.includes(c)) : [...new Set([...filters.cats, ...tailKeys])] }),
+        key: "__other", label: "Other", value: tail, tone: tone(tailKeys.some((c) => chosen.has(c))),
+        href: hrefWith({ cats: otherAll ? filters.cats.filter((c) => !tailKeys.includes(c)) : [...new Set([...filters.cats, ...tailKeys])] }),
       }] : []),
     ];
   };
@@ -183,10 +183,12 @@ export default async function FinancePage({
 
         <FilterBar filters={filters} period={p.key} defaultPeriod={defaultPeriod} options={periodOptions(coverage, now)} categories={categoryOptions} />
 
-        <section className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4" aria-label={`${p.label} at a glance`}>
-          <StatTile icon={Wallet} label="Spent" value={inr(spent)} caption={spentCaption} />
-          <StatTile icon={CalendarDays} label="Daily average" value={inr(spent / days)} caption={`Over ${plural(days, "day")}`} />
-          <StatTile icon={ReceiptText} label="Transactions" value={listed.length.toLocaleString("en-IN")} caption={filters.show === "all" ? "Including transfers and bills" : "Counted as spending"} />
+        <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4" aria-label={`${p.label} at a glance`}>
+          <div className="col-span-2 sm:col-span-1 [&>*]:h-full">
+            <StatTile icon={Wallet} label="Spent" value={inr(spent)} caption={spentCaption} />
+          </div>
+          <StatTile icon={Tag} label={<><span className="sm:hidden">Top category</span><span className="hidden sm:inline">Highest spend category</span></>} value={topCat ? categoryLabel(topCat[0], names) : "—"}
+            caption={topCat ? `${inr(topCat[1])}${topShare !== null ? ` · ${topShare}% of spending` : ""}` : "No spending in this period"} />
           <StatTile icon={TrendingUp} label="Largest spend" value={inr(largest)} caption="Single transaction" />
         </section>
 

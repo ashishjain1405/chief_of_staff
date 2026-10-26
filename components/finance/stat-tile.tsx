@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 
 export function StatTile({
@@ -7,7 +8,7 @@ export function StatTile({
   caption,
 }: {
   icon: LucideIcon;
-  label: string;
+  label: ReactNode;
   value: string;
   caption?: string;
 }) {
