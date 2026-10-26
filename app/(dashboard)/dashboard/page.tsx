@@ -9,6 +9,8 @@ import { SectionCard, EmptyState } from "@/components/dashboard/section-card";
 import { StatLink } from "@/components/dashboard/stat-link";
 import { TaskList, MeetingList, EmailList, CommitmentList } from "@/components/dashboard/lists";
 import { Brief } from "@/components/dashboard/brief";
+import { BriefSections } from "@/components/dashboard/brief-sections";
+import type { Brief as BriefContent } from "@/lib/brief/build";
 import { Explore } from "@/components/dashboard/explore";
 
 const IST = "Asia/Kolkata";
@@ -42,7 +44,7 @@ export default async function DashboardPage() {
   const [briefRes, overdueRes, upcomingRes, undatedRes, dueSoonCountRes, meetingsRes, actionEmailsRes, googleRes, latestEmailRes] = await Promise.all([
     supabase
       .from("daily_briefs")
-      .select("raw_markdown, brief_date")
+      .select("raw_markdown, brief_date, content")
       .eq("user_id", user.id)
       .order("brief_date", { ascending: false })
       .limit(1)
@@ -113,6 +115,8 @@ export default async function DashboardPage() {
         : null;
 
   const brief = briefRes.data;
+  // Briefs saved before the structured content (version 2) fall back to markdown.
+  const sections = (brief?.content as BriefContent | null)?.version === 2 ? (brief!.content as BriefContent) : null;
   // Which five to show: reserve two slots for the most recently missed so a
   // long backlog cannot crowd out the week ahead, fill the rest with what is
   // due soonest, then fall back to older overdue items and undated tasks.
@@ -222,9 +226,11 @@ export default async function DashboardPage() {
         <SectionCard
           icon={Newspaper}
           title="Daily brief"
-          description={brief ? `Prepared ${new Date(brief.brief_date).toLocaleDateString("en-IN", { day: "numeric", month: "long", timeZone: IST })}` : "Prepared every morning at 8:00"}
+          description={brief ? `Prepared ${new Date(brief.brief_date).toLocaleDateString("en-IN", { day: "numeric", month: "long", timeZone: IST })}${sections ? ` · ${sections.summary}` : ""}` : "Prepared every morning at 8:00"}
         >
-          {brief?.raw_markdown ? (
+          {sections ? (
+            <BriefSections brief={sections} />
+          ) : brief?.raw_markdown ? (
             <div className="lg:columns-2 lg:gap-10 [&_h3]:break-after-avoid">
               <Brief markdown={brief.raw_markdown} />
             </div>

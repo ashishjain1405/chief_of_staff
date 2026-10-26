@@ -1,9 +1,11 @@
 import type { Brief, BriefItem, Chip, Tone } from "./build";
 
-// One brief, three renderings: the HTML email, its plain-text part, and the
-// markdown the dashboard card reads. Email HTML is tables and inline styles -
-// Gmail drops most <style> rules - in the dashboard's soft palette, and every
-// chip carries a word, never colour alone.
+// One brief, four renderings: the HTML email, its plain-text part, the markdown
+// kept for briefs saved before sections, and the dashboard's sections
+// (components/dashboard/brief-sections), which share the wording helpers
+// exported here. Email HTML is tables and inline styles - Gmail drops most
+// <style> rules - in the dashboard's soft palette, and every chip carries a
+// word, never colour alone.
 
 type Url = (path: string) => string;
 
@@ -15,19 +17,20 @@ const TONES: Record<Tone, [string, string]> = {
 const FONT = "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
-const inr = (n: number) => `₹${Math.round(n).toLocaleString("en-IN")}`;
+// A refund larger than the day's spend reads "−₹360", not "₹-360".
+export const inr = (n: number) => `${Math.round(n) < 0 ? "−" : ""}₹${Math.abs(Math.round(n)).toLocaleString("en-IN")}`;
 const shortDay = (b: Brief) => new Date(`${b.date}T12:00:00+05:30`).toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short", timeZone: "Asia/Kolkata" }).replace(",", "");
 
 export function briefSubject(b: Brief): string {
   return `Brief · ${shortDay(b)} · ${b.summary.replace(/ · /g, ", ")}`;
 }
 
-const MERCHANTS = 6;
-const times = (n: number) => (n > 1 ? ` ×${n}` : "");
+export const MERCHANTS = 6;
+export const times = (n: number) => (n > 1 ? ` ×${n}` : "");
 // Net of refunds, which is why "Amazon ×5 ₹285" needs its refund beside it.
-const refundNote = (x: { refunded: number }) => (x.refunded ? `after a ${inr(x.refunded)} refund` : "");
-const moreMerchants = (n: number) => `+${n} more ${n === 1 ? "merchant" : "merchants"}`;
-const comparison = (m: NonNullable<Brief["money"]>) => (m.prevTotal ? `${m.prevMonth} in full: ${inr(m.prevTotal)}` : "");
+export const refundNote = (x: { refunded: number }) => (x.refunded ? `after a ${inr(x.refunded)} refund` : "");
+export const moreMerchants = (n: number) => `+${n} more ${n === 1 ? "merchant" : "merchants"}`;
+export const comparison = (m: NonNullable<Brief["money"]>) => (m.prevTotal ? `${m.prevMonth} in full: ${inr(m.prevTotal)}` : "");
 
 // ── HTML ────────────────────────────────────
 
@@ -44,7 +47,7 @@ function heading(title: string, count?: number) {
 
 const same = (a?: string, b?: string) => !!a && !!b && a.toLowerCase().replace(/[^a-z0-9]/g, "") === b.toLowerCase().replace(/[^a-z0-9]/g, "");
 // The first step for the start item, unless it only repeats the context.
-const firstStep = (b: Brief, i: BriefItem) => (b.start && b.start.key === i.key && b.start.step && !same(b.start.step, i.context) ? b.start.step : "");
+export const firstStep = (b: Brief, i: BriefItem) => (b.start && b.start.key === i.key && b.start.step && !same(b.start.step, i.context) ? b.start.step : "");
 
 function row(i: BriefItem, url: Url, opts: { number?: number; muted?: boolean; step?: string } = {}) {
   const num = opts.number
