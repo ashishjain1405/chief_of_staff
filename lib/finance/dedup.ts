@@ -129,6 +129,56 @@ export function isPaymentForShipping(payment: Dated, shipping: Dated): boolean {
   return merchantSimilarity(payment.merchant_normalized, shipping.merchant_normalized) >= 0.85 && gap <= ORDER_AMOUNT_TOLERANCE;
 }
 
+type ShippingCandidate = Dated & { id: string; shippingOnly: boolean };
+
+// Removing a counted row needs the exact amount as well: the 10% order
+// tolerance took a ₹1,691 Myntra item for a repeat of a ₹1,780 one.
+const coversShipping = (payment: Dated, shipping: Dated) =>
+  isPaymentForShipping(payment, shipping) && Math.abs((payment.amount ?? 0) - (shipping.amount ?? 0)) <= 0.5;
+
+// Which rows made only of shipping updates no longer count: one a payment
+// covers, and of several for the same unpaid order, all but the first.
+export function unneededShippingRows(rows: ShippingCandidate[]): string[] {
+  const payments = rows.filter((r) => !r.shippingOnly);
+  const kept: ShippingCandidate[] = [];
+  const drop: string[] = [];
+  const updates = rows.filter((r) => r.shippingOnly).sort((a, b) => (a.transaction_datetime ?? "").localeCompare(b.transaction_datetime ?? ""));
+  for (const s of updates) {
+    if (payments.some((p) => coversShipping(p, s)) || kept.some((k) => coversShipping(k, s))) drop.push(s.id);
+    else kept.push(s);
+  }
+  return drop;
+}
+
+// An update is counted when it arrives before anything paid for it, and the
+// payment can come later - a delayed alert, or mail read by the 90-day import:
+// a ₹525 Svaras order showed four times. So whenever a payment or an update is
+// saved, the shipping-only rows around it are settled again, whichever came first.
+export async function settleShippingRows(db: any, userId: string, around: string): Promise<number> {
+  const at = Date.parse(around);
+  const { data: rows, error } = await db
+    .from("transactions_normalized")
+    .select("id, merchant_normalized, amount, transaction_datetime, raw_transaction_ids")
+    .eq("user_id", userId)
+    .gte("transaction_datetime", new Date(at - 2 * SHIPPING_LOOKBACK_MS).toISOString())
+    .lte("transaction_datetime", new Date(at + 2 * SHIPPING_LOOKBACK_MS).toISOString());
+  if (error) throw new Error(`[shipping] settle lookup failed: ${error.message}`);
+  const rawIds: string[] = (rows ?? []).flatMap((r: { raw_transaction_ids: string[] | null }) => r.raw_transaction_ids ?? []);
+  const kind = new Map<string, string | null>();
+  for (let i = 0; i < rawIds.length; i += 200) {
+    const { data, error: kindError } = await db.from("transactions_raw").select("id, event_kind").in("id", rawIds.slice(i, i + 200));
+    if (kindError) throw new Error(`[shipping] settle lookup failed: ${kindError.message}`);
+    for (const r of data ?? []) kind.set(r.id, r.event_kind);
+  }
+  const drop = unneededShippingRows((rows ?? []).map((r: any) => ({
+    ...r, shippingOnly: (r.raw_transaction_ids ?? []).length > 0 && r.raw_transaction_ids.every((id: string) => kind.get(id) === "shipping"),
+  })));
+  if (!drop.length) return 0;
+  const { error: deleteError } = await db.from("transactions_normalized").delete().in("id", drop);
+  if (deleteError) throw new Error(`[shipping] settle delete failed: ${deleteError.message}`);
+  return drop.length;
+}
+
 const ALERT_SOURCES = new Set(["BANK", "CREDIT_CARD", "UPI", "WALLET"]);
 const RECEIPT_WINDOW_MS = 3 * 60 * 60 * 1000;
 const senderDomain = (r: TransactionRaw) => (r.raw_sender ?? "").split("@")[1]?.toLowerCase() ?? "";

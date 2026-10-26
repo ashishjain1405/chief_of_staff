@@ -6,7 +6,7 @@ import { classifySender, getSenderHint, shouldRunStage1, isKnownFinancialDomain 
 import { enqueueOperationalState } from "@/lib/queues";
 import { extractFinancialTransaction } from "@/lib/ai/extractors/financial";
 import { getCategoryForMerchant, getWalletPaymentModeLabel, resolveMerchant, resolveTransactionType } from "@/lib/finance/normalize";
-import { deduplicateRawTransactions, isPaymentForShipping, isShippingUpdate, saveNormalizedGroups, type TransactionRaw } from "@/lib/finance/dedup";
+import { deduplicateRawTransactions, isPaymentForShipping, isShippingUpdate, saveNormalizedGroups, settleShippingRows, type TransactionRaw } from "@/lib/finance/dedup";
 import { resolveFollowUpDeadline, stillActionable } from "@/lib/tasks/deadline";
 import { LOW_SIGNAL_CATEGORIES } from "@/lib/inbox/categories";
 import { shouldCreateTask, ccOnlyWithoutAsk, hasMessageText } from "@/lib/tasks/gate";
@@ -443,9 +443,10 @@ async function runFinancialExtraction(
 
   const transactionDatetime = resolveTransactionDatetime(raw?.transaction_datetime ?? null, occurredAt);
 
-  // See isShippingUpdate. An update sharing an order ID with another email
-  // stays "completed": the order rule already joins it, and a delivered total
-  // can be the final amount.
+  // See isShippingUpdate. An update sharing an order ID with a payment or
+  // order email stays "completed": the order rule already joins it, and a
+  // delivered total can be the final amount. Sharing one only with another
+  // update (a courier's tracking number) does not count.
   const shipping = raw?.event_kind === "completed" && isShippingUpdate(subject)
     && !(await sharesOrderId(supabase, userId, communicationId, [raw?.transaction_id, raw?.reference_id]));
   const eventKind = shipping ? "shipping" : (raw?.event_kind ?? null);
@@ -499,10 +500,12 @@ async function runFinancialExtraction(
   // statement stays as a raw row for reference but is never normalized.
   if (!needsReview && transactionDatetime && eventKind === "completed") {
     await runDedup(supabase, userId, transactionDatetime, [raw?.transaction_id, raw?.reference_id]);
+    await settleShippingRows(supabase, userId, transactionDatetime);
   } else if (!needsReview && transactionDatetime && shipping) {
     await countShippingIfUnpaid(supabase, userId, communicationId, {
       merchant_normalized: merchantNormalized, amount: raw?.amount ?? null, transaction_datetime: transactionDatetime,
     });
+    await settleShippingRows(supabase, userId, transactionDatetime);
   }
 }
 
@@ -518,6 +521,7 @@ async function sharesOrderId(supabase: any, userId: string, communicationId: str
     .select("id")
     .eq("user_id", userId)
     .neq("communication_id", communicationId)
+    .eq("event_kind", "completed")
     .or(`transaction_id.in.(${quoteIds(ids)}),reference_id.in.(${quoteIds(ids)})`)
     .limit(1);
   if (error) throw new Error(`[shipping] order lookup failed: ${error.message}`);
