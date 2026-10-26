@@ -1,4 +1,5 @@
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
+import { orderValue } from "@/lib/finance/spend";
 
 export type Sort = "newest" | "largest" | "smallest";
 
@@ -9,10 +10,10 @@ const nextAmountSort = (s: Sort): Sort => (s === "largest" ? "smallest" : s === 
 export const SORT_WORD: Record<Sort, string> = { newest: "Latest", largest: "Largest", smallest: "Smallest" };
 
 // Rows arrive newest first; equal amounts keep that order.
-export function sortRows<T extends { amount: number | null; transaction_datetime: string }>(rows: T[], sort: Sort): T[] {
+export function sortRows<T extends { amount: number | null; order_total?: number | null; transaction_datetime: string }>(rows: T[], sort: Sort): T[] {
   if (sort === "newest") return rows;
   const dir = sort === "largest" ? -1 : 1;
-  return [...rows].sort((a, b) => dir * ((a.amount ?? 0) - (b.amount ?? 0)) || b.transaction_datetime.localeCompare(a.transaction_datetime));
+  return [...rows].sort((a, b) => dir * (orderValue(a) - orderValue(b)) || b.transaction_datetime.localeCompare(a.transaction_datetime));
 }
 
 const button = "items-center gap-1 rounded transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50";

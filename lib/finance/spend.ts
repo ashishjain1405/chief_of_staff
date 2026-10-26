@@ -42,7 +42,7 @@ const FAILED = /^(failed|declined|cancell?ed|rejected|unsuccessful|reversed|(pay
 
 // counted_override is the founder's decision (lib/finance/rules): null leaves
 // it to the rules below.
-type Txn = { transaction_type?: string | null; merchant_normalized?: string | null; status?: string | null; amount?: number | string | null; category?: string | null; counted_override?: boolean | null };
+type Txn = { transaction_type?: string | null; merchant_normalized?: string | null; status?: string | null; amount?: number | string | null; order_total?: number | string | null; category?: string | null; counted_override?: boolean | null };
 
 export function isFailedTransaction(t: { status?: string | null }): boolean {
   return !!t.status && FAILED.test(t.status.trim());
@@ -79,5 +79,13 @@ export function countsAsSpend(t: Txn): boolean {
 export function spendAmount(t: Txn): number {
   if (!countsAsSpend(t)) return 0;
   const amount = Number(t.amount ?? 0);
-  return CREDITS.has(t.transaction_type ?? "") ? -amount : amount;
+  return CREDITS.has(t.transaction_type ?? "") ? -amount : orderValue(t);
+}
+
+// Store credit, gift cards and wallet balances are spent when they are used,
+// since buying them is not spending (VOUCHER_SELLERS, wallet_topup): a ₹4,116
+// Myntra order paid ₹3,805 from Myntra Credit and ₹311 by card counts ₹4,116.
+// amount is what the card was charged, so the larger of the two is the order.
+export function orderValue(t: Pick<Txn, "amount" | "order_total">): number {
+  return Math.max(Number(t.amount ?? 0), Number(t.order_total ?? 0));
 }

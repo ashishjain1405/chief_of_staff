@@ -461,6 +461,7 @@ async function runFinancialExtraction(
       transaction_type: resolveTransactionType(raw?.transaction_type, merchantNormalized),
       category,
       amount: raw?.amount ?? null,
+      order_total: raw?.order_total && raw.order_total > (raw.amount ?? 0) ? raw.order_total : null,
       currency: raw?.currency ?? "INR",
       merchant_name: merchantRaw,
       merchant_normalized: merchantNormalized,

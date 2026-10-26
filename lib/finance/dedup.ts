@@ -6,6 +6,8 @@ export type TransactionRaw = {
   user_id: string;
   communication_id: string;
   amount: number | null;
+  // The order's full value when a balance paid part of it (migrations/add-order-total.sql).
+  order_total?: number | null;
   currency: string | null;
   merchant_normalized: string | null;
   transaction_datetime: string | null;
@@ -30,6 +32,7 @@ export type NormalizedTransaction = {
   primary_source: string;
   merchant_normalized: string | null;
   amount: number;
+  order_total: number | null;
   currency: string;
   category: string | null;
   transaction_type: string | null;
@@ -392,6 +395,8 @@ export function deduplicateRawTransactions(rows: TransactionRaw[]): NormalizedTr
       primary_source: primary.sender_type ?? "UNKNOWN",
       merchant_normalized: withMerchant?.merchant_normalized ?? null,
       amount: primary.amount ?? 0,
+      // The receipt knows the order's full value; the card alert only its share.
+      order_total: Math.max(0, ...group.map((r) => Number(r.order_total ?? 0))) || null,
       currency: primary.currency ?? "INR",
       category: knownCategory ?? primary.category ?? withMerchant?.category ?? null,
       transaction_type: primary.transaction_type,

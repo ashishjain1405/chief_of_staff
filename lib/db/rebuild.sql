@@ -756,3 +756,9 @@ DO $$ BEGIN
     CREATE TRIGGER user_categories_updated_at BEFORE UPDATE ON user_categories FOR EACH ROW EXECUTE FUNCTION update_updated_at();
   END IF;
 END $$;
+
+-- ─────────────────────────────────────────
+-- Orders paid partly from a balance (migrations/add-order-total.sql)
+-- ─────────────────────────────────────────
+ALTER TABLE transactions_raw        ADD COLUMN IF NOT EXISTS order_total numeric;
+ALTER TABLE transactions_normalized ADD COLUMN IF NOT EXISTS order_total numeric;

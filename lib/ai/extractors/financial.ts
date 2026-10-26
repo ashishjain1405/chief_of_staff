@@ -31,6 +31,9 @@ const financialExtractionSchema = z.object({
         "pharmacy", "unknown",
       ]),
       amount: z.number().nullable(),
+      // Set only when store credit, a gift card or a wallet balance paid part
+      // of the order: its full value, of which amount is what was charged.
+      order_total: z.number().nullable(),
       currency: z.string().nullable(),
       merchant_name: z.string().nullable(),
       merchant_normalized: z.string().nullable(),
@@ -103,6 +106,7 @@ EXTRACTION RULES:
 - If the email is purely promotional with no real transaction, set is_financial_email=false.
 - Credit card statements and payment reminders are financial emails.
 - Refund amounts are positive numbers; transaction_type handles directionality.
+- When store credit, a gift card or a wallet balance paid PART of an order or bill (e.g. "Myntra Credit - ₹3,805.11 ... Net Paid ₹310.89", "Zomato Money ₹829"), amount is what the card, bank or UPI was charged and order_total is the full order total after discounts and coupons. When the balance paid ALL of it, amount is the order total and order_total is null. A remaining or available balance shown on a receipt ("Amazon Pay balance: ₹8,964") is not a payment. Reward points and coins are discounts. Otherwise order_total is null.
 - If multiple transactions exist, extract only the primary one.
 - transaction_type is what the money did, not the instrument. A debit, card, UPI or wallet charge at a merchant is a purchase (or the specific type, e.g. food_order). credit_card_payment means paying a credit card's own bill or statement. bank_transfer or p2p_transfer only when the email says money was sent to an account or a person. A debit with no merchant and no recipient is "unknown".
 

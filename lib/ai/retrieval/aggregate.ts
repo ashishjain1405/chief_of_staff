@@ -23,7 +23,7 @@ export async function aggregateTransactions(
 
   let query = (supabase as any)
     .from("transactions_normalized")
-    .select("amount, currency, category, merchant_normalized, transaction_datetime, transaction_type, status, counted_override")
+    .select("amount, order_total, currency, category, merchant_normalized, transaction_datetime, transaction_type, status, counted_override")
     .eq("user_id", userId)
     .not("amount", "is", null);
 
@@ -52,7 +52,7 @@ export async function aggregateTransactions(
   if (!error && !data?.length && categories?.length) {
     let retryQuery = supabase
       .from("transactions_normalized")
-      .select("amount, currency, category, merchant_normalized, transaction_datetime, transaction_type, status, counted_override")
+      .select("amount, order_total, currency, category, merchant_normalized, transaction_datetime, transaction_type, status, counted_override")
       .eq("user_id", userId)
       .not("amount", "is", null);
     if (filters.dateRange) {
@@ -82,7 +82,7 @@ export async function aggregateTransactions(
   }
 
   // Same rule as the finance pages, so "how much did I spend" matches them.
-  const rows = (data as { amount: number; currency: string | null; category: string | null; merchant_normalized: string | null; transaction_datetime: string | null; transaction_type: string | null; status: string | null; counted_override: boolean | null }[])
+  const rows = (data as { amount: number; order_total: number | null; currency: string | null; category: string | null; merchant_normalized: string | null; transaction_datetime: string | null; transaction_type: string | null; status: string | null; counted_override: boolean | null }[])
     .filter(countsAsSpend);
 
   const by_category: Record<string, number> = {};
@@ -141,7 +141,7 @@ export async function aggregateTransactions(
       .slice(0, 5)
       .map((r) => ({
         merchant: r.merchant_normalized ?? "Unknown",
-        amount: Math.round(r.amount),
+        amount: Math.round(spendAmount(r)),
         currency: r.currency ?? "INR",
         date: r.transaction_datetime ? istDate(new Date(r.transaction_datetime)) : null,
         transaction_type: typeLabel(r),

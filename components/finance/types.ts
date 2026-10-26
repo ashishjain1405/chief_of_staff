@@ -10,6 +10,7 @@ export type TransactionRow = {
   transaction_type: string | null;
   status: string | null;
   amount: number | null;
+  order_total?: number | null;
   currency: string | null;
   communication_ids?: string[] | null;
   category_auto?: string | null;
