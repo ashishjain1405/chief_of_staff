@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useOptimistic, useState, useTransition } from "react";
-import { ArrowUpRight, ChevronDown, X } from "lucide-react";
+import { ArrowUpRight, ChevronDown } from "lucide-react";
 import { notSpendReason } from "@/lib/finance/spend";
 import { matchesFor, planChange, recompute, rulesWithout, type Rule, type Snapshot, type UserCategory } from "@/lib/finance/rules";
 import {
@@ -14,7 +14,7 @@ import { YourCategories, YourRules } from "./your-choices";
 import { SORT_WORD, TransactionsHeader, sortRows, type Sort } from "./transactions-header";
 import type { TransactionRow } from "./types";
 
-const SHOWN = 100;
+const PAGE = 100;
 const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
 // A transfer is shown by who it went to: its "merchant" is usually the bank,
 // the founder, or nothing ("Unknown merchant").
@@ -26,8 +26,9 @@ const FAILED = "That change could not be saved, so nothing was changed. Try agai
 
 // The founder's corrections apply at once: the change is shown before the
 // server confirms it, and Undo puts back exactly what the action changed.
-export function TransactionsTable({ rows, filter, rules, categories, counts }: {
-  rows: TransactionRow[]; filter?: string; rules: Rule[]; categories: UserCategory[]; counts: Record<string, number>;
+export function TransactionsTable({ rows, summary, hidden, rules, categories, counts }: {
+  rows: TransactionRow[]; summary: string; hidden?: { count: number; href: string };
+  rules: Rule[]; categories: UserCategory[]; counts: Record<string, number>;
 }) {
   const [view, apply] = useOptimistic(rows, (state: TransactionRow[], changes: Snapshot[]) => {
     const byId = new Map(changes.map((c) => [c.id, c]));
@@ -41,6 +42,7 @@ export function TransactionsTable({ rows, filter, rules, categories, counts }: {
   const [toast, setToast] = useState<{ message: string; undo?: Undo } | null>(null);
   const [failed, setFailed] = useState<string | null>(null);
   const [sort, setSort] = useState<Sort>("newest");
+  const [shown, setShown] = useState(PAGE);
   const sorted = sortRows(view, sort);
 
   useEffect(() => {
@@ -90,30 +92,31 @@ export function TransactionsTable({ rows, filter, rules, categories, counts }: {
   return (
     <section className="rounded-2xl border border-border/70 bg-card shadow-sm">
       <header className="flex flex-wrap items-center justify-between gap-3 px-5 pt-5 pb-4">
-        <div className="flex items-center gap-2">
+        <div>
           <h2 className="text-base font-semibold text-foreground">Transactions</h2>
-          {filter && (
-            <Link href="/finance" scroll={false} aria-label={`Clear the ${filter} filter`}
-              className="inline-flex items-center gap-1 rounded-full bg-sky-50 px-2.5 py-0.5 text-xs font-medium text-sky-700 transition-colors hover:bg-sky-100 dark:bg-sky-500/10 dark:text-sky-300">
-              {filter}
-              <X className="size-3" aria-hidden />
-            </Link>
-          )}
+          <p className="mt-0.5 text-xs text-muted-foreground">{summary}</p>
         </div>
         <p className="text-xs text-muted-foreground">
-          {view.length > SHOWN ? `${SORT_WORD[sort]} ${SHOWN} of ${view.length}` : `${view.length} in the last 6 months`} · select a category to change it
+          {view.length > shown ? `${SORT_WORD[sort]} ${shown} of ${view.length} · ` : ""}select a category to change it
         </p>
       </header>
+
+      {hidden && (
+        <p className="mx-5 mb-3 text-xs text-muted-foreground">
+          {hidden.count} not counted (transfers, card bills) hidden ·{" "}
+          <Link href={hidden.href} scroll={false} className="font-medium text-sky-700 hover:underline dark:text-sky-300">Show</Link>
+        </p>
+      )}
 
       {failed && <p className="mx-5 mb-3 rounded-lg bg-rose-50 px-3 py-2 text-xs text-rose-700 dark:bg-rose-500/10 dark:text-rose-300">{failed}</p>}
 
       {view.length === 0 ? (
-        <p className="px-5 pb-8 text-sm text-muted-foreground">No transactions here yet.</p>
+        <p className="px-5 pb-8 text-sm text-muted-foreground">No transactions match these filters.</p>
       ) : (
         <div className="border-t border-border/60">
           <TransactionsHeader sort={sort} onSort={setSort} />
           <ul className="divide-y divide-border/60">
-            {sorted.slice(0, SHOWN).map((r) => {
+            {sorted.slice(0, shown).map((r) => {
               const match = matchesFor(r, merchantLabel)[0] ?? null;
               const reason = notSpendReason(r);
               const toggle = () => setOpen(open === r.id ? null : r.id);
@@ -177,6 +180,13 @@ export function TransactionsTable({ rows, filter, rules, categories, counts }: {
               );
             })}
           </ul>
+          {view.length > shown && (
+            <div className="border-t border-border/60 px-5 py-3 text-center">
+              <button type="button" onClick={() => setShown(shown + PAGE)} className="rounded-full px-4 py-1.5 text-sm font-medium text-sky-700 hover:bg-muted dark:text-sky-300">
+                Show {Math.min(PAGE, view.length - shown)} more
+              </button>
+            </div>
+          )}
         </div>
       )}
 
