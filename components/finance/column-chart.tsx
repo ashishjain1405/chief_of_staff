@@ -9,8 +9,6 @@ export type Column = {
   href?: string;
   // default: every bar alike; accent/soft: one bar emphasised, the rest receding.
   tone?: "default" | "accent" | "soft";
-  // Value printed on the cap. Used sparingly - the axis and tooltip carry the rest.
-  showValue?: boolean;
 };
 
 // One hue throughout: the columns are one series, so colour carries no
@@ -86,8 +84,13 @@ const TOOLTIP_X = {
   center: "left-1/2 -translate-x-1/2",
 };
 
+// A single word too long for the column ("Entertainment", "Uncategorised")
+// was clipped, and browsers do not reliably hyphenate it, so it is set a step smaller.
+const LONG_WORD = 10;
+
 function ColumnBar({ column: c, max, edge }: { column: Column; max: number; edge?: "start" | "end" }) {
   const pct = c.value > 0 ? Math.max((c.value / max) * 100, 1.5) : 0;
+  const longWord = c.label.split(/\s+/).some((w) => w.length > LONG_WORD);
   const body = (
     <>
       <div className="relative flex h-56 w-full items-end justify-center">
@@ -98,11 +101,10 @@ function ColumnBar({ column: c, max, edge }: { column: Column; max: number; edge
               TONE[c.tone ?? "default"]
             )}
           />
-          {c.showValue && (
-            <span className="absolute bottom-full left-1/2 mb-1 -translate-x-1/2 whitespace-nowrap text-[11px] font-medium text-foreground transition-opacity group-hover:opacity-0 group-focus-visible:opacity-0">
-              {inrCompact(c.value)}
-            </span>
-          )}
+          {/* Every column carries its value; it gives way to the tooltip on hover. */}
+          <span className="absolute bottom-full left-1/2 mb-1 -translate-x-1/2 whitespace-nowrap text-[11px] font-medium tabular-nums text-foreground transition-opacity group-hover:opacity-0 group-focus-visible:opacity-0">
+            {inrCompact(c.value)}
+          </span>
           <span
             role="tooltip"
             className={cn("pointer-events-none absolute bottom-full z-10 mb-2 whitespace-nowrap rounded-lg", TOOLTIP_X[edge ?? "center"], " bg-foreground px-2.5 py-1.5 text-center opacity-0 shadow-md transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100")}
@@ -112,7 +114,7 @@ function ColumnBar({ column: c, max, edge }: { column: Column; max: number; edge
           </span>
         </div>
       </div>
-      <span className="mt-2 line-clamp-2 w-full text-center text-[10px] leading-tight hyphens-auto text-muted-foreground group-hover:text-foreground sm:px-0.5 sm:text-[11px]">
+      <span className={cn("mt-2 line-clamp-2 w-full text-center leading-tight hyphens-auto [overflow-wrap:anywhere] text-muted-foreground group-hover:text-foreground sm:px-0.5", longWord ? "text-[9px] sm:text-[10px]" : "text-[10px] sm:text-[11px]")}>
         {c.label}
       </span>
     </>

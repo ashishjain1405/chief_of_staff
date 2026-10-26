@@ -11,6 +11,7 @@ import {
 import { categoryLabel, istDate, merchantLabel } from "./labels";
 import { TransactionEditor } from "./transaction-editor";
 import { YourCategories, YourRules } from "./your-choices";
+import { SORT_WORD, TransactionsHeader, sortRows, type Sort } from "./transactions-header";
 import type { TransactionRow } from "./types";
 
 const SHOWN = 100;
@@ -39,6 +40,8 @@ export function TransactionsTable({ rows, filter, rules, categories, counts }: {
   const [open, setOpen] = useState<string | null>(null);
   const [toast, setToast] = useState<{ message: string; undo?: Undo } | null>(null);
   const [failed, setFailed] = useState<string | null>(null);
+  const [sort, setSort] = useState<Sort>("newest");
+  const sorted = sortRows(view, sort);
 
   useEffect(() => {
     if (!toast) return;
@@ -98,7 +101,7 @@ export function TransactionsTable({ rows, filter, rules, categories, counts }: {
           )}
         </div>
         <p className="text-xs text-muted-foreground">
-          {view.length > SHOWN ? `Latest ${SHOWN} of ${view.length}` : `${view.length} in the last 6 months`} · select a category to change it
+          {view.length > SHOWN ? `${SORT_WORD[sort]} ${SHOWN} of ${view.length}` : `${view.length} in the last 6 months`} · select a category to change it
         </p>
       </header>
 
@@ -108,11 +111,9 @@ export function TransactionsTable({ rows, filter, rules, categories, counts }: {
         <p className="px-5 pb-8 text-sm text-muted-foreground">No transactions here yet.</p>
       ) : (
         <div className="border-t border-border/60">
-          <div className="hidden grid-cols-[minmax(0,1fr)_11rem_5rem_7rem] gap-4 px-5 py-2.5 text-xs text-muted-foreground sm:grid">
-            <span>Merchant</span><span>Category</span><span>Date</span><span className="text-right">Amount</span>
-          </div>
+          <TransactionsHeader sort={sort} onSort={setSort} />
           <ul className="divide-y divide-border/60">
-            {view.slice(0, SHOWN).map((r) => {
+            {sorted.slice(0, SHOWN).map((r) => {
               const match = matchesFor(r, merchantLabel)[0] ?? null;
               const reason = notSpendReason(r);
               const toggle = () => setOpen(open === r.id ? null : r.id);

@@ -137,7 +137,6 @@ export default async function FinancePage({
         value,
         href: cat === c ? "/finance" : `/finance?cat=${c}`,
         tone: filtering ? (cat === c ? ("accent" as const) : ("soft" as const)) : ("default" as const),
-        showValue: filtering ? cat === c : c === head[0]?.[0],
       })),
       ...(tail > 0 ? [{
         key: "__other",
@@ -145,7 +144,6 @@ export default async function FinancePage({
         value: tail,
         href: otherActive ? "/finance" : `/finance?other=${count}`,
         tone: filtering ? (otherActive ? ("accent" as const) : ("soft" as const)) : ("default" as const),
-        showValue: otherActive,
       }] : []),
     ];
   };
@@ -155,7 +153,6 @@ export default async function FinancePage({
     label: new Date(`${m}-01T00:00:00+05:30`).toLocaleDateString("en-IN", { month: "short", timeZone: "Asia/Kolkata" }),
     value,
     tone: m === thisMonthKey ? "accent" : "soft",
-    showValue: m === thisMonthKey,
   }));
 
   return (

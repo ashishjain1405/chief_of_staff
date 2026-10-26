@@ -7,7 +7,7 @@ const CATEGORIES: [string, number][] = [
 const TOTAL = CATEGORIES.reduce((sum, [, v]) => sum + v, 0);
 
 const columns = (count: number): Column[] => {
-  const head = CATEGORIES.slice(0, count).map(([label, value], i) => ({ key: label, label, value, showValue: i === 0 }));
+  const head = CATEGORIES.slice(0, count).map(([label, value]) => ({ key: label, label, value }));
   const rest = CATEGORIES.slice(count).reduce((sum, [, v]) => sum + v, 0);
   return rest ? [...head, { key: "rest", label: "Other", value: rest }] : head;
 };
