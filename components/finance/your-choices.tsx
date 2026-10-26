@@ -1,10 +1,38 @@
-import { useState, type FormEvent } from "react";
+import { useState, type FormEvent, type ReactNode } from "react";
+import { X } from "lucide-react";
 import { CATEGORY_NAME_MAX, cleanCategoryName, type Rule, type UserCategory } from "@/lib/finance/rules";
 import { builtInCategory, categoryLabel } from "./labels";
 
 const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
 const heading = "text-xs font-semibold uppercase tracking-wide text-muted-foreground";
 const quiet = "shrink-0 rounded-full px-3 py-1 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground";
+
+// Categories and rules, in a panel over the page rather than under the
+// transaction list, where they sat after hundreds of rows.
+export function ChoicesPanel({ open, onClose, hasCategories, hasRules, children }: {
+  open: boolean; onClose: () => void; hasCategories: boolean; hasRules: boolean; children: ReactNode;
+}) {
+  if (!open) return null;
+  const hint = "px-5 py-4 text-sm leading-relaxed text-muted-foreground";
+  return (
+    <div role="dialog" aria-modal="true" aria-label="Categories and rules" className="fixed inset-0 z-50" onKeyDown={(e) => e.key === "Escape" && onClose()}>
+      <button type="button" aria-label="Close" tabIndex={-1} onClick={onClose} className="absolute inset-0 bg-black/30" />
+      <aside className="absolute inset-y-0 right-0 flex w-full max-w-md flex-col bg-card shadow-xl">
+        <div className="flex items-center justify-between border-b border-border/60 px-5 py-4">
+          <h2 className="text-base font-semibold text-foreground">Categories &amp; rules</h2>
+          <button type="button" autoFocus onClick={onClose} aria-label="Close" className="-mr-2 rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground">
+            <X className="size-5" aria-hidden />
+          </button>
+        </div>
+        <div className="flex-1 overflow-y-auto [&>div:first-child]:border-t-0">
+          {children}
+          {!hasCategories && <p className={hint}>No categories of your own yet. Add one from any transaction&apos;s category menu with <span className="font-medium text-foreground">+ New category</span>.</p>}
+          {!hasRules && <p className={hint}>No rules yet. A rule is made when you change a transaction and choose <span className="font-medium text-foreground">This and all…</span></p>}
+        </div>
+      </aside>
+    </div>
+  );
+}
 
 export function YourRules({ rules, names, onRemove }: { rules: Rule[]; names: Record<string, string>; onRemove: (rule: Rule) => void }) {
   if (!rules.length) return null;

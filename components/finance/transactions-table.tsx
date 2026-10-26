@@ -10,7 +10,7 @@ import {
 } from "@/app/(dashboard)/finance/actions";
 import { categoryLabel, istDate, merchantLabel } from "./labels";
 import { TransactionEditor } from "./transaction-editor";
-import { YourCategories, YourRules } from "./your-choices";
+import { ChoicesPanel, YourCategories, YourRules } from "./your-choices";
 import { SORT_WORD, TransactionsHeader, sortRows, type Sort } from "./transactions-header";
 import type { TransactionRow } from "./types";
 
@@ -43,6 +43,7 @@ export function TransactionsTable({ rows, summary, hidden, rules, categories, co
   const [failed, setFailed] = useState<string | null>(null);
   const [sort, setSort] = useState<Sort>("newest");
   const [shown, setShown] = useState(PAGE);
+  const [managing, setManaging] = useState(false);
   const sorted = sortRows(view, sort);
 
   useEffect(() => {
@@ -96,9 +97,15 @@ export function TransactionsTable({ rows, summary, hidden, rules, categories, co
           <h2 className="text-base font-semibold text-foreground">Transactions</h2>
           <p className="mt-0.5 text-xs text-muted-foreground">{summary}</p>
         </div>
-        <p className="text-xs text-muted-foreground">
-          {view.length > shown ? `${SORT_WORD[sort]} ${shown} of ${view.length} · ` : ""}select a category to change it
-        </p>
+        <div className="flex flex-wrap items-center gap-3">
+          <p className="text-xs text-muted-foreground">
+            {view.length > shown ? `${SORT_WORD[sort]} ${shown} of ${view.length} · ` : ""}select a category to change it
+          </p>
+          <button type="button" onClick={() => setManaging(true)}
+            className="rounded-full border border-border/70 bg-background px-3.5 py-1.5 text-xs font-medium text-foreground shadow-sm transition-colors hover:bg-muted">
+            Categories &amp; rules{cats.length + rules.length ? ` · ${cats.length + rules.length}` : ""}
+          </button>
+        </div>
       </header>
 
       {hidden && (
@@ -197,10 +204,12 @@ export function TransactionsTable({ rows, summary, hidden, rules, categories, co
         </div>
       )}
 
-      <YourCategories categories={cats} counts={counts} onRename={rename} onDelete={remove} />
-      <YourRules rules={rules} names={names}
-        onRemove={(rule) => rule.id && run(recompute(view, rules.filter((x) => x.id !== rule.id), () => ({})).after, () => deleteRule(rule.id!),
-          (n) => `Removed the rule for ${rule.label}${n ? ` · ${plural(n, "transaction")} back to automatic` : ""}`)} />
+      <ChoicesPanel open={managing} onClose={() => setManaging(false)} hasCategories={cats.length > 0} hasRules={rules.length > 0}>
+        <YourCategories categories={cats} counts={counts} onRename={rename} onDelete={remove} />
+        <YourRules rules={rules} names={names}
+          onRemove={(rule) => rule.id && run(recompute(view, rules.filter((x) => x.id !== rule.id), () => ({})).after, () => deleteRule(rule.id!),
+            (n) => `Removed the rule for ${rule.label}${n ? ` · ${plural(n, "transaction")} back to automatic` : ""}`)} />
+      </ChoicesPanel>
 
       {toast && (
         <div role="status" className="fixed inset-x-4 bottom-6 z-50 mx-auto flex max-w-md items-center justify-between gap-4 rounded-full bg-foreground px-5 py-3 text-sm text-background shadow-lg">
